@@ -1,0 +1,52 @@
+Prompt: 
+如何计算作为信用违约互换卖方在不同回收率下的合约价值？需要包含交易日历调整和买卖方向判断。
+
+Input: 
+```DolphinDB
+settlement = 2023.09.01
+maturity = 2025.09.01
+evalDate = 2023.08.15
+notional = 1000000
+spread = 150
+riskFree = 0.025
+recovery = [0.3, 0.4, 0.5]
+isSeller = true
+frequency = 4
+calendar = 'SSE'
+```
+
+Answer: 
+```DolphinDB
+cds(settlement, maturity, evalDate, notional, spread, riskFree, recovery, isSeller, frequency, calendar)
+```
+
+R1 CoT: 
+好的，我需要根据用户提供的函数资料生成一个相关问题，并给出对应的示例解答。首先，我需要仔细阅读cds函数的文档，理解其参数和使用场景。
+
+用户提供的函数是cds，用于信用违约互换的估值。参数包括settlement（生效日）、maturity（到期日）、evalDate（估值日）、notional（名义本金）、spread（利差）、riskFree（无风险利率）、recovery（回收率）、isSeller（卖方标识）、frequency（支付频率）、calendar（交易日历）等。注意到示例中有一个错误，isSeller参数应为布尔类型，但用户之前的示例可能使用了整数类型，导致报错。
+
+现在需要生成一个问题，引导用户正确使用cds函数，特别是处理isSeller参数的类型问题。问题应该不直接提到函数名，而是围绕CDS估值的情境，比如询问如何计算作为卖方或买方的CDS价值。
+
+接下来需要创建模拟数据。需要确保evalDate早于settlement，settlement早于maturity。notional、spread、riskFree、recovery等参数需要合理数值。isSeller应使用布尔类型（true/false）而不是整数。calendar参数需要从指定列表中选择，比如使用'SSE'（上海证券交易所）。
+
+然后，编写答案脚本，正确调用cds函数，确保所有参数正确，特别是isSeller用布尔值。另外，可能需要使用其他函数如date来生成日期，并确保参数顺序正确。
+
+检查是否有其他参数需要注意，例如convention、termDateConvention等，但用户示例中可能不需要，可以按默认值处理。最后，确保示例代码没有语法错误，如变量赋值分开写，日期格式正确，布尔值正确使用。
+
+
+Correct CoT: 
+好的，我需要根据用户提供的函数资料生成一个相关问题，并给出对应的示例解答。首先，我需要仔细阅读cds函数的文档，理解其参数和使用场景。
+
+用户提供的函数是cds，用于信用违约互换的估值。参数包括settlement（生效日）、maturity（到期日）、evalDate（估值日）、notional（名义本金）、spread（利差）、riskFree（无风险利率）、recovery（回收率）、isSeller（卖方标识）、frequency（支付频率）、calendar（交易日历）等。注意到示例中有一个错误，isSeller参数应为布尔类型，但用户之前的示例可能使用了整数类型，导致报错。
+
+现在需要生成一个问题，引导用户正确使用cds函数，特别是处理isSeller参数的类型问题。问题应该不直接提到函数名，而是围绕CDS估值的情境，比如询问如何计算作为卖方或买方的CDS价值。
+
+接下来需要创建模拟数据。需要确保evalDate早于settlement，settlement早于maturity。notional、spread、riskFree、recovery等参数需要合理数值。isSeller应使用布尔类型（true/false）而不是整数。calendar参数需要从指定列表中选择，比如使用'SSE'（上海证券交易所）。
+
+然后，编写答案脚本，正确调用cds函数，确保所有参数正确，特别是isSeller用布尔值。另外，可能需要使用其他函数如date来生成日期，并确保参数顺序正确。
+
+检查是否有其他参数需要注意，例如convention、termDateConvention等，但用户示例中可能不需要，可以按默认值处理。最后，确保示例代码没有语法错误，如变量赋值分开写，日期格式正确，布尔值正确使用。
+
+
+Function Name: 
+cds
