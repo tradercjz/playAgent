@@ -176,3 +176,103 @@ createPricingEngine(
 )
 getStreamEngine('bondEngine').append!(inputData)'
 2025-03-12 15:17:49,658 - [ThreadPoolExecutor-0_5] - INFO - 函数 createPricingEngine 处理失败
+2025-03-12 15:19:28,799 - [ThreadPoolExecutor-0_0] - INFO - 开始处理函数: createPricingEngine
+2025-03-12 15:19:28,869 - [ThreadPoolExecutor-0_0] - INFO - 开始读取 ./cleandocs/createPricingEngine.txt
+2025-03-12 15:19:28,881 - [ThreadPoolExecutor-0_0] - INFO - 开始第1次尝试
+2025-03-12 15:19:30,316 - [ThreadPoolExecutor-0_0] - INFO - Thinking...
+2025-03-12 15:19:30,318 - [ThreadPoolExecutor-0_0] - INFO - Reasoning:
+2025-03-12 15:20:09,948 - [ThreadPoolExecutor-0_0] - INFO - Assistant> 
+
+{
+    "function":"createPricingEngine",
+    "question": "如何为不同类别的固定收益证券同时计算含息价格和久期指标？需要包含合约基础信息，并添加价格与预测收益率的乘积作为额外指标。",
+    "input": "// 定义输入表结构\ndummyTable = table(1:0, `tradeTime`type`Symbol`yieldCurve`marketPrice, [TIMESTAMP,INT,SYMBOL,DOUBLE,DOUBLE])\n\n// 创建合约参考表\nrefTable = table(\n    [0,1,2] as type,\n    [2025.06.30, 2026.07.15, 2024.12.31] as maturity,\n    [3.85, 4.20, 2.95] as coupon,\n    [2,4,1] as frequency,\n    [1,1,0] as basis\n)\n\n// 准备输出表结构\noutputSchema = table(1:0, `tradeTime`type`Symbol`valuation`priceYieldProduct, [TIMESTAMP,INT,SYMBOL,DOUBLE,DOUBLE])",
+    "answer": "// 配置多品种定价方法\ntypeCategories = [0,1,2]\ncalcMethods = [\n    <bondDirtyPrice(now(), maturity, coupon, yieldCurve, frequency, basis)>,\n    <bondDuration(now(), maturity, coupon, yieldCurve, frequency, basis)>,\n    <bondDirtyPrice(now(), maturity, coupon, yieldCurve, frequency, basis)>\n]\n\n// 创建定价引擎\ncreatePricingEngine(\n    name=\"fixedIncomeValuator\",\n    dummyTable=dummyTable,\n    timeColumn=`tradeTime,\n    typeColumn=`type,\n    securityType=typeCategories,\n    method=calcMethods,\n    outputTable=outputSchema,\n    securityReference=refTable,\n    keyColumn=`Symbol,\n    extraMetrics=[<marketPrice * yieldCurve>]\n)\n\n// 生成测试数据\ninputData = table(\n    take(2023.12.01T09:30:00.000, 3) as tradeTime,\n    0 1 2 as type,\n    `BOND_A`BOND_B`BOND_C as Symbol,\n    [2.15, 3.40, 1.85] as yieldCurve,\n    [98.6, 102.3, 99.8] as marketPrice\n)\n\n// 执行计算\ngetStreamEngine(\"fixedIncomeValuator\").append!(inputData)"
+}
+2025-03-12 15:20:09,949 - [ThreadPoolExecutor-0_0] - INFO - 准备测试生成脚本正确性
+2025-03-12 15:20:09,954 - [ThreadPoolExecutor-0_0] - ERROR - 解答脚本错误：<Exception> in run: Server response: 'createPricingEngine("fixedIncomeValuator", dummyTable, "tradeTime", "type", typeCategories, calcMethods, outputSchema, refTable, "Symbol", [< marketPrice * yieldCurve >]) => securityReference should contain keyColumn.' script: '// 配置多品种定价方法
+typeCategories = [0,1,2]
+calcMethods = [
+    <bondDirtyPrice(now(), maturity, coupon, yieldCurve, frequency, basis)>,
+    <bondDuration(now(), maturity, coupon, yieldCurve, frequency, basis)>,
+    <bondDirtyPrice(now(), maturity, coupon, yieldCurve, frequency, basis)>
+]
+
+// 创建定价引擎
+createPricingEngine(
+    name="fixedIncomeValuator",
+    dummyTable=dummyTable,
+    timeColumn=`tradeTime,
+    typeColumn=`type,
+    securityType=typeCategories,
+    method=calcMethods,
+    outputTable=outputSchema,
+    securityReference=refTable,
+    keyColumn=`Symbol,
+    extraMetrics=[<marketPrice * yieldCurve>]
+)
+
+// 生成测试数据
+inputData = table(
+    take(2023.12.01T09:30:00.000, 3) as tradeTime,
+    0 1 2 as type,
+    `BOND_A`BOND_B`BOND_C as Symbol,
+    [2.15, 3.40, 1.85] as yieldCurve,
+    [98.6, 102.3, 99.8] as marketPrice
+)
+
+// 执行计算
+getStreamEngine("fixedIncomeValuator").append!(inputData)'
+2025-03-12 15:20:09,954 - [ThreadPoolExecutor-0_0] - INFO - 开始第2次尝试
+2025-03-12 15:20:11,081 - [ThreadPoolExecutor-0_0] - INFO - Thinking...
+2025-03-12 15:20:11,082 - [ThreadPoolExecutor-0_0] - INFO - Reasoning:
+2025-03-12 15:20:46,697 - [ThreadPoolExecutor-0_0] - INFO - Assistant> 
+
+{
+    "function":"createPricingEngine",
+    "question": "如何在创建债券定价引擎时正确配置合约代码列，避免出现'securityReference should contain keyColumn'错误？",
+    "input": "// 创建基础信息表时使用正确的列名\nrefTable = table(\n    take(0 1 2, 3) as type,\n    'BOND_A'BOND_B'BOND_C as Symbol,  // 注意列名大小写\n    2025.01.01 + 0 1 2 as maturity,\n    [5.0,4.8,4.5] as coupon,\n    [2,2,2] as frequency,\n    [0,0,0] as basis\n)\n\n// 定义输入表结构\ndummyTable = table(1:0, `tradeTime`type`Symbol`yieldCurve`marketPrice, [TIMESTAMP,INT,SYMBOL,DOUBLE,DOUBLE])\n\n// 配置输出表结构\noutputSchema = table(1:0, `tradeTime`type`Symbol`result`extra1, [TIMESTAMP,INT,SYMBOL,DOUBLE,DOUBLE])",
+    "answer": "// 正确配置keyColumn对应的Symbol列\ncreatePricingEngine(\n    name=\"fixedIncomeValuator\",\n    dummyTable=dummyTable,\n    timeColumn=`tradeTime,\n    typeColumn=`type,\n    securityType=[0,1,2],\n    method=[<bondDirtyPrice(now(),maturity,coupon,yieldCurve,frequency,basis)>],\n    outputTable=outputSchema,\n    securityReference=refTable,\n    keyColumn=`Symbol,  // 需要与securityReference的Symbol列名严格匹配\n    extraMetrics=[<marketPrice * yieldCurve>]\n)\n\n// 测试数据需要包含匹配的Symbol\ninputData = table(\n    take(2023.12.01T09:30:00.000, 3) as tradeTime,\n    0 1 2 as type,\n    `BOND_A`BOND_B`BOND_C as Symbol,\n    [2.15, 3.40, 1.85] as yieldCurve,\n    [98.6, 102.3, 99.8] as marketPrice\n)\n\n// 执行计算\ngetStreamEngine(\"fixedIncomeValuator\").append!(inputData)"
+}
+2025-03-12 15:20:46,698 - [ThreadPoolExecutor-0_0] - INFO - 准备测试生成脚本正确性
+2025-03-12 15:20:46,701 - [ThreadPoolExecutor-0_0] - ERROR - 数据脚本错误：<Exception> in run: Server response: 'Syntax Error: [line #4] Cannot recognize the token BOND_B' script: '// 创建基础信息表时使用正确的列名
+refTable = table(
+    take(0 1 2, 3) as type,
+    'BOND_A'BOND_B'BOND_C as Symbol,  // 注意列名大小写
+    2025.01.01 + 0 1 2 as maturity,
+    [5.0,4.8,4.5] as coupon,
+    [2,2,2] as frequency,
+    [0,0,0] as basis
+)
+
+// 定义输入表结构
+dummyTable = table(1:0, `tradeTime`type`Symbol`yieldCurve`marketPrice, [TIMESTAMP,INT,SYMBOL,DOUBLE,DOUBLE])
+
+// 配置输出表结构
+outputSchema = table(1:0, `tradeTime`type`Symbol`result`extra1, [TIMESTAMP,INT,SYMBOL,DOUBLE,DOUBLE])'
+2025-03-12 15:20:46,715 - [ThreadPoolExecutor-0_0] - ERROR - 解答脚本错误：<Exception> in run: Server response: 'createPricingEngine("fixedIncomeValuator", dummyTable, "tradeTime", "type", [0,1,2], [< bondDirtyPrice(now(), maturity, coupon, yieldCurve, frequency, basis) >], outputSchema, refTable, "Symbol", [< marketPrice * yieldCurve >]) => createPricingEngine(name, dummyTable, timeColumn, typeColumn, securityType, method, outputTable, [securityReference], [keyColumn], [extraMetrics])length of method should be consistent with securityType.' script: '// 正确配置keyColumn对应的Symbol列
+createPricingEngine(
+    name="fixedIncomeValuator",
+    dummyTable=dummyTable,
+    timeColumn=`tradeTime,
+    typeColumn=`type,
+    securityType=[0,1,2],
+    method=[<bondDirtyPrice(now(),maturity,coupon,yieldCurve,frequency,basis)>],
+    outputTable=outputSchema,
+    securityReference=refTable,
+    keyColumn=`Symbol,  // 需要与securityReference的Symbol列名严格匹配
+    extraMetrics=[<marketPrice * yieldCurve>]
+)
+
+// 测试数据需要包含匹配的Symbol
+inputData = table(
+    take(2023.12.01T09:30:00.000, 3) as tradeTime,
+    0 1 2 as type,
+    `BOND_A`BOND_B`BOND_C as Symbol,
+    [2.15, 3.40, 1.85] as yieldCurve,
+    [98.6, 102.3, 99.8] as marketPrice
+)
+
+// 执行计算
+getStreamEngine("fixedIncomeValuator").append!(inputData)'
+2025-03-12 15:20:46,715 - [ThreadPoolExecutor-0_0] - INFO - 函数 createPricingEngine 处理失败

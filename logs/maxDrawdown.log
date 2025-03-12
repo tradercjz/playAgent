@@ -4,3 +4,6 @@
 2025-03-12 15:16:30,769 - [ThreadPoolExecutor-0_0] - INFO - 开始处理函数: maxDrawdown
 2025-03-12 15:16:30,807 - [ThreadPoolExecutor-0_0] - INFO - maxDrawdown已生成，无需再处理
 2025-03-12 15:16:30,822 - [ThreadPoolExecutor-0_0] - INFO - 函数 maxDrawdown 处理成功
+2025-03-12 15:19:28,802 - [ThreadPoolExecutor-0_9] - INFO - 开始处理函数: maxDrawdown
+2025-03-12 15:19:28,837 - [ThreadPoolExecutor-0_9] - INFO - maxDrawdown已生成，无需再处理
+2025-03-12 15:19:28,838 - [ThreadPoolExecutor-0_9] - INFO - 函数 maxDrawdown 处理成功

@@ -96,3 +96,21 @@ answer
 2025-03-12 15:16:56,080 - [ThreadPoolExecutor-0_7] - INFO - 已生成输出文件: ./data/jinzhi_nssPredict.txt
 2025-03-12 15:16:56,081 - [ThreadPoolExecutor-0_7] - INFO - 模型预实验成功，开始生成标注数据
 2025-03-12 15:16:56,081 - [ThreadPoolExecutor-0_7] - INFO - 函数 nsspredict 处理失败
+2025-03-12 15:19:28,744 - [ThreadPoolExecutor-0_7] - INFO - 开始处理函数: nsspredict
+2025-03-12 15:19:28,790 - [ThreadPoolExecutor-0_7] - INFO - 开始读取 ./cleandocs/nsspredict.txt
+2025-03-12 15:19:28,800 - [ThreadPoolExecutor-0_7] - INFO - 开始第1次尝试
+2025-03-12 15:19:29,834 - [ThreadPoolExecutor-0_7] - INFO - Thinking...
+2025-03-12 15:19:29,836 - [ThreadPoolExecutor-0_7] - INFO - Reasoning:
+2025-03-12 15:20:09,311 - [ThreadPoolExecutor-0_7] - INFO - Assistant> 
+
+{
+    "function":"nssPredict",
+    "question": "假设已构建好一个Nelson-Siegel-Svensson利率模型，包含特定参数组合和到期期限，如何计算对应期限的债券收益率？",
+    "input": "modelParams = [0.035, -0.02, 0.01, -0.005, 1.5, 0.2]\nmodelName = \"nss\"\nmodel = dict(STRING, ANY)\nmodel[`modelName] = modelName\nmodel[`params] = modelParams\nmaturity = [3, 5]",
+    "answer": "// 使用构建好的NSS模型预测3年期和5年期债券收益率\nnssPredict(model, maturity)\n// 预期输出格式示例：[0.0285, 0.0312]（具体数值根据参数变化）"
+}
+2025-03-12 15:20:09,311 - [ThreadPoolExecutor-0_7] - INFO - 准备测试生成脚本正确性
+2025-03-12 15:20:09,313 - [ThreadPoolExecutor-0_7] - INFO - 脚本正常，准备生成文件
+2025-03-12 15:20:09,314 - [ThreadPoolExecutor-0_7] - INFO - 已生成输出文件: ./data/jinzhi_nssPredict.txt
+2025-03-12 15:20:09,315 - [ThreadPoolExecutor-0_7] - INFO - 模型预实验成功，开始生成标注数据
+2025-03-12 15:20:09,315 - [ThreadPoolExecutor-0_7] - INFO - 函数 nsspredict 处理失败

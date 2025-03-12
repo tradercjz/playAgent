@@ -67,3 +67,39 @@ cdsValuation'
 2025-03-12 15:17:43,713 - [ThreadPoolExecutor-0_3] - ERROR - 解答脚本错误：<Exception> in run: Server response: 'cdsValuation = cds(settlement, maturities, evalDate, notional, spread, riskFree, recovery, isSeller, frequency, calendar) => Market name NY does not exist in trading calendar!' script: 'cdsValuation = cds(settlement, maturities, evalDate, notional, spread, riskFree, recovery, isSeller, frequency, calendar)
 cdsValuation'
 2025-03-12 15:17:43,713 - [ThreadPoolExecutor-0_3] - INFO - 函数 cds 处理失败
+2025-03-12 15:19:28,812 - [ThreadPoolExecutor-0_5] - INFO - 开始处理函数: cds
+2025-03-12 15:19:28,868 - [ThreadPoolExecutor-0_5] - INFO - 开始读取 ./cleandocs/cds.txt
+2025-03-12 15:19:28,872 - [ThreadPoolExecutor-0_5] - WARNING - 文件超过4KB，已截断
+2025-03-12 15:19:28,894 - [ThreadPoolExecutor-0_5] - INFO - 开始第1次尝试
+2025-03-12 15:19:29,434 - [ThreadPoolExecutor-0_5] - INFO - Thinking...
+2025-03-12 15:19:29,435 - [ThreadPoolExecutor-0_5] - INFO - Reasoning:
+2025-03-12 15:19:54,471 - [ThreadPoolExecutor-0_5] - INFO - Assistant> 
+
+{
+    "function":"cds",
+    "question": "如何根据季度付和半年付两种不同的支付频率，计算同一信用违约互换合约在不同调整规则下的估值差异？",
+    "input": "settlement = 2023.05.16\nmaturity = 2023.08.16\nevalDate = 2023.05.15\nnotional = 1000000.0\nspread = 150\nriskFree = 0.02\nrecovery = 0.4\nisSeller = 1\nfrequency1 = 4\nfrequency2 = 2\ncalendar = 'US'\nconvention1 = 'ModifiedFollowing'\nconvention2 = 'Following'",
+    "answer": "// 季度付+ModifiedFollowing规则\nval1 = cds(settlement, maturity, evalDate, notional, spread, riskFree, recovery, isSeller, frequency1, calendar, convention1)\n// 半年付+Following规则\nval2 = cds(settlement, maturity, evalDate, notional, spread, riskFree, recovery, isSeller, frequency2, calendar, convention2)\n[val1, val2]"
+}
+2025-03-12 15:19:54,471 - [ThreadPoolExecutor-0_5] - INFO - 准备测试生成脚本正确性
+2025-03-12 15:19:54,473 - [ThreadPoolExecutor-0_5] - ERROR - 解答脚本错误：<Exception> in run: Server response: 'val1 = cds(settlement, maturity, evalDate, notional, spread, riskFree, recovery, isSeller, frequency1, calendar, convention1) => Usage: cds(settlement, maturity, evalDate, notional, spread, riskFree, recovery, isSeller, frequency, calendar, [convention='Following'], [termDateConvention='Following'], [rule='CDS'], [basis=1]). isSeller should be a BOOLEAN scalar or vector.' script: '// 季度付+ModifiedFollowing规则
+val1 = cds(settlement, maturity, evalDate, notional, spread, riskFree, recovery, isSeller, frequency1, calendar, convention1)
+// 半年付+Following规则
+val2 = cds(settlement, maturity, evalDate, notional, spread, riskFree, recovery, isSeller, frequency2, calendar, convention2)
+[val1, val2]'
+2025-03-12 15:19:54,474 - [ThreadPoolExecutor-0_5] - INFO - 开始第2次尝试
+2025-03-12 15:19:54,952 - [ThreadPoolExecutor-0_5] - INFO - Thinking...
+2025-03-12 15:19:54,954 - [ThreadPoolExecutor-0_5] - INFO - Reasoning:
+2025-03-12 15:20:18,629 - [ThreadPoolExecutor-0_5] - INFO - Assistant> 
+
+{
+    "function":"cds",
+    "question": "如何计算在季付模式下使用ModifiedFollowing规则，以及半年付模式下使用Following规则的两个CDS合约价值？",
+    "input": "settlement = 2023.01.01\nmaturity = 2023.12.31\nevalDate = 2023.01.01\nnotional = 1000000.0\nspread = 50\nriskFree = 0.03\nrecovery = 0.4\nisSeller = true\nfrequency1 = 4\ncalendar = 'US'\nconvention1 = 'ModifiedFollowing'\nfrequency2 = 2\nconvention2 = 'Following'",
+    "answer": "val1 = cds(settlement, maturity, evalDate, notional, spread, riskFree, recovery, isSeller, frequency1, calendar, convention1)\nval2 = cds(settlement, maturity, evalDate, notional, spread, riskFree, recovery, isSeller, frequency2, calendar, convention2)\n[val1, val2]"
+}
+2025-03-12 15:20:18,629 - [ThreadPoolExecutor-0_5] - INFO - 准备测试生成脚本正确性
+2025-03-12 15:20:18,632 - [ThreadPoolExecutor-0_5] - ERROR - 解答脚本错误：<Exception> in run: Server response: 'val1 = cds(settlement, maturity, evalDate, notional, spread, riskFree, recovery, isSeller, frequency1, calendar, convention1) => Market name US does not exist in trading calendar!' script: 'val1 = cds(settlement, maturity, evalDate, notional, spread, riskFree, recovery, isSeller, frequency1, calendar, convention1)
+val2 = cds(settlement, maturity, evalDate, notional, spread, riskFree, recovery, isSeller, frequency2, calendar, convention2)
+[val1, val2]'
+2025-03-12 15:20:18,633 - [ThreadPoolExecutor-0_5] - INFO - 函数 cds 处理失败

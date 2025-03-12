@@ -132,3 +132,112 @@ select count(*) from modelSchema where time >= min(newData.sendingtime)
 // 输出处理数量与模型更新数量
 [processedCount, exec count(*) from modelSchema]'
 2025-03-12 15:17:52,190 - [ThreadPoolExecutor-0_0] - INFO - 函数 appendForPrediction 处理失败
+2025-03-12 15:19:28,838 - [ThreadPoolExecutor-0_1] - INFO - 开始处理函数: appendForPrediction
+2025-03-12 15:19:28,868 - [ThreadPoolExecutor-0_1] - INFO - 开始读取 ./cleandocs/appendForPrediction.txt
+2025-03-12 15:19:28,873 - [ThreadPoolExecutor-0_1] - INFO - 开始第1次尝试
+2025-03-12 15:19:29,412 - [ThreadPoolExecutor-0_1] - INFO - Thinking...
+2025-03-12 15:19:29,414 - [ThreadPoolExecutor-0_1] - INFO - Reasoning:
+2025-03-12 15:20:17,330 - [ThreadPoolExecutor-0_1] - INFO - Assistant> 
+
+{
+    "function":"appendForPrediction",
+    "question": "当使用收益率曲线预测引擎时，如何批量添加符合模型要求的债券数据并进行实时预测？",
+    "input": "// 创建收益率曲线引擎\nmodelOutput = table(1:0, `time`assetType`dataSource`clearRate`model, [TIMESTAMP,INT,INT,SYMBOL,BLOB])\nengine = createYieldCurveEngine(\n    name=\"bondPred\",\n    dummyTable=table(1:0, `symbol`sendingtime`askDirtyPrice1`bidDirtyPrice1`midDirtyPirce1`askyield1`bidyield1`midyield1`timetoMaturity`assetType`datasource`clearRate, [SYMBOL,TIMESTAMP,DECIMAL32(3),DECIMAL32(3),DECIMAL32(3),DECIMAL32(3),DECIMAL32(3),DECIMAL32(3),DOUBLE,INT,INT,STRING]),\n    assetType=[0,1,2],\n    fitMethod=[<piecewiseLinFit(timetoMaturity, midyield1, 8)>, <nss(timetoMaturity,bidyield1,\"ns\")>, <piecewiseLinFit(timetoMaturity, askyield1, 6)>],\n    keyColumn=`assetType`dataSource`clearRate,\n    modelOutput=modelOutput,\n    frequency=5\n)\n\n// 生成测试数据\nnewData = table(\n    take(`BOND01`BOND02`BOND03, 15) as symbol,\n    take(2023.09.15T09:30:00..2023.09.15T09:45:00, 15) as sendingtime,\n    decimal32(rand(95.0..105.0,15),3) as askDirtyPrice1,\n    decimal32(rand(94.5..104.5,15),3) as bidDirtyPrice1,\n    decimal32((askDirtyPrice1 + bidDirtyPrice1)/2,3) as midDirtyPirce1,\n    decimal32(rand(2.5..5.5,15),3) as askyield1,\n    decimal32(rand(2.3..5.3,15),3) as bidyield1,\n    decimal32((askyield1 + bidyield1)/2,3) as midyield1,\n    rand(1.0..30.0,15).sort() as timetoMaturity,\n    take(0 1 2,15) as assetType,\n    take(1001,15) as datasource,\n    take(\"CLEAR_A\",15) as clearRate\n)",
+    "answer": "// 添加预测数据并获取处理数量\nprocessedRows = appendForPrediction(engine, newData)\n\n// 验证处理结果\nselect * from modelOutput where time >= 2023.09.15T09:30:00\n\n/* 输出示例\n-----------------------------\ntime                | assetType | dataSource | clearRate | model\n2023.09.15T09:30:00 | 0         | 1001       | CLEAR_A   | 0100...\n...共15条处理记录*/"
+}
+2025-03-12 15:20:17,331 - [ThreadPoolExecutor-0_1] - INFO - 准备测试生成脚本正确性
+2025-03-12 15:20:17,334 - [ThreadPoolExecutor-0_1] - ERROR - 数据脚本错误：<Exception> in run: Server response: 'Syntax Error: [line #19] Cannot recognize the token askDirtyPrice1' script: '// 创建收益率曲线引擎
+modelOutput = table(1:0, `time`assetType`dataSource`clearRate`model, [TIMESTAMP,INT,INT,SYMBOL,BLOB])
+engine = createYieldCurveEngine(
+    name="bondPred",
+    dummyTable=table(1:0, `symbol`sendingtime`askDirtyPrice1`bidDirtyPrice1`midDirtyPirce1`askyield1`bidyield1`midyield1`timetoMaturity`assetType`datasource`clearRate, [SYMBOL,TIMESTAMP,DECIMAL32(3),DECIMAL32(3),DECIMAL32(3),DECIMAL32(3),DECIMAL32(3),DECIMAL32(3),DOUBLE,INT,INT,STRING]),
+    assetType=[0,1,2],
+    fitMethod=[<piecewiseLinFit(timetoMaturity, midyield1, 8)>, <nss(timetoMaturity,bidyield1,"ns")>, <piecewiseLinFit(timetoMaturity, askyield1, 6)>],
+    keyColumn=`assetType`dataSource`clearRate,
+    modelOutput=modelOutput,
+    frequency=5
+)
+
+// 生成测试数据
+newData = table(
+    take(`BOND01`BOND02`BOND03, 15) as symbol,
+    take(2023.09.15T09:30:00..2023.09.15T09:45:00, 15) as sendingtime,
+    decimal32(rand(95.0..105.0,15),3) as askDirtyPrice1,
+    decimal32(rand(94.5..104.5,15),3) as bidDirtyPrice1,
+    decimal32((askDirtyPrice1 + bidDirtyPrice1)/2,3) as midDirtyPirce1,
+    decimal32(rand(2.5..5.5,15),3) as askyield1,
+    decimal32(rand(2.3..5.3,15),3) as bidyield1,
+    decimal32((askyield1 + bidyield1)/2,3) as midyield1,
+    rand(1.0..30.0,15).sort() as timetoMaturity,
+    take(0 1 2,15) as assetType,
+    take(1001,15) as datasource,
+    take("CLEAR_A",15) as clearRate
+)'
+2025-03-12 15:20:17,335 - [ThreadPoolExecutor-0_1] - ERROR - 解答脚本错误：<Exception> in run: Server response: 'Syntax Error: [line #2] Cannot recognize the token engine' script: '// 添加预测数据并获取处理数量
+processedRows = appendForPrediction(engine, newData)
+
+// 验证处理结果
+select * from modelOutput where time >= 2023.09.15T09:30:00
+
+/* 输出示例
+-----------------------------
+time                | assetType | dataSource | clearRate | model
+2023.09.15T09:30:00 | 0         | 1001       | CLEAR_A   | 0100...
+...共15条处理记录*/'
+2025-03-12 15:20:17,335 - [ThreadPoolExecutor-0_1] - INFO - 开始第2次尝试
+2025-03-12 15:20:18,022 - [ThreadPoolExecutor-0_1] - INFO - Thinking...
+2025-03-12 15:20:18,023 - [ThreadPoolExecutor-0_1] - INFO - Reasoning:
+2025-03-12 15:21:08,421 - [ThreadPoolExecutor-0_1] - INFO - Assistant> 
+
+{
+    "function":"appendForPrediction",
+    "question": "如何将实时债券市场数据输入到收益率曲线预测引擎并进行处理验证？",
+    "input": "// 创建模型输出表\nmodelOutput = table(1:0, `time`assetType`dataSource`clearRate`model, [TIMESTAMP,INT,INT,SYMBOL,BLOB])\n\n// 初始化收益率曲线引擎\nengine = createYieldCurveEngine(\n    name=\"bondEngine\",\n    dummyTable=table(1:0, `symbol`sendingtime`askDirtyPrice1`bidDirtyPrice1`midDirtyPrice1`askyield1`bidyield1`midyield1`timetoMaturity`assetType`datasource`clearRate, \n                   [SYMBOL,TIMESTAMP,DECIMAL32(3),DECIMAL32(3),DECIMAL32(3),DECIMAL32(3),DECIMAL32(3),DECIMAL32(3),DOUBLE,INT,INT,STRING]),\n    assetType=[0,1,2],\n    fitMethod=[<piecewiseLinFit(timetoMaturity, midyield1, 8)>, <nss(timetoMaturity,bidyield1,\"ns\")>, <piecewiseLinFit(timetoMaturity, askyield1, 6)>],\n    keyColumn=`assetType`dataSource`clearRate,\n    modelOutput=modelOutput,\n    frequency=5\n)\n\n// 生成测试数据\nsymbols = take(`BOND01`BOND02`BOND03, 15)\ntimes = 2023.09.15T09:30:00 + 0..14 * 60\naskPrices = decimal32(rand(95.0..105.0,15),3)\nbidPrices = decimal32(rand(94.5..104.5,15),3)\nmidPrices = decimal32((askPrices + bidPrices)/2.0,3)\n\nnewData = table(\n    symbols as symbol,\n    times as sendingtime,\n    askPrices as askDirtyPrice1,\n    bidPrices as bidDirtyPrice1,\n    midPrices as midDirtyPrice1,\n    decimal32(rand(2.5..5.5,15),3) as askyield1,\n    decimal32(rand(2.3..5.3,15),3) as bidyield1,\n    decimal32((col(askyield1) + col(bidyield1))/2.0,3) as midyield1,\n    rand(1.0..30.0,15).sort() as timetoMaturity,\n    take(0 1 2,15) as assetType,\n    take(1001,15) as datasource,\n    take(\"CLEAR_A\",15) as clearRate\n)",
+    "answer": "// 执行预测并验证结果\nprocessed = appendForPrediction(engine, newData)\n\n// 查询生成的模型数据\nselect * from modelOutput \nwhere time between 2023.09.15T09:30:00 : 2023.09.15T09:44:00 \ncontext by assetType, dataSource, clearRate\nlimit 3"
+}
+2025-03-12 15:21:08,422 - [ThreadPoolExecutor-0_1] - INFO - 准备测试生成脚本正确性
+2025-03-12 15:21:08,425 - [ThreadPoolExecutor-0_1] - ERROR - 数据脚本错误：<Exception> in run: Server response: 'Syntax Error: [line #31] Cannot recognize the token askyield1' script: '// 创建模型输出表
+modelOutput = table(1:0, `time`assetType`dataSource`clearRate`model, [TIMESTAMP,INT,INT,SYMBOL,BLOB])
+
+// 初始化收益率曲线引擎
+engine = createYieldCurveEngine(
+    name="bondEngine",
+    dummyTable=table(1:0, `symbol`sendingtime`askDirtyPrice1`bidDirtyPrice1`midDirtyPrice1`askyield1`bidyield1`midyield1`timetoMaturity`assetType`datasource`clearRate, 
+                   [SYMBOL,TIMESTAMP,DECIMAL32(3),DECIMAL32(3),DECIMAL32(3),DECIMAL32(3),DECIMAL32(3),DECIMAL32(3),DOUBLE,INT,INT,STRING]),
+    assetType=[0,1,2],
+    fitMethod=[<piecewiseLinFit(timetoMaturity, midyield1, 8)>, <nss(timetoMaturity,bidyield1,"ns")>, <piecewiseLinFit(timetoMaturity, askyield1, 6)>],
+    keyColumn=`assetType`dataSource`clearRate,
+    modelOutput=modelOutput,
+    frequency=5
+)
+
+// 生成测试数据
+symbols = take(`BOND01`BOND02`BOND03, 15)
+times = 2023.09.15T09:30:00 + 0..14 * 60
+askPrices = decimal32(rand(95.0..105.0,15),3)
+bidPrices = decimal32(rand(94.5..104.5,15),3)
+midPrices = decimal32((askPrices + bidPrices)/2.0,3)
+
+newData = table(
+    symbols as symbol,
+    times as sendingtime,
+    askPrices as askDirtyPrice1,
+    bidPrices as bidDirtyPrice1,
+    midPrices as midDirtyPrice1,
+    decimal32(rand(2.5..5.5,15),3) as askyield1,
+    decimal32(rand(2.3..5.3,15),3) as bidyield1,
+    decimal32((col(askyield1) + col(bidyield1))/2.0,3) as midyield1,
+    rand(1.0..30.0,15).sort() as timetoMaturity,
+    take(0 1 2,15) as assetType,
+    take(1001,15) as datasource,
+    take("CLEAR_A",15) as clearRate
+)'
+2025-03-12 15:21:08,426 - [ThreadPoolExecutor-0_1] - ERROR - 解答脚本错误：<Exception> in run: Server response: 'Syntax Error: [line #2] Cannot recognize the token engine' script: '// 执行预测并验证结果
+processed = appendForPrediction(engine, newData)
+
+// 查询生成的模型数据
+select * from modelOutput 
+where time between 2023.09.15T09:30:00 : 2023.09.15T09:44:00 
+context by assetType, dataSource, clearRate
+limit 3'
+2025-03-12 15:21:08,427 - [ThreadPoolExecutor-0_1] - INFO - 函数 appendForPrediction 处理失败

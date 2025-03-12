@@ -89,3 +89,34 @@ kwargs = dict(`theta, 0.04).append!(dict(`kappa, 0.5)).append!(dict(`rho, -0.3))
 2025-03-12 15:17:25,888 - [ThreadPoolExecutor-0_4] - ERROR - 解答脚本错误：<Exception> in run: Server response: 'option_result = vanillaOption(settlement, maturity, evalDate, spot, strike, riskFree, divYield, volatility, isCall, style, basis, calendar, "Heston", kwargs, 2) => Usage: vanillaOption(settlement, maturity, evalDate, spot, strike, riskFree, divYield, volatility, isCall, style, basis, calendar, [method=`BS], [kwargs], [mode=0]). method should be 'BS', 'FDBS', 'heston', 'FDHeston' or 'PTDHeston'.' script: 'option_result = vanillaOption(settlement, maturity, evalDate, spot, strike, riskFree, divYield, volatility, isCall, style, basis, calendar, 'Heston', kwargs, 2)
 select option_result as Greeks from option_result'
 2025-03-12 15:17:25,888 - [ThreadPoolExecutor-0_4] - INFO - 函数 vanillaOption 处理失败
+2025-03-12 15:19:28,801 - [ThreadPoolExecutor-0_6] - INFO - 开始处理函数: vanillaOption
+2025-03-12 15:19:28,872 - [ThreadPoolExecutor-0_6] - INFO - 开始读取 ./cleandocs/vanillaOption.txt
+2025-03-12 15:19:28,917 - [ThreadPoolExecutor-0_6] - INFO - 开始第1次尝试
+2025-03-12 15:19:29,762 - [ThreadPoolExecutor-0_6] - INFO - Thinking...
+2025-03-12 15:19:29,763 - [ThreadPoolExecutor-0_6] - INFO - Reasoning:
+2025-03-12 15:19:54,219 - [ThreadPoolExecutor-0_6] - INFO - Assistant> 
+
+{
+    "function":"vanillaOption",
+    "question": "如何计算某欧式看跌期权在Black-Scholes模型下的各项风险指标，包括净现值、delta、gamma等？",
+    "input": "settlement = 2023.05.17\nmaturity = 2024.05.17\nevalDate = 2023.05.15\nspot = 100.0\nstrike = 105.0\nriskFree = 0.05\ndivYield = 0.02\nvolatility = 0.25\nisCall = false\nstyle = 'european'\nbasis = 3\ncalendar = 'NYSE'",
+    "answer": "vanillaOption(settlement, maturity, evalDate, spot, strike, riskFree, divYield, volatility, isCall, style, basis, calendar, method='BS', mode=2)"
+}
+2025-03-12 15:19:54,222 - [ThreadPoolExecutor-0_6] - INFO - 准备测试生成脚本正确性
+2025-03-12 15:19:54,228 - [ThreadPoolExecutor-0_6] - ERROR - 解答脚本错误：<Exception> in run: Server response: 'vanillaOption(settlement, maturity, evalDate, spot, strike, riskFree, divYield, volatility, isCall, style, basis, calendar, "BS", , 2) => Market name NYSE does not exist in trading calendar!' script: 'vanillaOption(settlement, maturity, evalDate, spot, strike, riskFree, divYield, volatility, isCall, style, basis, calendar, method='BS', mode=2)'
+2025-03-12 15:19:54,228 - [ThreadPoolExecutor-0_6] - INFO - 开始第2次尝试
+2025-03-12 15:19:55,044 - [ThreadPoolExecutor-0_6] - INFO - Thinking...
+2025-03-12 15:19:55,045 - [ThreadPoolExecutor-0_6] - INFO - Reasoning:
+2025-03-12 15:20:12,473 - [ThreadPoolExecutor-0_6] - INFO - Assistant> 
+
+{
+    "function":"vanillaOption",
+    "question": "如何正确设置交易日历参数来计算欧式看跌期权的估值？",
+    "input": "settlement = 2023.01.03\nmaturity = 2023.06.16\nevalDate = 2023.03.15\nspot = 150.0\nstrike = 155.0\nriskFree = 0.045\ndivYield = 0.02\nvolatility = 0.25\nisCall = false\nstyle = 'european'\nbasis = 0\ncalendar = 'CCFX'",
+    "answer": "vanillaOption(settlement, maturity, evalDate, spot, strike, riskFree, divYield, volatility, isCall, style, basis, calendar, method='BS', mode=2)"
+}
+2025-03-12 15:20:12,474 - [ThreadPoolExecutor-0_6] - INFO - 准备测试生成脚本正确性
+2025-03-12 15:20:12,476 - [ThreadPoolExecutor-0_6] - INFO - 脚本正常，准备生成文件
+2025-03-12 15:20:12,476 - [ThreadPoolExecutor-0_6] - INFO - 已生成输出文件: ./data/jinzhi_vanillaOption.txt
+2025-03-12 15:20:12,477 - [ThreadPoolExecutor-0_6] - INFO - 模型预实验成功，开始生成标注数据
+2025-03-12 15:20:12,477 - [ThreadPoolExecutor-0_6] - INFO - 函数 vanillaOption 处理失败

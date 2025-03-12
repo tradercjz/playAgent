@@ -98,3 +98,6 @@ input
 2025-03-12 15:16:54,035 - [ThreadPoolExecutor-0_2] - INFO - 已生成输出文件: ./data/jinzhi_irs.txt
 2025-03-12 15:16:54,035 - [ThreadPoolExecutor-0_2] - INFO - 模型预实验成功，开始生成标注数据
 2025-03-12 15:16:54,036 - [ThreadPoolExecutor-0_2] - INFO - 函数 irs 处理失败
+2025-03-12 15:19:28,777 - [ThreadPoolExecutor-0_4] - INFO - 开始处理函数: irs
+2025-03-12 15:19:28,789 - [ThreadPoolExecutor-0_4] - INFO - irs已生成，无需再处理
+2025-03-12 15:19:28,792 - [ThreadPoolExecutor-0_4] - INFO - 函数 irs 处理成功

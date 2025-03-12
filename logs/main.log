@@ -10,3 +10,9 @@
 2025-03-12 15:17:52,192 - [MainThread] - INFO - 处理完成: 共 24 个函数，成功 15 个，失败 9 个
 2025-03-12 15:17:52,193 - [MainThread] - INFO - SQL函数处理完成: 共 24 个函数，成功 15 个，失败 9 个
 2025-03-12 15:17:52,193 - [MainThread] - INFO - 主程序执行完毕
+2025-03-12 15:19:28,733 - [MainThread] - INFO - 开始执行主程序
+2025-03-12 15:19:28,734 - [MainThread] - INFO - 开始处理 SQL 函数: ['bondAccrInt', 'bondConvexity', 'bondDirtyPrice', 'bondDuration', 'nss', 'ns', 'condValueAtRisk', 'nsspredict', 'trueRange', 'valueAtRisk', 'irs', 'varma', 'bondCashflow', 'bondYield', 'createPricingEngine', 'treasuryConversionFactor', 'crmwCBond', 'cds', 'vanillaOption', 'maxDrawdown', 'mdd', 'cummdd', 'createYieldCurveEngine', 'appendForPrediction']
+2025-03-12 15:19:28,734 - [MainThread] - INFO - 开始处理 24 个函数
+2025-03-12 15:21:40,906 - [MainThread] - INFO - 处理完成: 共 24 个函数，成功 16 个，失败 8 个
+2025-03-12 15:21:40,907 - [MainThread] - INFO - SQL函数处理完成: 共 24 个函数，成功 16 个，失败 8 个
+2025-03-12 15:21:40,907 - [MainThread] - INFO - 主程序执行完毕

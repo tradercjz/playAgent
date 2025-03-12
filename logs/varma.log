@@ -106,3 +106,48 @@ model_result = varma(
 )
 [model_result[`aic], model_result[`bic], model_result[`llf]]'
 2025-03-12 15:17:32,523 - [ThreadPoolExecutor-0_1] - INFO - 函数 varma 处理失败
+2025-03-12 15:19:28,781 - [ThreadPoolExecutor-0_3] - INFO - 开始处理函数: varma
+2025-03-12 15:19:28,835 - [ThreadPoolExecutor-0_3] - INFO - 开始读取 ./cleandocs/varma.txt
+2025-03-12 15:19:28,846 - [ThreadPoolExecutor-0_3] - INFO - 开始第1次尝试
+2025-03-12 15:19:29,370 - [ThreadPoolExecutor-0_3] - INFO - Thinking...
+2025-03-12 15:19:29,379 - [ThreadPoolExecutor-0_3] - INFO - Reasoning:
+2025-03-12 15:19:56,109 - [ThreadPoolExecutor-0_3] - INFO - Assistant> 
+
+{
+    "function":"varma",
+    "question": "如何分析三个宏观经济指标（GDP、消费、投资）的相互动态关系，并考虑政府支出作为外生变量？要求使用向量自回归移动平均模型，包含常数趋势项。",
+    "input": "timeCol = 2010.01.01 + 0..23\ngdp = 1000 + 5*0..23 + norm(0,10,24)\ncons = 800 + 3*0..23 + norm(0,5,24)\ninv = 200 + 2*0..23 + norm(0,3,24)\nmacroData = table(timeCol as date, gdp, cons, inv)\nexogData = matrix(take(1.0,24), 24, 1)",
+    "answer": "modelResult = varma(macroData, [`gdp, `cons, `inv], [1,1], exog=exogData, trend='c')\nprint('AIC值:', modelResult.aic, ' 对数似然值:', modelResult.llf)\nprint('AR参数矩阵:', modelResult.params[0:3])"
+}
+2025-03-12 15:19:56,109 - [ThreadPoolExecutor-0_3] - INFO - 准备测试生成脚本正确性
+2025-03-12 15:19:56,112 - [ThreadPoolExecutor-0_3] - ERROR - 数据脚本错误：<Exception> in run: Server response: 'exogData = matrix(take(1, 24), 24, 1) => The data object for matrix function must be vector, matrix, table, or tuple of vectors' script: 'timeCol = 2010.01.01 + 0..23
+gdp = 1000 + 5*0..23 + norm(0,10,24)
+cons = 800 + 3*0..23 + norm(0,5,24)
+inv = 200 + 2*0..23 + norm(0,3,24)
+macroData = table(timeCol as date, gdp, cons, inv)
+exogData = matrix(take(1.0,24), 24, 1)'
+2025-03-12 15:19:56,113 - [ThreadPoolExecutor-0_3] - ERROR - 解答脚本错误：<Exception> in run: Server response: 'modelResult = varma(macroData, ["gdp","cons","inv"], [1,1], exogData, 'c') => Variable 'exogData' isn't initialized yet.' script: 'modelResult = varma(macroData, [`gdp, `cons, `inv], [1,1], exog=exogData, trend='c')
+print('AIC值:', modelResult.aic, ' 对数似然值:', modelResult.llf)
+print('AR参数矩阵:', modelResult.params[0:3])'
+2025-03-12 15:19:56,113 - [ThreadPoolExecutor-0_3] - INFO - 开始第2次尝试
+2025-03-12 15:19:56,924 - [ThreadPoolExecutor-0_3] - INFO - Thinking...
+2025-03-12 15:19:56,926 - [ThreadPoolExecutor-0_3] - INFO - Reasoning:
+2025-03-12 15:21:40,899 - [ThreadPoolExecutor-0_3] - INFO - Assistant> 
+
+{
+    "function":"varma",
+    "question": "如何为三变量时间序列构建带外生变量的VARMA模型，并提取前三个参数？",
+    "input": "timeCol = 2010.01.01 + 0..23\ngdp = 1000 + 5*0..23 + norm(0,10,24)\ncons = 800 + 3*0..23 + norm(0,5,24)\ninv = 200 + 2*0..23 + norm(0,3,24)\nmacroData = table(timeCol as date, gdp, cons, inv)\nexogData = matrix(take(1.0,24),24:1)",
+    "answer": "modelResult = varma(macroData, [\"gdp\",\"cons\",\"inv\"], [1,1], exog=exogData, trend='c')\nprint('AIC值:', modelResult.aic, ' 对数似然值:', modelResult.llf)\nprint('前三个参数:', modelResult.params[0..2])"
+}
+2025-03-12 15:21:40,900 - [ThreadPoolExecutor-0_3] - INFO - 准备测试生成脚本正确性
+2025-03-12 15:21:40,902 - [ThreadPoolExecutor-0_3] - ERROR - 数据脚本错误：<Exception> in run: Server response: 'exogData = matrix(take(1, 24), 24 : 1) => The number of rows of all arguments are inconsistent.' script: 'timeCol = 2010.01.01 + 0..23
+gdp = 1000 + 5*0..23 + norm(0,10,24)
+cons = 800 + 3*0..23 + norm(0,5,24)
+inv = 200 + 2*0..23 + norm(0,3,24)
+macroData = table(timeCol as date, gdp, cons, inv)
+exogData = matrix(take(1.0,24),24:1)'
+2025-03-12 15:21:40,904 - [ThreadPoolExecutor-0_3] - ERROR - 解答脚本错误：<Exception> in run: Server response: 'modelResult = varma(macroData, ["gdp","cons","inv"], [1,1], exogData, 'c') => Variable 'exogData' isn't initialized yet.' script: 'modelResult = varma(macroData, ["gdp","cons","inv"], [1,1], exog=exogData, trend='c')
+print('AIC值:', modelResult.aic, ' 对数似然值:', modelResult.llf)
+print('前三个参数:', modelResult.params[0..2])'
+2025-03-12 15:21:40,904 - [ThreadPoolExecutor-0_3] - INFO - 函数 varma 处理失败
