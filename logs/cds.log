@@ -103,3 +103,35 @@ val2 = cds(settlement, maturity, evalDate, notional, spread, riskFree, recovery,
 val2 = cds(settlement, maturity, evalDate, notional, spread, riskFree, recovery, isSeller, frequency2, calendar, convention2)
 [val1, val2]'
 2025-03-12 15:20:18,633 - [ThreadPoolExecutor-0_5] - INFO - 函数 cds 处理失败
+2025-03-12 15:24:09,341 - [ThreadPoolExecutor-0_1] - INFO - 开始处理函数: cds
+2025-03-12 15:24:09,404 - [ThreadPoolExecutor-0_1] - INFO - 开始读取 ./cleandocs/cds.txt
+2025-03-12 15:24:09,405 - [ThreadPoolExecutor-0_1] - WARNING - 文件超过4KB，已截断
+2025-03-12 15:24:09,410 - [ThreadPoolExecutor-0_1] - INFO - 开始第1次尝试
+2025-03-12 15:24:10,035 - [ThreadPoolExecutor-0_1] - INFO - Thinking...
+2025-03-12 15:24:10,036 - [ThreadPoolExecutor-0_1] - INFO - Reasoning:
+2025-03-12 15:24:26,876 - [ThreadPoolExecutor-0_1] - INFO - Assistant> 
+
+{
+    "function":"cds",
+    "question": "如何计算以2007年5月15日为估值日，名义本金100万，利差150基点，卖方角色的信用违约互换价值？假设无风险利率1%，回收率50%，季度支付，使用NYSE交易日历。",
+    "input": "evalDate = 2007.05.15\nsettlement = 2007.05.16\nmaturity = 2007.08.16\nnotional = 1000000.0\nspread = 150\nriskFree = 0.01\nrecovery = 0.5\nisSeller = 1\nfrequency = 4\ncalendar = 'NYSE'",
+    "answer": "cds(settlement, maturity, evalDate, notional, spread, riskFree, recovery, isSeller, frequency, calendar)"
+}
+2025-03-12 15:24:26,877 - [ThreadPoolExecutor-0_1] - INFO - 准备测试生成脚本正确性
+2025-03-12 15:24:26,879 - [ThreadPoolExecutor-0_1] - ERROR - 解答脚本错误：<Exception> in run: Server response: 'cds(settlement, maturity, evalDate, notional, spread, riskFree, recovery, isSeller, frequency, calendar) => Usage: cds(settlement, maturity, evalDate, notional, spread, riskFree, recovery, isSeller, frequency, calendar, [convention='Following'], [termDateConvention='Following'], [rule='CDS'], [basis=1]). isSeller should be a BOOLEAN scalar or vector.' script: 'cds(settlement, maturity, evalDate, notional, spread, riskFree, recovery, isSeller, frequency, calendar)'
+2025-03-12 15:24:26,879 - [ThreadPoolExecutor-0_1] - INFO - 开始第2次尝试
+2025-03-12 15:24:27,336 - [ThreadPoolExecutor-0_1] - INFO - Thinking...
+2025-03-12 15:24:27,337 - [ThreadPoolExecutor-0_1] - INFO - Reasoning:
+2025-03-12 15:24:50,188 - [ThreadPoolExecutor-0_1] - INFO - Assistant> 
+
+{
+    "function":"cds",
+    "question": "在CDS估值时，当交易方向分别为卖方和买方时，如何正确设置参数来体现不同交易方向的价值差异？",
+    "input": "settlement = 2023.01.15\nmaturity = 2025.01.15\nevalDate = 2023.01.10\nnotional = 1000000.0\nspread = 50.0\nriskFree = 0.025\nrecovery = 0.40\nisSeller = [true, false]\nfrequency = 4\ncalendar = 'NYC'",
+    "answer": "// 分别计算卖方和买方的CDS价值\ncdsValues = cds(settlement, maturity, evalDate, notional, spread, riskFree, recovery, isSeller, frequency, calendar, 'Following', 'Following', 'CDS', 1)\nselect isSeller?\"卖方\":\"买方\" as position, cdsValues"
+}
+2025-03-12 15:24:50,189 - [ThreadPoolExecutor-0_1] - INFO - 准备测试生成脚本正确性
+2025-03-12 15:24:50,191 - [ThreadPoolExecutor-0_1] - ERROR - 解答脚本错误：<Exception> in run: Server response: 'cdsValues = cds(settlement, maturity, evalDate, notional, spread, riskFree, recovery, isSeller, frequency, calendar, "Following", "Following", "CDS", 1) => Market name NYC does not exist in trading calendar!' script: '// 分别计算卖方和买方的CDS价值
+cdsValues = cds(settlement, maturity, evalDate, notional, spread, riskFree, recovery, isSeller, frequency, calendar, 'Following', 'Following', 'CDS', 1)
+select isSeller?"卖方":"买方" as position, cdsValues'
+2025-03-12 15:24:50,192 - [ThreadPoolExecutor-0_1] - INFO - 函数 cds 处理失败

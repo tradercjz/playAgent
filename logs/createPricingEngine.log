@@ -276,3 +276,75 @@ inputData = table(
 // 执行计算
 getStreamEngine("fixedIncomeValuator").append!(inputData)'
 2025-03-12 15:20:46,715 - [ThreadPoolExecutor-0_0] - INFO - 函数 createPricingEngine 处理失败
+2025-03-12 15:24:09,333 - [ThreadPoolExecutor-0_0] - INFO - 开始处理函数: createPricingEngine
+2025-03-12 15:24:09,358 - [ThreadPoolExecutor-0_0] - INFO - 开始读取 ./cleandocs/createPricingEngine.txt
+2025-03-12 15:24:09,368 - [ThreadPoolExecutor-0_0] - INFO - 开始第1次尝试
+2025-03-12 15:24:10,045 - [ThreadPoolExecutor-0_0] - INFO - Thinking...
+2025-03-12 15:24:10,046 - [ThreadPoolExecutor-0_0] - INFO - Reasoning:
+2025-03-12 15:24:55,760 - [ThreadPoolExecutor-0_0] - INFO - Assistant> 
+
+{
+    "function": "createPricingEngine",
+    "question": "如何同时计算三种债券类型的含息价格和应计利息，并在结果中附加价格与预测收益率的乘积指标？",
+    "input": "dummyTable = table(1:0, `tradeTime`Symbol`predictY`price, [TIMESTAMP,SYMBOL,DOUBLE,DOUBLE])\nsecurityRef = table(\n    [0,1,2] as type,\n    `BOND_A`BOND_B`BOND_C as symbol,\n    2025.01.01+0 30 60 as maturity,\n    [3.5,4.0,4.5] as coupon,\n    [2,2,2] as frequency,\n    [0,0,0] as basis\n)\noutputTable = table(1:0, `tradeTime`type`symbol`result`price_predictY, [TIMESTAMP,INT,SYMBOL,DOUBLE,DOUBLE])",
+    "answer": "typeList = [0,1,2]\nmethodList = [\n    <bondDirtyPrice(2024.06.01, maturity, coupon, dummyTable.predictY, frequency, basis)>,\n    <bondAccrInt(2024.06.01, maturity, coupon, frequency, 100, basis)>\n]\ncreatePricingEngine(\n    name='bondEngine',\n    dummyTable=dummyTable,\n    timeColumn=`tradeTime,\n    typeColumn=`type,\n    securityType=typeList,\n    method=methodList,\n    outputTable=outputTable,\n    securityReference=securityRef,\n    keyColumn=`Symbol,\n    extraMetrics=[<dummyTable.price * dummyTable.predictY>]\n)\ninputData = table(2024.06.01T09:30:00.000+1..3 as tradeTime, `BOND_A`BOND_B`BOND_C as Symbol, 0.035 0.04 0.045 as predictY, 100.1 101.2 102.3 as price)\ngetStreamEngine('bondEngine).append!(inputData)"
+}
+2025-03-12 15:24:55,760 - [ThreadPoolExecutor-0_0] - INFO - 准备测试生成脚本正确性
+2025-03-12 15:24:55,764 - [ThreadPoolExecutor-0_0] - ERROR - 解答脚本错误：<Exception> in run: Server response: 'Syntax Error: [line #19] Can't recognize token bondEngine).append!(inputData)' script: 'typeList = [0,1,2]
+methodList = [
+    <bondDirtyPrice(2024.06.01, maturity, coupon, dummyTable.predictY, frequency, basis)>,
+    <bondAccrInt(2024.06.01, maturity, coupon, frequency, 100, basis)>
+]
+createPricingEngine(
+    name='bondEngine',
+    dummyTable=dummyTable,
+    timeColumn=`tradeTime,
+    typeColumn=`type,
+    securityType=typeList,
+    method=methodList,
+    outputTable=outputTable,
+    securityReference=securityRef,
+    keyColumn=`Symbol,
+    extraMetrics=[<dummyTable.price * dummyTable.predictY>]
+)
+inputData = table(2024.06.01T09:30:00.000+1..3 as tradeTime, `BOND_A`BOND_B`BOND_C as Symbol, 0.035 0.04 0.045 as predictY, 100.1 101.2 102.3 as price)
+getStreamEngine('bondEngine).append!(inputData)'
+2025-03-12 15:24:55,764 - [ThreadPoolExecutor-0_0] - INFO - 开始第2次尝试
+2025-03-12 15:24:56,419 - [ThreadPoolExecutor-0_0] - INFO - Thinking...
+2025-03-12 15:24:56,421 - [ThreadPoolExecutor-0_0] - INFO - Reasoning:
+2025-03-12 15:25:34,619 - [ThreadPoolExecutor-0_0] - INFO - Assistant> 
+
+{
+    "function":"createPricingEngine",
+    "question": "如何为不同债券类型配置定价引擎并处理实时数据流？需要包含含息价格和应计利息计算，并输出自定义风险因子。",
+    "input": "dummyTable = table(1:0, `tradeTime`Symbol`realTimeX`predictY`price, [TIMESTAMP,SYMBOL,DOUBLE,DOUBLE,DOUBLE])\nsecurityRef = table(\n    [0,1,0] as type,\n    [1,2,1] as assetType,\n    [`BOND_A,`BOND_B,`BOND_C] as symbol,\n    2025.06.01+0 30 60 as maturity,\n    [0.05,0.06,0.04] as coupon,\n    [2,4,2] as frequency,\n    [1,1,1] as basis\n)\noutputTable = table(1:0, `tradeTime`type`symbol`result`riskFactor1, [TIMESTAMP,INT,SYMBOL,DOUBLE,DOUBLE])",
+    "answer": "typeList = [0,1]\nmethodList = [\n    <bondDirtyPrice(2024.06.01, maturity, coupon, dummyTable.predictY, frequency, basis)>,\n    <bondAccrInt(2024.06.01, maturity, coupon, frequency, 100, basis)>\n]\ncreatePricingEngine(\n    name='bondEngine',\n    dummyTable=dummyTable,\n    timeColumn=`tradeTime,\n    typeColumn=`type,\n    securityType=typeList,\n    method=methodList,\n    outputTable=outputTable,\n    securityReference=securityRef,\n    keyColumn=`Symbol,\n    extraMetrics=[<dummyTable.price * dummyTable.realTimeX>]\n)\n\ninputData = table(\n    2024.06.01T09:30:00.000+1..3 as tradeTime,\n    [`BOND_A,`BOND_B,`BOND_C] as Symbol,\n    rand(0.1,3) as realTimeX,\n    [0.035,0.04,0.045] as predictY,\n    [100.1,101.2,102.3] as price\n)\ngetStreamEngine(`bondEngine).append!(inputData)"
+}
+2025-03-12 15:25:34,619 - [ThreadPoolExecutor-0_0] - INFO - 准备测试生成脚本正确性
+2025-03-12 15:25:34,623 - [ThreadPoolExecutor-0_0] - ERROR - 解答脚本错误：<Exception> in run: Server response: 'createPricingEngine("bondEngine", dummyTable, "tradeTime", "type", typeList, methodList, outputTable, securityRef, "Symbol", [< dummyTable.price * dummyTable.realTimeX >]) => Failed to call method <bondDirtyPrice(2024.06.01, maturity, coupon, dummyTable006081d4e67f0000, frequency, basis)> in method with error: Usage: bondDirtyPrice(settlement, maturity, coupon, yield, [frequency], [basis=1], [bondType=0]). yield should be numeric scalar or vector.' script: 'typeList = [0,1]
+methodList = [
+    <bondDirtyPrice(2024.06.01, maturity, coupon, dummyTable.predictY, frequency, basis)>,
+    <bondAccrInt(2024.06.01, maturity, coupon, frequency, 100, basis)>
+]
+createPricingEngine(
+    name='bondEngine',
+    dummyTable=dummyTable,
+    timeColumn=`tradeTime,
+    typeColumn=`type,
+    securityType=typeList,
+    method=methodList,
+    outputTable=outputTable,
+    securityReference=securityRef,
+    keyColumn=`Symbol,
+    extraMetrics=[<dummyTable.price * dummyTable.realTimeX>]
+)
+
+inputData = table(
+    2024.06.01T09:30:00.000+1..3 as tradeTime,
+    [`BOND_A,`BOND_B,`BOND_C] as Symbol,
+    rand(0.1,3) as realTimeX,
+    [0.035,0.04,0.045] as predictY,
+    [100.1,101.2,102.3] as price
+)
+getStreamEngine(`bondEngine).append!(inputData)'
+2025-03-12 15:25:34,623 - [ThreadPoolExecutor-0_0] - INFO - 函数 createPricingEngine 处理失败

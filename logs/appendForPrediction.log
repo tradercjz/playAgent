@@ -241,3 +241,46 @@ where time between 2023.09.15T09:30:00 : 2023.09.15T09:44:00
 context by assetType, dataSource, clearRate
 limit 3'
 2025-03-12 15:21:08,427 - [ThreadPoolExecutor-0_1] - INFO - 函数 appendForPrediction 处理失败
+2025-03-12 15:24:09,368 - [ThreadPoolExecutor-0_9] - INFO - 开始处理函数: appendForPrediction
+2025-03-12 15:24:09,404 - [ThreadPoolExecutor-0_9] - INFO - 开始读取 ./cleandocs/appendForPrediction.txt
+2025-03-12 15:24:09,416 - [ThreadPoolExecutor-0_9] - INFO - 开始第1次尝试
+2025-03-12 15:24:11,684 - [ThreadPoolExecutor-0_9] - INFO - Thinking...
+2025-03-12 15:24:11,686 - [ThreadPoolExecutor-0_9] - INFO - Reasoning:
+2025-03-12 15:24:40,453 - [ThreadPoolExecutor-0_9] - INFO - Assistant> 
+
+{
+    "function":"appendForPrediction",
+    "question": "如何将不同资产类型的市场收益率数据批量推入已配置的曲线预测模型进行处理？",
+    "input": "dummyData = table(
+    take(`A`B`C, 9) as symbol, 
+    take(2023.10.08T09:30:00.000, 9) as sendingtime, 
+    decimal32(rand(100..105,9),3) as askDirtyPrice1,
+    decimal32(rand(98..103,9),3) as bidDirtyPrice1,
+    decimal32(rand(99..104,9),3) as midDirtyPirce1,
+    decimal32(rand(0.05..0.08,9),3) as askyield1,
+    decimal32(rand(0.04..0.07,9),3) as bidyield1,
+    decimal32(rand(0.045..0.075,9),3) as midyield1,
+    (5.0 5.5 6.0 6.5 7.0 7.5 8.0 8.5 9.0) as timetoMaturity,
+    [0,1,2,0,1,2,0,1,2] as assetType,
+    take(101,9) as datasource,
+    take('X',9) as clearRate
+)",
+    "answer": "// 假设已创建名为bondModel的收益率曲线引擎\nprocessedRecords = appendForPrediction(bondModel, dummyData)\nselect count(*) from getStreamEngine('bondModel')"
+}
+2025-03-12 15:24:40,453 - [ThreadPoolExecutor-0_9] - ERROR - JSON解析错误: Invalid control character at: line 6 column 33 (char 130)
+2025-03-12 15:24:40,453 - [ThreadPoolExecutor-0_9] - ERROR - LLM响应解析失败: JSON解析错误: Invalid control character at: line 6 column 33 (char 130)
+2025-03-12 15:24:40,454 - [ThreadPoolExecutor-0_9] - INFO - 开始第2次尝试
+2025-03-12 15:24:41,621 - [ThreadPoolExecutor-0_9] - INFO - Thinking...
+2025-03-12 15:24:41,623 - [ThreadPoolExecutor-0_9] - INFO - Reasoning:
+2025-03-12 15:25:24,492 - [ThreadPoolExecutor-0_9] - INFO - Assistant> 
+
+{
+    "function":"appendForPrediction",
+    "question": "如何将包含不同资产类型和期限结构的中债估值数据批量推入收益率曲线预测引擎进行处理？",
+    "input": "dummyTable = table(1:0, `symbol`sendingtime`askDirtyPrice1`bidDirtyPrice1`midDirtyPirce1`askyield1`bidyield1`midyield1`timetoMaturity`assetType`datasource`clearRate, [SYMBOL,TIMESTAMP,DECIMAL32(3),DECIMAL32(3),DECIMAL32(3),DECIMAL32(3),DECIMAL32(3),DECIMAL32(3),DOUBLE,INT,INT,STRING])\nassetType = [0,1,2]\nfitMethod = [<piecewiseLinFit(timetoMaturity, midyield1, 5)>, <nss(timetoMaturity,bidyield1,'ns')>, <piecewiseLinFit(timetoMaturity, askyield1, 8)>]\nmodelOutput = table(1:0, `time`assetType`dataSource`clearRate`model, [TIMESTAMP,INT,INT,SYMBOL,BLOB])\ndata = table(take(`BOND_001, 15) as symbol, take(now(), 15) as sendingtime, decimal32(rand(100.0,15),3) as askDirtyPrice1, decimal32(rand(99.5,15),3) as bidDirtyPrice1, decimal32(norm(100,0.5,15),3) as midDirtyPirce1, decimal32(rand(3.5,15),3) as askyield1, decimal32(rand(3.0,15),3) as bidyield1, decimal32(rand(3.2,15),3) as midyield1, 5.0 + 0.1*1..15 as timetoMaturity, take(0 1 2,15) as assetType, take(101,15) as datasource, take('CNY',15) as clearRate)",
+    "answer": "engine = createYieldCurveEngine('curvePredictor', dummyTable, assetType, fitMethod, `assetType`datasource`clearRate, modelOutput, 100)\nappendForPrediction(engine, data)"
+}
+2025-03-12 15:25:24,492 - [ThreadPoolExecutor-0_9] - INFO - 准备测试生成脚本正确性
+2025-03-12 15:25:24,497 - [ThreadPoolExecutor-0_9] - ERROR - 解答脚本错误：<Exception> in run: Server response: 'appendForPrediction(engine, data) => appendForPrediction is not supported when predictOutput is not specified.' script: 'engine = createYieldCurveEngine('curvePredictor', dummyTable, assetType, fitMethod, `assetType`datasource`clearRate, modelOutput, 100)
+appendForPrediction(engine, data)'
+2025-03-12 15:25:24,497 - [ThreadPoolExecutor-0_9] - INFO - 函数 appendForPrediction 处理失败

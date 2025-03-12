@@ -7,3 +7,6 @@
 2025-03-12 15:19:28,754 - [ThreadPoolExecutor-0_8] - INFO - 开始处理函数: trueRange
 2025-03-12 15:19:28,782 - [ThreadPoolExecutor-0_8] - INFO - trueRange已生成，无需再处理
 2025-03-12 15:19:28,784 - [ThreadPoolExecutor-0_8] - INFO - 函数 trueRange 处理成功
+2025-03-12 15:24:09,278 - [ThreadPoolExecutor-0_8] - INFO - 开始处理函数: trueRange
+2025-03-12 15:24:09,311 - [ThreadPoolExecutor-0_8] - INFO - trueRange已生成，无需再处理
+2025-03-12 15:24:09,320 - [ThreadPoolExecutor-0_8] - INFO - 函数 trueRange 处理成功

@@ -120,3 +120,6 @@ select option_result as Greeks from option_result'
 2025-03-12 15:20:12,476 - [ThreadPoolExecutor-0_6] - INFO - 已生成输出文件: ./data/jinzhi_vanillaOption.txt
 2025-03-12 15:20:12,477 - [ThreadPoolExecutor-0_6] - INFO - 模型预实验成功，开始生成标注数据
 2025-03-12 15:20:12,477 - [ThreadPoolExecutor-0_6] - INFO - 函数 vanillaOption 处理失败
+2025-03-12 15:24:09,341 - [ThreadPoolExecutor-0_9] - INFO - 开始处理函数: vanillaOption
+2025-03-12 15:24:09,362 - [ThreadPoolExecutor-0_9] - INFO - vanillaOption已生成，无需再处理
+2025-03-12 15:24:09,367 - [ThreadPoolExecutor-0_9] - INFO - 函数 vanillaOption 处理成功

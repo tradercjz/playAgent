@@ -34,3 +34,15 @@ Traceback (most recent call last):
   File "/home/jzchen/DataDistiller/data_distiller.py", line 92, in _prepare_conversation_for_func
     raise Exception("not found")
 Exception: not found
+2025-03-12 15:24:09,284 - [ThreadPoolExecutor-0_9] - INFO - 开始处理函数: valueAtRisk
+2025-03-12 15:24:09,336 - [ThreadPoolExecutor-0_9] - ERROR - 函数 valueAtRisk 处理时出现异常: not found
+Traceback (most recent call last):
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 320, in _process_in_thread
+    result = distiller.distill_function(func)
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 281, in distill_function
+    mock_response_data = self._mock_distill_process(func)
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 139, in _mock_distill_process
+    self._prepare_conversation_for_func(func)
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 92, in _prepare_conversation_for_func
+    raise Exception("not found")
+Exception: not found

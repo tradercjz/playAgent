@@ -151,3 +151,55 @@ exogData = matrix(take(1.0,24),24:1)'
 print('AIC值:', modelResult.aic, ' 对数似然值:', modelResult.llf)
 print('前三个参数:', modelResult.params[0..2])'
 2025-03-12 15:21:40,904 - [ThreadPoolExecutor-0_3] - INFO - 函数 varma 处理失败
+2025-03-12 15:24:09,331 - [ThreadPoolExecutor-0_4] - INFO - 开始处理函数: varma
+2025-03-12 15:24:09,376 - [ThreadPoolExecutor-0_4] - INFO - 开始读取 ./cleandocs/varma.txt
+2025-03-12 15:24:09,389 - [ThreadPoolExecutor-0_4] - INFO - 开始第1次尝试
+2025-03-12 15:24:09,908 - [ThreadPoolExecutor-0_4] - INFO - Thinking...
+2025-03-12 15:24:09,917 - [ThreadPoolExecutor-0_4] - INFO - Reasoning:
+2025-03-12 15:24:41,411 - [ThreadPoolExecutor-0_4] - INFO - Assistant> 
+
+{
+    "function":"varma",
+    "question": "如何分析三个宏观经济指标（GDP、消费、投资）之间的动态关系，并考虑政府支出作为外生变量的影响？需要包含趋势项并使用一阶自回归和一阶移动平均项。",
+    "input": "// 创建模拟数据表\nyear = 2000..2023\nrealgdp = 100 + 5*(year-2000) + norm(size(year), 0, 2)\nrealcons = 60 + 3*(year-2000) + norm(size(year), 0, 1.5)\nrealinv = 30 + 2*(year-2000) + norm(size(year), 0, 1)\ngov_exp = 20 + 1.5*(year-2000) + norm(size(year), 0, 0.8)\nmacroData = table(year, realgdp, realcons, realinv, gov_exp)",
+    "answer": "// 提取外生变量并转换为矩阵\nexogMatrix = matrix(select gov_exp from macroData)\n// 执行VARMA分析\nmodelResult = varma(macroData, [`realgdp, `realcons, `realinv], [1,1], exog=exogMatrix, trend='c')\n// 输出模型信息\nprint('AIC值: ' + modelResult.aic)\nprint('参数数量: ' + modelResult.params.rows())"
+}
+2025-03-12 15:24:41,412 - [ThreadPoolExecutor-0_4] - INFO - 准备测试生成脚本正确性
+2025-03-12 15:24:41,428 - [ThreadPoolExecutor-0_4] - ERROR - 数据脚本错误：<Exception> in run: Server response: 'realgdp = 100 + 5 * (year - 2000) + norm(size(year), 0, 2) => Usage: normal(mean, std, count). std must be a positive number.' script: '// 创建模拟数据表
+year = 2000..2023
+realgdp = 100 + 5*(year-2000) + norm(size(year), 0, 2)
+realcons = 60 + 3*(year-2000) + norm(size(year), 0, 1.5)
+realinv = 30 + 2*(year-2000) + norm(size(year), 0, 1)
+gov_exp = 20 + 1.5*(year-2000) + norm(size(year), 0, 0.8)
+macroData = table(year, realgdp, realcons, realinv, gov_exp)'
+2025-03-12 15:24:41,429 - [ThreadPoolExecutor-0_4] - ERROR - 解答脚本错误：<Exception> in run: Server response: 'exogMatrix = matrix(select gov_exp from macroData) => Variable 'macroData' isn't initialized yet.' script: '// 提取外生变量并转换为矩阵
+exogMatrix = matrix(select gov_exp from macroData)
+// 执行VARMA分析
+modelResult = varma(macroData, [`realgdp, `realcons, `realinv], [1,1], exog=exogMatrix, trend='c')
+// 输出模型信息
+print('AIC值: ' + modelResult.aic)
+print('参数数量: ' + modelResult.params.rows())'
+2025-03-12 15:24:41,430 - [ThreadPoolExecutor-0_4] - INFO - 开始第2次尝试
+2025-03-12 15:24:41,889 - [ThreadPoolExecutor-0_4] - INFO - Thinking...
+2025-03-12 15:24:41,890 - [ThreadPoolExecutor-0_4] - INFO - Reasoning:
+2025-03-12 15:25:11,099 - [ThreadPoolExecutor-0_4] - INFO - Assistant> 
+
+{
+    "function":"varma",
+    "question": "如何为多变量时间序列数据构建包含外生变量的VARMA模型？",
+    "input": "// 创建模拟数据表
+year = 2000..2023
+realgdp = 100 + 5*(year-2000) + normal(0, 2, size(year))
+realcons = 60 + 3*(year-2000) + normal(0, 1.5, size(year))
+realinv = 30 + 2*(year-2000) + normal(0, 1, size(year))
+gov_exp = 20 + 1.5*(year-2000) + normal(0, 0.8, size(year))
+macroData = table(year, realgdp, realcons, realinv, gov_exp)",
+    "answer": "// 先创建数据表后再处理外生变量
+exogMatrix = matrix(macroData.gov_exp)
+modelResult = varma(macroData, [`realgdp, `realcons, `realinv], [1,1], exog=exogMatrix, trend='c')
+print('模型AIC值: ' + modelResult.aic)
+print('参数矩阵维度: ' + modelResult.params.rows() + 'x' + modelResult.params.cols())"
+}
+2025-03-12 15:25:11,100 - [ThreadPoolExecutor-0_4] - ERROR - JSON解析错误: Invalid control character at: line 6 column 25 (char 101)
+2025-03-12 15:25:11,100 - [ThreadPoolExecutor-0_4] - ERROR - LLM响应解析失败: JSON解析错误: Invalid control character at: line 6 column 25 (char 101)
+2025-03-12 15:25:11,100 - [ThreadPoolExecutor-0_4] - INFO - 函数 varma 处理失败
