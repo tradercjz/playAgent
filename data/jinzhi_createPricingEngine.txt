@@ -1,0 +1,90 @@
+Prompt: 
+如何根据不同债券类型实时计算含息价格和久期，并同时生成价格波动指标？
+
+Input: 
+```DolphinDB
+dummyTable = table(1:0, `tradeTime`Symbol`yield`price`couponRate, [TIMESTAMP,SYMBOL,DOUBLE,DOUBLE,DOUBLE])
+securityReference = table(
+    [0,1,2] as type,
+    [10001,10002,10003] as assetType,
+    `BOND_A`BOND_B`BOND_C as symbol,
+    2025.01.15+0 30 60 as maturity,
+    [4.5,5.0,5.5] as coupon,
+    [2,4,6] as frequency,
+    [1,1,1] as basis
+)
+inputData = table(
+    take(2023.09.15T09:30:00.000,3) as tradeTime,
+    `BOND_A`BOND_B`BOND_C as Symbol,
+    [3.8,4.2,4.5] as yield,
+    [102.5,105.0,107.8] as price,
+    [4.5,5.0,5.5] as couponRate
+)
+```
+
+Answer: 
+```DolphinDB
+outputTable = table(1:0, `tradeTime`type`symbol`result`priceMultiYield`couponPlusPrice, [TIMESTAMP,INT,SYMBOL,DOUBLE,DOUBLE,DOUBLE])
+typeList = [0,1,2]
+methodList = [
+    <bondDirtyPrice(2023.09.15, maturity, coupon, yield, frequency, basis)>,
+    <bondDuration(2023.09.15, maturity, coupon, yield, frequency, basis)>,
+    <bondYield(2023.09.15, maturity, coupon, price, frequency, basis)>
+]
+createPricingEngine(
+    name = 'bondPricer',
+    dummyTable = dummyTable,
+    timeColumn = `tradeTime,
+    typeColumn = `type,
+    securityType = typeList,
+    method = methodList,
+    outputTable = outputTable,
+    securityReference = securityReference,
+    keyColumn = `Symbol,
+    extraMetrics = [<price * yield>, <coupon + price>]
+)
+getStreamEngine(`bondPricer).append!(inputData)
+```
+
+R1 CoT: 
+好的，我现在需要根据用户提供的DolphinDB函数createPricingEngine来设计一个相关的问题和解决方案。首先，我要理解这个函数的作用和用法。createPricingEngine用于创建定价引擎，支持调用内置或自定义的定价函数，适用于不同金融工具的定价。参数包括输入表结构、时间列、类型列、债券类型列表、定价方法、输出表结构等。
+
+用户给的示例中，输入数据需要包含时间、合约代码、实时数据等，输出表则包含时间、类型、合约代码、结果及额外指标。那么，我需要构思一个使用场景，可能涉及多个债券类型的定价，并且需要额外的计算指标。
+
+问题应该不直接提到函数名，而是围绕其功能。比如，用户可能需要根据不同的债券类型计算不同的指标，如含息价格和久期，同时生成额外指标如价格乘以预测值。
+
+接下来，我需要生成模拟数据。根据示例中的输入表结构，模拟tradeTime、Symbol、realTimeX、predictY、price等字段。注意DolphinDB的语法，变量赋值需要分多行，不能连写。
+
+然后，构建定价引擎，设置不同的方法对应不同的债券类型。例如，类型0使用bondDirtyPrice，类型1使用bondDuration，类型2使用bondYield。同时，添加extraMetrics如price * predictY和coupon + price。
+
+最后，确保所有参数正确传递，特别是securityReference表的构建，包含必要的字段如type、maturity、coupon等。同时，正确指定keyColumn和extraMetrics的元代码。
+
+现在需要检查是否所有参数都正确应用，比如securityType是否对应typeList中的类型，methodList中的每个方法是否与类型匹配，输出表结构是否正确包含所有列。此外，在输入数据后，通过getStreamEngine调用引擎处理数据。
+
+可能需要注意的地方包括：时间列的格式是否正确，securityReference中的symbol是否与输入数据的Symbol列匹配，以及定价函数参数是否正确引用输入表或securityReference的列。
+
+完成这些步骤后，就可以生成符合要求的问答对，包括问题、模拟数据、解决方案的脚本。
+
+
+Correct CoT: 
+好的，我现在需要根据用户提供的DolphinDB函数createPricingEngine来设计一个相关的问题和解决方案。首先，我要理解这个函数的作用和用法。createPricingEngine用于创建定价引擎，支持调用内置或自定义的定价函数，适用于不同金融工具的定价。参数包括输入表结构、时间列、类型列、债券类型列表、定价方法、输出表结构等。
+
+用户给的示例中，输入数据需要包含时间、合约代码、实时数据等，输出表则包含时间、类型、合约代码、结果及额外指标。那么，我需要构思一个使用场景，可能涉及多个债券类型的定价，并且需要额外的计算指标。
+
+问题应该不直接提到函数名，而是围绕其功能。比如，用户可能需要根据不同的债券类型计算不同的指标，如含息价格和久期，同时生成额外指标如价格乘以预测值。
+
+接下来，我需要生成模拟数据。根据示例中的输入表结构，模拟tradeTime、Symbol、realTimeX、predictY、price等字段。注意DolphinDB的语法，变量赋值需要分多行，不能连写。
+
+然后，构建定价引擎，设置不同的方法对应不同的债券类型。例如，类型0使用bondDirtyPrice，类型1使用bondDuration，类型2使用bondYield。同时，添加extraMetrics如price * predictY和coupon + price。
+
+最后，确保所有参数正确传递，特别是securityReference表的构建，包含必要的字段如type、maturity、coupon等。同时，正确指定keyColumn和extraMetrics的元代码。
+
+现在需要检查是否所有参数都正确应用，比如securityType是否对应typeList中的类型，methodList中的每个方法是否与类型匹配，输出表结构是否正确包含所有列。此外，在输入数据后，通过getStreamEngine调用引擎处理数据。
+
+可能需要注意的地方包括：时间列的格式是否正确，securityReference中的symbol是否与输入数据的Symbol列匹配，以及定价函数参数是否正确引用输入表或securityReference的列。
+
+完成这些步骤后，就可以生成符合要求的问答对，包括问题、模拟数据、解决方案的脚本。
+
+
+Function Name: 
+createPricingEngine
