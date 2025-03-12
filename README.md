@@ -6,5 +6,7 @@
 
 ## 关键入口文件
 data_cleaner.py 清洗html文件转为txt
+
 data_dstiller.py 运行后，生成标注文件提交
+
 cot_review.py 尝试修改COT，更加符合要求
