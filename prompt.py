@@ -3,6 +3,13 @@ from textwrap import dedent
 
 class PromptTemplates:
     """提示词模板集合"""
+
+    @staticmethod
+    def cot_reviwer() -> str:
+        """ 用来清洗整理cot """
+        return dedent("""\
+            请修改下面的思维链，首先要保证意思不变，尽量不要改动。主要是讲可能表现出用户提示的意思修改掉，尽量改为完整的思考链路，没有用户提示的那种。
+            """)
     
     @staticmethod
     def html_doc_clean() -> str:
@@ -47,7 +54,21 @@ class PromptTemplates:
             y = [4.5, 7.8, 4.3]
             z = dict(x, y)
             z; 
+            
+            如果你需要调用matrix函数生成矩阵，请参考下面用法：
+   
+            #### 语法
+            ```dolphindb
+            matrix(X1, [X2], ...)
+            ```
+            #### 参数说明
+            - **X1, X2, ...**：支持向量、矩阵、表（不含SYMBOL字段）、元组或它们的组合
 
+          
+            matrix(1 2 3 4, 5 6 7 9, 11 12 13 14);
+            一定要注意，matrix的每一个参数都是一个向量，各个参数向量要等长要等长啊啊
+                      
+            另外一个注意点，参数如果是有'c'这样的字符串，请改为"c"，即使用双引号。这个是dolphindb参数注意点哦
 
             你需要提供如下的格式的输出：
             {
