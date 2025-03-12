@@ -90,6 +90,11 @@ class FileManager:
             找到的文件的完整路径，如果没找到则返回 None
         """
         # 生成可能的文件名变体
+
+        # 特殊处理一些函数
+        if function_name == "valueAtRisk": return "./docs/funcs/v/var_0.html"
+        if function_name == "condValueAtRisk": return "./docs/funcs/c/cvar.html"
+
         possible_filenames = [
             f"{function_name}.html",              # 原始名称
             f"{function_name.lower()}.html"       # 全小写
