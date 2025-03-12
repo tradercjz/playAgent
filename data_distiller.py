@@ -192,7 +192,7 @@ Function Name:
                 if input_ok and answer_ok:
                     self.logger.info("脚本正常，准备生成文件")
                     response_data.cot = llm_response.reasoning_content
-                    self._generate_output_file(response_data)
+                    #self._generate_output_file(response_data)
                     return response_data
         
         return False
@@ -284,7 +284,7 @@ Function Name:
             return mock_response_data
             
         self.logger.info("模型预实验成功，开始生成标注数据")
-        #return self._distill_via_llm(func, mock_response_data)
+        return self._distill_via_llm(func, mock_response_data)
 
 
 class DistillationOrchestrator:
@@ -391,13 +391,8 @@ def main():
     }
 
     # SQL相关函数
-    functions = [
-        "bondAccrInt", "bondConvexity", "bondDirtyPrice", "bondDuration", "nss", 
-        "ns", "condValueAtRisk", "nsspredict", "trueRange", "valueAtRisk",
-        "irs", "varma", "bondCashflow", "bondYield", "createPricingEngine", 
-        "treasuryConversionFactor", "crmwCBond", "cds", "vanillaOption", 
-        "maxDrawdown", "mdd", "cummdd", "createYieldCurveEngine", "appendForPrediction"
-    ]
+    functions = ["varma",  "appendForPrediction"]
+    
     clean_doc_dir = "./cleandocs"
     main_logger.info(f"开始处理 SQL 函数: {functions}")
     sql_results = DistillationOrchestrator.process_functions(
