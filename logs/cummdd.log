@@ -1,0 +1,6 @@
+2025-03-12 15:02:27,719 - [ThreadPoolExecutor-0_6] - INFO - 开始处理函数: cummdd
+2025-03-12 15:02:27,758 - [ThreadPoolExecutor-0_6] - INFO - cummdd已生成，无需再处理
+2025-03-12 15:02:27,766 - [ThreadPoolExecutor-0_6] - INFO - 函数 cummdd 处理成功
+2025-03-12 15:16:30,804 - [ThreadPoolExecutor-0_6] - INFO - 开始处理函数: cummdd
+2025-03-12 15:16:30,864 - [ThreadPoolExecutor-0_6] - INFO - cummdd已生成，无需再处理
+2025-03-12 15:16:30,864 - [ThreadPoolExecutor-0_6] - INFO - 函数 cummdd 处理成功

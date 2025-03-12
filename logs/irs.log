@@ -1,0 +1,100 @@
+2025-03-12 15:02:27,645 - [ThreadPoolExecutor-0_5] - INFO - 开始处理函数: irs
+2025-03-12 15:02:27,664 - [ThreadPoolExecutor-0_5] - INFO - 开始读取 ./cleandocs/irs.txt
+2025-03-12 15:02:27,672 - [ThreadPoolExecutor-0_5] - INFO - 开始第1次尝试
+2025-03-12 15:02:28,321 - [ThreadPoolExecutor-0_5] - INFO - Thinking...
+2025-03-12 15:02:28,322 - [ThreadPoolExecutor-0_5] - INFO - Reasoning:
+2025-03-12 15:02:53,237 - [ThreadPoolExecutor-0_5] - INFO - Assistant> 
+
+{
+    "function":"irs",
+    "question": "如何为以3个月SHIBOR为基准的五年期利率互换合约进行估值？该合约季付利息，使用实际/360日计数基准，当前需要计算2024年3月15日的估值。",
+    "input": "settlement = 2024.03.15\ncalendar = `SSE\nday0 = temporalAdd(settlement, 0, calendar)\n\ncurveRateTime = [10y, 1M, 6M, 1y, 2y, 3y, 5y]\ncurveRateValue = [0.027, 0.018, 0.0195, 0.022, 0.025, 0.027, 0.029]\n\ndates = []\nfor (dur in curveRateTime) {\n    dates.append!(temporalAdd(settlement, dur))\n}\nX = (dates - day0)$INT\ncurve = linearInterpolateFit(X, curveRateValue)\n\nresetIntv = 3M\nstartDay = 2024.03.15\nendDay = 2029.03.15\npar = 1000000\nfixRate = 0.028\nspread = 0.0025\nfreq = 3M\nbasis = 2",
+    "answer": "irs(settlement, resetIntv, startDay, endDay, par, fixRate, spread, curve, freq, calendar, basis=basis)"
+}
+2025-03-12 15:02:53,238 - [ThreadPoolExecutor-0_5] - INFO - 准备测试生成脚本正确性
+2025-03-12 15:02:53,276 - [ThreadPoolExecutor-0_5] - INFO - 脚本正常，准备生成文件
+2025-03-12 15:02:53,277 - [ThreadPoolExecutor-0_5] - INFO - 模型预实验成功，开始生成标注数据
+2025-03-12 15:02:53,277 - [ThreadPoolExecutor-0_5] - INFO - 开始读取 ./cleandocs/irs.txt
+2025-03-12 15:02:53,280 - [ThreadPoolExecutor-0_5] - INFO - 开始第1次尝试
+2025-03-12 15:02:54,328 - [ThreadPoolExecutor-0_5] - INFO - Thinking...
+2025-03-12 15:02:54,332 - [ThreadPoolExecutor-0_5] - INFO - Reasoning:
+2025-03-12 15:03:57,144 - [ThreadPoolExecutor-0_5] - INFO - Assistant> 
+
+{
+    "function":"irs",
+    "question": "如何为以3个月SHIBOR为基准的五年期利率互换合约进行估值？该合约季付利息，使用实际/360日计数基准，当前需要计算2024年3月15日的估值。",
+    "input": "settlement=2024.03.15, resetInterval=3M, start=2024.03.15, maturity=2029.03.15, notional=1000000, fixedRate=0.027, spread=0, curve通过SHIBOR利率曲线拟合，frequency=3M, calendar='SSE', basis=2",
+    "answer": "settlement = 2024.03.15\ncalendar = `SSE\nday0 = temporalAdd(settlement, 0, calendar)\n\n// 构建SHIBOR利率曲线\ncurveRateTime = [1M,3M,6M,1Y,2Y,3Y,5Y]\ncurveRateValue = [0.018,0.02,0.022,0.025,0.028,0.03,0.035]\n\ndates = []\nfor (dur in curveRateTime) {\n    dates.append!(temporalAdd(settlement, dur, calendar))\n}\nX = (dates - day0)$INT\n\n// 线性插值拟合曲线\ncurve = linearInterpolateFit(X, curveRateValue)\n\n// 执行估值计算\nirs(settlement, 3M, 2024.03.15, 2029.03.15, 1000000, 0.027, 0, curve, 3M, calendar, basis=2)"
+}
+2025-03-12 15:03:57,145 - [ThreadPoolExecutor-0_5] - INFO - 准备测试生成脚本正确性
+2025-03-12 15:03:57,147 - [ThreadPoolExecutor-0_5] - ERROR - 数据脚本错误：<Exception> in run: Server response: 'Syntax Error: [line #1] Invalid expression: , resetInterval = 3M , start = 2024.03.15 , maturity = 2029.03.15 , notional = 1000000 , fixedRate = 0.027 , spread = 0 , curve通过SHIBOR利率曲线拟合，frequency = 3M , calendar = SSE , basis = 2 ' script: 'settlement=2024.03.15, resetInterval=3M, start=2024.03.15, maturity=2029.03.15, notional=1000000, fixedRate=0.027, spread=0, curve通过SHIBOR利率曲线拟合，frequency=3M, calendar='SSE', basis=2'
+2025-03-12 15:03:57,149 - [ThreadPoolExecutor-0_5] - ERROR - 解答脚本错误：<Exception> in run: Server response: 'Syntax Error: [line #6] Can't recognize token 1Y' script: 'settlement = 2024.03.15
+calendar = `SSE
+day0 = temporalAdd(settlement, 0, calendar)
+
+// 构建SHIBOR利率曲线
+curveRateTime = [1M,3M,6M,1Y,2Y,3Y,5Y]
+curveRateValue = [0.018,0.02,0.022,0.025,0.028,0.03,0.035]
+
+dates = []
+for (dur in curveRateTime) {
+    dates.append!(temporalAdd(settlement, dur, calendar))
+}
+X = (dates - day0)$INT
+
+// 线性插值拟合曲线
+curve = linearInterpolateFit(X, curveRateValue)
+
+// 执行估值计算
+irs(settlement, 3M, 2024.03.15, 2029.03.15, 1000000, 0.027, 0, curve, 3M, calendar, basis=2)'
+2025-03-12 15:03:57,149 - [ThreadPoolExecutor-0_5] - INFO - 开始第2次尝试
+2025-03-12 15:04:00,175 - [ThreadPoolExecutor-0_5] - INFO - Thinking...
+2025-03-12 15:04:00,176 - [ThreadPoolExecutor-0_5] - INFO - Reasoning:
+2025-03-12 15:04:36,781 - [ThreadPoolExecutor-0_5] - INFO - Assistant> 
+
+{
+    "function":"irs",
+    "question": "如何为以3个月SHIBOR为基准的五年期利率互换合约进行估值？该合约季付利息，使用实际/360日计数基准，当前需要计算2024年3月15日的估值。",
+    "input": {
+        "settlement": "2024.03.15",
+        "resetInterval": "3M",
+        "start": "2024.03.15",
+        "maturity": "2029.03.15",
+        "notional": 1000000,
+        "fixedRate": 0.027,
+        "spread": 0,
+        "curveRateTime": ["1M","3M","6M","1Y","2Y","3Y","5Y"],
+        "curveRateValue": [0.018,0.02,0.022,0.025,0.028,0.03,0.035],
+        "frequency": "3M",
+        "calendar": "SSE",
+        "basis": 2
+    },
+    "answer": "settlement = 2024.03.15\ncalendar = `SSE\nday0 = temporalAdd(settlement, 0, calendar)\n\n// 构建SHIBOR利率曲线\ncurveRateTime = [1M,3M,6M,1Y,2Y,3Y,5Y]\ncurveRateValue = [0.018,0.02,0.022,0.025,0.028,0.03,0.035]\n\ndates = []\nfor (dur in curveRateTime) {\n    dates.append!(temporalAdd(settlement, dur, calendar))\n}\nX = (dates - day0).int()\n\n// 线性插值拟合曲线\ncurve = linearInterpolateFit(X, curveRateValue)\n\n// 执行估值计算\nirs(settlement, 3M, 2024.03.15, 2029.03.15, 1000000, 0.027, 0, curve, 3M, calendar, basis=2)"
+}
+2025-03-12 15:04:36,783 - [ThreadPoolExecutor-0_5] - ERROR - 响应对象创建错误: 1 validation error for DistillResponse
+input
+  Input should be a valid string [type=string_type, input_value={'settlement': '2024.03.1...dar': 'SSE', 'basis': 2}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.10/v/string_type
+2025-03-12 15:04:36,783 - [ThreadPoolExecutor-0_5] - ERROR - LLM响应解析失败: 响应对象创建错误: 1 validation error for DistillResponse
+input
+  Input should be a valid string [type=string_type, input_value={'settlement': '2024.03.1...dar': 'SSE', 'basis': 2}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.10/v/string_type
+2025-03-12 15:04:36,784 - [ThreadPoolExecutor-0_5] - INFO - 函数 irs 处理失败
+2025-03-12 15:16:30,728 - [ThreadPoolExecutor-0_2] - INFO - 开始处理函数: irs
+2025-03-12 15:16:30,742 - [ThreadPoolExecutor-0_2] - INFO - 开始读取 ./cleandocs/irs.txt
+2025-03-12 15:16:30,750 - [ThreadPoolExecutor-0_2] - INFO - 开始第1次尝试
+2025-03-12 15:16:31,626 - [ThreadPoolExecutor-0_2] - INFO - Thinking...
+2025-03-12 15:16:31,627 - [ThreadPoolExecutor-0_2] - INFO - Reasoning:
+2025-03-12 15:16:54,031 - [ThreadPoolExecutor-0_2] - INFO - Assistant> 
+
+{
+    "function":"irs",
+    "question": "如何计算一个季度付息的利率互换合约，其浮动利率每周重置一次，采用30/360日计数基准，并基于线性插值的利率曲线进行估值？",
+    "input": "settlement = 2024.03.15\ncalendar = `SSE\ncurveDates = [2024.03.18, 2024.03.22, 2024.04.15, 2024.06.15, 2025.03.15]\ncurveRates = [0.0185, 0.0192, 0.021, 0.0225, 0.025]\ndaysFromSettle = (curveDates - temporalAdd(settlement, 0, calendar))$INT\ncurve = linearInterpolateFit(daysFromSettle, curveRates)\nresetIntv = 7d\nstartDate = 2024.04.01\nendDate = 2029.04.01\nparValue = 5000000\nfixedRate = 0.023\nspreadVal = 0.0025\npaymentFreq = 3M",
+    "answer": "irs(settlement, resetIntv, startDate, endDate, parValue, fixedRate, spreadVal, curve, paymentFreq, calendar, basis=0)"
+}
+2025-03-12 15:16:54,031 - [ThreadPoolExecutor-0_2] - INFO - 准备测试生成脚本正确性
+2025-03-12 15:16:54,034 - [ThreadPoolExecutor-0_2] - INFO - 脚本正常，准备生成文件
+2025-03-12 15:16:54,035 - [ThreadPoolExecutor-0_2] - INFO - 已生成输出文件: ./data/jinzhi_irs.txt
+2025-03-12 15:16:54,035 - [ThreadPoolExecutor-0_2] - INFO - 模型预实验成功，开始生成标注数据
+2025-03-12 15:16:54,036 - [ThreadPoolExecutor-0_2] - INFO - 函数 irs 处理失败

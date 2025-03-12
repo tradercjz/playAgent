@@ -1,0 +1,98 @@
+2025-03-12 15:02:27,626 - [ThreadPoolExecutor-0_7] - INFO - 开始处理函数: nsspredict
+2025-03-12 15:02:27,664 - [ThreadPoolExecutor-0_7] - INFO - 开始读取 ./cleandocs/nsspredict.txt
+2025-03-12 15:02:27,674 - [ThreadPoolExecutor-0_7] - INFO - 开始第1次尝试
+2025-03-12 15:02:28,233 - [ThreadPoolExecutor-0_7] - INFO - Thinking...
+2025-03-12 15:02:28,242 - [ThreadPoolExecutor-0_7] - INFO - Reasoning:
+2025-03-12 15:02:56,291 - [ThreadPoolExecutor-0_7] - INFO - Assistant> 
+
+{
+    "function": "nssPredict",
+    "question": "假设我已经通过校准得到了NSS模型的参数β0=0.035，β1=-0.015，β2=0.002，β3=-0.008，λ0=1.8，λ1=0.5，以及NS模型的参数β0=0.028，β1=-0.012，β2=0.005，λ=2.1，如何计算不同到期期限（0.5年、2年、5年）的债券收益率？",
+    "input": "// NS模型参数\nmodel1 = dict(STRING, ANY)\nmodel1[`modelName] = 'ns'\nmodel1[`params] = [0.028, -0.012, 0.005, 2.1]\n\n// NSS模型参数\nmodel2 = dict(STRING, ANY)\nmodel2[`modelName] = 'nss'\nmodel2[`params] = [0.035, -0.015, 0.002, -0.008, 1.8, 0.5]\n\nmaturities = [0.5, 2, 5]",
+    "answer": "// 计算NS模型预测收益率\nnssPredict(model1, maturities)\n\n// 计算NSS模型预测收益率\nnssPredict(model2, maturities)"
+}
+2025-03-12 15:02:56,291 - [ThreadPoolExecutor-0_7] - INFO - 准备测试生成脚本正确性
+2025-03-12 15:02:56,293 - [ThreadPoolExecutor-0_7] - INFO - 脚本正常，准备生成文件
+2025-03-12 15:02:56,294 - [ThreadPoolExecutor-0_7] - INFO - 模型预实验成功，开始生成标注数据
+2025-03-12 15:02:56,294 - [ThreadPoolExecutor-0_7] - INFO - 开始读取 ./cleandocs/nsspredict.txt
+2025-03-12 15:02:56,297 - [ThreadPoolExecutor-0_7] - INFO - 开始第1次尝试
+2025-03-12 15:02:57,436 - [ThreadPoolExecutor-0_7] - INFO - Thinking...
+2025-03-12 15:02:57,440 - [ThreadPoolExecutor-0_7] - INFO - Reasoning:
+2025-03-12 15:03:27,718 - [ThreadPoolExecutor-0_7] - INFO - Assistant> 
+
+{
+    "function":"nssPredict",
+    "question": "使用NSS和NS模型参数计算不同期限债券收益率",
+    "input": {
+        "NSS模型参数": [0.035, -0.015, 0.002, -0.008, 1.8, 0.5],
+        "NS模型参数": [0.028, -0.012, 0.005, 2.1],
+        "期限": [0.5, 2, 5]
+    },
+    "answer": "// 计算NSS模型收益率
+nss_model = dict(STRING, ANY)
+nss_model[`modelName] = 'nss'
+nss_model[`params] = [0.035, -0.015, 0.002, -0.008, 1.8, 0.5]
+yields_nss = nssPredict(nss_model, [0.5, 2, 5])
+
+// 计算NS模型收益率
+ns_model = dict(STRING, ANY)
+ns_model[`modelName] = 'ns'
+ns_model[`params] = [0.028, -0.012, 0.005, 2.1]
+yields_ns = nssPredict(ns_model, [0.5, 2, 5])
+
+// 合并结果展示
+result = table([0.5, 2, 5] as maturity, yields_nss as NSS_Yield, yields_ns as NS_Yield)"
+}
+2025-03-12 15:03:27,719 - [ThreadPoolExecutor-0_7] - ERROR - JSON解析错误: Invalid control character at: line 11 column 29 (char 260)
+2025-03-12 15:03:27,719 - [ThreadPoolExecutor-0_7] - ERROR - LLM响应解析失败: JSON解析错误: Invalid control character at: line 11 column 29 (char 260)
+2025-03-12 15:03:27,720 - [ThreadPoolExecutor-0_7] - INFO - 开始第2次尝试
+2025-03-12 15:03:28,066 - [ThreadPoolExecutor-0_7] - INFO - Thinking...
+2025-03-12 15:03:28,067 - [ThreadPoolExecutor-0_7] - INFO - Reasoning:
+2025-03-12 15:04:00,215 - [ThreadPoolExecutor-0_7] - INFO - Assistant> 
+
+{
+    "function":"nssPredict",
+    "question": "计算NSS和NS模型在不同到期期限的债券收益率",
+    "input": {
+        "NSS模型参数": [0.035,-0.015,0.002,-0.008,1.8,0.5],
+        "NS模型参数": [0.028,-0.012,0.005,2.1],
+        "maturity": [0.5, 2, 5]
+    },
+    "answer": [
+        "// NSS模型计算\nmodel_nss = dict(STRING, ANY)\nmodel_nss[`modelName] = 'nss'\nmodel_nss[`params] = [0.035,-0.015,0.002,-0.008,1.8,0.5]\nnssPredict(model_nss, [0.5, 2, 5])\n",
+        "// NS模型计算\nmodel_ns = dict(STRING, ANY)\nmodel_ns[`modelName] = 'ns'\nmodel_ns[`params] = [0.028,-0.012,0.005,2.1]\nnssPredict(model_ns, [0.5, 2, 5])"
+    ]
+}
+2025-03-12 15:04:00,215 - [ThreadPoolExecutor-0_7] - ERROR - 响应对象创建错误: 2 validation errors for DistillResponse
+input
+  Input should be a valid string [type=string_type, input_value={'NSS模型参数': [0.03...'maturity': [0.5, 2, 5]}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.10/v/string_type
+answer
+  Input should be a valid string [type=string_type, input_value=["// NSS模型计算\nmod...model_ns, [0.5, 2, 5])"], input_type=list]
+    For further information visit https://errors.pydantic.dev/2.10/v/string_type
+2025-03-12 15:04:00,216 - [ThreadPoolExecutor-0_7] - ERROR - LLM响应解析失败: 响应对象创建错误: 2 validation errors for DistillResponse
+input
+  Input should be a valid string [type=string_type, input_value={'NSS模型参数': [0.03...'maturity': [0.5, 2, 5]}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.10/v/string_type
+answer
+  Input should be a valid string [type=string_type, input_value=["// NSS模型计算\nmod...model_ns, [0.5, 2, 5])"], input_type=list]
+    For further information visit https://errors.pydantic.dev/2.10/v/string_type
+2025-03-12 15:04:00,216 - [ThreadPoolExecutor-0_7] - INFO - 函数 nsspredict 处理失败
+2025-03-12 15:16:30,713 - [ThreadPoolExecutor-0_7] - INFO - 开始处理函数: nsspredict
+2025-03-12 15:16:30,742 - [ThreadPoolExecutor-0_7] - INFO - 开始读取 ./cleandocs/nsspredict.txt
+2025-03-12 15:16:30,749 - [ThreadPoolExecutor-0_7] - INFO - 开始第1次尝试
+2025-03-12 15:16:34,819 - [ThreadPoolExecutor-0_7] - INFO - Thinking...
+2025-03-12 15:16:34,820 - [ThreadPoolExecutor-0_7] - INFO - Reasoning:
+2025-03-12 15:16:56,077 - [ThreadPoolExecutor-0_7] - INFO - Assistant> 
+
+{
+    "function":"nssPredict",
+    "question": "给定一个NSS模型参数β0=0.035，β1=-0.02，β2=-0.015，β3=0.03，λ0=1.5，λ1=0.2，如何计算1年期和5年期债券的理论收益率？",
+    "input": "model = dict(STRING, ANY)\nmodel[`modelName] = `nss\nmodel[`params] = [0.035, -0.02, -0.015, 0.03, 1.5, 0.2]\nmaturity = [1, 5]",
+    "answer": "nssPredict(model, maturity)"
+}
+2025-03-12 15:16:56,078 - [ThreadPoolExecutor-0_7] - INFO - 准备测试生成脚本正确性
+2025-03-12 15:16:56,079 - [ThreadPoolExecutor-0_7] - INFO - 脚本正常，准备生成文件
+2025-03-12 15:16:56,080 - [ThreadPoolExecutor-0_7] - INFO - 已生成输出文件: ./data/jinzhi_nssPredict.txt
+2025-03-12 15:16:56,081 - [ThreadPoolExecutor-0_7] - INFO - 模型预实验成功，开始生成标注数据
+2025-03-12 15:16:56,081 - [ThreadPoolExecutor-0_7] - INFO - 函数 nsspredict 处理失败

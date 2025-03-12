@@ -1,7 +1,6 @@
 __pycache__
 cleandocs
 docs
-logs
 .env
 .env.bak
 .env.claude

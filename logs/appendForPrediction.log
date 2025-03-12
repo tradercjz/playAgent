@@ -1,0 +1,134 @@
+2025-03-12 15:02:27,765 - [ThreadPoolExecutor-0_1] - INFO - 开始处理函数: appendForPrediction
+2025-03-12 15:02:27,792 - [ThreadPoolExecutor-0_1] - INFO - 开始读取 ./cleandocs/appendForPrediction.txt
+2025-03-12 15:02:27,794 - [ThreadPoolExecutor-0_1] - INFO - 开始第1次尝试
+2025-03-12 15:02:29,200 - [ThreadPoolExecutor-0_1] - INFO - Thinking...
+2025-03-12 15:02:29,201 - [ThreadPoolExecutor-0_1] - INFO - Reasoning:
+2025-03-12 15:03:01,892 - [ThreadPoolExecutor-0_1] - INFO - Assistant> 
+
+{
+    "function":"appendForPrediction",
+    "question": "当使用债券收益率曲线预测引擎时，如何将最新的市场报价数据输入到预测系统中，并确认这些数据已被成功处理？",
+    "input": "// 创建收益率曲线引擎\nmodelOutput = table(1:0, `time`assetType`dataSource`clearRate`model,\n                   [TIMESTAMP,INT,INT,SYMBOL,BLOB])\n\nengine = createYieldCurveEngine(\n    name=\"marketPred\", \n    dummyTable=table(1:0, `symbol`time`askYield`bidYield`maturity`assetType`source`rate,\n                   [SYMBOL,TIMESTAMP,DOUBLE,DOUBLE,DOUBLE,INT,INT,SYMBOL]),\n    assetType=[0,1],\n    fitMethod=[<nss(maturity,bidYield,\"nss\")>,<piecewiseLinFit(maturity,askYield,5)>],\n    keyColumn=`assetType`source`rate,\n    modelOutput=modelOutput,\n    frequency=5\n)\n\n// 生成模拟市场数据\nnewData = table(\n    take(`BOND_A, 5) join take(`BOND_B, 5) as symbol,\n    take(2023.10.01T09:30:00 + 1..5, 10) as time,\n    round(rand(2.5,10)+3, 2) as askYield,\n    round(rand(2.3,10)+3, 2) as bidYield,\n    (10 + 1..10) as maturity,\n    take([0,1], 10) as assetType,\n    take(1001, 10) as source,\n    take(`USD, 10) as rate\n)",
+    "answer": "// 将新数据输入预测系统\nprocessedCount = appendForPrediction(engine, newData)\n\n// 输出处理记录数\nselect processedCount as 已处理数据条数"
+}
+2025-03-12 15:03:01,892 - [ThreadPoolExecutor-0_1] - INFO - 准备测试生成脚本正确性
+2025-03-12 15:03:01,903 - [ThreadPoolExecutor-0_1] - ERROR - 解答脚本错误：<Exception> in run: Server response: 'processedCount = appendForPrediction(engine, newData) => appendForPrediction is not supported when predictOutput is not specified.' script: '// 将新数据输入预测系统
+processedCount = appendForPrediction(engine, newData)
+
+// 输出处理记录数
+select processedCount as 已处理数据条数'
+2025-03-12 15:03:01,903 - [ThreadPoolExecutor-0_1] - INFO - 开始第2次尝试
+2025-03-12 15:03:02,321 - [ThreadPoolExecutor-0_1] - INFO - Thinking...
+2025-03-12 15:03:02,322 - [ThreadPoolExecutor-0_1] - INFO - Reasoning:
+2025-03-12 15:03:35,325 - [ThreadPoolExecutor-0_1] - INFO - Assistant> 
+
+{
+    "function":"appendForPrediction",
+    "question": "如何在债券收益率曲线预测引擎配置输出表后执行实时预测？",
+    "input": "// 创建预测输出表结构\npredictOutput = table(1:0, `time`assetType`dataSource`clearRate`predictedYield, [TIMESTAMP,INT,INT,SYMBOL,DOUBLE])\n\n// 重新配置引擎参数\nengine = createYieldCurveEngine(\n    name=\"test\", \n    dummyTable=dummyTable,\n    assetType=assetType,\n    fitMethod=fitMethod,\n    keyColumn=`assetType`dataSource`clearRate, \n    modelOutput=modelOutput,\n    predictOutput=predictOutput,\n    frequency=10\n)\n\n// 生成测试数据\nnewData = table(\n    take(`a`b`c, 5) as symbol, \n    take(now(), 5) as sendingtime, \n    decimal32(rand(10.0,5),3) as askDirtyPrice1,\n    decimal32(rand(10.0,5),3) as bidDirtyPrice1,\n    decimal32(rand(10.0,5),3) as midDirtyPirce1,\n    decimal32(rand(5.0,5),3) as askyield1,\n    decimal32(rand(5.0,5),3) as bidyield1,\n    decimal32(rand(5.0,5),3) as midyield1,\n    (rand(5.0,5)+5).sort() as timetoMaturity,\n    take(0 1 2,5) as assetType,\n    take(1,5) as datasource,\n    take(\"1\",5) as clearRate\n)",
+    "answer": "// 将新数据输入预测系统\nprocessedCount = appendForPrediction(engine, newData)\n\n// 输出处理记录数\nselect processedCount as 已处理数据条数"
+}
+2025-03-12 15:03:35,325 - [ThreadPoolExecutor-0_1] - INFO - 准备测试生成脚本正确性
+2025-03-12 15:03:35,327 - [ThreadPoolExecutor-0_1] - ERROR - 数据脚本错误：<Exception> in run: Server response: 'Syntax Error: [line #7] Cannot recognize the token dummyTable' script: '// 创建预测输出表结构
+predictOutput = table(1:0, `time`assetType`dataSource`clearRate`predictedYield, [TIMESTAMP,INT,INT,SYMBOL,DOUBLE])
+
+// 重新配置引擎参数
+engine = createYieldCurveEngine(
+    name="test", 
+    dummyTable=dummyTable,
+    assetType=assetType,
+    fitMethod=fitMethod,
+    keyColumn=`assetType`dataSource`clearRate, 
+    modelOutput=modelOutput,
+    predictOutput=predictOutput,
+    frequency=10
+)
+
+// 生成测试数据
+newData = table(
+    take(`a`b`c, 5) as symbol, 
+    take(now(), 5) as sendingtime, 
+    decimal32(rand(10.0,5),3) as askDirtyPrice1,
+    decimal32(rand(10.0,5),3) as bidDirtyPrice1,
+    decimal32(rand(10.0,5),3) as midDirtyPirce1,
+    decimal32(rand(5.0,5),3) as askyield1,
+    decimal32(rand(5.0,5),3) as bidyield1,
+    decimal32(rand(5.0,5),3) as midyield1,
+    (rand(5.0,5)+5).sort() as timetoMaturity,
+    take(0 1 2,5) as assetType,
+    take(1,5) as datasource,
+    take("1",5) as clearRate
+)'
+2025-03-12 15:03:35,328 - [ThreadPoolExecutor-0_1] - ERROR - 解答脚本错误：<Exception> in run: Server response: 'processedCount = appendForPrediction(engine, newData) => appendForPrediction is not supported when predictOutput is not specified.' script: '// 将新数据输入预测系统
+processedCount = appendForPrediction(engine, newData)
+
+// 输出处理记录数
+select processedCount as 已处理数据条数'
+2025-03-12 15:03:35,329 - [ThreadPoolExecutor-0_1] - INFO - 函数 appendForPrediction 处理失败
+2025-03-12 15:16:30,826 - [ThreadPoolExecutor-0_0] - INFO - 开始处理函数: appendForPrediction
+2025-03-12 15:16:30,849 - [ThreadPoolExecutor-0_0] - INFO - 开始读取 ./cleandocs/appendForPrediction.txt
+2025-03-12 15:16:30,852 - [ThreadPoolExecutor-0_0] - INFO - 开始第1次尝试
+2025-03-12 15:16:31,985 - [ThreadPoolExecutor-0_0] - INFO - Thinking...
+2025-03-12 15:16:31,986 - [ThreadPoolExecutor-0_0] - INFO - Reasoning:
+2025-03-12 15:17:13,928 - [ThreadPoolExecutor-0_0] - INFO - Assistant> 
+
+{
+    "function":"appendForPrediction",
+    "question": "如何将新的债券收益率数据添加到现有的曲线拟合引擎中进行预测？",
+    "input": "dummyTable = table(1:0, `symbol`sendingtime`askDirtyPrice1`bidDirtyPrice1`midDirtyPirce1`askyield1`bidyield1`midyield1`timetoMaturity`assetType`datasource`clearRate, [SYMBOL, TIMESTAMP,DECIMAL32(3),DECIMAL32(3),DECIMAL32(3),DECIMAL32(3),DECIMAL32(3),DECIMAL32(3),DOUBLE,INT,INT,STRING])\nassetTypeList = [0,1,2]\nfitAlgorithms = [<piecewiseLinFit(timetoMaturity, midyield1, 8)>,<nss(timetoMaturity,bidyield1,\"ns\")>,<piecewiseLinFit(timetoMaturity, askyield1, 6)>]\nmodelSchema = table(1:0, `time`assetType`dataSource`clearRate`model, [TIMESTAMP,INT,INT,SYMBOL,BLOB])\ncurveEngine = createYieldCurveEngine(name=\"bondCurve\", dummyTable=dummyTable, assetType=assetTypeList, fitMethod=fitAlgorithms, keyColumn=`assetType`dataSource`clearRate, modelOutput=modelSchema, frequency=15)\nnewData = table(take(`BOND_001,15) as symbol, take(now(),15) as sendingtime, decimal32(rand(97.5..102.3,15),3) as askDirtyPrice1, decimal32(rand(97.0..101.8,15),3) as bidDirtyPrice1, decimal32(rand(0.5,15),3) as midDirtyPirce1, decimal32(rand(3.0..5.5,15),3) as askyield1, decimal32(rand(2.8..5.2,15),3) as bidyield1, decimal32(rand(0.1,15),3) as midyield1, rand(1.0..30.0,15) as timetoMaturity, take(0 1 2,15) as assetType, take(101,15) as datasource, take(\"CLEAR_01\",15) as clearRate)",
+    "answer": "// 获取预测结果数量\npredictionCount = appendForPrediction(curveEngine, newData)\n// 输出已处理数据量\npredictionCount  // 返回15"
+}
+2025-03-12 15:17:13,928 - [ThreadPoolExecutor-0_0] - INFO - 准备测试生成脚本正确性
+2025-03-12 15:17:13,932 - [ThreadPoolExecutor-0_0] - ERROR - 数据脚本错误：<Exception> in run: Server response: 'curveEngine = createYieldCurveEngine("bondCurve", dummyTable, assetTypeList, fitAlgorithms, ["assetType","dataSource","clearRate"], modelSchema, 15) => (name, dummyTable, assetType, fitMethod, keyColumn, modelOutput, frequency, [timeColumn], , [predictDummyTable], [predictInputColumn], [predictKeyColumn], [predictTimeColumn], [predictOutput], [extraMetrics], [fitAfterPredict=false])The engine bondCurve already exists. Choose another name or release the existing engine using 'dropStreamEngine()'. RefId: S03001.' script: 'dummyTable = table(1:0, `symbol`sendingtime`askDirtyPrice1`bidDirtyPrice1`midDirtyPirce1`askyield1`bidyield1`midyield1`timetoMaturity`assetType`datasource`clearRate, [SYMBOL, TIMESTAMP,DECIMAL32(3),DECIMAL32(3),DECIMAL32(3),DECIMAL32(3),DECIMAL32(3),DECIMAL32(3),DOUBLE,INT,INT,STRING])
+assetTypeList = [0,1,2]
+fitAlgorithms = [<piecewiseLinFit(timetoMaturity, midyield1, 8)>,<nss(timetoMaturity,bidyield1,"ns")>,<piecewiseLinFit(timetoMaturity, askyield1, 6)>]
+modelSchema = table(1:0, `time`assetType`dataSource`clearRate`model, [TIMESTAMP,INT,INT,SYMBOL,BLOB])
+curveEngine = createYieldCurveEngine(name="bondCurve", dummyTable=dummyTable, assetType=assetTypeList, fitMethod=fitAlgorithms, keyColumn=`assetType`dataSource`clearRate, modelOutput=modelSchema, frequency=15)
+newData = table(take(`BOND_001,15) as symbol, take(now(),15) as sendingtime, decimal32(rand(97.5..102.3,15),3) as askDirtyPrice1, decimal32(rand(97.0..101.8,15),3) as bidDirtyPrice1, decimal32(rand(0.5,15),3) as midDirtyPirce1, decimal32(rand(3.0..5.5,15),3) as askyield1, decimal32(rand(2.8..5.2,15),3) as bidyield1, decimal32(rand(0.1,15),3) as midyield1, rand(1.0..30.0,15) as timetoMaturity, take(0 1 2,15) as assetType, take(101,15) as datasource, take("CLEAR_01",15) as clearRate)'
+2025-03-12 15:17:13,933 - [ThreadPoolExecutor-0_0] - ERROR - 解答脚本错误：<Exception> in run: Server response: 'predictionCount = appendForPrediction(curveEngine, newData) => Variable 'curveEngine' isn't initialized yet.' script: '// 获取预测结果数量
+predictionCount = appendForPrediction(curveEngine, newData)
+// 输出已处理数据量
+predictionCount  // 返回15'
+2025-03-12 15:17:13,933 - [ThreadPoolExecutor-0_0] - INFO - 开始第2次尝试
+2025-03-12 15:17:14,483 - [ThreadPoolExecutor-0_0] - INFO - Thinking...
+2025-03-12 15:17:14,484 - [ThreadPoolExecutor-0_0] - INFO - Reasoning:
+2025-03-12 15:17:52,184 - [ThreadPoolExecutor-0_0] - INFO - Assistant> 
+
+{
+    "function":"appendForPrediction",
+    "question": "如何将新债券市场数据输入到已创建的收益率曲线分析模型中，并确认数据是否被成功处理？",
+    "input": "// 创建收益率曲线引擎\n dummyTable = table(1:0, `symbol`sendingtime`askDirtyPrice1`bidDirtyPrice1`midDirtyPirce1`askyield1`bidyield1`midyield1`timetoMaturity`assetType`datasource`clearRate, [SYMBOL, TIMESTAMP,DECIMAL32(3),DECIMAL32(3),DECIMAL32(3),DECIMAL32(3),DECIMAL32(3),DECIMAL32(3),DOUBLE,INT,INT,STRING])\nassetTypeList = [0,1,2]\nfitAlgorithms = [<piecewiseLinFit(timetoMaturity, midyield1, 8)>,<nss(timetoMaturity,bidyield1,\"ns\")>,<piecewiseLinFit(timetoMaturity, askyield1, 6)>]\nmodelSchema = table(1:0, `time`assetType`dataSource`clearRate`model, [TIMESTAMP,INT,INT,SYMBOL,BLOB])\ncurveEngine = createYieldCurveEngine(name=\"bondCurveTest\", dummyTable=dummyTable, assetType=assetTypeList, fitMethod=fitAlgorithms, keyColumn=`assetType`dataSource`clearRate, modelOutput=modelSchema, frequency=15)\n\n// 生成模拟市场数据\nnewData = table(\n    take(`BOND_001,15) as symbol,\n    take(now(),15) as sendingtime,\n    decimal32(rand(97.5..102.3,15),3) as askDirtyPrice1,\n    decimal32(rand(97.0..101.8,15),3) as bidDirtyPrice1,\n    decimal32(rand(0.5,15),3) as midDirtyPirce1,\n    decimal32(rand(3.0..5.5,15),3) as askyield1,\n    decimal32(rand(2.8..5.2,15),3) as bidyield1,\n    decimal32(rand(0.1,15),3) as midyield1,\n    rand(1.0..30.0,15) as timetoMaturity,\n    take(0 1 2,15) as assetType,\n    take(101,15) as datasource,\n    take(\"CLEAR_01\",15) as clearRate\n)",
+    "answer": "// 执行预测并获取处理数量\nprocessedCount = appendForPrediction(curveEngine, newData)\n\n// 验证处理结果\nselect count(*) from modelSchema where time >= min(newData.sendingtime)\n\n// 输出处理数量与模型更新数量\n[processedCount, exec count(*) from modelSchema]"
+}
+2025-03-12 15:17:52,185 - [ThreadPoolExecutor-0_0] - INFO - 准备测试生成脚本正确性
+2025-03-12 15:17:52,188 - [ThreadPoolExecutor-0_0] - ERROR - 数据脚本错误：<Exception> in run: Server response: 'newData = table(take("BOND_001", 15) as symbol, take(now(), 15) as sendingtime, decimal32(rand(97.5 .. 102.299999999999997, 15), 3) as askDirtyPrice1, decimal32(rand(97 .. 101.799999999999997, 15), 3) as bidDirtyPrice1, decimal32(rand(0.5, 15), 3) as midDirtyPirce1, decimal32(rand(3 .. 5.5, 15), 3) as askyield1, decimal32(rand(2.8 .. 5.200000000000001, 15), 3) as bidyield1, decimal32(rand(0.1, 15), 3) as midyield1, rand(1 .. 30, 15) as timetoMaturity, take([0,1,2], 15) as assetType, take(101, 15) as datasource, take("CLEAR_01", 15) as clearRate) => Both starting value and ending value of 'seq' must be an integer or a temporal object' script: '// 创建收益率曲线引擎
+ dummyTable = table(1:0, `symbol`sendingtime`askDirtyPrice1`bidDirtyPrice1`midDirtyPirce1`askyield1`bidyield1`midyield1`timetoMaturity`assetType`datasource`clearRate, [SYMBOL, TIMESTAMP,DECIMAL32(3),DECIMAL32(3),DECIMAL32(3),DECIMAL32(3),DECIMAL32(3),DECIMAL32(3),DOUBLE,INT,INT,STRING])
+assetTypeList = [0,1,2]
+fitAlgorithms = [<piecewiseLinFit(timetoMaturity, midyield1, 8)>,<nss(timetoMaturity,bidyield1,"ns")>,<piecewiseLinFit(timetoMaturity, askyield1, 6)>]
+modelSchema = table(1:0, `time`assetType`dataSource`clearRate`model, [TIMESTAMP,INT,INT,SYMBOL,BLOB])
+curveEngine = createYieldCurveEngine(name="bondCurveTest", dummyTable=dummyTable, assetType=assetTypeList, fitMethod=fitAlgorithms, keyColumn=`assetType`dataSource`clearRate, modelOutput=modelSchema, frequency=15)
+
+// 生成模拟市场数据
+newData = table(
+    take(`BOND_001,15) as symbol,
+    take(now(),15) as sendingtime,
+    decimal32(rand(97.5..102.3,15),3) as askDirtyPrice1,
+    decimal32(rand(97.0..101.8,15),3) as bidDirtyPrice1,
+    decimal32(rand(0.5,15),3) as midDirtyPirce1,
+    decimal32(rand(3.0..5.5,15),3) as askyield1,
+    decimal32(rand(2.8..5.2,15),3) as bidyield1,
+    decimal32(rand(0.1,15),3) as midyield1,
+    rand(1.0..30.0,15) as timetoMaturity,
+    take(0 1 2,15) as assetType,
+    take(101,15) as datasource,
+    take("CLEAR_01",15) as clearRate
+)'
+2025-03-12 15:17:52,189 - [ThreadPoolExecutor-0_0] - ERROR - 解答脚本错误：<Exception> in run: Server response: 'processedCount = appendForPrediction(curveEngine, newData) => Variable 'newData' isn't initialized yet.' script: '// 执行预测并获取处理数量
+processedCount = appendForPrediction(curveEngine, newData)
+
+// 验证处理结果
+select count(*) from modelSchema where time >= min(newData.sendingtime)
+
+// 输出处理数量与模型更新数量
+[processedCount, exec count(*) from modelSchema]'
+2025-03-12 15:17:52,190 - [ThreadPoolExecutor-0_0] - INFO - 函数 appendForPrediction 处理失败

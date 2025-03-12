@@ -1,0 +1,178 @@
+2025-03-12 15:02:27,656 - [ThreadPoolExecutor-0_3] - INFO - 开始处理函数: createPricingEngine
+2025-03-12 15:02:27,720 - [ThreadPoolExecutor-0_3] - INFO - 开始读取 ./cleandocs/createPricingEngine.txt
+2025-03-12 15:02:27,732 - [ThreadPoolExecutor-0_3] - INFO - 开始第1次尝试
+2025-03-12 15:02:28,325 - [ThreadPoolExecutor-0_3] - INFO - Thinking...
+2025-03-12 15:02:28,328 - [ThreadPoolExecutor-0_3] - INFO - Reasoning:
+2025-03-12 15:02:59,620 - [ThreadPoolExecutor-0_3] - INFO - Assistant> 
+
+{
+    "function":"createPricingEngine",
+    "question": "如何为不同债券类型配置不同的定价算法，并在计算时同时使用输入数据和合约基础信息表中的参数？",
+    "input": "// 定义输入表结构\ndummyTable = table(1:0, `tradeTime`Symbol`yield`price, [TIMESTAMP,SYMBOL,DOUBLE,DOUBLE])\n\n// 创建合约基础信息表\nsecurityRef = table(\n    [0,1,2] as type,\n    `CORP`GOVT`MUNI as assetType,\n    `B001`B002`B003 as symbol,\n    2025.01.01+365*1..3 as maturity,\n    [3.5,4.0,3.8] as coupon,\n    [2,2,1] as frequency,\n    [1,1,1] as basis\n)\n\n// 定义输出表结构\noutputTable = table(1:0, `tradeTime`type`symbol`result`riskFactor, [TIMESTAMP,INT,SYMBOL,DOUBLE,DOUBLE])",
+    "answer": "// 配置不同类型债券的定价算法\ntypeList = [0, 1, 2]\nmethodList = [\n    <bondYield(tradeTime, maturity, coupon, yield, frequency, basis)>,\n    <bondDuration(tradeTime, maturity, coupon, yield, frequency, basis)>,\n    <bondConvexity(tradeTime, maturity, coupon, yield, frequency, basis)>\n]\n\n// 创建定价引擎\ncreatePricingEngine(\n    name = \"bondPricer\",\n    dummyTable = dummyTable,\n    timeColumn = `tradeTime,\n    typeColumn = `type,\n    securityType = typeList,\n    method = methodList,\n    outputTable = outputTable,\n    securityReference = securityRef,\n    keyColumn = `Symbol,\n    extraMetrics = [<price * 0.01>]\n)\n\n// 模拟输入数据并触发计算\ninputData = table(\n    take(2024.07.25T09:30:00.000, 3) as tradeTime,\n    [`B001, `B002, `B003] as Symbol,\n    [4.5, 3.2, 3.6] as yield,\n    [98.5, 102.3, 99.8] as price\n)\ngetStreamEngine(`bondPricer).append!(inputData)"
+}
+2025-03-12 15:02:59,621 - [ThreadPoolExecutor-0_3] - INFO - 准备测试生成脚本正确性
+2025-03-12 15:02:59,625 - [ThreadPoolExecutor-0_3] - ERROR - 解答脚本错误：<Exception> in run: Server response: 'createPricingEngine("bondPricer", dummyTable, "tradeTime", "type", typeList, methodList, outputTable, securityRef, "Symbol", [< price * 0.01 >]) => Failed to call method <bondYield(tradetime, maturity, coupon, yield, frequency, basis)> in method with error: Usage: bondYield(settlement, maturity, coupon, price, redemption, frequency, [basis=1], [method='newton'], [maxIter]). settlement should be DATE scalar or vector.' script: '// 配置不同类型债券的定价算法
+typeList = [0, 1, 2]
+methodList = [
+    <bondYield(tradeTime, maturity, coupon, yield, frequency, basis)>,
+    <bondDuration(tradeTime, maturity, coupon, yield, frequency, basis)>,
+    <bondConvexity(tradeTime, maturity, coupon, yield, frequency, basis)>
+]
+
+// 创建定价引擎
+createPricingEngine(
+    name = "bondPricer",
+    dummyTable = dummyTable,
+    timeColumn = `tradeTime,
+    typeColumn = `type,
+    securityType = typeList,
+    method = methodList,
+    outputTable = outputTable,
+    securityReference = securityRef,
+    keyColumn = `Symbol,
+    extraMetrics = [<price * 0.01>]
+)
+
+// 模拟输入数据并触发计算
+inputData = table(
+    take(2024.07.25T09:30:00.000, 3) as tradeTime,
+    [`B001, `B002, `B003] as Symbol,
+    [4.5, 3.2, 3.6] as yield,
+    [98.5, 102.3, 99.8] as price
+)
+getStreamEngine(`bondPricer).append!(inputData)'
+2025-03-12 15:02:59,625 - [ThreadPoolExecutor-0_3] - INFO - 开始第2次尝试
+2025-03-12 15:03:00,094 - [ThreadPoolExecutor-0_3] - INFO - Thinking...
+2025-03-12 15:03:00,098 - [ThreadPoolExecutor-0_3] - INFO - Reasoning:
+2025-03-12 15:03:33,740 - [ThreadPoolExecutor-0_3] - INFO - Assistant> 
+
+{
+    "function":"createPricingEngine",
+    "question": "如何正确配置债券收益率计算的定价引擎参数？",
+    "input": "dummyTable = table(1:0, `tradeTime`Symbol`price`yield, [TIMESTAMP,SYMBOL, DOUBLE, DOUBLE])\nsecurityRef = table(\n    take(0 1 2, 3) as type,\n    `B001`B002`B003 as symbol,\n    2025.01.15 + 0 30 60 as maturity,\n    [4.0, 3.5, 4.2] as coupon,\n    take(100,3) as redemption,\n    take(2,3) as frequency,\n    take(1,3) as basis\n)\noutputTable = table(1:0, `tradeTime`type`symbol`result`metric, [TIMESTAMP, INT, SYMBOL, DOUBLE, DOUBLE])",
+    "answer": "// 正确配置bondYield参数包含redemption字段\ntypeList = [0, 1, 2]\nmethodList = [\n    <bondYield(tradeTime, maturity, coupon, price, redemption, frequency, basis)>,\n    <bondYield(tradeTime, maturity, coupon, price, redemption, frequency, basis)>,\n    <bondYield(tradeTime, maturity, coupon, price, redemption, frequency, basis)>\n]\n\ncreatePricingEngine(\n    name = \"yieldEngine\",\n    dummyTable = dummyTable,\n    timeColumn = `tradeTime,\n    typeColumn = `type,\n    securityType = typeList,\n    method = methodList,\n    outputTable = outputTable,\n    securityReference = securityRef,\n    keyColumn = `Symbol,\n    extraMetrics = [<price * 0.01>]\n)\n\ninputData = table(\n    take(2024.07.25T09:30:00.000, 3) as tradeTime,\n    [`B001, `B002, `B003] as Symbol,\n    [98.5, 102.3, 99.8] as price,\n    [4.5, 3.2, 3.6] as yield\n)\ngetStreamEngine(`yieldEngine).append!(inputData)"
+}
+2025-03-12 15:03:33,741 - [ThreadPoolExecutor-0_3] - INFO - 准备测试生成脚本正确性
+2025-03-12 15:03:33,745 - [ThreadPoolExecutor-0_3] - ERROR - 解答脚本错误：<Exception> in run: Server response: 'createPricingEngine("yieldEngine", dummyTable, "tradeTime", "type", typeList, methodList, outputTable, securityRef, "Symbol", [< price * 0.01 >]) => Failed to call method <bondYield(tradetime, maturity, coupon, price, redemption, frequency, basis)> in method with error: Usage: bondYield(settlement, maturity, coupon, price, redemption, frequency, [basis=1], [method='newton'], [maxIter]). settlement should be DATE scalar or vector.' script: '// 正确配置bondYield参数包含redemption字段
+typeList = [0, 1, 2]
+methodList = [
+    <bondYield(tradeTime, maturity, coupon, price, redemption, frequency, basis)>,
+    <bondYield(tradeTime, maturity, coupon, price, redemption, frequency, basis)>,
+    <bondYield(tradeTime, maturity, coupon, price, redemption, frequency, basis)>
+]
+
+createPricingEngine(
+    name = "yieldEngine",
+    dummyTable = dummyTable,
+    timeColumn = `tradeTime,
+    typeColumn = `type,
+    securityType = typeList,
+    method = methodList,
+    outputTable = outputTable,
+    securityReference = securityRef,
+    keyColumn = `Symbol,
+    extraMetrics = [<price * 0.01>]
+)
+
+inputData = table(
+    take(2024.07.25T09:30:00.000, 3) as tradeTime,
+    [`B001, `B002, `B003] as Symbol,
+    [98.5, 102.3, 99.8] as price,
+    [4.5, 3.2, 3.6] as yield
+)
+getStreamEngine(`yieldEngine).append!(inputData)'
+2025-03-12 15:03:33,746 - [ThreadPoolExecutor-0_3] - INFO - 函数 createPricingEngine 处理失败
+2025-03-12 15:16:30,736 - [ThreadPoolExecutor-0_5] - INFO - 开始处理函数: createPricingEngine
+2025-03-12 15:16:30,777 - [ThreadPoolExecutor-0_5] - INFO - 开始读取 ./cleandocs/createPricingEngine.txt
+2025-03-12 15:16:30,790 - [ThreadPoolExecutor-0_5] - INFO - 开始第1次尝试
+2025-03-12 15:16:31,281 - [ThreadPoolExecutor-0_5] - INFO - Thinking...
+2025-03-12 15:16:31,290 - [ThreadPoolExecutor-0_5] - INFO - Reasoning:
+2025-03-12 15:17:01,194 - [ThreadPoolExecutor-0_5] - INFO - Assistant> 
+
+{
+    "function":"createPricingEngine",
+    "question": "如何为不同债券类型同时计算含息价格和久期，并在结果中包含价格波动因子？",
+    "input": "dummyTable = table(1:0, `tradeTime`Symbol`yield`price`couponRate, [TIMESTAMP,SYMBOL,DOUBLE,DOUBLE,DOUBLE])\nsecurityRef = table(\n    take([101,102,103], 9) as type,\n    'B'+string(1..9) as symbol,\n    2025.01.01+1..9 as maturity,\n    rand(0.05..0.08,9) as coupon,\n    take([2,4],9) as frequency,\n    take([0],9) as basis\n)\ninputData = table(\n    take(2023.06.01T09:30:00.000, 9) as tradeTime,\n    'B'+string(1..9) as Symbol,\n    rand(0.04..0.07,9) as yield,\n    rand(95..105,9) as price,\n    rand(0.05..0.08,9) as couponRate\n)",
+    "answer": "outputSchema = table(1:0, `tradeTime`type`symbol`result`volatilityFactor, [TIMESTAMP,INT,SYMBOL,DOUBLE,DOUBLE])\ncreatePricingEngine(\n    name='bondEngine',\n    dummyTable=dummyTable,\n    timeColumn=`tradeTime,\n    typeColumn=`type,\n    securityType=[101,102,103],\n    method=[\n        <bondDirtyPrice(tradeTime, maturity, coupon, yield, frequency, basis)>,\n        <bondDuration(tradeTime, maturity, coupon, yield, frequency, basis)>\n    ],\n    outputTable=outputSchema,\n    securityReference=securityRef,\n    keyColumn=`Symbol,\n    extraMetrics=[<price * 0.01 * couponRate>]\n)\ngetStreamEngine('bondEngine').append!(inputData)"
+}
+2025-03-12 15:17:01,194 - [ThreadPoolExecutor-0_5] - INFO - 准备测试生成脚本正确性
+2025-03-12 15:17:01,197 - [ThreadPoolExecutor-0_5] - ERROR - 数据脚本错误：<Exception> in run: Server response: 'securityRef = table(take([101,102,103], 9) as type, 'B' + string(1 .. 9) as symbol, 2025.01.01 + 1 .. 9 as maturity, rand(0.05 .. 0.08, 9) as coupon, take([2,4], 9) as frequency, take([0], 9) as basis) => String cannot be added to a vector that is not of string type.' script: 'dummyTable = table(1:0, `tradeTime`Symbol`yield`price`couponRate, [TIMESTAMP,SYMBOL,DOUBLE,DOUBLE,DOUBLE])
+securityRef = table(
+    take([101,102,103], 9) as type,
+    'B'+string(1..9) as symbol,
+    2025.01.01+1..9 as maturity,
+    rand(0.05..0.08,9) as coupon,
+    take([2,4],9) as frequency,
+    take([0],9) as basis
+)
+inputData = table(
+    take(2023.06.01T09:30:00.000, 9) as tradeTime,
+    'B'+string(1..9) as Symbol,
+    rand(0.04..0.07,9) as yield,
+    rand(95..105,9) as price,
+    rand(0.05..0.08,9) as couponRate
+)'
+2025-03-12 15:17:01,199 - [ThreadPoolExecutor-0_5] - ERROR - 解答脚本错误：<Exception> in run: Server response: 'createPricingEngine("bondEngine", dummyTable, "tradeTime", "type", [101,102,103], [< bondDirtyPrice(tradeTime, maturity, coupon, yield, frequency, basis) >,< bondDuration(tradeTime, maturity, coupon, yield, frequency, basis) >], outputSchema, securityRef, "Symbol", [< price * 0.01 * couponRate >]) => Variable 'securityRef' isn't initialized yet.' script: 'outputSchema = table(1:0, `tradeTime`type`symbol`result`volatilityFactor, [TIMESTAMP,INT,SYMBOL,DOUBLE,DOUBLE])
+createPricingEngine(
+    name='bondEngine',
+    dummyTable=dummyTable,
+    timeColumn=`tradeTime,
+    typeColumn=`type,
+    securityType=[101,102,103],
+    method=[
+        <bondDirtyPrice(tradeTime, maturity, coupon, yield, frequency, basis)>,
+        <bondDuration(tradeTime, maturity, coupon, yield, frequency, basis)>
+    ],
+    outputTable=outputSchema,
+    securityReference=securityRef,
+    keyColumn=`Symbol,
+    extraMetrics=[<price * 0.01 * couponRate>]
+)
+getStreamEngine('bondEngine').append!(inputData)'
+2025-03-12 15:17:01,199 - [ThreadPoolExecutor-0_5] - INFO - 开始第2次尝试
+2025-03-12 15:17:02,363 - [ThreadPoolExecutor-0_5] - INFO - Thinking...
+2025-03-12 15:17:02,364 - [ThreadPoolExecutor-0_5] - INFO - Reasoning:
+2025-03-12 15:17:49,653 - [ThreadPoolExecutor-0_5] - INFO - Assistant> 
+
+{
+    "function":"createPricingEngine",
+    "question": "如何为不同债券类型配置现金流折现法和久期计算引擎，并附加风险因子指标？",
+    "input": "dummyTable = table(1:0, `tradeTime`Symbol`yield`price`couponRate, [TIMESTAMP,SYMBOL,DOUBLE,DOUBLE,DOUBLE])\nsecurityRef = table(\n    take([101,102,103], 9) as type,\n    'B'+string(1..9) as symbol,\n    2025.01.01+1..9 as maturity,\n    rand(0.05..0.08,9) as coupon,\n    take([2,4],9) as frequency,\n    take([0],9) as basis\n)\ninputData = table(\n    take(2023.06.01T09:30:00.000, 9) as tradeTime,\n    'B'+string(1..9) as Symbol,\n    rand(0.04..0.07,9) as yield,\n    rand(95..105,9) as price,\n    rand(0.05..0.08,9) as couponRate\n)",
+    "answer": "outputSchema = table(1:0, `tradeTime`type`symbol`result`riskFactor, [TIMESTAMP,INT,SYMBOL,DOUBLE,DOUBLE])\ncreatePricingEngine(\n    name='bondEngine',\n    dummyTable=dummyTable,\n    timeColumn=`tradeTime,\n    typeColumn=`type,\n    securityType=[101,102,103],\n    method=[\n        <bondDirtyPrice(tradeTime, maturity, coupon, yield, frequency, basis)>,\n        <bondDuration(tradeTime, maturity, coupon, yield, frequency, basis)>\n    ],\n    outputTable=outputSchema,\n    securityReference=securityRef,\n    keyColumn=`Symbol,\n    extraMetrics=[<price * 0.01 * couponRate>]\n)\ngetStreamEngine('bondEngine').append!(inputData)"
+}
+2025-03-12 15:17:49,653 - [ThreadPoolExecutor-0_5] - INFO - 准备测试生成脚本正确性
+2025-03-12 15:17:49,656 - [ThreadPoolExecutor-0_5] - ERROR - 数据脚本错误：<Exception> in run: Server response: 'securityRef = table(take([101,102,103], 9) as type, 'B' + string(1 .. 9) as symbol, 2025.01.01 + 1 .. 9 as maturity, rand(0.05 .. 0.08, 9) as coupon, take([2,4], 9) as frequency, take([0], 9) as basis) => String cannot be added to a vector that is not of string type.' script: 'dummyTable = table(1:0, `tradeTime`Symbol`yield`price`couponRate, [TIMESTAMP,SYMBOL,DOUBLE,DOUBLE,DOUBLE])
+securityRef = table(
+    take([101,102,103], 9) as type,
+    'B'+string(1..9) as symbol,
+    2025.01.01+1..9 as maturity,
+    rand(0.05..0.08,9) as coupon,
+    take([2,4],9) as frequency,
+    take([0],9) as basis
+)
+inputData = table(
+    take(2023.06.01T09:30:00.000, 9) as tradeTime,
+    'B'+string(1..9) as Symbol,
+    rand(0.04..0.07,9) as yield,
+    rand(95..105,9) as price,
+    rand(0.05..0.08,9) as couponRate
+)'
+2025-03-12 15:17:49,658 - [ThreadPoolExecutor-0_5] - ERROR - 解答脚本错误：<Exception> in run: Server response: 'createPricingEngine("bondEngine", dummyTable, "tradeTime", "type", [101,102,103], [< bondDirtyPrice(tradeTime, maturity, coupon, yield, frequency, basis) >,< bondDuration(tradeTime, maturity, coupon, yield, frequency, basis) >], outputSchema, securityRef, "Symbol", [< price * 0.01 * couponRate >]) => Variable 'securityRef' isn't initialized yet.' script: 'outputSchema = table(1:0, `tradeTime`type`symbol`result`riskFactor, [TIMESTAMP,INT,SYMBOL,DOUBLE,DOUBLE])
+createPricingEngine(
+    name='bondEngine',
+    dummyTable=dummyTable,
+    timeColumn=`tradeTime,
+    typeColumn=`type,
+    securityType=[101,102,103],
+    method=[
+        <bondDirtyPrice(tradeTime, maturity, coupon, yield, frequency, basis)>,
+        <bondDuration(tradeTime, maturity, coupon, yield, frequency, basis)>
+    ],
+    outputTable=outputSchema,
+    securityReference=securityRef,
+    keyColumn=`Symbol,
+    extraMetrics=[<price * 0.01 * couponRate>]
+)
+getStreamEngine('bondEngine').append!(inputData)'
+2025-03-12 15:17:49,658 - [ThreadPoolExecutor-0_5] - INFO - 函数 createPricingEngine 处理失败
