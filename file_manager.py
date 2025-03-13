@@ -1,5 +1,6 @@
 import os 
 import re
+import glob
 from typing import Optional, List
 
 class FileManager:
@@ -76,7 +77,38 @@ class FileManager:
         
         # 如果没有找到匹配的文件
         return None
+    
+    def find_generated_files(self, root_directory: str, function_name: str) -> Optional[List[str]]:
+        """
+        查找指定目录下所有以 "jinzhi_{function_name}" 开头的文件
         
+        参数:
+        root_directory (str): 要搜索的目录路径
+        function_name (str): 功能标识符，如 "bondAccr"
+        
+        返回:
+        Optional[List[str]]: 如果找到匹配的文件，返回所有匹配文件路径的列表；如果没有找到任何匹配的文件，返回None
+        """
+        # 确保目录路径格式正确
+        root_directory = os.path.normpath(root_directory)
+        
+        # 创建搜索模式
+        pattern = os.path.join(root_directory, f"jinzhi_{function_name}*")
+        
+        # 使用glob查找匹配的文件
+        matching_files = glob.glob(pattern)
+        
+        # 只保留文件，不保留子目录
+        matching_files = [f for f in matching_files if os.path.isfile(f)]
+        
+        # 判断是否为空
+        if not matching_files:
+            return None
+        
+        # 返回所有匹配的文件路径列表
+        return matching_files
+        
+
 
     def find_function_html_file(root_directory: str, function_name: str) -> Optional[str]:
         """

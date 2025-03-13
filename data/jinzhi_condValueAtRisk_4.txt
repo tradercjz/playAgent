@@ -1,0 +1,545 @@
+Prompt: 
+某私募基金需要评估商品期货策略在极端行情下的抗压能力，已知过去30个交易日收益呈现左偏分布且存在极端负值。要求分别采用对数正态参数法和蒙特卡洛法，计算98%置信度下的预期损失差额应如何实现？
+
+Input: 
+```DolphinDB
+returns = [-0.035,-0.028,-0.041,-0.019,-0.026,-0.132,-0.087,-0.022,-0.033,-0.015,-0.028,-0.145,-0.063,-0.029,-0.017,-0.038,-0.024,-0.121,-0.095,-0.031,-0.027,-0.043,-0.129,-0.018,-0.036,-0.024,-0.112,-0.079,-0.029,-0.026]
+```
+
+Answer: 
+```DolphinDB
+logNormalCVaR = condValueAtRisk(returns, 'logNormal', 0.98)
+monteCarloCVaR = condValueAtRisk(returns, 'monteCarlo', 0.98)
+select logNormalCVaR - monteCarloCVaR as ExpectedLossDifference
+```
+
+R1 CoT: 
+好的，我现在需要解决用户的问题。用户是某私募基金，他们想评估商品期货策略在极端行情下的抗压能力。已知过去30个交易日的收益呈现左偏分布且有极端负值。他们要求分别使用对数正态参数法和蒙特卡洛法，计算98%置信度下的预期损失差额。预期损失差额可能指的是两种方法计算的条件风险值（CVaR）的差。
+
+首先，我需要回忆DolphinDB中的相关函数。用户的问题提到了condValueAtRisk函数，这个函数用于计算条件风险值（Expected Shortfall）。根据文档，condValueAtRisk的参数包括收益序列、方法（method）、置信水平等。方法参数有四个选项：'normal'、'logNormal'、'historical'和'monteCarlo'。
+
+用户的问题需要分别用对数正态参数法（'logNormal'）和蒙特卡洛法（'monteCarlo'）来计算98%置信度下的CVaR，然后求两者的差额。所以，我需要先生成符合用户描述的模拟数据，即过去30个交易日的数据，呈现左偏分布且有极端负值。
+
+生成模拟数据的话，可能需要用DolphinDB的随机数函数。左偏分布通常意味着数据左侧有较长的尾部，即更多的小于均值的值。可以考虑使用负偏态的分布，比如对数正态分布取负数，或者生成一些极端负值的数据。
+
+例如，生成左偏数据的一种方法是生成一些正态分布的数据，然后减去一个较大的值，使得整体左偏。或者使用beta分布等。但要注意，所有的收益率必须大于-1。例如，可以先生成均值为负的正态分布数据，或者生成一些极端负值的数据点。
+
+接下来，编写DolphinDB脚本。首先模拟数据，假设生成30个交易日的收益数据，其中大部分为负数，尤其是极端负值。比如，可以使用normal函数生成，然后调整参数使其左偏，并添加一些极端负值的样本。
+
+例如：
+
+returns = -0.1 * randnormal(30, 0.05, 0.1)  -- 这样生成的数据可能呈现左偏，因为乘以了负数，但可能不够。或者更直接地生成一些极端负值。
+
+或者，使用混合分布：大部分数据在负方向，加上几个极端负值。例如：
+
+base = rand(-0.03..0.01, 25)  -- 生成25个在-0.03到0.01之间的数
+extreme = rand(-0.15..-0.1, 5)  -- 加入5个极端负值
+returns = base join extreme
+
+但需要注意，rand的范围可能需要调整，确保所有元素都大于-1。例如，生成的极端负值不能小于-1。比如，极端值在-0.2到-0.15之间。
+
+然后，使用condValueAtRisk函数分别用两种方法计算CVaR，然后求差值。
+
+例如：
+
+cvar_log = condValueAtRisk(returns, 'logNormal', 0.98)
+cvar_monte = condValueAtRisk(returns, 'monteCarlo', 0.98)
+difference = cvar_log - cvar_monte
+
+所以，用户需要的是这两个值的差额。在DolphinDB中，如何实现这个？
+
+现在，根据用户提供的示例数据格式，需要构造一个模拟的returns数据。例如，用户给的例子中是多个正负交替的小数，但用户的问题中数据是左偏且有极端负值，所以模拟数据可能需要更多的负值，尤其是较大的负值。
+
+例如：
+
+生成30个数据点，大部分为负数，少数较大的负数：
+
+假设用以下方式生成：
+
+// 生成左偏数据，比如大部分数据在负数区域，且有极端负值
+returns = -0.1 * rand(0.5, 30)  // 生成0到-0.05之间的均匀分布，但可能不够左偏
+// 或者使用正态分布，但调整参数使得均值为负，比如均值-0.02，标准差较大
+returns = -0.02 + 0.05 * normal(30)
+// 然后加入几个极端负值，比如将某些元素替换为更小的值
+returns[rand(0..29,5)] = -0.1 + 0.05 * normal(5)
+// 但需要确保所有元素都 >-1，所以可能需要调整参数
+
+或者，直接构造一个左偏的数组，比如大部分数据在-0.03附近，少数在-0.1左右。
+
+例如：
+
+returns = array(DOUBLE, 0)
+for(i in 0:25){
+    returns.append!(rand(-0.05, 1)[0])  // 生成大部分在-0.05左右的数
+}
+for(i in 0:5){
+    returns.append!(rand(-0.15, 1)[0])  // 加入极端负值
+}
+
+或者更简单的办法：
+
+base = -0.03 + 0.02 * randnormal(25)  // 生成25个均值为-0.03，标准差0.02的正态分布数
+extreme = -0.1 + 0.05 * randnormal(5) // 生成5个更低的数
+returns = base.join(extreme)
+
+但需要确保所有元素都大于-1。例如，极端值中的-0.1加上0.05*正态可能得到更小的值，比如正态可能生成负数，所以例如当正态生成-3时，极端值会是-0.1 +0.05*(-3) = -0.25，这仍大于-1。
+
+所以这样的数据可以满足条件。
+
+现在，在DolphinDB中，如何生成这样的模拟数据？
+
+可能需要用DolphinDB的函数，比如randnormal生成正态分布的随机数，然后构造数组。
+
+例如：
+
+n = 30
+// 生成25个基础数据
+base = -0.03 + 0.02 * norm(25, 1, 0, 1)  // 假设norm函数生成正态分布数，参数可能不同？
+// 或者使用randNormal
+base = randNormal(25, -0.03, 0.02)
+extreme = randNormal(5, -0.1, 0.05)
+returns = concat(base, extreme)
+
+但DolphinDB的randNormal函数的参数是均值、标准差和数量。例如，randNormal(n, mean, stdev)生成n个正态分布的随机数。
+
+所以，正确的生成方式是：
+
+base = randNormal(25, -0.03, 0.02)
+extreme = randNormal(5, -0.1, 0.05)
+returns = base join extreme
+
+然后，要确保所有returns中的元素都 >-1。可能需要检查，但考虑到生成的参数，比如极端值的均值为-0.1，标准差0.05，所以最大的可能负值可能在-0.1 - 3*0.05 = -0.25，远大于-1，所以没问题。
+
+现在，将这样的数据作为输入。
+
+接下来，计算两种方法的CVaR，并求差。
+
+所以，用户的问题的答案脚本应该包括：
+
+1. 生成模拟数据（左偏，极端负值）
+2. 分别调用condValueAtRisk函数，使用method='logNormal'和'monteCarlo'，置信度0.98
+3. 计算两者的差额
+
+例如：
+
+returns = <生成的模拟数据>
+cvar_log = condValueAtRisk(returns, 'logNormal', 0.98)
+cvar_monte = condValueAtRisk(returns, 'monteCarlo', 0.98)
+difference = cvar_log - cvar_monte
+select difference as expectedLossDifference
+
+现在，根据用户提供的示例，回答需要包含input的模拟数据，然后answer中的脚本。
+
+因此，最终的输出应该符合用户提供的JSON结构，其中function是condValueAtRisk，question是用户的问题，input是模拟的returns数据，answer是使用该函数计算差额的脚本。
+
+现在，编写模拟数据，假设生成30个数据点，左偏且有极端负值。
+
+例如，可能的returns数据：
+
+returns = [-0.028, -0.031, -0.025, ..., -0.12, -0.11, -0.13]
+
+为了具体，我需要构造一个具体的数组。例如：
+
+base = randNormal(25, -0.03, 0.01)  // 25个均值为-0.03，标准差0.01的正态分布数
+extreme = randNormal(5, -0.1, 0.02)  // 5个均值为-0.1，标准差0.02的数
+returns = base join extreme
+
+但实际代码可能需要用DolphinDB的函数来实现。例如，在DolphinDB中，可以使用：
+
+n = 30
+// 生成25个基础数据点
+base = randNormal(25, -0.03, 0.02)
+// 生成5个极端负值
+extreme = randNormal(5, -0.1, 0.05)
+returns = base.join(extreme)
+
+不过，这样生成的数组可能是连续的，但需要将两者合并。或者用concat函数？
+
+在DolphinDB中，数组的拼接可以使用concat或者直接用join。例如：
+
+returns = base join extreme
+
+这应该可行。然后，将returns作为输入数据。
+
+现在，构造一个具体的例子：
+
+假设：
+
+base有25个元素，比如：
+
+-0.031, -0.029, -0.028, ..., 平均在-0.03左右
+
+extreme有5个元素，比如：
+
+-0.12, -0.11, -0.15, -0.13, -0.10
+
+合并后的returns数组包含这些数值。
+
+现在，在DolphinDB的脚本中，如何生成这样的数据？
+
+可能需要使用循环，但更有效的方式是使用向量化操作。例如：
+
+base = randNormal(25, -0.03, 0.02)
+extreme = randNormal(5, -0.1, 0.05)
+returns = base.join(extreme)
+
+然后，将returns作为输入数据。
+
+现在，编写完整的测试案例：
+
+模拟数据部分可能如下：
+
+returns = array(DOUBLE)
+base = randNormal(25, -0.03, 0.02)
+extreme = randNormal(5, -0.1, 0.05)
+returns = base.join(extreme)
+
+但用户需要具体的数值，比如在input字段中给出具体的数据，如用户提供的示例中有具体的数值列表。
+
+但作为模拟数据，我可以生成一个示例数据，例如：
+
+returns = [-0.0312, -0.0285, -0.0298, ..., -0.12, -0.115, -0.13]
+
+或者，具体列举30个数值，但可能太繁琐。不过，根据用户提供的示例，他们的returns数组是手动输入的多个数值。因此，在input部分，我需要提供一个具体的数组，比如：
+
+假设生成的returns数组如下：
+
+returns = [-0.031, -0.029, -0.028, -0.032, -0.027, -0.030, -0.025, -0.033, -0.026, -0.024, -0.0295, -0.031, -0.027, -0.030, -0.028, -0.029, -0.027, -0.026, -0.031, -0.029, -0.030, -0.028, -0.032, -0.027, -0.029, -0.12, -0.11, -0.15, -0.13, -0.10]
+
+不过，可能为了简便，可以构造一个包含30个元素的数组，其中前25个接近-0.03，后5个更小。
+
+例如：
+
+// 前25个数据点
+base = [-0.028, -0.031, -0.029, -0.027, -0.030, -0.032, -0.026, -0.025, -0.029, -0.028, -0.030, -0.031, -0.027, -0.028, -0.029, -0.026, -0.027, -0.030, -0.029, -0.032, -0.028, -0.027, -0.031, -0.030, -0.029]
+// 后5个极端数据点
+extreme = [-0.12, -0.11, -0.15, -0.13, -0.10]
+returns = base join extreme
+
+但需要确保每个元素都大于-1，这里都是较大的负数，没问题。
+
+现在，在回答的input部分，给出这个returns数组的具体数值。
+
+然后，answer部分需要计算对数正态法和蒙特卡洛法的CVaR，并计算差额。
+
+所以，最终的回答应该包括：
+
+{
+    "function":"condValueAtRisk",
+    "question": "某私募基金需要评估商品期货策略在极端行情下的抗压能力，已知过去30个交易日收益呈现左偏分布且存在极端负值。要求分别采用对数正态参数法和蒙特卡洛法，计算98%置信度下的预期损失差额应如何实现？",
+    "input": "使用dolphindb模拟的数据",
+    "answer": "根据input的数据和question，使用dolphindb脚本编写function使用案例"
+}
+
+具体来说，input是生成的returns数组，例如：
+
+returns = [-0.028, -0.031, -0.029, -0.027, -0.030, -0.032, -0.026, -0.025, -0.029, -0.028, -0.030, -0.031, -0.027, -0.028, -0.029, -0.026, -0.027, -0.030, -0.029, -0.032, -0.028, -0.027, -0.031, -0.030, -0.029, -0.12, -0.11, -0.15, -0.13, -0.10]
+
+然后，answer部分：
+
+cvar_log = condValueAtRisk(returns, 'logNormal', 0.98)
+cvar_monte = condValueAtRisk(returns, 'monteCarlo', 0.98)
+expectedLossDifference = cvar_log - cvar_monte
+select expectedLossDifference as ExpectedLossDifference
+
+或者可能直接输出差额：
+
+difference = condValueAtRisk(returns, 'logNormal', 0.98) - condValueAtRisk(returns, 'monteCarlo', 0.98)
+difference
+
+或者更完整的脚本：
+
+returns = [此处是具体的模拟数据数组]
+logNormalCVaR = condValueAtRisk(returns, `logNormal, 0.98)
+monteCarloCVaR = condValueAtRisk(returns, `monteCarlo, 0.98)
+select logNormalCVaR - monteCarloCVaR as ExpectedLossDifference
+
+但需要注意DolphinDB的语法，比如字符串参数是否需要反引号或单引号。根据文档中的示例，参数如'historical'是用的单引号，所以正确的方式是：
+
+condValueAtRisk(returns, 'logNormal', 0.98)
+
+所以，在answer中的脚本应该正确使用函数参数。
+
+因此，最终的脚本如下：
+
+returns = [-0.028, -0.031, -0.029, -0.027, -0.030, -0.032, -0.026, -0.025, -0.029, -0.028, -0.030, -0.031, -0.027, -0.028, -0.029, -0.026, -0.027, -0.030, -0.029, -0.032, -0.028, -0.027, -0.031, -0.030, -0.029, -0.12, -0.11, -0.15, -0.13, -0.10]
+logNormalCVaR = condValueAtRisk(returns, 'logNormal', 0.98)
+monteCarloCVaR = condValueAtRisk(returns, 'monteCarlo', 0.98)
+select logNormalCVaR - monteCarloCVaR as expectedLossDifference
+
+或者直接输出差额：
+
+logNormalCVaR = condValueAtRisk(returns, 'logNormal', 0.98)
+monteCarloCVaR = condValueAtRisk(returns, 'monteCarlo', 0.98)
+expectedLossDifference = logNormalCVaR - monteCarloCVaR
+expectedLossDifference
+
+这样，用户就可以得到两种方法计算的CVaR的差额，即预期损失差额。
+
+
+Correct CoT: 
+好的，我现在需要解决用户的问题。用户是某私募基金，他们想评估商品期货策略在极端行情下的抗压能力。已知过去30个交易日的收益呈现左偏分布且有极端负值。他们要求分别使用对数正态参数法和蒙特卡洛法，计算98%置信度下的预期损失差额。预期损失差额可能指的是两种方法计算的条件风险值（CVaR）的差。
+
+首先，我需要回忆DolphinDB中的相关函数。用户的问题提到了condValueAtRisk函数，这个函数用于计算条件风险值（Expected Shortfall）。根据文档，condValueAtRisk的参数包括收益序列、方法（method）、置信水平等。方法参数有四个选项：'normal'、'logNormal'、'historical'和'monteCarlo'。
+
+用户的问题需要分别用对数正态参数法（'logNormal'）和蒙特卡洛法（'monteCarlo'）来计算98%置信度下的CVaR，然后求两者的差额。所以，我需要先生成符合用户描述的模拟数据，即过去30个交易日的数据，呈现左偏分布且有极端负值。
+
+生成模拟数据的话，可能需要用DolphinDB的随机数函数。左偏分布通常意味着数据左侧有较长的尾部，即更多的小于均值的值。可以考虑使用负偏态的分布，比如对数正态分布取负数，或者生成一些极端负值的数据。
+
+例如，生成左偏数据的一种方法是生成一些正态分布的数据，然后减去一个较大的值，使得整体左偏。或者使用beta分布等。但要注意，所有的收益率必须大于-1。例如，可以先生成均值为负的正态分布数据，或者生成一些极端负值的数据点。
+
+接下来，编写DolphinDB脚本。首先模拟数据，假设生成30个交易日的收益数据，其中大部分为负数，尤其是极端负值。比如，可以使用normal函数生成，然后调整参数使其左偏，并添加一些极端负值的样本。
+
+例如：
+
+returns = -0.1 * randnormal(30, 0.05, 0.1)  -- 这样生成的数据可能呈现左偏，因为乘以了负数，但可能不够。或者更直接地生成一些极端负值。
+
+或者，使用混合分布：大部分数据在负方向，加上几个极端负值。例如：
+
+base = rand(-0.03..0.01, 25)  -- 生成25个在-0.03到0.01之间的数
+extreme = rand(-0.15..-0.1, 5)  -- 加入5个极端负值
+returns = base join extreme
+
+但需要注意，rand的范围可能需要调整，确保所有元素都大于-1。例如，生成的极端负值不能小于-1。比如，极端值在-0.2到-0.15之间。
+
+然后，使用condValueAtRisk函数分别用两种方法计算CVaR，然后求差值。
+
+例如：
+
+cvar_log = condValueAtRisk(returns, 'logNormal', 0.98)
+cvar_monte = condValueAtRisk(returns, 'monteCarlo', 0.98)
+difference = cvar_log - cvar_monte
+
+所以，用户需要的是这两个值的差额。在DolphinDB中，如何实现这个？
+
+现在，根据用户提供的示例数据格式，需要构造一个模拟的returns数据。例如，用户给的例子中是多个正负交替的小数，但用户的问题中数据是左偏且有极端负值，所以模拟数据可能需要更多的负值，尤其是较大的负值。
+
+例如：
+
+生成30个数据点，大部分为负数，少数较大的负数：
+
+假设用以下方式生成：
+
+// 生成左偏数据，比如大部分数据在负数区域，且有极端负值
+returns = -0.1 * rand(0.5, 30)  // 生成0到-0.05之间的均匀分布，但可能不够左偏
+// 或者使用正态分布，但调整参数使得均值为负，比如均值-0.02，标准差较大
+returns = -0.02 + 0.05 * normal(30)
+// 然后加入几个极端负值，比如将某些元素替换为更小的值
+returns[rand(0..29,5)] = -0.1 + 0.05 * normal(5)
+// 但需要确保所有元素都 >-1，所以可能需要调整参数
+
+或者，直接构造一个左偏的数组，比如大部分数据在-0.03附近，少数在-0.1左右。
+
+例如：
+
+returns = array(DOUBLE, 0)
+for(i in 0:25){
+    returns.append!(rand(-0.05, 1)[0])  // 生成大部分在-0.05左右的数
+}
+for(i in 0:5){
+    returns.append!(rand(-0.15, 1)[0])  // 加入极端负值
+}
+
+或者更简单的办法：
+
+base = -0.03 + 0.02 * randnormal(25)  // 生成25个均值为-0.03，标准差0.02的正态分布数
+extreme = -0.1 + 0.05 * randnormal(5) // 生成5个更低的数
+returns = base.join(extreme)
+
+但需要确保所有元素都大于-1。例如，极端值中的-0.1加上0.05*正态可能得到更小的值，比如正态可能生成负数，所以例如当正态生成-3时，极端值会是-0.1 +0.05*(-3) = -0.25，这仍大于-1。
+
+所以这样的数据可以满足条件。
+
+现在，在DolphinDB中，如何生成这样的模拟数据？
+
+可能需要用DolphinDB的函数，比如randnormal生成正态分布的随机数，然后构造数组。
+
+例如：
+
+n = 30
+// 生成25个基础数据
+base = -0.03 + 0.02 * norm(25, 1, 0, 1)  // 假设norm函数生成正态分布数，参数可能不同？
+// 或者使用randNormal
+base = randNormal(25, -0.03, 0.02)
+extreme = randNormal(5, -0.1, 0.05)
+returns = concat(base, extreme)
+
+但DolphinDB的randNormal函数的参数是均值、标准差和数量。例如，randNormal(n, mean, stdev)生成n个正态分布的随机数。
+
+所以，正确的生成方式是：
+
+base = randNormal(25, -0.03, 0.02)
+extreme = randNormal(5, -0.1, 0.05)
+returns = base join extreme
+
+然后，要确保所有returns中的元素都 >-1。可能需要检查，但考虑到生成的参数，比如极端值的均值为-0.1，标准差0.05，所以最大的可能负值可能在-0.1 - 3*0.05 = -0.25，远大于-1，所以没问题。
+
+现在，将这样的数据作为输入。
+
+接下来，计算两种方法的CVaR，并求差。
+
+所以，用户的问题的答案脚本应该包括：
+
+1. 生成模拟数据（左偏，极端负值）
+2. 分别调用condValueAtRisk函数，使用method='logNormal'和'monteCarlo'，置信度0.98
+3. 计算两者的差额
+
+例如：
+
+returns = <生成的模拟数据>
+cvar_log = condValueAtRisk(returns, 'logNormal', 0.98)
+cvar_monte = condValueAtRisk(returns, 'monteCarlo', 0.98)
+difference = cvar_log - cvar_monte
+select difference as expectedLossDifference
+
+现在，根据用户提供的示例，回答需要包含input的模拟数据，然后answer中的脚本。
+
+因此，最终的输出应该符合用户提供的JSON结构，其中function是condValueAtRisk，question是用户的问题，input是模拟的returns数据，answer是使用该函数计算差额的脚本。
+
+现在，编写模拟数据，假设生成30个数据点，左偏且有极端负值。
+
+例如，可能的returns数据：
+
+returns = [-0.028, -0.031, -0.025, ..., -0.12, -0.11, -0.13]
+
+为了具体，我需要构造一个具体的数组。例如：
+
+base = randNormal(25, -0.03, 0.01)  // 25个均值为-0.03，标准差0.01的正态分布数
+extreme = randNormal(5, -0.1, 0.02)  // 5个均值为-0.1，标准差0.02的数
+returns = base join extreme
+
+但实际代码可能需要用DolphinDB的函数来实现。例如，在DolphinDB中，可以使用：
+
+n = 30
+// 生成25个基础数据点
+base = randNormal(25, -0.03, 0.02)
+// 生成5个极端负值
+extreme = randNormal(5, -0.1, 0.05)
+returns = base.join(extreme)
+
+不过，这样生成的数组可能是连续的，但需要将两者合并。或者用concat函数？
+
+在DolphinDB中，数组的拼接可以使用concat或者直接用join。例如：
+
+returns = base join extreme
+
+这应该可行。然后，将returns作为输入数据。
+
+现在，构造一个具体的例子：
+
+假设：
+
+base有25个元素，比如：
+
+-0.031, -0.029, -0.028, ..., 平均在-0.03左右
+
+extreme有5个元素，比如：
+
+-0.12, -0.11, -0.15, -0.13, -0.10
+
+合并后的returns数组包含这些数值。
+
+现在，在DolphinDB的脚本中，如何生成这样的数据？
+
+可能需要使用循环，但更有效的方式是使用向量化操作。例如：
+
+base = randNormal(25, -0.03, 0.02)
+extreme = randNormal(5, -0.1, 0.05)
+returns = base.join(extreme)
+
+然后，将returns作为输入数据。
+
+现在，编写完整的测试案例：
+
+模拟数据部分可能如下：
+
+returns = array(DOUBLE)
+base = randNormal(25, -0.03, 0.02)
+extreme = randNormal(5, -0.1, 0.05)
+returns = base.join(extreme)
+
+但用户需要具体的数值，比如在input字段中给出具体的数据，如用户提供的示例中有具体的数值列表。
+
+但作为模拟数据，我可以生成一个示例数据，例如：
+
+returns = [-0.0312, -0.0285, -0.0298, ..., -0.12, -0.115, -0.13]
+
+或者，具体列举30个数值，但可能太繁琐。不过，根据用户提供的示例，他们的returns数组是手动输入的多个数值。因此，在input部分，我需要提供一个具体的数组，比如：
+
+假设生成的returns数组如下：
+
+returns = [-0.031, -0.029, -0.028, -0.032, -0.027, -0.030, -0.025, -0.033, -0.026, -0.024, -0.0295, -0.031, -0.027, -0.030, -0.028, -0.029, -0.027, -0.026, -0.031, -0.029, -0.030, -0.028, -0.032, -0.027, -0.029, -0.12, -0.11, -0.15, -0.13, -0.10]
+
+不过，可能为了简便，可以构造一个包含30个元素的数组，其中前25个接近-0.03，后5个更小。
+
+例如：
+
+// 前25个数据点
+base = [-0.028, -0.031, -0.029, -0.027, -0.030, -0.032, -0.026, -0.025, -0.029, -0.028, -0.030, -0.031, -0.027, -0.028, -0.029, -0.026, -0.027, -0.030, -0.029, -0.032, -0.028, -0.027, -0.031, -0.030, -0.029]
+// 后5个极端数据点
+extreme = [-0.12, -0.11, -0.15, -0.13, -0.10]
+returns = base join extreme
+
+但需要确保每个元素都大于-1，这里都是较大的负数，没问题。
+
+现在，在回答的input部分，给出这个returns数组的具体数值。
+
+然后，answer部分需要计算对数正态法和蒙特卡洛法的CVaR，并计算差额。
+
+所以，最终的回答应该包括：
+
+{
+    "function":"condValueAtRisk",
+    "question": "某私募基金需要评估商品期货策略在极端行情下的抗压能力，已知过去30个交易日收益呈现左偏分布且存在极端负值。要求分别采用对数正态参数法和蒙特卡洛法，计算98%置信度下的预期损失差额应如何实现？",
+    "input": "使用dolphindb模拟的数据",
+    "answer": "根据input的数据和question，使用dolphindb脚本编写function使用案例"
+}
+
+具体来说，input是生成的returns数组，例如：
+
+returns = [-0.028, -0.031, -0.029, -0.027, -0.030, -0.032, -0.026, -0.025, -0.029, -0.028, -0.030, -0.031, -0.027, -0.028, -0.029, -0.026, -0.027, -0.030, -0.029, -0.032, -0.028, -0.027, -0.031, -0.030, -0.029, -0.12, -0.11, -0.15, -0.13, -0.10]
+
+然后，answer部分：
+
+cvar_log = condValueAtRisk(returns, 'logNormal', 0.98)
+cvar_monte = condValueAtRisk(returns, 'monteCarlo', 0.98)
+expectedLossDifference = cvar_log - cvar_monte
+select expectedLossDifference as ExpectedLossDifference
+
+或者可能直接输出差额：
+
+difference = condValueAtRisk(returns, 'logNormal', 0.98) - condValueAtRisk(returns, 'monteCarlo', 0.98)
+difference
+
+或者更完整的脚本：
+
+returns = [此处是具体的模拟数据数组]
+logNormalCVaR = condValueAtRisk(returns, `logNormal, 0.98)
+monteCarloCVaR = condValueAtRisk(returns, `monteCarlo, 0.98)
+select logNormalCVaR - monteCarloCVaR as ExpectedLossDifference
+
+但需要注意DolphinDB的语法，比如字符串参数是否需要反引号或单引号。根据文档中的示例，参数如'historical'是用的单引号，所以正确的方式是：
+
+condValueAtRisk(returns, 'logNormal', 0.98)
+
+所以，在answer中的脚本应该正确使用函数参数。
+
+因此，最终的脚本如下：
+
+returns = [-0.028, -0.031, -0.029, -0.027, -0.030, -0.032, -0.026, -0.025, -0.029, -0.028, -0.030, -0.031, -0.027, -0.028, -0.029, -0.026, -0.027, -0.030, -0.029, -0.032, -0.028, -0.027, -0.031, -0.030, -0.029, -0.12, -0.11, -0.15, -0.13, -0.10]
+logNormalCVaR = condValueAtRisk(returns, 'logNormal', 0.98)
+monteCarloCVaR = condValueAtRisk(returns, 'monteCarlo', 0.98)
+select logNormalCVaR - monteCarloCVaR as expectedLossDifference
+
+或者直接输出差额：
+
+logNormalCVaR = condValueAtRisk(returns, 'logNormal', 0.98)
+monteCarloCVaR = condValueAtRisk(returns, 'monteCarlo', 0.98)
+expectedLossDifference = logNormalCVaR - monteCarloCVaR
+expectedLossDifference
+
+这样，用户就可以得到两种方法计算的CVaR的差额，即预期损失差额。
+
+
+Function Name: 
+condValueAtRisk

@@ -12,6 +12,7 @@ from prompt import PromptTemplates
 from file_manager import FileManager
 
 from dotenv import load_dotenv
+from utils import parse_markdown_to_json
 
 # 配置和初始化
 load_dotenv()
@@ -50,6 +51,7 @@ class FunctionDistiller:
         self.file_manager = FileManager(logger=self.logger)
         self.templates = PromptTemplates()
         self.conversation_history = []
+        self.index = 0;
     
     def _parse_llm_response(self, llm_response: LLMResponse) -> Union[DistillResponse, str]:
         """解析LLM响应为DistillResponse对象
@@ -121,21 +123,42 @@ Correct CoT:
 Function Name: 
 {distill_resp.function}
 """
-        output_file = f"./data/jinzhi_{distill_resp.function}.txt"
+        output_file = f"./data/jinzhi_{distill_resp.function}_{self.index}.txt"
         
         with open(output_file, "w") as file:
             file.write(template_content)
         
         self.logger.info(f"已生成输出文件: {output_file}")
     
+    def _extract_info_from_generated_file(self, file_paths: List[str]) -> Tuple[List[str], List[str]]:
+        """
+            从生成的文件中提取输入和答案信息
+        """
+        inputs = []
+        answers = []
+    
+        # 遍历所有文件
+        for file_path in file_paths:
+            try:
+                parsed_content = parse_markdown_to_json(file_path)
+                inputs.append(parsed_content["Prompt"])
+                answers.append(parsed_content["Answer"])
+
+            except Exception as e:
+                print(f"处理文件 {file_path} 时出错: {str(e)}")
+        
+        return inputs, answers
 
     def _mock_distill_process(self, func: str) -> Union[DistillResponse, bool]:
         """模拟蒸馏过程，用于预实验"""
-        if os.path.exists(f"./data/jinzhi_{func}.txt"): 
-            self.logger.info(f"{func}已生成，无需再处理")
-            return True
-
-        self.conversation_history = [{"role": "system", "content": self.templates.mock_distill()}]
+        exist_data = self.file_manager.find_generated_files("./data", func)
+        if exist_data is None:
+            self.conversation_history = [{"role": "system", "content": self.templates.mock_distill()}]
+        else:
+            inputs, answers = self._extract_info_from_generated_file(exist_data)
+            self.index = len(inputs)
+            self.conversation_history = [{"role": "system", "content": self.templates.mock_distill_unique(inputs, answers)}]
+        
         self._prepare_conversation_for_func(func)
 
         try_count = 0
@@ -198,11 +221,7 @@ Function Name:
         return False
 
     def _distill_via_llm(self, func: str, resp: DistillResponse) -> bool:
-        """通过LLM进行蒸馏"""
-        if os.path.exists(f"./data/jinzhi_{func}.txt"): 
-            self.logger.info(f"{func}已生成，无需再处理")
-            return True
-            
+
         self.conversation_history = [{
             "role": "system", 
             "content": self.templates.question_prompt(resp.question)
@@ -286,6 +305,31 @@ Function Name:
         self.logger.info("模型预实验成功，开始生成标注数据")
         return self._distill_via_llm(func, mock_response_data)
 
+    def gen_question(self, func: str): 
+        self.conversation_history = [{
+            "role": "system", 
+            "content": self.templates.gen_question()
+        }]
+
+        self._prepare_conversation_for_func(func)
+        llm_response = self.llm_client.generate_response(self.conversation_history)
+                
+        # 解析响应
+        response_data = self._parse_llm_response(llm_response)
+                
+        # 处理解析结果
+        if isinstance(response_data, str):  # 错误情况
+            self.logger.error(f"LLM响应解析失败: {response_data}")
+            self.conversation_history.append({
+                 "role": "user",
+                "content": "请重新按要求生成有效的JSON格式响应"
+            })
+            return;
+
+        if self.logger:
+            self.logger.log(response_data)
+
+    
 
 class DistillationOrchestrator:
     """蒸馏任务编排器"""
@@ -306,23 +350,27 @@ class DistillationOrchestrator:
         logger = ThreadSafeLogger.get_logger(func)
         logger.info(f"开始处理函数: {func}")
         
-        distiller = FunctionDistiller(
-            host=config['host'], 
-            port=config['port'], 
-            user=config['user'], 
-            passwd=config['passwd'],
-            md_dir=md_dir,
-            max_retries=config.get('max_retries', 2),
-            func_name=func
-        )
-        
-        try:
-            result = distiller.distill_function(func)
-            logger.info(f"函数 {func} 处理{'成功' if result else '失败'}")
-            return func, result
-        except Exception as e:
-            logger.error(f"函数 {func} 处理时出现异常: {str(e)}", exc_info=True)
-            return func, False
+        cnt=0
+        while cnt <= 20:
+            cnt += 1
+            logger.info(f"第{cnt}次重新开始")
+            distiller = FunctionDistiller(
+                host=config['host'], 
+                port=config['port'], 
+                user=config['user'], 
+                passwd=config['passwd'],
+                md_dir=md_dir,
+                max_retries=config.get('max_retries', 2),
+                func_name=func
+            )
+            
+            try:
+                result = distiller.distill_function(func)
+                logger.info(f"函数 {func} 处理{'成功' if result else '失败'}")
+                return func, result
+            except Exception as e:
+                logger.error(f"函数 {func} 处理时出现异常: {str(e)}", exc_info=True)
+                return func, False
 
     @classmethod
     def process_functions(cls, funcs: List[str], config: Dict[str, Any], 
@@ -391,12 +439,12 @@ def main():
     }
 
     # SQL相关函数
-    functions = ["varma",  "appendForPrediction"]
+    functions = [ "nss", "ns", "condValueAtRisk", "nsspredict", "valueAtRisk"  ]
     
     clean_doc_dir = "./cleandocs"
     main_logger.info(f"开始处理 SQL 函数: {functions}")
     sql_results = DistillationOrchestrator.process_functions(
-        functions, config, clean_doc_dir, max_workers=10
+        functions, config, clean_doc_dir, max_workers=5
     )
 
 

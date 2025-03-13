@@ -1,0 +1,38 @@
+Prompt: 
+当使用正态分布假设评估金融资产风险时，如何确定其在95%置信水平下的单日最大潜在亏损？
+
+Input: 
+```DolphinDB
+使用normal生成正态分布的1000个收益率数据：returns = normal(0, 0.01, 1000)
+```
+
+Answer: 
+```DolphinDB
+// 生成正态分布收益率并计算VaR
+returns = normal(0, 0.01, 1000)
+valueAtRisk(returns, 'normal', 0.95)
+// 输出示例：0.01634 (表示在95%置信水平下，单日最大潜在亏损为1.634%)
+```
+
+R1 CoT: 
+嗯，用户的问题是使用正态分布假设评估金融资产风险时，如何确定95%置信水平下的单日最大潜在亏损。根据DolphinDB的文档，valueAtRisk函数可以计算VaR，其中method参数选'normal'就是用正态参数法。
+
+首先，我需要生成符合正态分布的收益率数据来模拟。用户之前可能尝试用了normrand函数，但报错了，可能是因为DolphinDB中没有这个函数。正确的应该是使用normal函数，比如normal(0, 0.01, 1000)来生成均值为0，标准差0.01的1000个样本。
+
+然后，调用valueAtRisk，指定method为'normal'，confidenceLevel为0.95。这样就能得到对应的VaR值了。需要注意的是，输入数据要符合正态分布，并且参数设置正确。
+
+所以，正确的脚本应该是生成数据用normal而不是normrand，然后调用函数。这样应该能解决之前的报错问题。
+
+
+Correct CoT: 
+嗯，用户的问题是使用正态分布假设评估金融资产风险时，如何确定95%置信水平下的单日最大潜在亏损。根据DolphinDB的文档，valueAtRisk函数可以计算VaR，其中method参数选'normal'就是用正态参数法。
+
+首先，我需要生成符合正态分布的收益率数据来模拟。用户之前可能尝试用了normrand函数，但报错了，可能是因为DolphinDB中没有这个函数。正确的应该是使用normal函数，比如normal(0, 0.01, 1000)来生成均值为0，标准差0.01的1000个样本。
+
+然后，调用valueAtRisk，指定method为'normal'，confidenceLevel为0.95。这样就能得到对应的VaR值了。需要注意的是，输入数据要符合正态分布，并且参数设置正确。
+
+所以，正确的脚本应该是生成数据用normal而不是normrand，然后调用函数。这样应该能解决之前的报错问题。
+
+
+Function Name: 
+valueAtRisk
