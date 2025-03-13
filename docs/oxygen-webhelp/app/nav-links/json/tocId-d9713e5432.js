@@ -1,0 +1,1 @@
+oxy_webhelp_navlinks = {"tocId-d9713e5432":{"topics":[{"title":"INSIGHT","href":"plugins\/insight\/insight.html","attributes":{"data-id":"insight"},"menu":{"hasChildren":false},"tocID":"insight-d9713e5433","topics":[]}]}};

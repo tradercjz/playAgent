@@ -1,0 +1,97 @@
+
+
+# createYieldCurveEngine
+
+## 语法
+
+```DolphinDB
+createYieldCurveEngine(name, dummyTable, assetType, fitMethod, keyColumn, modelOutput, frequency, [timeColumn], [predictDummyTable], [predictInputColumn], [predictKeyColumn], [predictTimeColumn], [predictOutput], [extraMetrics], [fitAfterPredict=false])
+```
+
+## 详情
+
+创建利率（或收益率）曲线引擎，用于对金融工具的利率和剩余期限关系建模。支持债券资产类型，提供多种插值/拟合方法：
+- 线性插值
+- 三次样条插值
+- Krogh 插值
+- 分段回归
+- 多项式拟合
+- NS/NSS 模型
+
+## 参数
+
+| 参数                | 类型                  | 描述                                                                                                                                               |
+|--------------------|---------------------|--------------------------------------------------------------------------------------------------------------------------------------------------|
+| name               | 字符串标量             | 引擎唯一标识（字母开头，可包含字母/数字/下划线）                                                                                                                   |
+| dummyTable         | 表                  | 输入数据表结构模板                                                                                                                                         |
+| assetType          | 整型/字符串向量          | 资产类型列表，需与dummyTable中的assetType字段匹配                                                                                                             |
+| fitMethod          | 元代码元组             | 资产类型对应的拟合方法及参数，支持：<br>`cubicSpline`, `kroghInterpFit`, `linearInterpolateFit`, `ns`, `nss`, `piecewiseLinFit`, `polyFit` |
+| keyColumn          | 字符串标量/向量          | 分组列（首个元素需为"assetType"）                                                                                                                         |
+| modelOutput        | 表                  | 模型输出表结构（包含时间列、分组列、BLOB类型模型列）                                                                                                                  |
+| frequency          | 正整数/DURATION类型   | 模型更新频率：<br>- 正整数：按数据条数更新<br>- DURATION：按时间窗口更新                                                                                             |
+| timeColumn         | 时间类型向量（可选）        | 输入数据时间列                                                                                                                                            |
+| predictDummyTable  | 表（可选）             | 预测输入表结构（默认同dummyTable）                                                                                                                         |
+| predictInputColumn | 字符串标量（可选）        | 预测输入列名                                                                                                                                             |
+| predictKeyColumn   | 字符串标量/向量（可选）     | 预测分组列（默认同keyColumn）                                                                                                                              |
+| predictTimeColumn  | 时间类型（可选）          | 预测时间列（默认同timeColumn）                                                                                                                             |
+| predictOutput      | 表（可选）             | 预测结果输出表结构                                                                                                                                          |
+| extraMetrics       | 元代码/元代码元组（可选）    | 额外输出指标                                                                                                                                             |
+| fitAfterPredict    | 布尔标量（可选，默认false） | 是否在预测后拟合模型                                                                                                                                         |
+
+## 示例
+
+```DolphinDB
+// 定义输入表结构
+dummyTable = table(1:0, 
+    `symbol`sendingtime`askDirtyPrice1`bidDirtyPrice1`midDirtyPirce1`askyield1`bidyield1`midyield1`timetoMaturity`assetType`datasource`clearRate, 
+    [SYMBOL, TIMESTAMP, DECIMAL32(3), DECIMAL32(3), DECIMAL32(3), DECIMAL32(3), DECIMAL32(3), DECIMAL32(3), DOUBLE, INT, INT, STRING]
+)
+
+// 配置资产类型及拟合方法
+assetType = [0, 1, 2]
+fitMethod = [
+    <piecewiseLinFit(timetoMaturity, midyield1, 10)>,
+    <nss(timetoMaturity, bidyield1, "ns")>,
+    <piecewiseLinFit(timetoMaturity, askyield1, 5)>
+]
+
+// 定义输出表结构
+modelOutput = table(1:0, `time`assetType`dataSource`clearRate`model, 
+    [TIMESTAMP, INT, INT, SYMBOL, BLOB]
+)
+predictOutput = table(1:0, `time`assetType`dataSource`clearRate`x`y, 
+    [TIMESTAMP, INT, INT, SYMBOL, DOUBLE, DOUBLE]
+)
+
+// 创建收益率曲线引擎
+engine = createYieldCurveEngine(
+    name = "test",
+    dummyTable = dummyTable,
+    assetType = assetType,
+    fitMethod = fitMethod,
+    keyColumn = `assetType`dataSource`clearRate,
+    modelOutput = modelOutput,
+    frequency = 10,
+    predictInputColumn = `timetoMaturity,
+    predictTimeColumn = `sendingtime,
+    predictOutput = predictOutput,
+    fitAfterPredict = true
+)
+
+// 生成测试数据并拟合
+data = table(
+    take(`a`b`c, 30) as symbol,
+    take(now(), 30) as time,
+    decimal32(rand(10.0, 30), 3) as p1,
+    decimal32(rand(10.0, 30), 3) as p2,
+    decimal32(rand(10.0, 30), 3) as p3,
+    decimal32(rand(10.0, 30), 3) as p4,
+    decimal32(rand(10.0, 30), 3) as p5,
+    decimal32(rand(10.0, 30), 3) as p6,
+    (rand(10.0, 30) + 10).sort() as timetoMaturity,
+    take(0 1 2, 30) as assetType,
+    take([1], 30) as datasource,
+    take("1", 30) as clearRate
+)
+engine.append!(data)
+```

@@ -1,0 +1,1743 @@
+<!DOCTYPE html><html xmlns="http://www.w3.org/1999/xhtml" xml:lang="zh" lang="zh" data-whc_version="26.0">
+    <head><link rel="shortcut icon" href="../favicon.ico"/><link rel="icon" href="../favicon.ico"/><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><meta name="description" content="通联数据的原始历史数据包含多层次市场结构与高频时序特征，因此在标准化入库过程中，需要完成库表分区设计、数据处理转换和分布式存储等多个环节。针对通联数据特有的多层次结构和高频时序特征，DolphinDB 提供了高效数据导入解决方案 —— ImportTLData 模块 。ImportTLData ..."/><meta name="DC.rights.owner" content="(C) 版权 2025"/><meta name="copyright" content="(C) 版权 2025"/><meta name="generator" content="DITA-OT"/><meta name="DC.type" content="topic"/><meta name="DC.coverage" content=""/><meta name="DC.relation" content="../tutorials/tu_modules.html"/><meta name="prodname" content="DolphinDB"/><meta name="brand" content="DolphinDB"/><meta name="DC.creator" content="DolphinDB"/><meta name="DC.publisher" content="DDB N/A DDB 200"/><meta name="DC.format" content="HTML5"/><meta name="DC.identifier" content="ImportTLData_toturial"/><title>通联历史数据导入教程</title><!--  Generated with Oxygen version 26.0, build number 2024012323.  --><meta name="wh-path2root" content="../"/><meta name="wh-toc-id" content="ImportTLData_toturial-d9713e102522"/><meta name="wh-source-relpath" content="tutorials/ImportTLData_toturial.dita"/><meta name="wh-out-relpath" content="tutorials/ImportTLData_toturial.html"/>
+
+    <link rel="stylesheet" type="text/css" href="../oxygen-webhelp/app/commons.css?buildId=2024012323"/>
+    <link rel="stylesheet" type="text/css" href="../oxygen-webhelp/app/topic.css?buildId=2024012323"/>
+
+    <script src="../oxygen-webhelp/app/options/properties.js?buildId=20250305183303"></script>
+    <script src="../oxygen-webhelp/app/localization/strings.js?buildId=2024012323"></script>
+    <script src="../oxygen-webhelp/app/search/index/keywords.js?buildId=20250305183303"></script>
+    <script defer="defer" src="../oxygen-webhelp/app/commons.js?buildId=2024012323"></script>
+    <script defer="defer" src="../oxygen-webhelp/app/topic.js?buildId=2024012323"></script>
+<link rel="stylesheet" type="text/css" href="../oxygen-webhelp/template/styles.css?buildId=2024012323"/><script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script><script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script></head>
+
+    <body id="ImportTLData_toturial" class="wh_topic_page frmBody">
+        <a href="#wh_topic_body" class="sr-only sr-only-focusable">
+            跳转到主要内容
+        </a>
+        
+        
+        
+        
+        <header class="navbar navbar-default wh_header">
+    <div class="container-fluid">
+        <div xmlns:whc="http://www.oxygenxml.com/webhelp/components" class="wh_header_flex_container navbar-nav navbar-expand-md navbar-dark">
+            <div class="wh_logo_and_publication_title_container">
+                <div class="wh_logo_and_publication_title">
+                    
+                    <a href="https://docs.dolphindb.cn/zh/index.html" class=" wh_logo d-none d-sm-block "><img src="../logo.png" alt="  DolphinDB 文档中心  "/></a>
+                    <div class=" wh_publication_title "><a href="../index.html"><span class="booktitle">  <span class="ph mainbooktitle">DolphinDB 文档中心</span>  </span></a></div>
+                    
+                </div>
+                
+                
+            </div>
+
+            <div class="wh_top_menu_and_indexterms_link collapse navbar-collapse" id="wh_top_menu_and_indexterms_link">
+                
+                
+                
+                
+            </div>
+        <div class=" wh_search_input navbar-form wh_topic_page_search search " role="form">
+            
+            
+            
+            <form id="searchForm" method="get" role="search" action="../search.html"><div><input type="search" placeholder="搜索 " class="wh_search_textfield" id="textToSearch" name="searchQuery" aria-label="搜索查询" required="required"/><button type="submit" class="wh_search_button" aria-label="搜索"><span class="search_input_text">搜索</span></button></div></form>
+            
+            <script src="/vendors/react/umd/react.production.min.js" defer="defer"></script>
+<script src="/vendors/react-dom/umd/react-dom.production.min.js" defer="defer"></script>
+<script src="/vendors/dayjs/dayjs.min.js" defer="defer"></script>
+<script src="/vendors/antd/dist/antd.min.js" defer="defer"></script>
+<script src="/vendors/@ant-design/icons/dist/index.umd.min.js" defer="defer"></script>
+<script src="/zh/index.js" type="module"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" defer="defer"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML" defer="defer"><!--
+
+
+--></script>
+<script defer="defer"><!--
+
+// 从主页重定向
+const currentUrl = window.location.href;
+
+// 判断当前URL是否包含index.html并且路径最后部分是index.html
+if (currentUrl.endsWith('index.html')) {
+    // 处理根目录下的index.html跳转
+    const baseUrl = currentUrl.split('/index.html')[0]; // 获取index.html之前的部分
+    const redirectUrl = `${baseUrl}/about/ddb_intro.html`; // 构建跳转路径
+    window.location.href = redirectUrl; // 执行跳转
+}
+
+--></script>
+            
+        </div></div>
+    </div>
+</header>
+        
+        
+         
+        
+        
+        
+        <div class="container-fluid" id="wh_topic_container">
+            <div class="row">
+
+                <nav class="wh_tools d-print-none navbar-expand-md" aria-label="Tools">
+                    
+                    <div data-tooltip-position="bottom" class=" wh_breadcrumb "><ol class="d-print-none"><li><span class="home"><a href="../index.html"><span>主页</span></a></span></li><li><div class="topicref" data-id="about_tutorials"><div class="title"><a href="../tutorials/about_tutorials.html"><span class="keyword label">教程</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 产品使用教程</p></div></div></div></li><li><div class="topicref" data-id="模块概述"><div class="title"><a href="../tutorials/tu_modules.html">模块</a></div></div></li><li class="active"><div class="topicref" data-id="ImportTLData_toturial"><div class="title"><a href="../tutorials/ImportTLData_toturial.html">通联历史数据导入教程</a></div></div></li></ol></div>
+                    
+                    
+                    
+                    <div class="wh_right_tools">
+                        <button class="wh_hide_highlight" aria-label="切换搜索突出显示" title="切换搜索突出显示"></button>
+                        <button class="webhelp_expand_collapse_sections" data-next-state="collapsed" aria-label="折叠截面" title="折叠截面"></button>
+                        
+                        
+                        
+                        
+                        <div class=" wh_print_link print d-none d-md-inline-block "><button onClick="window.print()" title="打印此页" aria-label="打印此页"></button></div>
+                        
+                        <button type="button" id="wh_toc_button" class="custom-toggler navbar-toggler collapsed wh_toggle_button navbar-light" aria-expanded="false" aria-label="Toggle publishing table of content" aria-controls="wh_publication_toc">
+                            <span class="navbar-toggler-icon"></span>
+                        </button>
+                    </div>
+                    
+                </nav>
+            </div>
+            
+            
+            
+            
+            <div class="wh_content_area">
+                <div class="row">
+                    
+                        <nav id="wh_publication_toc" class="col-lg-3 col-md-3 col-sm-12 d-md-block d-none d-print-none" aria-label="Table of Contents Container">
+                            <div id="wh_publication_toc_content">
+		                        
+                            	<div class=" wh_publication_toc " data-tooltip-position="right"><span class="expand-button-action-labels"><span id="button-expand-action" role="button" aria-label="Expand"></span><span id="button-collapse-action" role="button" aria-label="Collapse"></span><span id="button-pending-action" role="button" aria-label="Pending"></span></span><ul role="tree" aria-label="Table of Contents"><li role="treeitem"><div data-tocid="ddb_intro-d9713e87" class="topicref" data-id="ddb_intro" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../about/ddb_intro.html" id="ddb_intro-d9713e87-link">关于DolphinDB</a></div></div></li><li role="treeitem"><div data-tocid="chap1_getstarted-d9713e136" class="topicref" data-id="chap1_getstarted" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../getstarted/chap1_getstarted.html" id="chap1_getstarted-d9713e136-link">快速上手</a><div class="wh-tooltip"><p class="shortdesc">如何快速部署 DolphinDB、建库建表、写入和查询数据</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="sectionddb_deployment-d9713e189" class="topicref" data-id="sectionddb_deployment" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action sectionddb_deployment-d9713e189-link" class="wh-expand-btn"></span><div class="title"><a href="../deploy/deploy_intro.html" id="sectionddb_deployment-d9713e189-link"><span class="keyword label">部署</span></a><div class="wh-tooltip"><p class="shortdesc">如何在不同的场景中部署 DolphinDB</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="new_chap_database_manage_new_chap_dbmanage_landing_page-d9713e2259" class="topicref" data-id="new_chap_database_manage_new_chap_dbmanage_landing_page" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action new_chap_database_manage_new_chap_dbmanage_landing_page-d9713e2259-link" class="wh-expand-btn"></span><div class="title"><a href="../db_distr_comp/cfg/db_intro.html" id="new_chap_database_manage_new_chap_dbmanage_landing_page-d9713e2259-link"><span class="keyword label">数据库</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 数据库的基本概念</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="chap7_tutorials_streaming-d9713e3760" class="topicref" data-id="chap7_tutorials_streaming" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action chap7_tutorials_streaming-d9713e3760-link" class="wh-expand-btn"></span><div class="title"><a href="../stream/str_intro.html" id="chap7_tutorials_streaming-d9713e3760-link"><span class="keyword label">流数据</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 流数据引擎及流数据计算的基本概念</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e7513" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e7513-link" class="wh-expand-btn"></span><div class="title"><a href="../db_distr_comp/db_oper/import_data.html" id="tocId-d9713e7513-link">数据迁移</a><div class="wh-tooltip"><p class="shortdesc">如何从不同数据源向 DolphinDB 迁移数据</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="chap7_tutorials_system_management-d9713e7940" class="topicref" data-id="chap7_tutorials_system_management" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action chap7_tutorials_system_management-d9713e7940-link" class="wh-expand-btn"></span><div class="title"><a href="../sys_man/om_intro.html" id="chap7_tutorials_system_management-d9713e7940-link"><span class="keyword label">系统运维</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 的系统运维功能及方法</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="troubleshooting-d9713e8780" class="topicref" data-id="troubleshooting" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action troubleshooting-d9713e8780-link" class="wh-expand-btn"></span><div class="title"><a href="../error_codes/troubleshooting.html" id="troubleshooting-d9713e8780-link">故障排查</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="about_language_resources-d9713e20911" class="topicref" data-id="about_language_resources" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action about_language_resources-d9713e20911-link" class="wh-expand-btn"></span><div class="title"><a href="../progr/progr_intro.html" id="about_language_resources-d9713e20911-link"><span class="keyword label">编程语言</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 编程基本概念与方法、SQL 在 DolphinDB 的应用</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="functions_references-d9713e30925" class="topicref" data-id="functions_references" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action functions_references-d9713e30925-link" class="wh-expand-btn"></span><div class="title"><a href="../funcs/funcs_intro.html" id="functions_references-d9713e30925-link"><span class="keyword label">函数参考</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 函数分类、语法、详解及示例</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="api_protocol-d9713e94064" class="topicref" data-id="api_protocol" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action api_protocol-d9713e94064-link" class="wh-expand-btn"></span><div class="title"><a href="../api/connapi_intro.html" id="api_protocol-d9713e94064-link"><span class="keyword label">连接器 &amp; API</span></a><div class="wh-tooltip"><p class="shortdesc">面向不同编程语言的 DolphinDB API 及连接器，相关协议和用法</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="chap6_plugin-d9713e94210" class="topicref" data-id="chap6_plugin" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action chap6_plugin-d9713e94210-link" class="wh-expand-btn"></span><div class="title"><a href="../plugins/plg_intro.html" id="chap6_plugin-d9713e94210-link"><span class="keyword label">插件</span></a><div class="wh-tooltip"><p class="shortdesc">多个应用场景的插件使用说明和插件开发指导</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="third_party-d9713e97904" class="topicref" data-id="third_party" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action third_party-d9713e97904-link" class="wh-expand-btn"></span><div class="title"><a href="../third_party.html" id="third_party-d9713e97904-link">第三方工具</a></div></div></li><li role="treeitem" aria-expanded="true"><div data-tocid="about_tutorials-d9713e98227" class="topicref" data-id="about_tutorials" data-state="expanded"><span role="button" tabindex="0" aria-labelledby="button-collapse-action about_tutorials-d9713e98227-link" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/about_tutorials.html" id="about_tutorials-d9713e98227-link"><span class="keyword label">教程</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 产品使用教程</p></div></div></div><ul role="group" class="navbar-nav nav-list"><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e98280" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e98280-link" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/new_users_finance.html" id="tocId-d9713e98280-link">新用户入门</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e98327" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e98327-link" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/database.html" id="tocId-d9713e98327-link">数据库</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e99111" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e99111-link" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/std_sql_ddb.html" id="tocId-d9713e99111-link">编程</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e100448" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e100448-link" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/streaming-real-time-correlation-processing_2.html" id="tocId-d9713e100448-link">流数据</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e100955" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e100955-link" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/scheduledJob_2.html" id="tocId-d9713e100955-link">系统运维</a></div></div></li><li role="treeitem" aria-expanded="true"><div data-tocid="模块概述-d9713e101923" class="topicref" data-id="模块概述" data-state="expanded"><span role="button" tabindex="0" aria-labelledby="button-collapse-action 模块概述-d9713e101923-link" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/tu_modules.html" id="模块概述-d9713e101923-link">模块</a></div></div><ul role="group" class="navbar-nav nav-list"><li role="treeitem"><div data-tocid="dolphindb-脚本工程化管理模块代码版本与权限管理-d9713e101969" class="topicref" data-id="dolphindb-脚本工程化管理模块代码版本与权限管理" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/module_code_versioning_and_rights_management.html" id="dolphindb-脚本工程化管理模块代码版本与权限管理-d9713e101969-link">DolphinDB 脚本工程化管理：模块代码版本与权限管理</a></div></div></li><li role="treeitem"><div data-tocid="easynsq-实时行情数据接入功能模块-d9713e102015" class="topicref" data-id="easynsq-实时行情数据接入功能模块" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../modules/easyNSQ/easynsq_2.html" id="easynsq-实时行情数据接入功能模块-d9713e102015-link">easyNSQ 实时行情数据接入功能模块</a></div></div></li><li role="treeitem"><div data-tocid="easytldataimport-通联历史数据自动化导入功能模块-d9713e102061" class="topicref" data-id="easytldataimport-通联历史数据自动化导入功能模块" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../modules/easyTLDataImport/easytl_data_import.html" id="easytldataimport-通联历史数据自动化导入功能模块-d9713e102061-link">easyTLDataImport 通联历史数据自动化导入功能模块</a></div></div></li><li role="treeitem"><div data-tocid="mytt-指标库-d9713e102107" class="topicref" data-id="mytt-指标库" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../modules/mytt/mytt.html" id="mytt-指标库-d9713e102107-link">MyTT 指标库</a></div></div></li><li role="treeitem"><div data-tocid="ops-运维函数库-d9713e102153" class="topicref" data-id="ops-运维函数库" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../modules/ops/ops.html" id="ops-运维函数库-d9713e102153-link">ops 运维函数库</a></div></div></li><li role="treeitem"><div data-tocid="worldquant-101-alpha-因子指标库-d9713e102199" class="topicref" data-id="worldquant-101-alpha-因子指标库" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../modules/wq101alpha/wq101alpha.html" id="worldquant-101-alpha-因子指标库-d9713e102199-link">WorldQuant 101 Alpha 因子指标库</a></div></div></li><li role="treeitem"><div data-tocid="国泰君安-191-alpha-因子库-d9713e102245" class="topicref" data-id="国泰君安-191-alpha-因子库" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../modules/gtja191Alpha/191alpha.html" id="国泰君安-191-alpha-因子库-d9713e102245-link">国泰君安 191 Alpha 因子库</a></div></div></li><li role="treeitem"><div data-tocid="基于-dolphindb-的-barra-多因子风险模型实践-d9713e102291" class="topicref" data-id="基于-dolphindb-的-barra-多因子风险模型实践" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/barra_multi_factor_risk_model.html" id="基于-dolphindb-的-barra-多因子风险模型实践-d9713e102291-link">基于 DolphinDB 的 Barra 多因子风险模型实践</a></div></div></li><li role="treeitem"><div data-tocid="技术分析technical-analysis指标库-d9713e102337" class="topicref" data-id="技术分析technical-analysis指标库" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../modules/ta/ta.html" id="技术分析technical-analysis指标库-d9713e102337-link">技术分析（Technical Analysis）指标库</a></div></div></li><li role="treeitem"><div data-tocid="交易日历-d9713e102383" class="topicref" data-id="交易日历" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../modules/MarketHoliday/mkt_calendar.html" id="交易日历-d9713e102383-link">交易日历</a></div></div></li><li role="treeitem"><div data-tocid="金融-mock-数据生成模块-d9713e102430" class="topicref" data-id="金融-mock-数据生成模块" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/financial_mock_data_generation_module.html" id="金融-mock-数据生成模块-d9713e102430-link">金融 Mock 数据生成模块</a></div></div></li><li role="treeitem"><div data-tocid="dolphindb-日志分析工具使用手册-d9713e102476" class="topicref" data-id="dolphindb-日志分析工具使用手册" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/log_analysis_tool_user_manual.html" id="dolphindb-日志分析工具使用手册-d9713e102476-link">DolphinDB 日志分析工具使用手册</a></div></div></li><li role="treeitem" class="active"><div data-tocid="ImportTLData_toturial-d9713e102522" class="topicref" data-id="ImportTLData_toturial" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/ImportTLData_toturial.html" id="ImportTLData_toturial-d9713e102522-link">通联历史数据导入教程</a></div></div></li></ul></li><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e102568" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e102568-link" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/OHLC_2.html" id="tocId-d9713e102568-link">金融场景案例</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e104827" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e104827-link" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/streaming_engine_anomaly_alerts_2.html" id="tocId-d9713e104827-link">物联网场景案例</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e105795" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e105795-link" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/dolphindb_tensor_libtorch_tutorial.html" id="tocId-d9713e105795-link">机器学习</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e105842" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e105842-link" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/api_performance.html" id="tocId-d9713e105842-link">测试报告</a></div></div></li></ul></li><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e105982" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e105982-link" class="wh-expand-btn"></span><div class="title"><a href="../rn/server/3_00_2.html" id="tocId-d9713e105982-link">版本说明</a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 版本发布历史</p></div></div></div></li></ul></div>
+		                        
+                            </div>
+                        </nav>
+                    
+                    
+                    <div class="col-lg-7 col-md-9 col-sm-12" id="wh_topic_body">
+                        <button id="wh_close_publication_toc_button" class="close-toc-button d-none" aria-label="Toggle publishing table of content" aria-controls="wh_publication_toc" aria-expanded="true">
+                            <span class="close-toc-icon-container">
+                                <span class="close-toc-icon"></span>     
+                            </span>
+                        </button>
+                        <button id="wh_close_topic_toc_button" class="close-toc-button d-none" aria-label="Toggle topic table of content" aria-controls="wh_topic_toc" aria-expanded="true">
+                            <span class="close-toc-icon-container">
+                                <span class="close-toc-icon"></span>     
+                            </span>
+                        </button>
+                        
+                        <div class=" wh_topic_content body "><main role="main"><article class="- topic/topic topic" role="article" aria-labelledby="ariaid-title1">
+    <h1 class="- topic/title title topictitle1" id="ariaid-title1">通联历史数据导入教程</h1>
+    <div class="- topic/body body">
+        <p class="- topic/p p">通联数据的原始历史数据包含多层次市场结构与高频时序特征，因此在标准化入库过程中，需要完成库表分区设计、数据处理转换和分布式存储等多个环节。针对通联数据特有的多层次结构和高频时序特征，DolphinDB
+            提供了高效数据导入解决方案 ——<strong class="+ topic/ph hi-d/b ph b"> ImportTLData 模块</strong>。ImportTLData
+            通过结构化数据处理流水线，实现了多品种金融数据的高效导入。该导入方案采用模块化设计，能够有效存储复杂的金融数据，并为量化投研提供高质量的基础数据支持。本文将详细介绍
+            ImportTLData 模块的实现过程及最佳实践。</p>
+        <p class="- topic/p p">目前该模块已覆盖以下几类核心数据源：</p>
+        <ol class="- topic/ol ol" id="ImportTLData_toturial__ol_zwv_m5f_42c" data-ofbid="ImportTLData_toturial__ol_zwv_m5f_42c">
+            <li class="- topic/li li">证券基础行情：涵盖沪深市场股票、债券、可转债逐笔委托/成交数据及行情快照</li>
+            <li class="- topic/li li">衍生品数据：包含期货期权 L2 行情快照及期货 L1 行情快照</li>
+            <li class="- topic/li li">时序聚合数据：权益、债券、指数等品种 1-60 分钟多粒度 K 线数据</li>
+            <li class="- topic/li li">特色数据集：深交所 ETF 实时申赎行情、指数盘后数据</li>
+        </ol>
+        <div class="- topic/note note note note_note" id="ImportTLData_toturial__note_yhl_n5f_42c" data-ofbid="ImportTLData_toturial__note_yhl_n5f_42c"><span class="note__title">注：</span> 
+            <p class="- topic/p p">本教程代码基于 DolphinDB 2.00.12.5 开发，建议用户使用 2.00.12.5 及以上版本 。</p>
+        </div>
+    </div>
+    <article class="- topic/topic topic nested1" aria-labelledby="ariaid-title2" id="topic_xx2_f5f_42c">
+        <h2 class="- topic/title title topictitle2" id="ariaid-title2">1. 数据导入模块</h2>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title3" id="topic_q4n_f5f_42c">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title3">1.1 模块结构与功能</h3>
+            <div class="- topic/body body">
+                <div class="- topic/note note note note_note" id="topic_q4n_f5f_42c__note_qr2_p5f_42c" data-ofbid="topic_q4n_f5f_42c__note_qr2_p5f_42c"><span class="note__title">注：</span> 
+                    <p class="- topic/p p">在数据导入操作中，只需调用 loadTL&lt;DataType&gt;.dos 这些模块里面的函数，其它均为<strong class="+ topic/ph hi-d/b ph b">内部辅助</strong>模块，其中
+                        &lt;DataType&gt; 的全部取值以及含义参照附件中的<strong class="+ topic/ph hi-d/b ph b">数据类别部分</strong>。</p>
+                </div>
+                <div class="table-container"><table class="- topic/table table frame-all" id="topic_q4n_f5f_42c__table_mnk_q5f_42c" data-ofbid="topic_q4n_f5f_42c__table_mnk_q5f_42c" data-cols="2"><caption></caption><colgroup><col/><col/></colgroup><thead class="- topic/thead thead">
+                            <tr class="- topic/row">
+                                <th class="- topic/entry entry align-left colsep-1 rowsep-1" id="topic_q4n_f5f_42c__table_mnk_q5f_42c__entry__1"><strong class="+ topic/ph hi-d/b ph b">模块名</strong></th>
+                                <th class="- topic/entry entry align-left colsep-0 rowsep-1" id="topic_q4n_f5f_42c__table_mnk_q5f_42c__entry__2"><strong class="+ topic/ph hi-d/b ph b">模块功能</strong></th>
+                            </tr>
+                        </thead><tbody class="- topic/tbody tbody">
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_q4n_f5f_42c__table_mnk_q5f_42c__entry__1">loadTL&lt;DataType&gt;.dos</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_q4n_f5f_42c__table_mnk_q5f_42c__entry__2">定义导入通联原始数据到 DolphinDB 的函数，其中 &lt;DataType&gt;
+                                    为相应的数据类型</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_q4n_f5f_42c__table_mnk_q5f_42c__entry__1">createTable.dos</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_q4n_f5f_42c__table_mnk_q5f_42c__entry__2">定义创建相关数据库表的函数</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_q4n_f5f_42c__table_mnk_q5f_42c__entry__1">process&lt;DataType&gt;.dos</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_q4n_f5f_42c__table_mnk_q5f_42c__entry__2">定义通联原始数据结构和数据转换规则的函数，其中 &lt;DataType&gt;
+                                    为相应的数据类型</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_q4n_f5f_42c__table_mnk_q5f_42c__entry__1">utils.dos</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_q4n_f5f_42c__table_mnk_q5f_42c__entry__2">定义模块中使用的工具函数</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_q4n_f5f_42c__table_mnk_q5f_42c__entry__1">setting.dos</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_q4n_f5f_42c__table_mnk_q5f_42c__entry__2">定义源数据映射函数及数据导入相关辅助函数</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-0" headers="topic_q4n_f5f_42c__table_mnk_q5f_42c__entry__1">dataCheck.dos</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="topic_q4n_f5f_42c__table_mnk_q5f_42c__entry__2">定义股票数据校验的函数</td>
+                            </tr>
+                        </tbody></table></div>
+            </div>
+        </article>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title4" id="topic_hvn_f5f_42c">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title4">1.2 模块同步</h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p">下载附件中的通联数据导入模块 ImportTLData 之后，需要将其同步到服务器上。当在 DolphinDB
+                    调用模块时，会到相应路径下查找需要的模块文件。</p>
+                <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">同步路径</strong></p>
+                <p class="- topic/p p">将模块放置于<strong class="+ topic/ph hi-d/b ph b">节点所在 Home 目录的 module 目录下</strong>。节点所在 Home 目录可通过 <code class="+ topic/ph pr-d/codeph ph codeph">getHomeDir</code>
+                    函数获取， 假设 Home 目录为 /DolphinDB/server，那么可以将模块文件放置于 /DolphinDB/server/modules/
+                    路径下。</p>
+                <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">如何同步</strong></p>
+                <div class="- topic/p p">
+                    <ul class="- topic/ul ul" id="topic_hvn_f5f_42c__ul_e4k_dyf_42c" data-ofbid="topic_hvn_f5f_42c__ul_e4k_dyf_42c">
+                        <li class="- topic/li li">使用 xftp 等传输软件，将模块传输至服务器上指定的路径。</li>
+                        <li class="- topic/li li">使用 scp 命令：<code class="+ topic/ph pr-d/codeph ph codeph">scp -r ImportTLData
+                                &lt;user&gt;@&lt;服务器ip&gt;:/DolphinDB/server/modules/</code>。</li>
+                        <li class="- topic/li li">使用 vscode 的 DolphinDB 插件，参考：<a class="- topic/xref xref" href="../db_distr_comp/vscode.html">VS
+                                Code 插件</a>。</li>
+                        <li class="- topic/li li">使用 DolphinDB 的 GUI 客户端，参考：<a class="- topic/xref xref" href="../db_distr_comp/gui.html">GUI
+                                客户端</a>。</li>
+                    </ul>
+                </div>
+            </div>
+        </article>
+    </article>
+    <article class="- topic/topic topic nested1" aria-labelledby="ariaid-title5" id="topic_bpj_f5f_42c">
+        <h2 class="- topic/title title topictitle2" id="ariaid-title5">2. 数据导入操作</h2>
+        <div class="- topic/body body">
+            <p class="- topic/p p">将数据导入模块同步到服务器相应目录之后，就可以使用 DolphinDB 脚本调用该模块。使用模块中的函数可以将通联原始数据导入到 DolphinDB
+                数据库表中。需要操作的具体步骤有：</p>
+            <ol class="- topic/ol ol" id="topic_bpj_f5f_42c__ol_fgx_55f_42c" data-ofbid="topic_bpj_f5f_42c__ol_fgx_55f_42c">
+                <li class="- topic/li li">设定所需参数，定义数据导入函数。参考附件中的 example.dos 文件，修改相应参数后直接执行即可定义相关数据导入函数。</li>
+                <li class="- topic/li li">设定需要导入数据的起止时间，调用定义的导入函数，执行数据导入任务。</li>
+            </ol>
+            <p class="- topic/p p">本部分内容首先介绍如何通过 ImportTLData 定义符合自有环境的数据导入函数，然后介绍通过前台任务、后台任务、定时任务等方式来导入历史数据和增量数据。</p>
+        </div>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title6" id="topic_c3q_f5f_42c">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title6">2.1 数据导入步骤</h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">前置条件</strong></p>
+                <ul class="- topic/ul ul" id="topic_c3q_f5f_42c__ul_fhq_y5f_42c" data-ofbid="topic_c3q_f5f_42c__ul_fhq_y5f_42c">
+                    <li class="- topic/li li">进行数据导入之前，首先要确保目标时间段的通联原始数据压缩文件已经保存到服务器下，需要注意的是: <strong class="+ topic/ph hi-d/b ph b">原始数据要保存在执行导入任务的 DolphinDB
+                            节点所在的服务器</strong>。</li>
+                    <li class="- topic/li li">需要记住原始数据保存路径，后续导入时需要将其作为参数，比如原始数据保存在：/data/20231007/&lt;具体数据 zip 文件&gt;
+                        ，那么，作为参数的路径可设为：/data。数据导入模块会在这个路径下根据数据类型和日期查找具体的数据文件。</li>
+                </ul>
+                <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">数据导入</strong></p>
+                <p class="- topic/p p">通联数据导入模块提供了多个导入函数，每个导入函数的功能为导入特定类型的通联历史数据，具体函数名和介绍参照<strong class="+ topic/ph hi-d/b ph b">附件中的数据导入函数</strong>部分。</p>
+                <p class="- topic/p p">以下部分将详细介绍<strong class="+ topic/ph hi-d/b ph b">如何通过 ImportTLData 的函数</strong>进行数据导入。所有数据导入的函数定义示例请参考附件中的 example.dos
+                    文件。</p>
+                <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">数据导入函数参数介绍</strong></p>
+                <p class="- topic/p p">每个数据导入函数的命名格式为 loadTL&lt;DataType&gt;，其中 &lt;DataType&gt;
+                    为具体的数据类型名称。每个数据导入函数所需参数及其含义如下所示：</p>
+                <div class="table-container"><table class="- topic/table table frame-all" id="topic_c3q_f5f_42c__table_qq5_z5f_42c" data-ofbid="topic_c3q_f5f_42c__table_qq5_z5f_42c" data-cols="2"><caption></caption><colgroup><col/><col/></colgroup><thead class="- topic/thead thead">
+                            <tr class="- topic/row">
+                                <th class="- topic/entry entry align-left colsep-1 rowsep-1" id="topic_c3q_f5f_42c__table_qq5_z5f_42c__entry__1"><strong class="+ topic/ph hi-d/b ph b">参数名</strong></th>
+                                <th class="- topic/entry entry align-left colsep-0 rowsep-1" id="topic_c3q_f5f_42c__table_qq5_z5f_42c__entry__2"><strong class="+ topic/ph hi-d/b ph b">参数含义</strong></th>
+                            </tr>
+                        </thead><tbody class="- topic/tbody tbody">
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_c3q_f5f_42c__table_qq5_z5f_42c__entry__1"><em class="+ topic/ph hi-d/i ph i">userName</em></td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_c3q_f5f_42c__table_qq5_z5f_42c__entry__2">DolphinDB 用户名</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_c3q_f5f_42c__table_qq5_z5f_42c__entry__1"><em class="+ topic/ph hi-d/i ph i">password</em></td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_c3q_f5f_42c__table_qq5_z5f_42c__entry__2">DolphinDB 用户密码</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_c3q_f5f_42c__table_qq5_z5f_42c__entry__1"><em class="+ topic/ph hi-d/i ph i">startDate</em></td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_c3q_f5f_42c__table_qq5_z5f_42c__entry__2">数据导入开始日期</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_c3q_f5f_42c__table_qq5_z5f_42c__entry__1"><em class="+ topic/ph hi-d/i ph i">endDate</em></td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_c3q_f5f_42c__table_qq5_z5f_42c__entry__2">数据导入结束日期</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_c3q_f5f_42c__table_qq5_z5f_42c__entry__1"><em class="+ topic/ph hi-d/i ph i">dbName</em></td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_c3q_f5f_42c__table_qq5_z5f_42c__entry__2">数据库名</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_c3q_f5f_42c__table_qq5_z5f_42c__entry__1"><em class="+ topic/ph hi-d/i ph i">tableName</em></td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_c3q_f5f_42c__table_qq5_z5f_42c__entry__2">数据表名</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_c3q_f5f_42c__table_qq5_z5f_42c__entry__1"><em class="+ topic/ph hi-d/i ph i">filePath</em></td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_c3q_f5f_42c__table_qq5_z5f_42c__entry__2">数据目录，存放数据的路径</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-0" headers="topic_c3q_f5f_42c__table_qq5_z5f_42c__entry__1"><em class="+ topic/ph hi-d/i ph i">loadType</em></td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="topic_c3q_f5f_42c__table_qq5_z5f_42c__entry__2">导入类型，如果是每日增量导入则为 “<strong class="+ topic/ph hi-d/b ph b">daily</strong>”，如果是历史批量导入则为
+                                        “<strong class="+ topic/ph hi-d/b ph b">batch</strong>”</td>
+                            </tr>
+                        </tbody></table></div>
+                <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">返回值</strong></p>
+                <div class="table-container"><table class="- topic/table table frame-all" id="topic_c3q_f5f_42c__table_i2h_bvf_42c" data-ofbid="topic_c3q_f5f_42c__table_i2h_bvf_42c" data-cols="2"><caption></caption><colgroup><col/><col/></colgroup><thead class="- topic/thead thead">
+                            <tr class="- topic/row">
+                                <th class="- topic/entry entry align-left colsep-1 rowsep-1" id="topic_c3q_f5f_42c__table_i2h_bvf_42c__entry__1">返回类型</th>
+                                <th class="- topic/entry entry align-left colsep-0 rowsep-1" id="topic_c3q_f5f_42c__table_i2h_bvf_42c__entry__2">返回值含义</th>
+                            </tr>
+                        </thead><tbody class="- topic/tbody tbody">
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-0" headers="topic_c3q_f5f_42c__table_i2h_bvf_42c__entry__1">表(N 行 1 列)</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="topic_c3q_f5f_42c__table_i2h_bvf_42c__entry__2">表的每一行对应于相应数据导入任务中产生的一条运行日志信息</td>
+                            </tr>
+                        </tbody></table></div>
+                <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">数据导入示例</strong></p>
+                <p class="- topic/p p">以导入股票逐笔委托数据为例，分别介绍如何定义导入函数和导入数据。</p>
+                <ul class="- topic/ul ul" id="topic_c3q_f5f_42c__ul_onz_cvf_42c" data-ofbid="topic_c3q_f5f_42c__ul_onz_cvf_42c">
+                    <li class="- topic/li li"><strong class="+ topic/ph hi-d/b ph b">定义导入函数</strong></li>
+                </ul>
+                <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_c3q_f5f_42c__codeblock_xjn_dvf_42c" data-ofbid="topic_c3q_f5f_42c__codeblock_xjn_dvf_42c"><code>// 导入模块
+use ImportTLData::loadTLEntrust
+// 定义数据导入函数
+def loadEntrustStock(startDate, endDate, loadType){
+	// 设定参数, 需根据实际情况改动
+	userName = "admin" 
+	password = "123456"
+	dbname = "dfs://level2_tl"
+	tableName = "entrust"
+	filePath = "/hdd/hdd3/customer/tlData/"
+	
+	// 增量导入
+	if(loadType == "daily"){
+		idate = today()
+		infoTb = loadTLEntrustStock(userName, password, idate, idate, dbname, tableName, filePath, loadType)
+	}
+	// 批量导入
+	else if (loadType == "batch"){
+		infoTb = loadTLEntrustStock(userName, password, date(startDate), date(endDate), dbname, tableName, filePath, loadType)
+	}
+	return infoTb
+}</code></pre>
+            </div>
+        </article>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title7" id="topic_apq_f5f_42c">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title7">2.2 通过前台任务导入数据</h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p">定义好数据导入函数之后，即可调用函数进行数据导入。</p>
+                <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_apq_f5f_42c__codeblock_zdh_2vf_42c" data-ofbid="topic_apq_f5f_42c__codeblock_zdh_2vf_42c"><code>startDate = 2024.08.07
+endDate = 2024.08.07
+loadType = "batch"
+infoTb = loadEntrustStock(startDate, endDate, loadType)</code></pre>
+            </div>
+        </article>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title8" id="topic_f5q_f5f_42c">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title8">2.3 通过后台任务和定时任务导入数据</h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p">在实际导入操作中，历史数据批量导入通常采用<strong class="+ topic/ph hi-d/b ph b">后台任务</strong>，而每日数据增量导入采用<strong class="+ topic/ph hi-d/b ph b">定时任务</strong>的方式进行。以下以<strong class="+ topic/ph hi-d/b ph b">导入股票委托历史数据和增量数据</strong>为例依次进行介绍。</p>
+                <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">后台任务</strong></p>
+                <p class="- topic/p p">通过 <code class="+ topic/ph pr-d/codeph ph codeph">submitJob</code> 提交后台任务导入 2023.02.01 - 2023.02.01 股票委托数据。
+                        <code class="+ topic/ph pr-d/codeph ph codeph">submitJob</code> 函数的用法可参考：<a class="- topic/xref xref" href="../funcs/s/submitJob.html">submitJob</a>。</p>
+                <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_f5q_f5f_42c__codeblock_mcc_3vf_42c" data-ofbid="topic_f5q_f5f_42c__codeblock_mcc_3vf_42c"><code>jobId = "loadEntrust20230201_20230201"
+jobDesc = "loadEntrust20230201_20230201"
+// 后台执行上文定义的 loadEntrustStock 函数
+submitJob(jobId,jobDesc,loadEntrustStock{2023.02.01,2023.02.01,"batch"})</code></pre>
+                <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">定时任务</strong></p>
+                <p class="- topic/p p">通过 <code class="+ topic/ph pr-d/codeph ph codeph">scheduleJob</code> 提交定时任务导入每日增量股票委托数据。假设从 2025.01.01 -
+                    2025.12.31，每周一到周五的 17:00 定时执行股票委托数据导入任务。 <code class="+ topic/ph pr-d/codeph ph codeph">scheduleJob</code> 函数的用法可参考：
+                        <a class="- topic/xref xref" href="../funcs/s/scheduleJob.html">scheduleJob</a>。</p>
+                <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_f5q_f5f_42c__codeblock_uqh_mvf_42c" data-ofbid="topic_f5q_f5f_42c__codeblock_uqh_mvf_42c"><code>jobId = "loadEntrustDaily"
+jobDesc = "loadEntrustDaily"
+scheduleTime = 17:00m
+beginDate = 2025.01.01
+endDate = 2025.12.31
+frequency = "W"
+days = [1,2,3,4,5]
+​
+// 设定定时任务，定时执行上文执行的 loadEntrustStock 函数
+scheduleJob(jobId,jobDesc,loadEntrustStock{NULL,NULL,"daily"},scheduleTime,beginDate,endDate,frequency,days)</code></pre>
+            </div>
+        </article>
+    </article>
+    <article class="- topic/topic topic nested1" aria-labelledby="ariaid-title9" id="topic_ygk_f5f_42c">
+        <h2 class="- topic/title title topictitle2" id="ariaid-title9">3. 数据导入流程与处理逻辑</h2>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title10" id="topic_n2w_f5f_42c">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title10">3.1 数据导入流程</h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p">通过本模块将通联各类历史数据导入 DolphinDB ，<strong class="+ topic/ph hi-d/b ph b">均经过如下步骤</strong>：</p>
+                <ol class="- topic/ol ol" id="topic_n2w_f5f_42c__ol_zps_mvf_42c" data-ofbid="topic_n2w_f5f_42c__ol_zps_mvf_42c">
+                    <li class="- topic/li li">检查系统配置。由于解压数据文件需要用到 <code class="+ topic/ph pr-d/codeph ph codeph">shell</code> 函数，因此需要在 DolphinDB 配置文件中设置
+                            <code class="+ topic/ph pr-d/codeph ph codeph">enableShellFunction=true</code> ，如果未设置，则会报错。</li>
+                    <li class="- topic/li li">函数会扫描服务器上开始日期和结束日期之间交易日期的相应数据文件，如果缺失某些交易日期的数据文件，则函数会<strong class="+ topic/ph hi-d/b ph b">报错，报错内容为缺失的数据文件</strong>。需要注意的是：<strong class="+ topic/ph hi-d/b ph b">必须保证
+                            DolphinDB 安装包的交易日历使用的是最新的版本</strong>，否则需先更新交易日历再执行数据导入任务。</li>
+                    <li class="- topic/li li">如果不存在共享表
+                            tlDataLoadInfo，则创建。该表用于记录数据导入的信息，主要有三列，分别表示数据类别、数据文件的日期和报错信息。这个表的作用是：<strong class="+ topic/ph hi-d/b ph b">可以方便查看当前的数据导入进度和报错信息</strong>。</li>
+                    <li class="- topic/li li">对于每一个需要导入数据的交易日，经过如下流程：<ol class="- topic/ol ol" type="a" id="topic_n2w_f5f_42c__ol_aqs_mvf_42c" data-ofbid="topic_n2w_f5f_42c__ol_aqs_mvf_42c">
+                            <li class="- topic/li li">如果 DolphinDB 中不存在相应库表，则根据相应数据类别进行<strong class="+ topic/ph hi-d/b ph b">建库建表</strong>。</li>
+                            <li class="- topic/li li">如果原始数据只存在 zip 格式，则进行数据的<strong class="+ topic/ph hi-d/b ph b">解压缩</strong>操作。</li>
+                            <li class="- topic/li li">如果 DolphinDB 相应数据库表中已存在即将导入的数据，则会先<strong class="+ topic/ph hi-d/b ph b">删除相应数据</strong>。</li>
+                            <li class="- topic/li li">将原始数据载入到内存，进行<strong class="+ topic/ph hi-d/b ph b">数据处理后导入到 DolphinDB </strong>相应数据库表中。</li>
+                            <li class="- topic/li li">导入完成或导入报错时，执行以下操作：<ol class="- topic/ol ol" type="i" id="topic_n2w_f5f_42c__ol_bqs_mvf_42c" data-ofbid="topic_n2w_f5f_42c__ol_bqs_mvf_42c">
+                                    <li class="- topic/li li">将解压缩后的数据文件删除，节省磁盘空间。</li>
+                                    <li class="- topic/li li">更新共享表 tlDataLoadInfo，记录导入情况。</li>
+                                </ol></li>
+                        </ol></li>
+                </ol>
+            </div>
+        </article>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title11" id="topic_tlw_f5f_42c">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title11">3.2 数据处理逻辑</h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">通用处理逻辑</strong></p>
+                <p class="- topic/p p">本文主要介绍导入通联数据到 DolphinDB 库表的数据处理逻辑。通联不同类别的原始数据存在以下特征：</p>
+                <ul class="- topic/ul ul" id="topic_tlw_f5f_42c__ul_mpy_4vf_42c" data-ofbid="topic_tlw_f5f_42c__ul_mpy_4vf_42c">
+                    <li class="- topic/li li">部分原始数据在不同时间段会有所变更，比如增加新数据列、旧数据列不再使用等。</li>
+                    <li class="- topic/li li">对于同一数据类别，如股票逐笔委托数据，上交所和深交所分别提供 csv 数据文件。</li>
+                </ul>
+                <p class="- topic/p p">考虑到以上情况，模块中的数据处理函数做了如下设计：</p>
+                <ul class="- topic/ul ul" id="topic_tlw_f5f_42c__ul_npy_4vf_42c" data-ofbid="topic_tlw_f5f_42c__ul_npy_4vf_42c">
+                    <li class="- topic/li li">对于每一个数据类别，考虑数据字段的历史变更，设计兼容的表结构。</li>
+                    <li class="- topic/li li">对于同时含有上交所和深交所数据的数据类别，合并它们相同含义的表字段，并在表结构中分别添加它们的独特字段，并添加字段 Market
+                            用于辨识市场类别，以此将上交所和深交所的相同类别数据<strong class="+ topic/ph hi-d/b ph b">导入到同一张表中</strong>。</li>
+                </ul>
+                <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">快照数据处理逻辑</strong></p>
+                <p class="- topic/p p">由于通联的股票和债券的快照数据分成两部分，一个是快照主体数据，一个是最优买卖价前50笔委托，分别存储在不同的 csv
+                    文件中。因此，股票和债券的快照数据处理逻辑除了遵循上文介绍的通用处理逻辑之外，还需要根据不同交易所进行以下处理：</p>
+                <ul class="- topic/ul ul" id="topic_tlw_f5f_42c__ul_f2t_pvf_42c" data-ofbid="topic_tlw_f5f_42c__ul_f2t_pvf_42c">
+                    <li class="- topic/li li">如果最优买价和最优卖价前 50 笔委托数据存储在不同文件，则根据交易时间和股票 ID 进行左连接操作，合并成一张表。</li>
+                    <li class="- topic/li li">根据交易时间和股票 ID ，将快照主体数据和最优买卖价前 50 笔委托数据进行左连接操作，合并成一张表。</li>
+                    <li class="- topic/li li">对于当天的每一支股票， 判断 TotalVolumeTrade
+                        字段是否递增（该字段表示截止当前快照时间点的成交总量），如果不满足递增条件，说明快照数据存在问题，则报错。</li>
+                </ul>
+            </div>
+        </article>
+    </article>
+    <article class="- topic/topic topic nested1" aria-labelledby="ariaid-title12" id="topic_wrk_f5f_42c">
+        <h2 class="- topic/title title topictitle2" id="ariaid-title12">4. 数据库表设计</h2>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title13" id="topic_icb_g5f_42c">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title13">4.1 原始数据文件与数据库表</h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p">通联各类历史数据文件根据一定规则命名，而且在不同时间段可能存在表结构的变化。因此，要把这些不同时间段的同一类数据导入到 DolphinDB
+                    同一张表中，需要考虑到所有变化，并设计出兼容所有数据的库表结构。本部分详细介绍通联原始数据文件在不同时间段的文件名与含义，以及与 DolphinDB
+                    数据库表的映射关系。其中文件名涉及到日期表示的以 <strong class="+ topic/ph hi-d/b ph b">20231007</strong> 为例：</p>
+                <div class="table-container"><table class="- topic/table table frame-all" id="topic_icb_g5f_42c__table_vv5_rvf_42c" data-ofbid="topic_icb_g5f_42c__table_vv5_rvf_42c" data-cols="4"><caption></caption><colgroup><col style="width:24.213075060532688%"/><col style="width:24.213075060532688%"/><col style="width:27.360774818401936%"/><col style="width:24.213075060532688%"/></colgroup><thead class="- topic/thead thead">
+                            <tr class="- topic/row">
+                                <th class="- topic/entry entry align-left colsep-1 rowsep-1" id="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__1"><strong class="+ topic/ph hi-d/b ph b">默认导入数据库名</strong></th>
+                                <th class="- topic/entry entry align-left colsep-1 rowsep-1" id="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__2"><strong class="+ topic/ph hi-d/b ph b">默认导入数据表名（数据表含义）</strong></th>
+                                <th class="- topic/entry entry align-left colsep-1 rowsep-1" id="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__3"><strong class="+ topic/ph hi-d/b ph b">文件名</strong></th>
+                                <th class="- topic/entry entry align-left colsep-0 rowsep-1" id="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__4"><strong class="+ topic/ph hi-d/b ph b">文件描述</strong></th>
+                            </tr>
+                        </thead><tbody class="- topic/tbody tbody">
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__1" rowspan="16">
+                                    <p class="- topic/p p">dfs://level2_tl</p>
+                                    <p class="- topic/p p"> </p>
+                                </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__2" rowspan="3">
+                                    <p class="- topic/p p">entrust（沪深股票委托）</p>
+                                    <p class="- topic/p p"> </p>
+                                </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__3">20231007_Order.csv</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__4">深交所股票逐笔委托(<strong class="+ topic/ph hi-d/b ph b">201005-20160506</strong>)</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__3">mdl_6_33_0.csv</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__4">深交所股票逐笔委托(<strong class="+ topic/ph hi-d/b ph b">20160507及之后</strong>)</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__3">mdl_4_19_0.csv</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__4">上交所股票逐笔委托(<strong class="+ topic/ph hi-d/b ph b">20210607-20231126</strong>)</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__2">entrust/trade（上交所股票委托和股票快照）</td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__3">mdl_4_24_0.csv</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__4">上交所股票合并逐笔(<strong class="+ topic/ph hi-d/b ph b">20231127新增)</strong></td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__2" rowspan="7">
+                                    <p class="- topic/p p">snapshot（股票快照）</p>
+                                    <p class="- topic/p p"> </p>
+                                </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__3">MarketData.csv</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__4">深交所股票快照行情(<strong class="+ topic/ph hi-d/b ph b">201005-20160506</strong>)</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__3">OrderQueue.csv</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__4">深交所股票最优买卖价前50笔委托(<strong class="+ topic/ph hi-d/b ph b">201005-20160506</strong>)</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__3">mdl_6_28_0.csv</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__4">深交所股票快照行情(<strong class="+ topic/ph hi-d/b ph b">20160507及之后)</strong></td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__3">mdl_6_28_1.csv</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__4">深交所股票最优卖价前50笔委托(<strong class="+ topic/ph hi-d/b ph b">20160507及之后</strong>)</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__3">mdl_6_28_2.csv</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__4">深交所股票最优买价前50笔委托(<strong class="+ topic/ph hi-d/b ph b">20160507及之后</strong>)</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__3">20231017_MarketData.csv</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__4">上交所股票快照行情</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__3">20231017_OrderQueue.csv</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__4">上交所股票最优买卖价前50委托</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__2" rowspan="4">
+                                    <p class="- topic/p p">trade（股票成交）</p>
+                                    <p class="- topic/p p"> </p>
+                                </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__3">mdl_6_36_0.csv</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__4">深交所股票逐笔成交(<strong class="+ topic/ph hi-d/b ph b">20160507及之后</strong>)</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__3">20231017_Trade.csv</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__4">深交所股票逐笔成交(<strong class="+ topic/ph hi-d/b ph b">201005-20160506</strong>)</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__3">20231017_Transaction</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__4">上交所股票逐笔成交</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__3">mdl_4_17_0.csv</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__4">上交所股票盘后固定价格交易逐笔成交</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__2">equityMf（权益分钟线数据）</td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__3">equity_mf20231017.txt</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__4">权益分钟线因子</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__1" rowspan="6">dfs://level2_tlExtra</td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__2" rowspan="2">index（沪深指数数据）</td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__3">mdl_6_29_0.csv</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__4">深交所指数快照行情</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__3">20231017_Index.csv</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__4">上交所指数快照行情</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__2" rowspan="2">afterTrade（沪深盘后数据）</td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__3">mdl_6_31_0.csv</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__4">深交所盘后定价交易业务行情快照</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__3">mdl_4_16_0.csv</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__4">上交所盘后固定价格交易行情快照</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__2">szTradeStat（深交所成交量统计指标）</td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__3">mdl_6_30_0.csv</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__4">深交所成交量统计指标</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__2">etfSellBuy（深交所 ETF 行情数据）</td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__3">mdl_6_50_0.csv</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__4">深交所 ETF 实时申赎行情</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__1" rowspan="7">dfs://level2_tlBond</td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__2">entrust/trade（上交所债券逐笔委托和成交）</td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__3">mdl_4_21_0.csv</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__4">上交所债券逐笔委托和成交</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__2">entrust（深交所债券逐笔委托）</td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__3">mdl_6_43_0.csv</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__4">深交所债券逐笔委托</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__2">trade（深交所债券逐笔成交）</td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__3">mdl_6_44_0.csv</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__4">深交所债券逐笔成交</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__2" rowspan="4">snapshot（沪深债券快照数据）</td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__3">mdl_4_20_0.csv</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__4">上交所债券快照行情</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__3">mdl_4_22_0.csv</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__4">上交所债券最优买卖价前50笔委托</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__3">mdl_6_42_0.csv</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__4">深交所债券行情快照</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__3">mdl_6_47_0.csv</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__4">深交所债券最优买卖价前50笔委托</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__1" rowspan="3">dfs://level2_tlPrice1_5Min</td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__2">equityPrice1Min（权益价格 1 分钟线）</td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__3">equity_pricemin20231017.txt</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__4">equity 价格数据1分钟线因子</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__2">equityPrice3Min（权益价格 3 分钟线）</td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__3">equity_price03min20231017.txt</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__4">equity 价格数据3分钟线因子</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__2">equityPrice5Min（权益价格 5 分钟线）</td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__3">equity_price05min20231017.txt</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__4">equity 价格数据5分钟线因子</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__1" rowspan="3">dfs://level2_tlPrice15_60Min</td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__2">equityPrice15Min（权益价格 15 分钟线）</td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__3">equity_price15min20231017.txt</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__4">equity 价格数据15分钟线因子</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__2">equityPrice30Min（权益价格 30 分钟线）</td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__3">equity_price30min20231017.txt</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__4">equity 价格数据30分钟线因子</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__2">equityPrice60Min（权益价格 60 分钟线）</td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__3">equity_price60min20231017.txt</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__4">equity 价格数据60分钟线因子</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__1" rowspan="3">dfs://level2_tlPrice1_5Min</td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__2">bondPrice1Min（债券价格 1 分钟线）</td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__3">bond_pricemin20231017.txt</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__4">bond 价格数据1分钟线因子</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__2">bondPrice3Min（债券价格 3 分钟线）</td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__3">bond_price03min20231017.txt</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__4">bond 价格数据3分钟线因子</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__2">bondPrice5Min（债券价格 5 分钟线）</td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__3">bond_price05min20231017.txt</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__4">bond 价格数据5分钟线因子</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__1" rowspan="3">dfs://level2_tlPrice15_60Min</td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__2">bondPrice15Min（债券价格 15 分钟线）</td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__3">bond_price15min20231017.txt</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__4">bond价格数据15分钟线因子</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__2">bondPrice30Min（债券价格 30 分钟线）</td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__3">bond_price30min20231017.txt</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__4">bond价格数据30分钟线因子</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__2">bondPrice60Min（债券价格 60 分钟线）</td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__3">bond_price60min20231017.txt</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__4">bond价格数据60分钟线因子</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__1" rowspan="3">dfs://level2_tlPrice1_5Min</td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__2">idxPrice1Min（指数价格 1 分钟线）</td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__3">idx_pricemin20231017.txt</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__4">idx价格数据1分钟线因子</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__2">idxPrice3Min（指数价格 3 分钟线）</td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__3">idx_price03min20231017.txt</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__4">idx价格数据3分钟线因子</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__2">idxPrice5Min（指数价格 5 分钟线）</td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__3">idx_price05min20231017.txt</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__4">idx价格数据5分钟线因子</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__1" rowspan="3">dfs://level2_tlPrice15_60Min</td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__2">idxPrice15Min（指数价格 15 分钟线）</td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__3">idx_price15min20231017.txt</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__4">idx价格数据15分钟线因子</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__2">idxPrice30Min（指数价格 30 分钟线）</td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__3">idx_price30min20231017.txt</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__4">idx价格数据30分钟线因子</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__2">idxPrice60Min（指数价格 60 分钟线）</td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__3">idx_price60min20231017.txt</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__4">idx价格数据60分钟线因子</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__1" rowspan="2">dfs://level2_tlFutOptTick</td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__2">optionTick（期权 tick 数据）</td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__3">opt_<strong class="+ topic/ph hi-d/b ph b">[xsge|xsie|xzce|xdce|xgfe|ccfx]</strong>l2_20231017.csv</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__4">上期所、上能所、郑商所、大商所、广期所、中金所的期权tick 行情数据</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__2">futureTick（期货 tick 数据）</td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__3">future_<strong class="+ topic/ph hi-d/b ph b">[xsge|xsie|xzce|xdce|xgfe|ccfx]</strong>l2_20231017.csv</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__4">上期所、上能所、郑商所、大商所、广期所、中金所的期货tick行情数据</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__1" rowspan="5">dfs://level2_tlFutOptOthers</td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__2">optionTqs（期权成交量统计）</td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__3">opttqs_<strong class="+ topic/ph hi-d/b ph b">[xdce|xgfe]</strong>l2_20231017.csv</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__4">大商所、广期所的期权成交量统计</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__2">optionOrderq（期权最优价十笔委托）</td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__3">optorderq_<strong class="+ topic/ph hi-d/b ph b">[xdce|xgfe]</strong>l2_20231017.csv</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__4">大商所、广期所的期权最优价十笔委托</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__2">futureCmb（期货组合行情）</td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__3">futcmb_<strong class="+ topic/ph hi-d/b ph b">[xzce|xdce|xgfe]</strong>l2_20231017.csv</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__4">郑商所、大商所、广期所的期货组合行情</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__2">futureTqs（期货成交量统计）</td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__3">futtqs_<strong class="+ topic/ph hi-d/b ph b">[xdce|xgfe]</strong>l2_20231017.csv</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__4">大商所、广期所的期货成交量统计</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__2">futureOrderq（期货最优价十笔委托）</td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__3">futorderq_<strong class="+ topic/ph hi-d/b ph b">[xdce|xgfe]</strong>l2_20231017.csv</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__4">大商所、广期所的期货最优价十笔委托</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__1">dfs://level2_tlFutL1</td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__2">futureL1（期货L1数据）</td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__3">future_price20231017.zip(解压后存在多个数据文件)</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__4">期货 L1 数据</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-0" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__1">dfs://level2_tlFutMins</td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-0" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__2">min1（期货数据1分钟线）</td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-0" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__3">future_pricemin20231017.zip(解压后存在多个数据文件)</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="topic_icb_g5f_42c__table_vv5_rvf_42c__entry__4">期货1分钟线数据</td>
+                            </tr>
+                        </tbody></table></div>
+            </div>
+        </article>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title14" id="topic_cjb_g5f_42c">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title14">4.2 部分数据表结构</h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p">以下列出了通联数据中股票逐笔委托、行情快照、逐笔成交表的详细字段名、字段类型和字段含义。</p>
+                <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">股票委托(dfs://level2_tl : entrust)</strong></p>
+                <div class="table-container"><table class="- topic/table table frame-all" id="topic_cjb_g5f_42c__table_dn3_vvf_42c" data-ofbid="topic_cjb_g5f_42c__table_dn3_vvf_42c" data-cols="3"><caption></caption><colgroup><col/><col/><col/></colgroup><thead class="- topic/thead thead">
+                            <tr class="- topic/row">
+                                <th class="- topic/entry entry align-left colsep-1 rowsep-1" id="topic_cjb_g5f_42c__table_dn3_vvf_42c__entry__1">字段名</th>
+                                <th class="- topic/entry entry align-left colsep-1 rowsep-1" id="topic_cjb_g5f_42c__table_dn3_vvf_42c__entry__2">字段类型</th>
+                                <th class="- topic/entry entry align-left colsep-0 rowsep-1" id="topic_cjb_g5f_42c__table_dn3_vvf_42c__entry__3">字段含义</th>
+                            </tr>
+                        </thead><tbody class="- topic/tbody tbody">
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_dn3_vvf_42c__entry__1">ChannelNo </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_dn3_vvf_42c__entry__2">INT </td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_cjb_g5f_42c__table_dn3_vvf_42c__entry__3">频道代码</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_dn3_vvf_42c__entry__1">ApplSeqNum </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_dn3_vvf_42c__entry__2">LONG </td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_cjb_g5f_42c__table_dn3_vvf_42c__entry__3">消息记录号，从 1 开始计数</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_dn3_vvf_42c__entry__1">MDStreamID </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_dn3_vvf_42c__entry__2">INT </td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_cjb_g5f_42c__table_dn3_vvf_42c__entry__3">
+                                    <p class="- topic/p p">行情类别：</p>
+                                    <ul class="- topic/ul ul" id="topic_cjb_g5f_42c__ul_hn3_vvf_42c" data-ofbid="topic_cjb_g5f_42c__ul_hn3_vvf_42c">
+                                        <li class="- topic/li li">011 现货（股票，基金，债券等）集中竞价交易逐笔行情</li>
+                                        <li class="- topic/li li">021 质押式回购交易逐笔行情</li>
+                                    </ul>
+                                </td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_dn3_vvf_42c__entry__1">SecurityID </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_dn3_vvf_42c__entry__2">SYMBOL </td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_cjb_g5f_42c__table_dn3_vvf_42c__entry__3">证券代码</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_dn3_vvf_42c__entry__1">SecurityIDSource </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_dn3_vvf_42c__entry__2">INT </td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_cjb_g5f_42c__table_dn3_vvf_42c__entry__3">证券代码源</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_dn3_vvf_42c__entry__1">Price </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_dn3_vvf_42c__entry__2">DOUBLE </td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_cjb_g5f_42c__table_dn3_vvf_42c__entry__3">委托价格</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_dn3_vvf_42c__entry__1">OrderQty </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_dn3_vvf_42c__entry__2">INT </td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_cjb_g5f_42c__table_dn3_vvf_42c__entry__3">委托数量</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_dn3_vvf_42c__entry__1">Side </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_dn3_vvf_42c__entry__2">SYMBOL </td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_cjb_g5f_42c__table_dn3_vvf_42c__entry__3">
+                                    <p class="- topic/p p">买卖方向：</p>
+                                    <ul class="- topic/ul ul" id="topic_cjb_g5f_42c__ul_in3_vvf_42c" data-ofbid="topic_cjb_g5f_42c__ul_in3_vvf_42c">
+                                        <li class="- topic/li li">深交所：<ul class="- topic/ul ul" id="topic_cjb_g5f_42c__ul_jn3_vvf_42c" data-ofbid="topic_cjb_g5f_42c__ul_jn3_vvf_42c">
+                                                <li class="- topic/li li">B -买单</li>
+                                                <li class="- topic/li li">S -卖单</li>
+                                            </ul></li>
+                                        <li class="- topic/li li">上交所：<ul class="- topic/ul ul" id="topic_cjb_g5f_42c__ul_kn3_vvf_42c" data-ofbid="topic_cjb_g5f_42c__ul_kn3_vvf_42c">
+                                                <li class="- topic/li li">若为新增或删除委托订单：<ul class="- topic/ul ul" id="topic_cjb_g5f_42c__ul_ln3_vvf_42c" data-ofbid="topic_cjb_g5f_42c__ul_ln3_vvf_42c">
+                                                  <li class="- topic/li li">B -买单</li>
+                                                  <li class="- topic/li li">S -卖单</li>
+                                                  </ul></li>
+                                                <li class="- topic/li li">若为产品状态订单：<ul class="- topic/ul ul" id="topic_cjb_g5f_42c__ul_mn3_vvf_42c" data-ofbid="topic_cjb_g5f_42c__ul_mn3_vvf_42c">
+                                                  <li class="- topic/li li">START 启动</li>
+                                                  <li class="- topic/li li">OCALL 开市集合竞价</li>
+                                                  <li class="- topic/li li">TRADE 连续自动撮合</li>
+                                                  <li class="- topic/li li">SUSP 停牌</li>
+                                                  <li class="- topic/li li">CCALL 收盘集合竞价</li>
+                                                  <li class="- topic/li li">CLOSE 闭市</li>
+                                                  <li class="- topic/li li">ENDTR 交易结束</li>
+                                                  </ul></li>
+                                            </ul></li>
+                                    </ul>
+                                </td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_dn3_vvf_42c__entry__1">TradeTime </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_dn3_vvf_42c__entry__2">TIMESTAMP </td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_cjb_g5f_42c__table_dn3_vvf_42c__entry__3">委托时间</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_dn3_vvf_42c__entry__1">OrderType </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_dn3_vvf_42c__entry__2">SYMBOL </td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_cjb_g5f_42c__table_dn3_vvf_42c__entry__3">
+                                    <p class="- topic/p p">订单类别：</p>
+                                    <ul class="- topic/ul ul" id="topic_cjb_g5f_42c__ul_nn3_vvf_42c" data-ofbid="topic_cjb_g5f_42c__ul_nn3_vvf_42c">
+                                        <li class="- topic/li li">深交所：<ul class="- topic/ul ul" id="topic_cjb_g5f_42c__ul_on3_vvf_42c" data-ofbid="topic_cjb_g5f_42c__ul_on3_vvf_42c">
+                                                <li class="- topic/li li">‘1’=市价</li>
+                                                <li class="- topic/li li">‘2’=限价</li>
+                                                <li class="- topic/li li">‘U’=本方最优</li>
+                                            </ul></li>
+                                        <li class="- topic/li li">上交所：<ul class="- topic/ul ul" id="topic_cjb_g5f_42c__ul_pn3_vvf_42c" data-ofbid="topic_cjb_g5f_42c__ul_pn3_vvf_42c">
+                                                <li class="- topic/li li">A-新增委托订单</li>
+                                                <li class="- topic/li li">D-删除委托订单</li>
+                                            </ul></li>
+                                    </ul>
+                                </td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_dn3_vvf_42c__entry__1">OrderIndex </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_dn3_vvf_42c__entry__2">INT </td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_cjb_g5f_42c__table_dn3_vvf_42c__entry__3">委托序号</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_dn3_vvf_42c__entry__1">LocalTime </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_dn3_vvf_42c__entry__2">TIME </td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_cjb_g5f_42c__table_dn3_vvf_42c__entry__3">接收时间戳</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_dn3_vvf_42c__entry__1">SeqNo </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_dn3_vvf_42c__entry__2">LONG </td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_cjb_g5f_42c__table_dn3_vvf_42c__entry__3">接收序列号</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_dn3_vvf_42c__entry__1">Market </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_dn3_vvf_42c__entry__2">SYMBOL </td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_cjb_g5f_42c__table_dn3_vvf_42c__entry__3">交易所代号：sz | sh</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_dn3_vvf_42c__entry__1">DataStatus </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_dn3_vvf_42c__entry__2">INT </td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_cjb_g5f_42c__table_dn3_vvf_42c__entry__3">数据状态</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_dn3_vvf_42c__entry__1">BizIndex </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_dn3_vvf_42c__entry__2">LONG </td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_cjb_g5f_42c__table_dn3_vvf_42c__entry__3">业务序列号</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-0" headers="topic_cjb_g5f_42c__table_dn3_vvf_42c__entry__1">TradedQty </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-0" headers="topic_cjb_g5f_42c__table_dn3_vvf_42c__entry__2">DOUBLE </td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="topic_cjb_g5f_42c__table_dn3_vvf_42c__entry__3">已成交的委托数量</td>
+                            </tr>
+                        </tbody></table></div>
+                <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">股票快照(dfs://level2_tl : snapshot)</strong></p>
+                <div class="table-container"><table class="- topic/table table frame-all" id="topic_cjb_g5f_42c__table_jgg_wvf_42c" data-ofbid="topic_cjb_g5f_42c__table_jgg_wvf_42c" data-cols="3"><caption></caption><colgroup><col/><col/><col/></colgroup><thead class="- topic/thead thead">
+                            <tr class="- topic/row">
+                                <th class="- topic/entry entry align-left colsep-1 rowsep-1" id="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__1">字段名</th>
+                                <th class="- topic/entry entry align-left colsep-1 rowsep-1" id="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__2">字段类型</th>
+                                <th class="- topic/entry entry align-left colsep-0 rowsep-1" id="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__3">字段含义</th>
+                            </tr>
+                        </thead><tbody class="- topic/tbody tbody">
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__1">Market </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__2">SYMBOL </td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__3">交易所代号：sz | sh</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__1">TradeTime </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__2">TIMESTAMP </td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__3">数据生成时间</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__1">MDStreamID </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__2">INT </td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__3">
+                                    <p class="- topic/p p">行情类别:</p>
+                                    <ul class="- topic/ul ul" id="topic_cjb_g5f_42c__ul_ngg_wvf_42c" data-ofbid="topic_cjb_g5f_42c__ul_ngg_wvf_42c">
+                                        <li class="- topic/li li">010 现货（股票，基金，债券等）集中竞价交易快照行</li>
+                                        <li class="- topic/li li">020 质押式回购交易快照行情</li>
+                                        <li class="- topic/li li">030 债券分销快照行情</li>
+                                    </ul>
+                                </td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__1">SecurityID </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__2">SYMBOL </td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__3">证券代码</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__1">NumImageStatus </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__2">INT </td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__3">
+                                    <p class="- topic/p p">快照状态（2015.08.24 之前值为空）：</p>
+                                    <ul class="- topic/ul ul" id="topic_cjb_g5f_42c__ul_ogg_wvf_42c" data-ofbid="topic_cjb_g5f_42c__ul_ogg_wvf_42c">
+                                        <li class="- topic/li li">1: 全量行情</li>
+                                        <li class="- topic/li li">2: 增量行情，客户端不会接收到该值</li>
+                                        <li class="- topic/li li">3: 增量和上一次全量合并后的行情</li>
+                                    </ul>
+                                </td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__1">SecurityIDSource </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__2">INT </td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__3">证券代码源</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__1">TradingPhaseCode </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__2">SYMBOL </td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__3">
+                                    <p class="- topic/p p">产品所处的交易阶段代码</p>
+                                    <ul class="- topic/ul ul" id="topic_cjb_g5f_42c__ul_pgg_wvf_42c" data-ofbid="topic_cjb_g5f_42c__ul_pgg_wvf_42c">
+                                        <li class="- topic/li li">第 0 位：<ul class="- topic/ul ul" id="topic_cjb_g5f_42c__ul_qgg_wvf_42c" data-ofbid="topic_cjb_g5f_42c__ul_qgg_wvf_42c">
+                                                <li class="- topic/li li">S=启动（开市前）</li>
+                                                <li class="- topic/li li">O=开盘集合竞价</li>
+                                                <li class="- topic/li li">T=连续竞价</li>
+                                                <li class="- topic/li li">B=休市</li>
+                                                <li class="- topic/li li">C=收盘集合竞价</li>
+                                                <li class="- topic/li li">E=已闭市</li>
+                                                <li class="- topic/li li">H=临时停牌</li>
+                                                <li class="- topic/li li">A=盘后交易</li>
+                                                <li class="- topic/li li">V=波动性中断</li>
+                                            </ul></li>
+                                        <li class="- topic/li li">第 1 位：<ul class="- topic/ul ul" id="topic_cjb_g5f_42c__ul_rgg_wvf_42c" data-ofbid="topic_cjb_g5f_42c__ul_rgg_wvf_42c">
+                                                <li class="- topic/li li">0=正常状态</li>
+                                                <li class="- topic/li li">1=全天停牌</li>
+                                            </ul></li>
+                                    </ul>
+                                </td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__1">PreCloPrice </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__2">DOUBLE </td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__3">昨收价</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__1">NumTrades </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__2">INT </td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__3">成交笔数</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__1">TotalVolumeTrade </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__2">LONG </td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__3">成交总量</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__1">TotalValueTrade </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__2">DOUBLE </td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__3">成交总金额</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__1">LastPrice </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__2">DOUBLE </td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__3">最新价</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__1">OpenPrice </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__2">DOUBLE </td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__3">开盘价</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__1">HighPrice </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__2">DOUBLE </td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__3">最高价</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__1">LowPrice </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__2">DOUBLE </td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__3">最低价</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__1">ClosePrice </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__2">DOUBLE </td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__3">今收盘价</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__1">DifPrice1 </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__2">DOUBLE </td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__3">升跌 1（最新价-昨收价）</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__1">DifPrice2 </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__2">DOUBLE </td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__3">升跌 2（最新价-上一最新价）</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__1">PE1 </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__2">DOUBLE </td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__3">股票市盈率 1</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__1">PE2 </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__2">DOUBLE </td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__3">股票市盈率 2</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__1">PreCloseIOPV </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__2">DOUBLE </td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__3">基金 T-1 日净值</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__1">IOPV </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__2">DOUBLE </td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__3">基金实时参考净值（包括 ETF的 IOPV）</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__1">TotalBidQty </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__2">LONG </td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__3">委托买入总量（有效竞价范围内）</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__1">WeightedAvgBidPx </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__2">DOUBLE </td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__3">加权平均买入价格（有效竞价范围内）</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__1">TotalOfferQty </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__2">LONG </td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__3">委托卖出总量（有效竞价范围内）</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__1">WeightedAvgOfferPx </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__2">DOUBLE </td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__3">加权平均卖出价格（有效竞价范围内）</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__1">UpLimitPx </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__2">DOUBLE </td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__3">涨停价，999999999.9999 表示无涨停价格限制。</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__1">DownLimitPx </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__2">DOUBLE </td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__3">跌停价，对于价格可以为负数的业务，-999999999.9999
+                                    表示无跌停价格限制</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__1">OpenInt </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__2">LONG </td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__3">持仓量</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__1">OptPremiumRatio </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__2">DOUBLE </td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__3">权证溢价率</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__1">OfferPrice </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__2">DOUBLE[] </td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__3">申卖价10档</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__1">BidPrice </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__2">DOUBLE[] </td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__3">申买价10档</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__1">OfferOrderQty </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__2">LONG[] </td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__3">申卖量10档</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__1">BidOrderQty </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__2">LONG[] </td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__3">申买量10档</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__1">BidNumOrders </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__2">LONG[] </td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__3">申买委托笔数10档</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__1">OfferNumOrders </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__2">LONG[] </td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__3">申卖委托笔数10档</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__1">ETFBuyNumber </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__2">INT </td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__3">ETF 申购笔数</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__1">ETFBuyAmount </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__2">LONG </td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__3">ETF 申购数量</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__1">ETFBuyMoney </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__2">DOUBLE </td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__3">ETF 申购金额</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__1">ETFSellNumber </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__2">INT </td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__3">ETF 赎回笔数</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__1">ETFSellAmount </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__2">LONG </td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__3">ETF 赎回数量</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__1">ETFSellMoney </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__2">DOUBLE </td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__3">ETF 赎回金额</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__1">YieldToMatu </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__2">DOUBLE </td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__3">债券到期收益率</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__1">WithdrawBuyNumber </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__2">INT </td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__3">买入撤单笔数</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__1">WithdrawBuyAmount </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__2">LONG </td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__3">买入撤单数量</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__1">WithdrawBuyMoney </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__2">DOUBLE </td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__3">买入撤单金额</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__1">WithdrawSellNumber </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__2">INT </td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__3">卖出撤单笔数</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__1">WithdrawSellAmount </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__2">LONG </td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__3">卖出撤单数量</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__1">WithdrawSellMoney </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__2">DOUBLE </td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__3">卖出撤单金额</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__1">TotalBidNumber </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__2">INT </td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__3">买入总笔数</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__1">TotalOfferNumber </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__2">INT </td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__3">卖出总笔数</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__1">MaxBidDur </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__2">INT </td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__3">买入委托成交最大等待时间</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__1">MaxSellDur </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__2">INT </td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__3">卖出委托最大等待时间</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__1">BidNum </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__2">INT </td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__3">买方委托价位数</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__1">SellNum </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__2">INT </td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__3">卖方委托价位数</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__1">LocalTime </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__2">TIME </td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__3">接收时间戳</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__1">SeqNo </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__2">INT </td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__3">接收序列号</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__1">OfferOrders </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__2">LONG[] </td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__3">委卖量50档</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-0" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__1">BidOrders </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-0" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__2">LONG[] </td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="topic_cjb_g5f_42c__table_jgg_wvf_42c__entry__3">委买量50档</td>
+                            </tr>
+                        </tbody></table></div>
+                <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">股票成交(dfs://level2_tl : trade)</strong></p>
+                <div class="table-container"><table class="- topic/table table frame-all" id="topic_cjb_g5f_42c__table_oqv_wvf_42c" data-ofbid="topic_cjb_g5f_42c__table_oqv_wvf_42c" data-cols="3"><caption></caption><colgroup><col/><col/><col/></colgroup><thead class="- topic/thead thead">
+                            <tr class="- topic/row">
+                                <th class="- topic/entry entry align-left colsep-1 rowsep-1" id="topic_cjb_g5f_42c__table_oqv_wvf_42c__entry__1">字段名</th>
+                                <th class="- topic/entry entry align-left colsep-1 rowsep-1" id="topic_cjb_g5f_42c__table_oqv_wvf_42c__entry__2">字段类型</th>
+                                <th class="- topic/entry entry align-left colsep-0 rowsep-1" id="topic_cjb_g5f_42c__table_oqv_wvf_42c__entry__3">字段含义</th>
+                            </tr>
+                        </thead><tbody class="- topic/tbody tbody">
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_oqv_wvf_42c__entry__1">ChannelNo </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_oqv_wvf_42c__entry__2">INT </td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_cjb_g5f_42c__table_oqv_wvf_42c__entry__3">频道代码</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_oqv_wvf_42c__entry__1">ApplSeqNum </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_oqv_wvf_42c__entry__2">LONG </td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_cjb_g5f_42c__table_oqv_wvf_42c__entry__3">消息记录号，从 1 开始计数</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_oqv_wvf_42c__entry__1">MDStreamID </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_oqv_wvf_42c__entry__2">INT </td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_cjb_g5f_42c__table_oqv_wvf_42c__entry__3">行情类别：<ul class="- topic/ul ul" id="topic_cjb_g5f_42c__ul_sqv_wvf_42c" data-ofbid="topic_cjb_g5f_42c__ul_sqv_wvf_42c">
+                                        <li class="- topic/li li">011 现货（股票，基金，债券等）集中竞价交易逐笔行情</li>
+                                        <li class="- topic/li li">021 质押式回购交易逐笔行情</li>
+                                    </ul></td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_oqv_wvf_42c__entry__1">BidApplSeqNum </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_oqv_wvf_42c__entry__2">INT </td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_cjb_g5f_42c__table_oqv_wvf_42c__entry__3">买方委托索引：从 1 开始计数， 0 表示无对应委托</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_oqv_wvf_42c__entry__1">OfferApplSeqNum </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_oqv_wvf_42c__entry__2">INT </td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_cjb_g5f_42c__table_oqv_wvf_42c__entry__3">卖方委托索引：从 1 开始计数， 0 表示无对应委托</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_oqv_wvf_42c__entry__1">SecurityID </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_oqv_wvf_42c__entry__2">SYMBOL </td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_cjb_g5f_42c__table_oqv_wvf_42c__entry__3">证券代码</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_oqv_wvf_42c__entry__1">SecurityIDSource </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_oqv_wvf_42c__entry__2">INT </td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_cjb_g5f_42c__table_oqv_wvf_42c__entry__3">证券代码源</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_oqv_wvf_42c__entry__1">TradePrice </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_oqv_wvf_42c__entry__2">DOUBLE </td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_cjb_g5f_42c__table_oqv_wvf_42c__entry__3">成交价格</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_oqv_wvf_42c__entry__1">TradeQty </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_oqv_wvf_42c__entry__2">LONG </td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_cjb_g5f_42c__table_oqv_wvf_42c__entry__3">成交数量</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_oqv_wvf_42c__entry__1">ExecType </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_oqv_wvf_42c__entry__2">INT </td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_cjb_g5f_42c__table_oqv_wvf_42c__entry__3">成交类别：<ul class="- topic/ul ul" id="topic_cjb_g5f_42c__ul_tqv_wvf_42c" data-ofbid="topic_cjb_g5f_42c__ul_tqv_wvf_42c">
+                                        <li class="- topic/li li">‘4’=撤销 (本地 ASCII 码自动转码为 52)</li>
+                                        <li class="- topic/li li">‘F’=成交 (本地 ASCII 码自动转码为 70)</li>
+                                    </ul></td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_oqv_wvf_42c__entry__1">TradeTime </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_oqv_wvf_42c__entry__2">TIMESTAMP </td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_cjb_g5f_42c__table_oqv_wvf_42c__entry__3">成交时间</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_oqv_wvf_42c__entry__1">LocalTime </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_oqv_wvf_42c__entry__2">TIME </td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_cjb_g5f_42c__table_oqv_wvf_42c__entry__3">接收时间戳</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_oqv_wvf_42c__entry__1">SeqNo </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_oqv_wvf_42c__entry__2">INT </td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_cjb_g5f_42c__table_oqv_wvf_42c__entry__3">接收序列号</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_oqv_wvf_42c__entry__1">TradeBSFlag </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_oqv_wvf_42c__entry__2">SYMBOL </td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_cjb_g5f_42c__table_oqv_wvf_42c__entry__3">标识：<ul class="- topic/ul ul" id="topic_cjb_g5f_42c__ul_uqv_wvf_42c" data-ofbid="topic_cjb_g5f_42c__ul_uqv_wvf_42c">
+                                        <li class="- topic/li li">B 外盘 主动买</li>
+                                        <li class="- topic/li li">S 内盘 主动卖</li>
+                                        <li class="- topic/li li">N 未知</li>
+                                    </ul></td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_oqv_wvf_42c__entry__1">Market </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_oqv_wvf_42c__entry__2">SYMBOL </td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_cjb_g5f_42c__table_oqv_wvf_42c__entry__3">交易所代号：sz | sh</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_oqv_wvf_42c__entry__1">DataStatus </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_oqv_wvf_42c__entry__2">INT </td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_cjb_g5f_42c__table_oqv_wvf_42c__entry__3">数据状态</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_oqv_wvf_42c__entry__1">TradeIndex </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_oqv_wvf_42c__entry__2">INT </td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_cjb_g5f_42c__table_oqv_wvf_42c__entry__3">成交序号</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_oqv_wvf_42c__entry__1">TradeMoney </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_cjb_g5f_42c__table_oqv_wvf_42c__entry__2">DOUBLE </td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_cjb_g5f_42c__table_oqv_wvf_42c__entry__3">成交金额</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-0" headers="topic_cjb_g5f_42c__table_oqv_wvf_42c__entry__1">BizIndex </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-0" headers="topic_cjb_g5f_42c__table_oqv_wvf_42c__entry__2">LONG </td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="topic_cjb_g5f_42c__table_oqv_wvf_42c__entry__3">逐笔序号：从 1 开始，按 Channel 连续</td>
+                            </tr>
+                        </tbody></table></div>
+            </div>
+        </article>
+    </article>
+    <article class="- topic/topic topic nested1" aria-labelledby="ariaid-title15" id="topic_pbl_f5f_42c">
+        <h2 class="- topic/title title topictitle2" id="ariaid-title15">5. 常见问题</h2>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title16" id="topic_ncg_g5f_42c">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title16">5.1 是否可以并发执行同一时间段多个数据导入任务？</h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p">可以。</p>
+                <p class="- topic/p p">假设要将 2023.01.01 - 2023.11.01 这一时间段内的股票委托数据、股票快照数据、股票成交数据、指数数据、盘后数据以及 equity
+                    分钟线数据同时导入 DolphinDB 。由于每个任务导入不同的数据表，不会产生冲突，因此修改参数之后就可以直接通过后台任务并发执行多个数据导入任务。</p>
+                <p class="- topic/p p">需要注意的是，在并发导入过程中应<strong class="+ topic/ph hi-d/b ph b">注意内存情况</strong>，避免产生内存溢出。</p>
+            </div>
+        </article>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title17" id="topic_z3g_g5f_42c">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title17">5.2 是否可以根据时间段的不同，并发执行同一数据导入任务？</h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p">依情况而定。</p>
+                <p class="- topic/p p">DolphinDB
+                    按分区存储数据。当一个写入任务涉及多个分区时，系统会首先锁定这些分区。如果在该任务完成之前，其他写入任务也涉及这些分区，由于锁定状态，这些任务会因分区冲突而报错
+                        <a class="- topic/xref xref" href="../error_codes/S00002.html">S00002</a>，从而导致任务失败。</p>
+                <p class="- topic/p p">尽管数据导入任务已根据不同时间段划分，但仍可能出现因同时写入同一分区而导致冲突的情况。接下来，我们将介绍每个库的分区类型，并探讨如何设计并发任务以避免分区冲突。</p>
+                <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">分区类型</strong></p>
+                <div class="table-container"><table class="- topic/table table frame-all" id="topic_z3g_g5f_42c__table_lrz_3wf_42c" data-ofbid="topic_z3g_g5f_42c__table_lrz_3wf_42c" data-cols="3"><caption></caption><colgroup><col/><col/><col/></colgroup><thead class="- topic/thead thead">
+                            <tr class="- topic/row">
+                                <th class="- topic/entry entry align-left colsep-1 rowsep-1" id="topic_z3g_g5f_42c__table_lrz_3wf_42c__entry__1">库名</th>
+                                <th class="- topic/entry entry align-left colsep-1 rowsep-1" id="topic_z3g_g5f_42c__table_lrz_3wf_42c__entry__2">分区类型</th>
+                                <th class="- topic/entry entry align-left colsep-0 rowsep-1" id="topic_z3g_g5f_42c__table_lrz_3wf_42c__entry__3">时间分区粒度</th>
+                            </tr>
+                        </thead><tbody class="- topic/tbody tbody">
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_z3g_g5f_42c__table_lrz_3wf_42c__entry__1">dfs://level2_tl</td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_z3g_g5f_42c__table_lrz_3wf_42c__entry__2">复合分区，第一层为按日划分的值分区，第二层为按证券代号划分的哈希分区</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_z3g_g5f_42c__table_lrz_3wf_42c__entry__3">日</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_z3g_g5f_42c__table_lrz_3wf_42c__entry__1">dfs://level2_tlBond</td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_z3g_g5f_42c__table_lrz_3wf_42c__entry__2">复合分区，第一层为按日划分的值分区，第二层为按证券代号划分的哈希分区</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_z3g_g5f_42c__table_lrz_3wf_42c__entry__3">日</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_z3g_g5f_42c__table_lrz_3wf_42c__entry__1">dfs://level2_tlExtra</td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_z3g_g5f_42c__table_lrz_3wf_42c__entry__2">按日划分的值分区</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_z3g_g5f_42c__table_lrz_3wf_42c__entry__3">日</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_z3g_g5f_42c__table_lrz_3wf_42c__entry__1">dfs://level2_tlEquity1_5Min</td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_z3g_g5f_42c__table_lrz_3wf_42c__entry__2">按月划分的值分区</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_z3g_g5f_42c__table_lrz_3wf_42c__entry__3">月</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_z3g_g5f_42c__table_lrz_3wf_42c__entry__1">dfs://level2_tlEquity15_60Min</td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_z3g_g5f_42c__table_lrz_3wf_42c__entry__2">按年划分的范围分区</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_z3g_g5f_42c__table_lrz_3wf_42c__entry__3">年</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_z3g_g5f_42c__table_lrz_3wf_42c__entry__1">dfs://level2_tlETF</td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_z3g_g5f_42c__table_lrz_3wf_42c__entry__2">按月划分的值分区</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_z3g_g5f_42c__table_lrz_3wf_42c__entry__3">月</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_z3g_g5f_42c__table_lrz_3wf_42c__entry__1">dfs://level2_tlFutOptTick</td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_z3g_g5f_42c__table_lrz_3wf_42c__entry__2">复合分区，第一层为按日划分的值分区，第二层为按证券代号划分的哈希分区</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_z3g_g5f_42c__table_lrz_3wf_42c__entry__3">日</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_z3g_g5f_42c__table_lrz_3wf_42c__entry__1">dfs://level2_tlFutOptOthers</td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_z3g_g5f_42c__table_lrz_3wf_42c__entry__2">按日划分的值分区</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_z3g_g5f_42c__table_lrz_3wf_42c__entry__3">日</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_z3g_g5f_42c__table_lrz_3wf_42c__entry__1">dfs://level2_tlFutL1</td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_z3g_g5f_42c__table_lrz_3wf_42c__entry__2">按日划分的值分区</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_z3g_g5f_42c__table_lrz_3wf_42c__entry__3">日</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-0" headers="topic_z3g_g5f_42c__table_lrz_3wf_42c__entry__1">dfs://level2_tlFutMins</td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-0" headers="topic_z3g_g5f_42c__table_lrz_3wf_42c__entry__2">按五年划分的范围分区</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="topic_z3g_g5f_42c__table_lrz_3wf_42c__entry__3">五年</td>
+                            </tr>
+                        </tbody></table></div>
+                <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">避免分区冲突</strong></p>
+                <p class="- topic/p p">根据以上每个数据库的分区类型可以得知，dfs://level2_tl 和 dfs://level2_tlExtra
+                    的时间分区粒度为日，所以不用担心分区冲突问题，只需保证多个并发任务之间的时间段不产生重合即可。</p>
+                <p class="- topic/p p">dfs://level2_tlEquity1_5Min 以月分区。为了避免分区冲突，应保证每个任务的导入时间段不产生月份重合。假设任务 A 的导入时间段为
+                        <code class="+ topic/ph pr-d/codeph ph codeph">2023.01.01 - 2023.01.15</code> ，任务B的导入时间段为 <code class="+ topic/ph pr-d/codeph ph codeph">2023.01.16 -
+                        2023.02.15</code> ，会产生分区冲突。应该改为：任务 A 的导入时间段为 <code class="+ topic/ph pr-d/codeph ph codeph">2023.01.01 -
+                        2023.01.31</code> ，任务 B 的导入时间段为 <code class="+ topic/ph pr-d/codeph ph codeph">2023.02.01 -
+                    2023.02.15</code>。</p>
+                <p class="- topic/p p">以此类推，dfs://level2_tlEquity15_60Min 以年分区，为了避免分区冲突，应保证每个任务的导入时间段不产生年份重合，假设任务 A
+                    的导入时间段为 <code class="+ topic/ph pr-d/codeph ph codeph">2023.01.01 - 2023.05.15</code> ，任务B的导入时间段为 <code class="+ topic/ph pr-d/codeph ph codeph">2023.05.16
+                        - 2024.04.15</code>，会产生分区冲突，应该改为：任务 A 的导入时间段为 <code class="+ topic/ph pr-d/codeph ph codeph">2023.01.01 -
+                        2023.12.31</code> ，任务 B 的导入时间段为 <code class="+ topic/ph pr-d/codeph ph codeph">2024.01.01 -
+                    2024.04.15</code>。</p>
+            </div>
+        </article>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title18" id="topic_opg_g5f_42c">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title18">5.3 如何获取具体数据导入任务的运行信息？</h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">前台任务</strong></p>
+                <p class="- topic/p p">以深交所交易统计数据导入为例，通过以下代码获取数据导入任务的运行信息：</p>
+                <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_opg_g5f_42c__codeblock_lrh_lwf_42c" data-ofbid="topic_opg_g5f_42c__codeblock_lrh_lwf_42c"><code>infoTb = loadSZTradeStat(startDate, endDate, loadType)</code></pre>
+                <p class="- topic/p p">这里的 infoTb 为一张表。该表只有一列 msg ，每一行记录深交所交易统计数据导入过程中的每一条运行信息：</p>
+                <div class="table-container"><table class="- topic/table table frame-all" id="topic_opg_g5f_42c__table_rq5_lwf_42c" data-ofbid="topic_opg_g5f_42c__table_rq5_lwf_42c" data-cols="1"><caption></caption><colgroup><col/></colgroup><thead class="- topic/thead thead">
+                            <tr class="- topic/row">
+                                <th class="- topic/entry entry align-left colsep-0 rowsep-1" id="topic_opg_g5f_42c__table_rq5_lwf_42c__entry__1">msg</th>
+                            </tr>
+                        </thead><tbody class="- topic/tbody tbody">
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_opg_g5f_42c__table_rq5_lwf_42c__entry__1">2024.08.08T10:30:09.862 :
+                                    [info]-[szTradeStat]-[20230206_20230206]: ----------------------
+                                    [BEGIN] ----------------------</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_opg_g5f_42c__table_rq5_lwf_42c__entry__1">2024.08.08T10:30:09.904 :
+                                    [info]-[szTradeStat]-[20230206_20230206]:
+                                    开始载入2023.02.06_2023.02.06 [szTradeStat] ...</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_opg_g5f_42c__table_rq5_lwf_42c__entry__1">2024.08.08T10:30:09.905 :
+                                    [warn]-[szTradeStat]-[20230206_20230206]: 2023.02.06 缺失数据文件,
+                                    但是存在相应压缩文件, 共 1 个文件, 正在解压中...</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_opg_g5f_42c__table_rq5_lwf_42c__entry__1">2024.08.08T10:30:10.189 :
+                                    [info]-[szTradeStat]-[20230206_20230206]: 已解压 1 / 1
+                                    个文件...</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_opg_g5f_42c__table_rq5_lwf_42c__entry__1">2024.08.08T10:30:12.190 :
+                                    [info]-[szTradeStat]-[20230206_20230206]: [checkSuccess] 依赖的 csv
+                                    文件全部存在, 准备进行导入操作...</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_opg_g5f_42c__table_rq5_lwf_42c__entry__1">2024.08.08T10:30:12.192 :
+                                    [info]-[szTradeStat]-[20230206_20230206]: 即将导入
+                                    20230206/mdl_6_30_0.csv 到内存...</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_opg_g5f_42c__table_rq5_lwf_42c__entry__1">2024.08.08T10:30:12.244 :
+                                    [info]-[szTradeStat]-[20230206_20230206]: 导入
+                                    20230206/mdl_6_30_0.csv 到内存成功, 即将根据规则处理该表...</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_opg_g5f_42c__table_rq5_lwf_42c__entry__1">2024.08.08T10:30:12.340 :
+                                    [info]-[szTradeStat]-[20230206_20230206]:
+                                    20230206/mdl_6_30_0.csv 处理成功！处理前共 43863 条数据, 处理后共 43863
+                                    条数据...</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_opg_g5f_42c__table_rq5_lwf_42c__entry__1">2024.08.08T10:30:12.342 :
+                                    [info]-[szTradeStat]-[20230206_20230206]:
+                                    库表在当前日期无数据，跳过删除...</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_opg_g5f_42c__table_rq5_lwf_42c__entry__1">2024.08.08T10:30:12.461 :
+                                    [info]-[szTradeStat]-[20230206_20230206]: 成功入库 , 导入:
+                                    dfs://level2_tlExtra szTradeStat 共 43863条数据...</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_opg_g5f_42c__table_rq5_lwf_42c__entry__1">2024.08.08T10:30:12.462 :
+                                    [info]-[szTradeStat]-[20230206_20230206]:
+                                    20230206szTradeStat导入成功！</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_opg_g5f_42c__table_rq5_lwf_42c__entry__1">2024.08.08T10:30:12.464 :
+                                    [info]-[szTradeStat]-[20230206_20230206]: 准备删除已有的 csv 数据文件共 1
+                                    个...</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_opg_g5f_42c__table_rq5_lwf_42c__entry__1">2024.08.08T10:30:12.717 :
+                                    [info]-[szTradeStat]-[20230206_20230206]: 删除成功...</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_opg_g5f_42c__table_rq5_lwf_42c__entry__1">2024.08.08T10:30:12.717 :
+                                    [info]-[szTradeStat]-[20230206_20230206]:
+                                    [success]2023.02.06_2023.02.06szTradeStat载入成功...</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="topic_opg_g5f_42c__table_rq5_lwf_42c__entry__1">2024.08.08T10:30:12.717 :
+                                    [info]-[szTradeStat]-[20230206_20230206]: ----------------------
+                                    [END] ----------------------</td>
+                            </tr>
+                        </tbody></table></div>
+                <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">后台任务和定时任务</strong></p>
+                <ul class="- topic/ul ul" id="topic_opg_g5f_42c__ul_j4g_nwf_42c" data-ofbid="topic_opg_g5f_42c__ul_j4g_nwf_42c">
+                    <li class="- topic/li li">获取后台任务的状态<pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_opg_g5f_42c__codeblock_ps2_4wf_42c" data-ofbid="topic_opg_g5f_42c__codeblock_ps2_4wf_42c"><code>getRecentJobs()</code></pre></li>
+                    <li class="- topic/li li">通过以上函数返回的结果查询所需的 jobId ，再通过以下函数获取相应的运行信息<ul class="- topic/ul ul" id="topic_opg_g5f_42c__ul_wcm_nwf_42c" data-ofbid="topic_opg_g5f_42c__ul_wcm_nwf_42c">
+                            <li class="- topic/li li"><code class="+ topic/ph pr-d/codeph ph codeph">getJobMessage(jobId)</code> ：以字符串形式返回运行信息</li>
+                            <li class="- topic/li li"><code class="+ topic/ph pr-d/codeph ph codeph">getJobReturn(jobId)</code> ：以表的形式返回运行信息</li>
+                        </ul></li>
+                </ul>
+            </div>
+        </article>
+    </article>
+    <article class="- topic/topic topic nested1" aria-labelledby="ariaid-title19" id="topic_u3l_f5f_42c">
+        <h2 class="- topic/title title topictitle2" id="ariaid-title19">附件</h2>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title20" id="topic_yr4_g5f_42c">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title20">数据类别</h3>
+            <div class="- topic/body body">
+                <div class="table-container"><table class="- topic/table table frame-all" id="topic_yr4_g5f_42c__table_exd_pwf_42c" data-ofbid="topic_yr4_g5f_42c__table_exd_pwf_42c" data-cols="2"><caption></caption><colgroup><col/><col/></colgroup><thead class="- topic/thead thead">
+                            <tr class="- topic/row">
+                                <th class="- topic/entry entry align-left colsep-1 rowsep-1" id="topic_yr4_g5f_42c__table_exd_pwf_42c__entry__1"><strong class="+ topic/ph hi-d/b ph b">数据类别名</strong></th>
+                                <th class="- topic/entry entry align-left colsep-0 rowsep-1" id="topic_yr4_g5f_42c__table_exd_pwf_42c__entry__2"><strong class="+ topic/ph hi-d/b ph b">含义</strong></th>
+                            </tr>
+                        </thead><tbody class="- topic/tbody tbody">
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_yr4_g5f_42c__table_exd_pwf_42c__entry__1">Entrust</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_yr4_g5f_42c__table_exd_pwf_42c__entry__2">沪深股票、债券委托数据</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_yr4_g5f_42c__table_exd_pwf_42c__entry__1">Snapshot</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_yr4_g5f_42c__table_exd_pwf_42c__entry__2">沪深股票、债券快照数据</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_yr4_g5f_42c__table_exd_pwf_42c__entry__1">Trade</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_yr4_g5f_42c__table_exd_pwf_42c__entry__2">沪深股票、债券成交数据</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_yr4_g5f_42c__table_exd_pwf_42c__entry__1">Equity</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_yr4_g5f_42c__table_exd_pwf_42c__entry__2">权益数据</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_yr4_g5f_42c__table_exd_pwf_42c__entry__1">Extra</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_yr4_g5f_42c__table_exd_pwf_42c__entry__2">沪深指数、盘后、深交所成交量统计指标数据</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_yr4_g5f_42c__table_exd_pwf_42c__entry__1">ETFBuySell</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_yr4_g5f_42c__table_exd_pwf_42c__entry__2">深交所ETF基金实时申购赎回数据</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-0" headers="topic_yr4_g5f_42c__table_exd_pwf_42c__entry__1">FutureOption</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="topic_yr4_g5f_42c__table_exd_pwf_42c__entry__2">期货期权数据</td>
+                            </tr>
+                        </tbody></table></div>
+            </div>
+        </article>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title21" id="topic_abp_g5f_42c">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title21">数据导入函数</h3>
+            <div class="- topic/body body">
+                <div class="table-container"><table class="- topic/table table frame-all" id="topic_abp_g5f_42c__table_qbq_qwf_42c" data-ofbid="topic_abp_g5f_42c__table_qbq_qwf_42c" data-cols="2"><caption></caption><colgroup><col/><col/></colgroup><thead class="- topic/thead thead">
+                            <tr class="- topic/row">
+                                <th class="- topic/entry entry align-left colsep-1 rowsep-1" id="topic_abp_g5f_42c__table_qbq_qwf_42c__entry__1"><strong class="+ topic/ph hi-d/b ph b">函数名</strong></th>
+                                <th class="- topic/entry entry align-left colsep-0 rowsep-1" id="topic_abp_g5f_42c__table_qbq_qwf_42c__entry__2"><strong class="+ topic/ph hi-d/b ph b">功能</strong></th>
+                            </tr>
+                        </thead><tbody class="- topic/tbody tbody">
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_abp_g5f_42c__table_qbq_qwf_42c__entry__1"><code class="+ topic/ph pr-d/codeph ph codeph">loadTLEntrustStock</code></td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_abp_g5f_42c__table_qbq_qwf_42c__entry__2">导入沪深股票委托数据</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_abp_g5f_42c__table_qbq_qwf_42c__entry__1"><code class="+ topic/ph pr-d/codeph ph codeph">loadTLEntrustBond</code></td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_abp_g5f_42c__table_qbq_qwf_42c__entry__2">导入沪深债券委托数据</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_abp_g5f_42c__table_qbq_qwf_42c__entry__1"><code class="+ topic/ph pr-d/codeph ph codeph">loadTLEntrustCbond</code></td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_abp_g5f_42c__table_qbq_qwf_42c__entry__2">导入沪深可转债委托数据</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_abp_g5f_42c__table_qbq_qwf_42c__entry__1"><code class="+ topic/ph pr-d/codeph ph codeph">loadTLSnapshotStock</code></td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_abp_g5f_42c__table_qbq_qwf_42c__entry__2">导入沪深股票快照数据</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_abp_g5f_42c__table_qbq_qwf_42c__entry__1"><code class="+ topic/ph pr-d/codeph ph codeph">loadTLSnapshotBond</code></td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_abp_g5f_42c__table_qbq_qwf_42c__entry__2">导入沪深债券快照数据</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_abp_g5f_42c__table_qbq_qwf_42c__entry__1"><code class="+ topic/ph pr-d/codeph ph codeph">loadTLSnapshotCbond</code></td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_abp_g5f_42c__table_qbq_qwf_42c__entry__2">导入沪深可转债快照数据</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_abp_g5f_42c__table_qbq_qwf_42c__entry__1"><code class="+ topic/ph pr-d/codeph ph codeph">loadTLTradeStock</code></td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_abp_g5f_42c__table_qbq_qwf_42c__entry__2">导入沪深股票成交数据</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_abp_g5f_42c__table_qbq_qwf_42c__entry__1"><code class="+ topic/ph pr-d/codeph ph codeph">loadTLTradeBond</code></td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_abp_g5f_42c__table_qbq_qwf_42c__entry__2">导入沪深债券成交数据</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_abp_g5f_42c__table_qbq_qwf_42c__entry__1"><code class="+ topic/ph pr-d/codeph ph codeph">loadTLTradeCbond</code></td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_abp_g5f_42c__table_qbq_qwf_42c__entry__2">导入沪深可转债成交数据</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_abp_g5f_42c__table_qbq_qwf_42c__entry__1"><code class="+ topic/ph pr-d/codeph ph codeph">loadTLIndex</code></td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_abp_g5f_42c__table_qbq_qwf_42c__entry__2">导入沪深指数数据</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_abp_g5f_42c__table_qbq_qwf_42c__entry__1"><code class="+ topic/ph pr-d/codeph ph codeph">loadTLAfterTrade</code></td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_abp_g5f_42c__table_qbq_qwf_42c__entry__2">导入沪深盘后数据</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_abp_g5f_42c__table_qbq_qwf_42c__entry__1"><code class="+ topic/ph pr-d/codeph ph codeph">loadTLSzTradeStat</code></td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_abp_g5f_42c__table_qbq_qwf_42c__entry__2">导入深交所成交量统计指标数据</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_abp_g5f_42c__table_qbq_qwf_42c__entry__1"><code class="+ topic/ph pr-d/codeph ph codeph">loadTLETFBuySell</code></td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_abp_g5f_42c__table_qbq_qwf_42c__entry__2">导入深交所ETF基金实时申购赎回数据</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_abp_g5f_42c__table_qbq_qwf_42c__entry__1"><code class="+ topic/ph pr-d/codeph ph codeph">loadTLEquityMf</code></td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_abp_g5f_42c__table_qbq_qwf_42c__entry__2">导入权益分钟数据</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_abp_g5f_42c__table_qbq_qwf_42c__entry__1"><code class="+ topic/ph pr-d/codeph ph codeph">loadTLEquity1_5Min</code></td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_abp_g5f_42c__table_qbq_qwf_42c__entry__2">导入权益价格 1、3、5 分钟线数据</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_abp_g5f_42c__table_qbq_qwf_42c__entry__1"><code class="+ topic/ph pr-d/codeph ph codeph">loadTLEquity15_60Min</code></td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_abp_g5f_42c__table_qbq_qwf_42c__entry__2">导入权益价格 15、30、60 分钟线数据</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_abp_g5f_42c__table_qbq_qwf_42c__entry__1"><code class="+ topic/ph pr-d/codeph ph codeph">loadTLBond1_5Min</code></td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_abp_g5f_42c__table_qbq_qwf_42c__entry__2">导入债券价格 1、3、5 分钟线数据</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_abp_g5f_42c__table_qbq_qwf_42c__entry__1"><code class="+ topic/ph pr-d/codeph ph codeph">loadTLBond15_60Min</code></td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_abp_g5f_42c__table_qbq_qwf_42c__entry__2">导入债券价格 15、30、60 分钟线数据</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_abp_g5f_42c__table_qbq_qwf_42c__entry__1"><code class="+ topic/ph pr-d/codeph ph codeph">loadTLIdx1_5Min</code></td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_abp_g5f_42c__table_qbq_qwf_42c__entry__2">导入指数价格 1、3、5 分钟线数据</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_abp_g5f_42c__table_qbq_qwf_42c__entry__1"><code class="+ topic/ph pr-d/codeph ph codeph">loadTLIdx15_60Min</code></td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_abp_g5f_42c__table_qbq_qwf_42c__entry__2">导入指数价格 15、30、60 分钟线数据</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_abp_g5f_42c__table_qbq_qwf_42c__entry__1"><code class="+ topic/ph pr-d/codeph ph codeph">loadTLFutTick</code></td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_abp_g5f_42c__table_qbq_qwf_42c__entry__2">导入期货 L2 tick 数据</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_abp_g5f_42c__table_qbq_qwf_42c__entry__1"><code class="+ topic/ph pr-d/codeph ph codeph">loadTLFutCmb</code></td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_abp_g5f_42c__table_qbq_qwf_42c__entry__2">导入期货 L2 组合行情</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_abp_g5f_42c__table_qbq_qwf_42c__entry__1"><code class="+ topic/ph pr-d/codeph ph codeph">loadTLFutOrderq</code></td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_abp_g5f_42c__table_qbq_qwf_42c__entry__2">导入期货 L2 最优价十笔委托</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_abp_g5f_42c__table_qbq_qwf_42c__entry__1"><code class="+ topic/ph pr-d/codeph ph codeph">loadTLFutTqs</code></td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_abp_g5f_42c__table_qbq_qwf_42c__entry__2">导入期货 L2 成交量统计</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_abp_g5f_42c__table_qbq_qwf_42c__entry__1"><code class="+ topic/ph pr-d/codeph ph codeph">loadTLOptTick</code></td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_abp_g5f_42c__table_qbq_qwf_42c__entry__2">导入期权 L2 tick 数据</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_abp_g5f_42c__table_qbq_qwf_42c__entry__1"><code class="+ topic/ph pr-d/codeph ph codeph">loadTLOptOrderq</code></td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_abp_g5f_42c__table_qbq_qwf_42c__entry__2">导入期权 L2 最优价十笔委托</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_abp_g5f_42c__table_qbq_qwf_42c__entry__1"><code class="+ topic/ph pr-d/codeph ph codeph">loadTLOptTqs</code></td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_abp_g5f_42c__table_qbq_qwf_42c__entry__2">导入期权 L2 成交量统计</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_abp_g5f_42c__table_qbq_qwf_42c__entry__1"><code class="+ topic/ph pr-d/codeph ph codeph">loadTLFutL1</code></td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_abp_g5f_42c__table_qbq_qwf_42c__entry__2">导入期货 L1 数据</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-0" headers="topic_abp_g5f_42c__table_qbq_qwf_42c__entry__1"><code class="+ topic/ph pr-d/codeph ph codeph">loadTLFut&lt;1,3,5,15,30,60&gt;Min</code></td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="topic_abp_g5f_42c__table_qbq_qwf_42c__entry__2">导入期货 1、3、5、15、30、60 分钟线数据</td>
+                            </tr>
+                        </tbody></table></div>
+            </div>
+        </article>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title22" id="topic_mjp_g5f_42c">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title22">通联历史数据导入模块与脚本</h3>
+            <div class="- topic/body body">
+                <div class="- topic/p p">
+                    <ul class="- topic/ul ul" id="topic_mjp_g5f_42c__ul_qms_swf_42c" data-ofbid="topic_mjp_g5f_42c__ul_qms_swf_42c">
+                        <li class="- topic/li li">通联历史数据导入模块：<a class="- topic/xref xref" href="script/ImportTLData_toturials/ImportTLData.zip">ImportTLData.zip</a></li>
+                        <li class="- topic/li li">数据导入函数定义示例脚本：<a class="- topic/xref xref" href="script/ImportTLData_toturials/example.dos">example.dos</a></li>
+                    </ul>
+                </div>
+            </div>
+        </article>
+    </article>
+</article></main></div>
+                        
+                        
+                        
+                        
+                        
+                        
+                    </div>
+                    
+                        <nav role="navigation" id="wh_topic_toc" aria-label="On this page" class="col-lg-2 d-none d-lg-block navbar d-print-none"> 
+                            <div id="wh_topic_toc_content">
+		                        
+	                            <div class=" wh_topic_toc "><div class="wh_topic_label">在本页上</div><ul><li class="topic-item"><a href="#topic_xx2_f5f_42c" data-tocid="topic_xx2_f5f_42c">1. 数据导入模块</a><ul><li class="topic-item"><a href="#topic_q4n_f5f_42c" data-tocid="topic_q4n_f5f_42c">1.1 模块结构与功能</a></li><li class="topic-item"><a href="#topic_hvn_f5f_42c" data-tocid="topic_hvn_f5f_42c">1.2 模块同步</a></li></ul></li><li class="topic-item"><a href="#topic_bpj_f5f_42c" data-tocid="topic_bpj_f5f_42c">2. 数据导入操作</a><ul><li class="topic-item"><a href="#topic_c3q_f5f_42c" data-tocid="topic_c3q_f5f_42c">2.1 数据导入步骤</a></li><li class="topic-item"><a href="#topic_apq_f5f_42c" data-tocid="topic_apq_f5f_42c">2.2 通过前台任务导入数据</a></li><li class="topic-item"><a href="#topic_f5q_f5f_42c" data-tocid="topic_f5q_f5f_42c">2.3 通过后台任务和定时任务导入数据</a></li></ul></li><li class="topic-item"><a href="#topic_ygk_f5f_42c" data-tocid="topic_ygk_f5f_42c">3. 数据导入流程与处理逻辑</a><ul><li class="topic-item"><a href="#topic_n2w_f5f_42c" data-tocid="topic_n2w_f5f_42c">3.1 数据导入流程</a></li><li class="topic-item"><a href="#topic_tlw_f5f_42c" data-tocid="topic_tlw_f5f_42c">3.2 数据处理逻辑</a></li></ul></li><li class="topic-item"><a href="#topic_wrk_f5f_42c" data-tocid="topic_wrk_f5f_42c">4. 数据库表设计</a><ul><li class="topic-item"><a href="#topic_icb_g5f_42c" data-tocid="topic_icb_g5f_42c">4.1 原始数据文件与数据库表</a></li><li class="topic-item"><a href="#topic_cjb_g5f_42c" data-tocid="topic_cjb_g5f_42c">4.2 部分数据表结构</a></li></ul></li><li class="topic-item"><a href="#topic_pbl_f5f_42c" data-tocid="topic_pbl_f5f_42c">5. 常见问题</a><ul><li class="topic-item"><a href="#topic_ncg_g5f_42c" data-tocid="topic_ncg_g5f_42c">5.1 是否可以并发执行同一时间段多个数据导入任务？</a></li><li class="topic-item"><a href="#topic_z3g_g5f_42c" data-tocid="topic_z3g_g5f_42c">5.2 是否可以根据时间段的不同，并发执行同一数据导入任务？</a></li><li class="topic-item"><a href="#topic_opg_g5f_42c" data-tocid="topic_opg_g5f_42c">5.3 如何获取具体数据导入任务的运行信息？</a></li></ul></li><li class="topic-item"><a href="#topic_u3l_f5f_42c" data-tocid="topic_u3l_f5f_42c">附件</a><ul><li class="topic-item"><a href="#topic_yr4_g5f_42c" data-tocid="topic_yr4_g5f_42c">数据类别</a></li><li class="topic-item"><a href="#topic_abp_g5f_42c" data-tocid="topic_abp_g5f_42c">数据导入函数</a></li><li class="topic-item"><a href="#topic_mjp_g5f_42c" data-tocid="topic_mjp_g5f_42c">通联历史数据导入模块与脚本</a></li></ul></li></ul></div>
+	                        	
+                        	</div>
+                        </nav>
+                    
+                </div>
+            </div>
+            
+            
+            
+        </div> 
+        <footer class="navbar navbar-default wh_footer">
+  <div class=" footer-container mx-auto ">
+<title>Copyright</title><p><b> ©2025 浙江智臾科技有限公司 浙ICP备18048711号-3</b></p>
+  </div>
+</footer>
+        
+        <div id="go2top" class="d-print-none">
+            <span class="oxy-icon oxy-icon-up"></span>
+        </div>
+        
+        <div id="modal_img_large" class="modal">
+            <span class="close oxy-icon oxy-icon-remove"></span>
+            <div id="modal_img_container"></div>
+            <div id="caption"></div>
+        </div>
+        
+        
+        
+    </body>
+</html>

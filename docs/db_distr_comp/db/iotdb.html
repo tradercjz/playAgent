@@ -1,0 +1,803 @@
+<!DOCTYPE html><html xmlns="http://www.w3.org/1999/xhtml" xml:lang="zh" lang="zh" data-whc_version="26.0">
+    <head><link rel="shortcut icon" href="../../favicon.ico"/><link rel="icon" href="../../favicon.ico"/><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><meta name="description" content="DolphinDB 提供物联网点位管理引擎（IOTDB 引擎）以对海量测点进行精细化、低延时的点位管理。用户能够在建表时使用含可变类型的列，并且系统会自动缓存每个点位的最新值数据，从而大幅提升查询性能（目前可达毫秒级）。 DolphinDB server：3.00.2 及以上版本。 本节将介绍物联网点位管理引擎中的一些基本概念。 在物联网（Internet of Things，简称 ..."/><meta name="DC.rights.owner" content="(C) 版权 2025"/><meta name="copyright" content="(C) 版权 2025"/><meta name="generator" content="DITA-OT"/><meta name="DC.type" content="topic"/><meta name="DC.coverage" content=""/><meta name="DC.relation" content="../../db_distr_comp/cfg/db_intro.html"/><meta name="prodname" content="DolphinDB"/><meta name="brand" content="DolphinDB"/><meta name="DC.creator" content="DolphinDB"/><meta name="DC.publisher" content="DDB N/A DDB 200"/><meta name="DC.format" content="HTML5"/><meta name="DC.identifier" content="iotdb"/><title>物联网点位管理引擎</title><!--  Generated with Oxygen version 26.0, build number 2024012323.  --><meta name="wh-path2root" content="../../"/><meta name="wh-toc-id" content="iotdb-d9713e3713"/><meta name="wh-source-relpath" content="db_distr_comp/db/iotdb.dita"/><meta name="wh-out-relpath" content="db_distr_comp/db/iotdb.html"/>
+
+    <link rel="stylesheet" type="text/css" href="../../oxygen-webhelp/app/commons.css?buildId=2024012323"/>
+    <link rel="stylesheet" type="text/css" href="../../oxygen-webhelp/app/topic.css?buildId=2024012323"/>
+
+    <script src="../../oxygen-webhelp/app/options/properties.js?buildId=20250305183303"></script>
+    <script src="../../oxygen-webhelp/app/localization/strings.js?buildId=2024012323"></script>
+    <script src="../../oxygen-webhelp/app/search/index/keywords.js?buildId=20250305183303"></script>
+    <script defer="defer" src="../../oxygen-webhelp/app/commons.js?buildId=2024012323"></script>
+    <script defer="defer" src="../../oxygen-webhelp/app/topic.js?buildId=2024012323"></script>
+<link rel="stylesheet" type="text/css" href="../../oxygen-webhelp/template/styles.css?buildId=2024012323"/><script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script><script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script></head>
+
+    <body id="iotdb" class="wh_topic_page frmBody">
+        <a href="#wh_topic_body" class="sr-only sr-only-focusable">
+            跳转到主要内容
+        </a>
+        
+        
+        
+        
+        <header class="navbar navbar-default wh_header">
+    <div class="container-fluid">
+        <div xmlns:whc="http://www.oxygenxml.com/webhelp/components" class="wh_header_flex_container navbar-nav navbar-expand-md navbar-dark">
+            <div class="wh_logo_and_publication_title_container">
+                <div class="wh_logo_and_publication_title">
+                    
+                    <a href="https://docs.dolphindb.cn/zh/index.html" class=" wh_logo d-none d-sm-block "><img src="../../logo.png" alt="  DolphinDB 文档中心  "/></a>
+                    <div class=" wh_publication_title "><a href="../../index.html"><span class="booktitle">  <span class="ph mainbooktitle">DolphinDB 文档中心</span>  </span></a></div>
+                    
+                </div>
+                
+                
+            </div>
+
+            <div class="wh_top_menu_and_indexterms_link collapse navbar-collapse" id="wh_top_menu_and_indexterms_link">
+                
+                
+                
+                
+            </div>
+        <div class=" wh_search_input navbar-form wh_topic_page_search search " role="form">
+            
+            
+            
+            <form id="searchForm" method="get" role="search" action="../../search.html"><div><input type="search" placeholder="搜索 " class="wh_search_textfield" id="textToSearch" name="searchQuery" aria-label="搜索查询" required="required"/><button type="submit" class="wh_search_button" aria-label="搜索"><span class="search_input_text">搜索</span></button></div></form>
+            
+            <script src="/vendors/react/umd/react.production.min.js" defer="defer"></script>
+<script src="/vendors/react-dom/umd/react-dom.production.min.js" defer="defer"></script>
+<script src="/vendors/dayjs/dayjs.min.js" defer="defer"></script>
+<script src="/vendors/antd/dist/antd.min.js" defer="defer"></script>
+<script src="/vendors/@ant-design/icons/dist/index.umd.min.js" defer="defer"></script>
+<script src="/zh/index.js" type="module"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" defer="defer"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML" defer="defer"><!--
+
+
+--></script>
+<script defer="defer"><!--
+
+// 从主页重定向
+const currentUrl = window.location.href;
+
+// 判断当前URL是否包含index.html并且路径最后部分是index.html
+if (currentUrl.endsWith('index.html')) {
+    // 处理根目录下的index.html跳转
+    const baseUrl = currentUrl.split('/index.html')[0]; // 获取index.html之前的部分
+    const redirectUrl = `${baseUrl}/about/ddb_intro.html`; // 构建跳转路径
+    window.location.href = redirectUrl; // 执行跳转
+}
+
+--></script>
+            
+        </div></div>
+    </div>
+</header>
+        
+        
+         
+        
+        
+        
+        <div class="container-fluid" id="wh_topic_container">
+            <div class="row">
+
+                <nav class="wh_tools d-print-none navbar-expand-md" aria-label="Tools">
+                    
+                    <div data-tooltip-position="bottom" class=" wh_breadcrumb "><ol class="d-print-none"><li><span class="home"><a href="../../index.html"><span>主页</span></a></span></li><li><div class="topicref" data-id="new_chap_database_manage_new_chap_dbmanage_landing_page"><div class="title"><a href="../../db_distr_comp/cfg/db_intro.html"><span class="keyword label">数据库</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 数据库的基本概念</p></div></div></div></li><li class="active"><div class="topicref" data-id="iotdb"><div class="title"><a href="../../db_distr_comp/db/iotdb.html">物联网点位管理引擎</a></div></div></li></ol></div>
+                    
+                    
+                    
+                    <div class="wh_right_tools">
+                        <button class="wh_hide_highlight" aria-label="切换搜索突出显示" title="切换搜索突出显示"></button>
+                        <button class="webhelp_expand_collapse_sections" data-next-state="collapsed" aria-label="折叠截面" title="折叠截面"></button>
+                        
+                        
+                        
+                        
+                        <div class=" wh_print_link print d-none d-md-inline-block "><button onClick="window.print()" title="打印此页" aria-label="打印此页"></button></div>
+                        
+                        <button type="button" id="wh_toc_button" class="custom-toggler navbar-toggler collapsed wh_toggle_button navbar-light" aria-expanded="false" aria-label="Toggle publishing table of content" aria-controls="wh_publication_toc">
+                            <span class="navbar-toggler-icon"></span>
+                        </button>
+                    </div>
+                    
+                </nav>
+            </div>
+            
+            
+            
+            
+            <div class="wh_content_area">
+                <div class="row">
+                    
+                        <nav id="wh_publication_toc" class="col-lg-3 col-md-3 col-sm-12 d-md-block d-none d-print-none" aria-label="Table of Contents Container">
+                            <div id="wh_publication_toc_content">
+		                        
+                            	<div class=" wh_publication_toc " data-tooltip-position="right"><span class="expand-button-action-labels"><span id="button-expand-action" role="button" aria-label="Expand"></span><span id="button-collapse-action" role="button" aria-label="Collapse"></span><span id="button-pending-action" role="button" aria-label="Pending"></span></span><ul role="tree" aria-label="Table of Contents"><li role="treeitem"><div data-tocid="ddb_intro-d9713e87" class="topicref" data-id="ddb_intro" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../about/ddb_intro.html" id="ddb_intro-d9713e87-link">关于DolphinDB</a></div></div></li><li role="treeitem"><div data-tocid="chap1_getstarted-d9713e136" class="topicref" data-id="chap1_getstarted" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../getstarted/chap1_getstarted.html" id="chap1_getstarted-d9713e136-link">快速上手</a><div class="wh-tooltip"><p class="shortdesc">如何快速部署 DolphinDB、建库建表、写入和查询数据</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="sectionddb_deployment-d9713e189" class="topicref" data-id="sectionddb_deployment" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action sectionddb_deployment-d9713e189-link" class="wh-expand-btn"></span><div class="title"><a href="../../deploy/deploy_intro.html" id="sectionddb_deployment-d9713e189-link"><span class="keyword label">部署</span></a><div class="wh-tooltip"><p class="shortdesc">如何在不同的场景中部署 DolphinDB</p></div></div></div></li><li role="treeitem" aria-expanded="true"><div data-tocid="new_chap_database_manage_new_chap_dbmanage_landing_page-d9713e2259" class="topicref" data-id="new_chap_database_manage_new_chap_dbmanage_landing_page" data-state="expanded"><span role="button" tabindex="0" aria-labelledby="button-collapse-action new_chap_database_manage_new_chap_dbmanage_landing_page-d9713e2259-link" class="wh-expand-btn"></span><div class="title"><a href="../../db_distr_comp/cfg/db_intro.html" id="new_chap_database_manage_new_chap_dbmanage_landing_page-d9713e2259-link"><span class="keyword label">数据库</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 数据库的基本概念</p></div></div></div><ul role="group" class="navbar-nav nav-list"><li role="treeitem" aria-expanded="false"><div data-tocid="chap3_sect_database_distributed_computing-d9713e2312" class="topicref" data-id="chap3_sect_database_distributed_computing" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action chap3_sect_database_distributed_computing-d9713e2312-link" class="wh-expand-btn"></span><div class="title"><a href="../../db_distr_comp/db_distr_comp.html" id="chap3_sect_database_distributed_computing-d9713e2312-link"><span class="keyword label">数据库操作</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 数据库的基本操作，例如创建数据库、表，增加列、分区，数据查询，表连接等。</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="topic_pg3_22w_ryb-d9713e2880" class="topicref" data-id="topic_pg3_22w_ryb" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action topic_pg3_22w_ryb-d9713e2880-link" class="wh-expand-btn"></span><div class="title"><a href="../../db_distr_comp/db/db_architecture.html" id="topic_pg3_22w_ryb-d9713e2880-link"><span class="keyword label">分布式架构</span></a></div></div></li><li role="treeitem"><div data-tocid="tsdb-d9713e3387" class="topicref" data-id="tsdb" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../db_distr_comp/db/tsdb.html" id="tsdb-d9713e3387-link"><span class="keyword label">TSDB 存储引擎</span></a></div></div></li><li role="treeitem"><div data-tocid="olap-d9713e3434" class="topicref" data-id="olap" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../db_distr_comp/db/olap.html" id="olap-d9713e3434-link"><span class="keyword label">OLAP 存储引擎</span></a></div></div></li><li role="treeitem"><div data-tocid="pkey_engine-d9713e3481" class="topicref" data-id="pkey_engine" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../db_distr_comp/db/pkey_engine.html" id="pkey_engine-d9713e3481-link"><span class="keyword">主键存储引擎</span>  </a></div></div></li><li role="treeitem"><div data-tocid="imoltp-d9713e3529" class="topicref" data-id="imoltp" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../db_distr_comp/db/imoltp.html" id="imoltp-d9713e3529-link">内存在线事务处理引擎</a></div></div></li><li role="treeitem"><div data-tocid="vectordb-d9713e3575" class="topicref" data-id="vectordb" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../db_distr_comp/db/vectordb.html" id="vectordb-d9713e3575-link">向量存储引擎</a></div></div></li><li role="treeitem"><div data-tocid="textdb-d9713e3621" class="topicref" data-id="textdb" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../db_distr_comp/db/textdb.html" id="textdb-d9713e3621-link">文本存储引擎</a></div></div></li><li role="treeitem"><div data-tocid="catalog-d9713e3667" class="topicref" data-id="catalog" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../db_distr_comp/db/catalog.html" id="catalog-d9713e3667-link">数据目录</a></div></div></li><li role="treeitem" class="active"><div data-tocid="iotdb-d9713e3713" class="topicref" data-id="iotdb" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../db_distr_comp/db/iotdb.html" id="iotdb-d9713e3713-link">物联网点位管理引擎</a></div></div></li></ul></li><li role="treeitem" aria-expanded="false"><div data-tocid="chap7_tutorials_streaming-d9713e3760" class="topicref" data-id="chap7_tutorials_streaming" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action chap7_tutorials_streaming-d9713e3760-link" class="wh-expand-btn"></span><div class="title"><a href="../../stream/str_intro.html" id="chap7_tutorials_streaming-d9713e3760-link"><span class="keyword label">流数据</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 流数据引擎及流数据计算的基本概念</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e7513" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e7513-link" class="wh-expand-btn"></span><div class="title"><a href="../../db_distr_comp/db_oper/import_data.html" id="tocId-d9713e7513-link">数据迁移</a><div class="wh-tooltip"><p class="shortdesc">如何从不同数据源向 DolphinDB 迁移数据</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="chap7_tutorials_system_management-d9713e7940" class="topicref" data-id="chap7_tutorials_system_management" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action chap7_tutorials_system_management-d9713e7940-link" class="wh-expand-btn"></span><div class="title"><a href="../../sys_man/om_intro.html" id="chap7_tutorials_system_management-d9713e7940-link"><span class="keyword label">系统运维</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 的系统运维功能及方法</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="troubleshooting-d9713e8780" class="topicref" data-id="troubleshooting" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action troubleshooting-d9713e8780-link" class="wh-expand-btn"></span><div class="title"><a href="../../error_codes/troubleshooting.html" id="troubleshooting-d9713e8780-link">故障排查</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="about_language_resources-d9713e20911" class="topicref" data-id="about_language_resources" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action about_language_resources-d9713e20911-link" class="wh-expand-btn"></span><div class="title"><a href="../../progr/progr_intro.html" id="about_language_resources-d9713e20911-link"><span class="keyword label">编程语言</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 编程基本概念与方法、SQL 在 DolphinDB 的应用</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="functions_references-d9713e30925" class="topicref" data-id="functions_references" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action functions_references-d9713e30925-link" class="wh-expand-btn"></span><div class="title"><a href="../../funcs/funcs_intro.html" id="functions_references-d9713e30925-link"><span class="keyword label">函数参考</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 函数分类、语法、详解及示例</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="api_protocol-d9713e94064" class="topicref" data-id="api_protocol" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action api_protocol-d9713e94064-link" class="wh-expand-btn"></span><div class="title"><a href="../../api/connapi_intro.html" id="api_protocol-d9713e94064-link"><span class="keyword label">连接器 &amp; API</span></a><div class="wh-tooltip"><p class="shortdesc">面向不同编程语言的 DolphinDB API 及连接器，相关协议和用法</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="chap6_plugin-d9713e94210" class="topicref" data-id="chap6_plugin" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action chap6_plugin-d9713e94210-link" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/plg_intro.html" id="chap6_plugin-d9713e94210-link"><span class="keyword label">插件</span></a><div class="wh-tooltip"><p class="shortdesc">多个应用场景的插件使用说明和插件开发指导</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="third_party-d9713e97904" class="topicref" data-id="third_party" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action third_party-d9713e97904-link" class="wh-expand-btn"></span><div class="title"><a href="../../third_party.html" id="third_party-d9713e97904-link">第三方工具</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="about_tutorials-d9713e98227" class="topicref" data-id="about_tutorials" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action about_tutorials-d9713e98227-link" class="wh-expand-btn"></span><div class="title"><a href="../../tutorials/about_tutorials.html" id="about_tutorials-d9713e98227-link"><span class="keyword label">教程</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 产品使用教程</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e105982" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e105982-link" class="wh-expand-btn"></span><div class="title"><a href="../../rn/server/3_00_2.html" id="tocId-d9713e105982-link">版本说明</a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 版本发布历史</p></div></div></div></li></ul></div>
+		                        
+                            </div>
+                        </nav>
+                    
+                    
+                    <div class="col-lg-7 col-md-9 col-sm-12" id="wh_topic_body">
+                        <button id="wh_close_publication_toc_button" class="close-toc-button d-none" aria-label="Toggle publishing table of content" aria-controls="wh_publication_toc" aria-expanded="true">
+                            <span class="close-toc-icon-container">
+                                <span class="close-toc-icon"></span>     
+                            </span>
+                        </button>
+                        <button id="wh_close_topic_toc_button" class="close-toc-button d-none" aria-label="Toggle topic table of content" aria-controls="wh_topic_toc" aria-expanded="true">
+                            <span class="close-toc-icon-container">
+                                <span class="close-toc-icon"></span>     
+                            </span>
+                        </button>
+                        
+                        <div class=" wh_topic_content body "><main role="main"><article class="- topic/topic topic" role="article" aria-labelledby="ariaid-title1">
+    <h1 class="- topic/title title topictitle1" id="ariaid-title1">物联网点位管理引擎</h1>
+    <div class="- topic/body body">
+        <p class="- topic/p p">DolphinDB 提供物联网点位管理引擎（IOTDB
+            引擎）以对海量测点进行精细化、低延时的点位管理。用户能够在建表时使用含可变类型的列，并且系统会自动缓存每个点位的最新值数据，从而大幅提升查询性能（目前可达毫秒级）。</p>
+    </div>
+    <article class="- topic/topic topic nested1" aria-labelledby="ariaid-title2" id="topic_g3t_1ny_bdc">
+        <h2 class="- topic/title title topictitle2" id="ariaid-title2">使用条件</h2>
+        <div class="- topic/body body">
+            <p class="- topic/p p">DolphinDB server：3.00.2 及以上版本。</p>
+        </div>
+    </article>
+    <article class="- topic/topic topic nested1" aria-labelledby="ariaid-title3" id="topic_k1x_bny_bdc">
+        <h2 class="- topic/title title topictitle2" id="ariaid-title3">基础概念</h2>
+        <div class="- topic/body body">
+            <p class="- topic/p p">本节将介绍物联网点位管理引擎中的一些基本概念。</p>
+        </div>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title4" id="topic_lyb_dny_bdc">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title4">点位</h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p">在物联网（Internet of Things，简称
+                    IoT）中，“点位”通常指被监控或管理的物理对象上的具体信息点或数据采集点。这些点位可以是传感器、执行器、控制器等物联网设备上的具体接口或参数，也可以是设备本身作为一个整体被监控的标识。其中数据对象包括静态属性（ID，名称等）和动态属性（温度，压力，湿度，状态等）。</p>
+            </div>
+        </article>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title5" id="topic_tby_dny_bdc">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title5">点位数据特点</h3>
+            <div class="- topic/body body">
+                <div class="- topic/p p">
+                    <ul class="- topic/ul ul" id="topic_tby_dny_bdc__ul_cgp_2ny_bdc" data-ofbid="topic_tby_dny_bdc__ul_cgp_2ny_bdc">
+                        <li class="- topic/li li">
+                            <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">数量巨多</strong>：在电网、车联网、工业制造场景中，点位数从几百万到上亿点不等。</p>
+                        </li>
+                        <li class="- topic/li li">
+                            <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">采样频率高</strong>：某些极端场景下，点位的采样频率高达 100KHz。</p>
+                        </li>
+                        <li class="- topic/li li">
+                            <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">数据类型复杂</strong>：点位数据类型涵盖布尔型、整型、浮点型、枚举型等。</p>
+                        </li>
+                        <li class="- topic/li li">
+                            <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">数据传输形式多样</strong>：同一设备的点位数据，可能同一时间采集、同一批次上传，也可能不同时间采集、单独上传。</p>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </article>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title6" id="topic_ttc_fny_bdc">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title6">物联网点位管理引擎 / IOTDB 引擎</h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p">DolphinDB 在 3.00.2 版本中推出的基于 TSDB 引擎自研的、针对物联网场景中海量点位数据进行高效管理的存储引擎。</p>
+            </div>
+        </article>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title7" id="topic_x5q_gny_bdc">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title7">IOTANY 列</h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p">值类型可变的列，能够在单值模型的字段里存储不同类型的属性值。</p>
+            </div>
+        </article>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title8" id="topic_p4p_hny_bdc">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title8">最新值缓存功能</h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p">系统实时更新最新值缓存，并直接从缓存而非磁盘中读取数据，创建以分区为单位的最新值缓存表。最新值缓存功能可在 create 或
+                        <code class="+ topic/ph pr-d/codeph ph codeph">createPartitionedTable</code> 中通过 <em class="+ topic/ph hi-d/i ph i">latestKeyCache</em>
+                    参数开启。功能说明小节将详细介绍其原理。</p>
+            </div>
+        </article>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title9" id="topic_cdm_3ny_bdc">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title9">点位管理表</h3>
+            <div class="- topic/body body">
+                <div class="- topic/p p">
+                    <ul class="- topic/ul ul" id="topic_cdm_3ny_bdc__ul_adc_jny_bdc" data-ofbid="topic_cdm_3ny_bdc__ul_adc_jny_bdc">
+                        <li class="- topic/li li">
+                            <p class="- topic/p p">包含 IOTANY 列的表。（推荐）</p>
+                        </li>
+                        <li class="- topic/li li">
+                            <p class="- topic/p p">使用物联网点位管理引擎（IOTDB 引擎）、且开启最新值缓存功能的分布式表。</p>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </article>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title10" id="topic_orr_jny_bdc">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title10">静态表</h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p">对 sortColumns 中指定的除最后时间列外的其它列进行映射。将其映射为内部 ID。在后续的存储和缓存操作中，系统将通过内部 ID
+                    来代指某个测点，以达到节省存储空间的目的。该表与 SymbolBase 类似，以分区为单位。该映射会存储于静态表中，用户无感知。</p>
+            </div>
+        </article>
+    </article>
+    <article class="- topic/topic topic nested1" aria-labelledby="ariaid-title11" id="topic_gfs_kny_bdc">
+        <h2 class="- topic/title title topictitle2" id="ariaid-title11">功能说明</h2>
+        <div class="- topic/body body">
+            <p class="- topic/p p">本节将从原理、使用、管理等多个角度详细介绍 IOTANY 列和最新值查询优化。</p>
+        </div>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title12" id="topic_nmr_lny_bdc">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title12">IOTANY 列</h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p">IOTANY 列即值类型可变的列，建表时最多可以创建一个 IOTANY 列。IOTANY 列类型只能用在 create
+                    语句中，不能单独建一个该类型的向量或者表。DolphinDB 在存储 IOTANY 列数据时， 将在 <strong class="+ topic/ph hi-d/b ph b">TSDB</strong> Level File
+                    层级单独存储不同类型的值。</p>
+                <p class="- topic/p p">关于 TSDB 存储引擎，物联网点位管理引擎：</p>
+                <ul class="- topic/ul ul" id="topic_nmr_lny_bdc__ul_xxk_mny_bdc" data-ofbid="topic_nmr_lny_bdc__ul_xxk_mny_bdc">
+                    <li class="- topic/li li">
+                        <p class="- topic/p p">规定将唯一标识一组测点的<strong class="+ topic/ph hi-d/b ph b">多个列（一般为 id 列+各种 tag 列）+时间列</strong>设置为 sortColumns。</p>
+                    </li>
+                    <li class="- topic/li li">
+                        <p class="- topic/p p">支持三种去重策略：ALL（保留所有数据，为默认值）， LAST（仅保留最新数据），FIRST（仅保留第一条数据）。</p>
+                    </li>
+                    <li class="- topic/li li">
+                        <p class="- topic/p p">支持 HashMappingFunction。</p>
+                    </li>
+                    <li class="- topic/li li">
+                        <p class="- topic/p p">暂不支持 softDelete。</p>
+                    </li>
+                    <li class="- topic/li li">
+                        <p class="- topic/p p">最新值查询功能暂不支持 snapshot read。</p>
+                    </li>
+                    <li class="- topic/li li">
+                        <p class="- topic/p p">暂不支持 level 4 compaction。</p>
+                    </li>
+                    <li class="- topic/li li">
+                        <p class="- topic/p p">暂不支持向量数据库等。</p>
+                    </li>
+                    <li class="- topic/li li">
+                        <p class="- topic/p p">暂不支持添加 IOTANY 列。</p>
+                    </li>
+                    <li class="- topic/li li">
+                        <p class="- topic/p p">不支持 sortColumns 中包含 DECIMAL 类型。</p>
+                    </li>
+                    <li class="- topic/li li">
+                        <p class="- topic/p p">不支持 upsert! 时设置 ignoreNull=true。</p>
+                    </li>
+                    <li class="- topic/li li">
+                        <p class="- topic/p p">不支持 upsert! 时传入 IOTANY 向量。</p>
+                    </li>
+                </ul>
+            </div>
+        </article>
+
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title13" id="topic_v2z_4ny_bdc">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title13">最新值查询优化</h3>
+            <div class="- topic/body body">
+                <div class="- topic/p p">
+                    <div class="- topic/div div"><p class="- topic/p p">最新值查询的优化有最新值缓存表和最新值查询优化两种方式。</p><p class="- topic/p p">一般情况下，我们通过<code class="+ topic/ph pr-d/codeph ph codeph">context by</code>
+                            <strong class="+ topic/ph hi-d/b ph b">id+tag 列</strong>
+                            <code class="+ topic/ph pr-d/codeph ph codeph">csort</code>
+                            <strong class="+ topic/ph hi-d/b ph b">时间列</strong>
+                            <code class="+ topic/ph pr-d/codeph ph codeph">limit
+                            -1</code>语法来查询最新值：</p><pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_v2z_4ny_bdc__codeblock_dmh_rny_bdc" data-ofbid="topic_v2z_4ny_bdc__codeblock_dmh_rny_bdc"><code>select deviceId, timestamp, metrics1... from pt
+where deviceId = xxx context by deviceId csort timestamp limit -1</code></pre><p class="- topic/p p">针对最新值查询，物联网点位管理引擎引入两种优化：</p><ul class="- topic/ul ul" id="topic_v2z_4ny_bdc__ul_emh_rny_bdc" data-ofbid="topic_v2z_4ny_bdc__ul_emh_rny_bdc">
+                            <li class="- topic/li li">
+                                <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">最新值缓存表</strong>：引入以分区为单位的最新值缓存表。系统将<strong class="+ topic/ph hi-d/b ph b">实时更新</strong>最新值缓存，并直接从<strong class="+ topic/ph hi-d/b ph b">缓存</strong>而非磁盘中读取数据。此外，物联网点位管理引擎提供预热机制，重启后自动加载最近时间分区的缓存数据，优化冷启动场景。</p>
+                            </li>
+                            <li class="- topic/li li">
+                                <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">存储引擎层的最新值查询优化</strong>：在存储引擎层实现 context by 最新值算法，根据 index zonemap
+                                    进行过滤，只读取磁盘上部分的 block。用于支持缓存表 cache miss 的情况。</p>
+                            </li>
+                        </ul><p class="- topic/p p">以下介绍两种优化方法的使用前提和优先顺序：</p><div class="table-container"><table class="- topic/table table frame-all" id="topic_v2z_4ny_bdc__table_imh_rny_bdc" data-ofbid="topic_v2z_4ny_bdc__table_imh_rny_bdc" data-cols="2"><caption></caption><colgroup><col/><col/></colgroup><thead class="- topic/thead thead">
+                                    <tr class="- topic/row">
+                                        <th class="- topic/entry entry align-left colsep-1 rowsep-1" id="topic_v2z_4ny_bdc__table_imh_rny_bdc__entry__1">
+                                            <p class="- topic/p p">优化逻辑</p>
+                                        </th>
+                                        <th class="- topic/entry entry align-left colsep-0 rowsep-1" id="topic_v2z_4ny_bdc__table_imh_rny_bdc__entry__2">
+                                            <p class="- topic/p p">使用前提（符合任一）</p>
+                                        </th>
+                                    </tr>
+                                </thead><tbody class="- topic/tbody tbody">
+                                    <tr class="- topic/row">
+                                        <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_v2z_4ny_bdc__table_imh_rny_bdc__entry__1">最新值缓存表</td>
+                                        <td class="- topic/entry entry colsep-0 rowsep-1" headers="topic_v2z_4ny_bdc__table_imh_rny_bdc__entry__2">
+                                            <ul class="- topic/ul ul" id="topic_v2z_4ny_bdc__ul_lmh_rny_bdc" data-ofbid="topic_v2z_4ny_bdc__ul_lmh_rny_bdc">
+                                                <li class="- topic/li li">
+                                                  <p class="- topic/p p">查询语句不包含任何 where 条件。</p>
+                                                </li>
+                                                <li class="- topic/li li">
+                                                  <p class="- topic/p p">查询语句包含 where 条件，过滤条件仅包含部分或全部 firstSortKey
+                                                  列，firstSortKey 支持的过滤类型：=, &lt;, &lt;=, &gt;, &gt;=,
+                                                  between, in。</p>
+                                                </li>
+                                                <li class="- topic/li li">
+                                                  <p class="- topic/p p">查询语句的 where 过滤条件涉及 lastSortKey 列且不涉及其他任何非
+                                                  sortKey 列，lastSortKey列支持的过滤类型为&lt;, &lt;=, &gt;, &gt;=,
+                                                  between。</p>
+                                                </li>
+                                            </ul>
+                                        </td>
+                                    </tr>
+                                    <tr class="- topic/row">
+                                        <td class="- topic/entry entry colsep-1 rowsep-0" headers="topic_v2z_4ny_bdc__table_imh_rny_bdc__entry__1">最新值查询优化</td>
+                                        <td class="- topic/entry entry colsep-0 rowsep-0" headers="topic_v2z_4ny_bdc__table_imh_rny_bdc__entry__2">
+                                            <ul class="- topic/ul ul" id="topic_v2z_4ny_bdc__ul_mmh_rny_bdc" data-ofbid="topic_v2z_4ny_bdc__ul_mmh_rny_bdc">
+                                                <li class="- topic/li li">
+                                                  <p class="- topic/p p">查询的 where 条件需要包含所有的 firstSortKey
+                                                  列，并且可以包含时间列（时间列 where 条件支持的过滤类型：=, &lt;, &lt;=, &gt;,
+                                                  &gt;=, between）。</p>
+                                                </li>
+                                                <li class="- topic/li li">
+                                                  <p class="- topic/p p">如果 firstSortKey 有多列，则每一列的过滤条件只支持等值过滤（即=）。</p>
+                                                </li>
+                                                <li class="- topic/li li">
+                                                  <p class="- topic/p p">如果 firstSortKey 只有一列，则过滤条件支持等值过滤和 in 过滤。</p>
+                                                </li>
+                                            </ul>
+                                        </td>
+                                    </tr>
+                                </tbody></table></div><p class="- topic/p p">注意：</p><ul class="- topic/ul ul" id="topic_v2z_4ny_bdc__ul_nmh_rny_bdc" data-ofbid="topic_v2z_4ny_bdc__ul_nmh_rny_bdc">
+                            <li class="- topic/li li">
+                                <p class="- topic/p p">最新值缓存表的条件三中，当 lastSortKey 列的过滤类型为 &lt;, &lt;=, between
+                                    时，需要最新值缓存表内 lastSortKey 列中的所有数据均满足 where
+                                    过滤条件才会通过缓存表返回结果。例如，最新值缓存表 lastSortKey
+                                        列<code class="+ topic/ph pr-d/codeph ph codeph">ts</code>的范围为<code class="+ topic/ph pr-d/codeph ph codeph">[2024.01.01,
+                                        2024.01.15]</code>，且 where 条件为<code class="+ topic/ph pr-d/codeph ph codeph">ts &lt;
+                                        2024.01.16</code>，此时可以通过查询最新值缓存表获取查询结果。</p>
+                            </li>
+                            <li class="- topic/li li">
+                                <p class="- topic/p p">若满足最新值缓存的使用条件，则优先从最新值缓存表中读取数据。</p>
+                            </li>
+                            <li class="- topic/li li">
+                                <p class="- topic/p p">若不满足最新值缓存的使用条件，则尝试最新值查询优化。</p>
+                            </li>
+                            <li class="- topic/li li">
+                                <p class="- topic/p p">若均不符合条件，则遵循先前版本逻辑。</p>
+                            </li>
+                        </ul><p class="- topic/p p">假设一个 TSDB 分布式表 test 的 sortColumns
+                            为<code class="+ topic/ph pr-d/codeph ph codeph">`c1`c2`timestamp</code>（其中称 c1, c2 为 firstSortKey，timestamp 为
+                            lastSortKey），则可以按照以下格式指定最新值查询：</p><code class="+ topic/ph pr-d/codeph ph codeph">select [cols] from test
+                            [where] context by c1,c2 csort timestamp limit
+                            -1.</code><p class="- topic/p p">下面给出一些查询语句示例以及这些查询会使用的优化方式：</p><div class="table-container"><table class="- topic/table table frame-all" id="topic_v2z_4ny_bdc__table_hnm_tny_bdc" data-ofbid="topic_v2z_4ny_bdc__table_hnm_tny_bdc" data-cols="4"><caption></caption><colgroup><col style="width:10.95290251916758%"/><col style="width:46.987951807228924%"/><col style="width:21.029572836801755%"/><col style="width:21.029572836801755%"/></colgroup><thead class="- topic/thead thead">
+                                    <tr class="- topic/row">
+                                        <th class="- topic/entry entry align-left colsep-1 rowsep-1" id="topic_v2z_4ny_bdc__table_hnm_tny_bdc__entry__1">
+                                            <p class="- topic/p p">sortColumns</p>
+                                        </th>
+                                        <th class="- topic/entry entry align-left colsep-1 rowsep-1" id="topic_v2z_4ny_bdc__table_hnm_tny_bdc__entry__2">
+                                            <p class="- topic/p p">SQL</p>
+                                        </th>
+                                        <th class="- topic/entry entry align-left colsep-1 rowsep-1" id="topic_v2z_4ny_bdc__table_hnm_tny_bdc__entry__3">
+                                            <p class="- topic/p p">方式1：最新值缓存表</p>
+                                        </th>
+                                        <th class="- topic/entry entry align-left colsep-0 rowsep-1" id="topic_v2z_4ny_bdc__table_hnm_tny_bdc__entry__4">
+                                            <p class="- topic/p p">方式2：最新值查询优化</p>
+                                        </th>
+                                    </tr>
+                                </thead><tbody class="- topic/tbody tbody">
+                                    <tr class="- topic/row">
+                                        <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_v2z_4ny_bdc__table_hnm_tny_bdc__entry__1">c1, c2, timestamp</td>
+                                        <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_v2z_4ny_bdc__table_hnm_tny_bdc__entry__2">
+                                            <p class="- topic/p p"><code class="+ topic/ph pr-d/codeph ph codeph">select [cols] from pt context by c1, c2 csort
+                                                  timestamp limit -1</code></p>
+                                            <p class="- topic/p p">（不包含任何过滤条件）</p>
+                                        </td>
+                                        <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_v2z_4ny_bdc__table_hnm_tny_bdc__entry__3">可使用</td>
+                                        <td class="- topic/entry entry colsep-0 rowsep-1" headers="topic_v2z_4ny_bdc__table_hnm_tny_bdc__entry__4"></td>
+                                    </tr>
+                                    <tr class="- topic/row">
+                                        <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_v2z_4ny_bdc__table_hnm_tny_bdc__entry__1">c1, c2, timestamp</td>
+                                        <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_v2z_4ny_bdc__table_hnm_tny_bdc__entry__2">
+                                            <div class="- topic/p p">
+                                                <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_v2z_4ny_bdc__codeblock_mnm_tny_bdc" data-ofbid="topic_v2z_4ny_bdc__codeblock_mnm_tny_bdc"><code>select [cols] from pt where c1 in [x,x,x] and c2 = xxx context by c1, c2 csort
+                timestamp limit -1</code></pre>
+                                            </div>
+                                            <p class="- topic/p p">（多个firstSortKey，且有firstSortKey的过滤类型为非等值过滤）</p>
+                                        </td>
+                                        <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_v2z_4ny_bdc__table_hnm_tny_bdc__entry__3">可使用</td>
+                                        <td class="- topic/entry entry colsep-0 rowsep-1" headers="topic_v2z_4ny_bdc__table_hnm_tny_bdc__entry__4"></td>
+                                    </tr>
+                                    <tr class="- topic/row">
+                                        <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_v2z_4ny_bdc__table_hnm_tny_bdc__entry__1">c1, c2, timestamp</td>
+                                        <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_v2z_4ny_bdc__table_hnm_tny_bdc__entry__2">
+                                            <div class="- topic/p p">
+                                                <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_v2z_4ny_bdc__codeblock_nnm_tny_bdc" data-ofbid="topic_v2z_4ny_bdc__codeblock_nnm_tny_bdc"><code>select [cols] from pt where c1 = xx and c2 = xx timestamp &gt;= xxx context by c1, c2
+                csort timestamp limit -1</code></pre>
+                                            </div>
+                                            <p class="- topic/p p">（涵盖所有firstSortKey，并且有lastSortKey过滤）</p>
+                                        </td>
+                                        <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_v2z_4ny_bdc__table_hnm_tny_bdc__entry__3">可使用</td>
+                                        <td class="- topic/entry entry colsep-0 rowsep-1" headers="topic_v2z_4ny_bdc__table_hnm_tny_bdc__entry__4">可使用</td>
+                                    </tr>
+                                    <tr class="- topic/row">
+                                        <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_v2z_4ny_bdc__table_hnm_tny_bdc__entry__1">c1, c2, timestamp</td>
+                                        <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_v2z_4ny_bdc__table_hnm_tny_bdc__entry__2">
+                                            <div class="- topic/p p">
+                                                <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_v2z_4ny_bdc__codeblock_onm_tny_bdc" data-ofbid="topic_v2z_4ny_bdc__codeblock_onm_tny_bdc"><code>select [cols] from pt where c1 = xx and c2 = xx  context by c1, c2 csort timestamp
+                limit -1</code></pre>
+                                            </div>
+                                            <p class="- topic/p p">（过滤条件包含所有firstSortKey）</p>
+                                        </td>
+                                        <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_v2z_4ny_bdc__table_hnm_tny_bdc__entry__3">可使用</td>
+                                        <td class="- topic/entry entry colsep-0 rowsep-1" headers="topic_v2z_4ny_bdc__table_hnm_tny_bdc__entry__4">可使用</td>
+                                    </tr>
+                                    <tr class="- topic/row">
+                                        <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_v2z_4ny_bdc__table_hnm_tny_bdc__entry__1">c1, c2, timestamp</td>
+                                        <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_v2z_4ny_bdc__table_hnm_tny_bdc__entry__2">
+                                            <div class="- topic/p p">
+                                                <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_v2z_4ny_bdc__codeblock_pnm_tny_bdc" data-ofbid="topic_v2z_4ny_bdc__codeblock_pnm_tny_bdc"><code>select [cols] from pt where c1 = xx and timestamp &gt; xxx  context by c1, c2 csort
+                timestamp limit -1</code></pre>
+                                            </div>
+                                            <p class="- topic/p p">（过滤条件包含部分firstSortKey以及lastSortKey）</p>
+                                        </td>
+                                        <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_v2z_4ny_bdc__table_hnm_tny_bdc__entry__3">可使用</td>
+                                        <td class="- topic/entry entry colsep-0 rowsep-1" headers="topic_v2z_4ny_bdc__table_hnm_tny_bdc__entry__4"></td>
+                                    </tr>
+                                    <tr class="- topic/row">
+                                        <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_v2z_4ny_bdc__table_hnm_tny_bdc__entry__1">c1, timestamp</td>
+                                        <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_v2z_4ny_bdc__table_hnm_tny_bdc__entry__2">
+                                            <div class="- topic/p p">
+                                                <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_v2z_4ny_bdc__codeblock_qnm_tny_bdc" data-ofbid="topic_v2z_4ny_bdc__codeblock_qnm_tny_bdc"><code>select [cols] from pt where c1 in [x,x,x] context by c1, c2 csort timestamp limit
+                -1</code></pre>
+                                            </div>
+                                            <p class="- topic/p p">（过滤条件包含所有firstSortKey，且firstSortKey过滤类型为in）</p>
+                                        </td>
+                                        <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_v2z_4ny_bdc__table_hnm_tny_bdc__entry__3">可使用</td>
+                                        <td class="- topic/entry entry colsep-0 rowsep-1" headers="topic_v2z_4ny_bdc__table_hnm_tny_bdc__entry__4">可使用</td>
+                                    </tr>
+                                    <tr class="- topic/row">
+                                        <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_v2z_4ny_bdc__table_hnm_tny_bdc__entry__1">c1, timestamp</td>
+                                        <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_v2z_4ny_bdc__table_hnm_tny_bdc__entry__2">
+                                            <div class="- topic/p p">
+                                                <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_v2z_4ny_bdc__codeblock_rnm_tny_bdc" data-ofbid="topic_v2z_4ny_bdc__codeblock_rnm_tny_bdc"><code>select [cols] from pt where c1 in [x,x,x] and timestamp between xxx and xxx context
+                by c1, c2 csort timestamp limit -1</code></pre>
+                                            </div>
+                                            <p class="- topic/p p">（过滤条件包含所有firstSortKey和lastSortKey）</p>
+                                        </td>
+                                        <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_v2z_4ny_bdc__table_hnm_tny_bdc__entry__3">可使用</td>
+                                        <td class="- topic/entry entry colsep-0 rowsep-1" headers="topic_v2z_4ny_bdc__table_hnm_tny_bdc__entry__4">可使用</td>
+                                    </tr>
+                                    <tr class="- topic/row">
+                                        <td class="- topic/entry entry colsep-1 rowsep-0" headers="topic_v2z_4ny_bdc__table_hnm_tny_bdc__entry__1">c1, timestamp</td>
+                                        <td class="- topic/entry entry colsep-1 rowsep-0" headers="topic_v2z_4ny_bdc__table_hnm_tny_bdc__entry__2">
+                                            <div class="- topic/p p">
+                                                <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_v2z_4ny_bdc__codeblock_snm_tny_bdc" data-ofbid="topic_v2z_4ny_bdc__codeblock_snm_tny_bdc"><code>select [cols] from pt where c1 &gt; x context by c1, c2 csort timestamp limit
+              -1</code></pre>
+                                            </div>
+                                            <p class="- topic/p p">（过滤条件包含所有firstSortKey，firSortKey过滤类型不是
+                                                  <code class="+ topic/ph pr-d/codeph ph codeph">in</code> 或 <code class="+ topic/ph pr-d/codeph ph codeph">=</code> )</p>
+                                        </td>
+                                        <td class="- topic/entry entry colsep-1 rowsep-0" headers="topic_v2z_4ny_bdc__table_hnm_tny_bdc__entry__3">可使用</td>
+                                        <td class="- topic/entry entry colsep-0 rowsep-0" headers="topic_v2z_4ny_bdc__table_hnm_tny_bdc__entry__4"></td>
+                                    </tr>
+                                </tbody></table></div></div>
+                </div>
+            </div>
+            <article class="- topic/topic topic nested3" aria-labelledby="ariaid-title14" id="topic_mkg_b4y_bdc">
+                <h4 class="- topic/title title topictitle4" id="ariaid-title14">通过 HINT_EXPLAIN 查看是否使用优化</h4>
+                <div class="- topic/body body">
+                    <p class="- topic/p p">可以通过 HINT_EXPLAIN 查看是否使用、以及具体使用了什么优化。</p>
+                    <p class="- topic/p p">如果查询是最新值查询（即 context by firstSortKey 列，csort lastSortKey 列，并且 limit
+                        为-1），则查询开启HINT_EXPLAIN 后，将可以在输出中看到 lastQuery 字段，该字段包含以下三种可能的输出形式：</p>
+                    <ol class="- topic/ol ol" id="topic_mkg_b4y_bdc__ol_lkq_c4y_bdc" data-ofbid="topic_mkg_b4y_bdc__ol_lkq_c4y_bdc">
+                        <li class="- topic/li li"><p class="- topic/p p">采用最新值缓存查询：</p><code class="+ topic/ph pr-d/codeph ph codeph"> "lastQuery": { "optimizationMethod":
+                                LatestKeyCache },</code></li>
+                        <li class="- topic/li li"><p class="- topic/p p">采用最新值查询优化查询：</p><code class="+ topic/ph pr-d/codeph ph codeph"> "lastQuery": { "optimizationMethod":
+                                LatestKeyQuery },</code></li>
+                        <li class="- topic/li li"><p class="- topic/p p">两种优化方式均不满足:</p><code class="+ topic/ph pr-d/codeph ph codeph"> "lastQuery": { "optimizationMethod": None
+                                },</code></li>
+                    </ol>
+                </div>
+            </article>
+            <article class="- topic/topic topic nested3" aria-labelledby="ariaid-title15" id="topic_r2y_c4y_bdc">
+                <h4 class="- topic/title title topictitle4" id="ariaid-title15">有重复数据时的最新值查询语义</h4>
+                <div class="- topic/body body">
+                    <p class="- topic/p p">如果存在两条 id 相同、时间戳相同的数据，当使用 context by 查询最新值时，只会保留其中的一条。比如：</p>
+                    <div class="table-container"><table class="- topic/table table frame-all" id="topic_r2y_c4y_bdc__table_z2t_d4y_bdc" data-ofbid="topic_r2y_c4y_bdc__table_z2t_d4y_bdc" data-cols="3"><caption></caption><colgroup><col/><col/><col/></colgroup><thead class="- topic/thead thead">
+                                <tr class="- topic/row">
+                                    <th class="- topic/entry entry align-left colsep-1 rowsep-1" id="topic_r2y_c4y_bdc__table_z2t_d4y_bdc__entry__1">
+                                        <p class="- topic/p p">id</p>
+                                    </th>
+                                    <th class="- topic/entry entry align-left colsep-1 rowsep-1" id="topic_r2y_c4y_bdc__table_z2t_d4y_bdc__entry__2">
+                                        <p class="- topic/p p">timestamp</p>
+                                    </th>
+                                    <th class="- topic/entry entry align-left colsep-0 rowsep-1" id="topic_r2y_c4y_bdc__table_z2t_d4y_bdc__entry__3">
+                                        <p class="- topic/p p">value</p>
+                                    </th>
+                                </tr>
+                            </thead><tbody class="- topic/tbody tbody">
+                                <tr class="- topic/row">
+                                    <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_r2y_c4y_bdc__table_z2t_d4y_bdc__entry__1">1</td>
+                                    <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_r2y_c4y_bdc__table_z2t_d4y_bdc__entry__2">10:00</td>
+                                    <td class="- topic/entry entry colsep-0 rowsep-1" headers="topic_r2y_c4y_bdc__table_z2t_d4y_bdc__entry__3">1</td>
+                                </tr>
+                                <tr class="- topic/row">
+                                    <td class="- topic/entry entry colsep-1 rowsep-0" headers="topic_r2y_c4y_bdc__table_z2t_d4y_bdc__entry__1">1</td>
+                                    <td class="- topic/entry entry colsep-1 rowsep-0" headers="topic_r2y_c4y_bdc__table_z2t_d4y_bdc__entry__2">10:00</td>
+                                    <td class="- topic/entry entry colsep-0 rowsep-0" headers="topic_r2y_c4y_bdc__table_z2t_d4y_bdc__entry__3">2</td>
+                                </tr>
+                            </tbody></table></div>
+                    <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_r2y_c4y_bdc__codeblock_dft_d4y_bdc" data-ofbid="topic_r2y_c4y_bdc__codeblock_dft_d4y_bdc"><code>select * from pt where id = 1 context by context by id csort timestamp limit -1</code></pre>
+                    <p class="- topic/p p">当对普通分区表使用 context by 时，并未明确规定保留对象，故将随机保留一条数据。但在 IOTDB 引擎中，对点位管理表使用 context by
+                            时，已明确规定<strong class="+ topic/ph hi-d/b ph b">保留最新一条</strong>，不会被 KEEP_LAST 或 KEEP_ALL 的设定影响。</p>
+                    <section class="- topic/section section" id="topic_r2y_c4y_bdc__最新值缓存表管理" data-ofbid="topic_r2y_c4y_bdc__最新值缓存表管理"><h5 class="- topic/title title sectiontitle">最新值缓存表管理</h5>
+                        
+                        <p class="- topic/p p">最新值缓存表以分区为单位，存储该分区内所有测点的最新值。写入时实时更新，随 Cache Engine 一同flush。持久化保存在每个分区的
+                            tableDir 目录下。文件名为 <em class="+ topic/ph hi-d/i ph i">timeseries.cache</em>。</p>
+                        <p class="- topic/p p">缓存管理与 symbolBase 一致，定期移除最近未使用的分区。参数 <em class="+ topic/ph hi-d/i ph i">IOTDBLatestKeyCacheSize
+                            </em>专用于控制最新值缓存表管理，默认为 maxMemSize 的 5%。</p>
+                        <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_r2y_c4y_bdc__codeblock_eft_d4y_bdc" data-ofbid="topic_r2y_c4y_bdc__codeblock_eft_d4y_bdc"><code>IOTDBLatestKeyCacheSize=0.5 //浮点数，单位为G</code></pre>
+                    </section>
+                </div>
+            </article>
+        </article>
+    </article>
+    <article class="- topic/topic topic nested1" aria-labelledby="ariaid-title16" id="topic_ivt_h4y_bdc">
+        <h2 class="- topic/title title topictitle2" id="ariaid-title16">数据类型</h2>
+        <div class="- topic/body body">
+            <div class="- topic/p p">IOTANY 类型目前支持如下几种类型：<div class="table-container"><table class="- topic/table table frame-all" id="topic_ivt_h4y_bdc__table_d1d_j4y_bdc" data-ofbid="topic_ivt_h4y_bdc__table_d1d_j4y_bdc" data-cols="2"><caption></caption><colgroup><col/><col/></colgroup><thead class="- topic/thead thead">
+                            <tr class="- topic/row">
+                                <th class="- topic/entry entry align-left colsep-1 rowsep-1" id="topic_ivt_h4y_bdc__table_d1d_j4y_bdc__entry__1">
+                                    <p class="- topic/p p">categroy</p>
+                                </th>
+                                <th class="- topic/entry entry align-left colsep-0 rowsep-1" id="topic_ivt_h4y_bdc__table_d1d_j4y_bdc__entry__2">
+                                    <p class="- topic/p p">类型</p>
+                                </th>
+                            </tr>
+                        </thead><tbody class="- topic/tbody tbody">
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_ivt_h4y_bdc__table_d1d_j4y_bdc__entry__1" rowspan="4">Integral</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="topic_ivt_h4y_bdc__table_d1d_j4y_bdc__entry__2">CHAR</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="topic_ivt_h4y_bdc__table_d1d_j4y_bdc__entry__2">SHORT</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="topic_ivt_h4y_bdc__table_d1d_j4y_bdc__entry__2">INT</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="topic_ivt_h4y_bdc__table_d1d_j4y_bdc__entry__2">LONG</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_ivt_h4y_bdc__table_d1d_j4y_bdc__entry__1">Logical</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="topic_ivt_h4y_bdc__table_d1d_j4y_bdc__entry__2">BOOL</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_ivt_h4y_bdc__table_d1d_j4y_bdc__entry__1" rowspan="2">Floating</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="topic_ivt_h4y_bdc__table_d1d_j4y_bdc__entry__2">FLOAT</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="topic_ivt_h4y_bdc__table_d1d_j4y_bdc__entry__2">DOUBLE</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-0" headers="topic_ivt_h4y_bdc__table_d1d_j4y_bdc__entry__1" rowspan="2">Literal</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="topic_ivt_h4y_bdc__table_d1d_j4y_bdc__entry__2">SYMBOL</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-0 rowsep-0" headers="topic_ivt_h4y_bdc__table_d1d_j4y_bdc__entry__2">STRING</td>
+                            </tr>
+                        </tbody></table></div></div>
+        </div>
+    </article>
+    <article class="- topic/topic topic nested1" aria-labelledby="ariaid-title17" id="topic_u4w_j4y_bdc">
+        <h2 class="- topic/title title topictitle2" id="ariaid-title17">使用示例</h2>
+        <div class="- topic/body body">
+            <p class="- topic/p p">本节将对创建点位管理表，表数据写入和查询、最新值查询等操作进行示例说明。</p>
+        </div>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title18" id="topic_elz_l4y_bdc">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title18">创建示例</h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p">推荐通过 create 语句创建含 IOTANY 列的点位管理表。</p>
+                <div class="- topic/p p">下例中，我们通过复合分区方案按 deviceId 和 timestamp 分区，创建了一个名为 pt 的点位管理表。该表使用 deviceId 和
+                    location 作为唯一识别一个点位的两列，启用最新值缓存，且 value 为 IOTANY 类型，可存储不同类型的测点数据；启用了 hashSortKey
+                    压缩。<pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_elz_l4y_bdc__codeblock_lv2_n4y_bdc" data-ofbid="topic_elz_l4y_bdc__codeblock_lv2_n4y_bdc"><code>dbName = "dfs://db"
+if (existsDatabase(dbName)) {
+    dropDatabase(dbName)
+}
+// 创建数据库，存储引擎为IOTDB
+create database "dfs://db" partitioned by HASH([INT, 20]),VALUE(2017.08.07..2017.08.11), engine='IOTDB'
+// 创建点位表，其中 firstSortKey 为 deviceId 和 location，lastSortKey(时间戳列)为 timestamp
+create table "dfs://db"."pt" (
+        deviceId INT,
+        location SYMBOL,
+        timestamp TIMESTAMP,
+        value IOTANY
+)
+partitioned by deviceId, timestamp,
+sortColumns = [`deviceId, `location, `timestamp],
+latestKeyCache = true</code></pre></div>
+            </div>
+        </article>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title19" id="topic_x44_n4y_bdc">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title19">写入示例</h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p">对于每个测点，第一次写入时会确定其 IOTANY 列的类型，如果之后对该测点写入不同的类型，会报错。</p>
+                <p class="- topic/p p">在<strong class="+ topic/ph hi-d/b ph b">非 KEEP_LAST </strong>的情况下，可以使用 update 语句修改测点 IOTANY 列的类型，但是 <strong class="+ topic/ph hi-d/b ph b">where
+                        条件里只能包含firstSortKey</strong>，这样能保证每次更新所有该测点的记录，以确保同一个测点的 IOTANY 列的类型一直统一。</p>
+                <div class="- topic/p p">基于上例已建立的表，进行写入对比操作。首先第一次写入数据，结果为可以正常写入，测点[1, `loc1`]的类型确定为
+                    INT。<pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_x44_n4y_bdc__codeblock_m1t_44y_bdc" data-ofbid="topic_x44_n4y_bdc__codeblock_m1t_44y_bdc"><code>// 测点[1, `loc1`] 第一次写入
+pt = loadTable("dfs://db", "pt")
+t = table([1] as deviceId,
+  [`loc1] as location,
+  [now()] as timestamp,
+  [int(233)] as value)
+pt.append!(t) </code></pre></div>
+                <div class="- topic/p p">第二次写入该测点，value 类型为
+                    DOUBLE。因为类型不匹配，故结果为不能写入。<pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_x44_n4y_bdc__codeblock_i44_q4y_bdc" data-ofbid="topic_x44_n4y_bdc__codeblock_i44_q4y_bdc"><code>// 测点[1, `loc1`] 第二次写入，value类型为double
+t = table([1] as deviceId,
+  [`loc1] as location,
+  [now()] as timestamp,
+  [double(233)] as value)
+pt.append!(t) </code></pre></div>
+                <div class="- topic/p p">尝试修改测点类型。<pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_x44_n4y_bdc__codeblock_j1k_q4y_bdc" data-ofbid="topic_x44_n4y_bdc__codeblock_j1k_q4y_bdc"><code>// 修改测点类型为double
+// 修改失败，where条件只能包含firstSortKey
+update pt set value=double(233) where deviceId = 1 and location=`loc1 and timestamp &gt;= 2017.08.07 
+// 修改成功
+update pt set value=double(233) where deviceId = 1 and location=`loc1 </code></pre></div>
+                <p class="- topic/p p">此时再次执行第二次写入的脚本，结果为写入成功。</p>
+            </div>
+        </article>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title20" id="topic_ogj_r4y_bdc">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title20">更新示例</h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p">在非 KEEP_LAST 的设置情况下，支持调用 update 时变更某个点位 IOTANY 列的类型。</p>
+                <p class="- topic/p p">在写入示例的最后也涉及到了更新操作，此处聚焦后再次讲解。</p>
+                <div class="- topic/p p">当更新列为 IOTANY列 时，where 中不能包含除 first sort key
+                    以外的列，否则会报错。这样是为了保证修改类型时要更新所有该点位的记录，以确保同一个点位的 IOTANY
+                    列的类型一直统一。<pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_ogj_r4y_bdc__codeblock_cgm_s4y_bdc" data-ofbid="topic_ogj_r4y_bdc__codeblock_cgm_s4y_bdc"><code>t = table([`dev1] as deviceId,
+  [now()] as timestamp,
+  [`loc1] as location,
+  [int(233)] as value)
+pt.append!(t) //该测点的类型为INT
+update pt set value = 2.33 where deviceId = `dev1 and location = `loc1
+// 将测点值更新为double
+update pt set value = 2.33 where deviceId = `dev1
+// ok
+update pt set value = 2.33 where deviceId = `dev1 and location = `loc1 and timestamp &gt; xxx
+// 不行，一次需要更新该点位所有的记录</code></pre></div>
+            </div>
+        </article>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title21" id="topic_skv_s4y_bdc">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title21">IOTANY 列查询示例</h3>
+            <div class="- topic/body body">
+                <div class="- topic/p p">基于已建立的表，进行如下查询操作：<pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_skv_s4y_bdc__codeblock_bgv_t4y_bdc" data-ofbid="topic_skv_s4y_bdc__codeblock_bgv_t4y_bdc"><code>select deviceId, location, sum(long(value)), timestamp from pt where deviceId = 1 and
+  location = `loc1 and timestamp &gt;= 2017.08.07
+//成功执行</code></pre></div>
+            </div>
+        </article>
+    </article>
+    <article class="- topic/topic topic nested1" aria-labelledby="ariaid-title22" id="topic_imj_wt5_hdc">
+        <h2 class="- topic/title title topictitle2" id="ariaid-title22">IOTANY 列计算示例</h2>
+        <div class="- topic/body body">
+            <div class="- topic/p p">基于已建立的表，进行如下计算：<pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_imj_wt5_hdc__codeblock_a4j_wt5_hdc" data-ofbid="topic_imj_wt5_hdc__codeblock_a4j_wt5_hdc"><code>// 判断相等关系
+select * from pt where value = 233
+
+// 聚合计算
+select deviceId, location, sum(value), timestamp from pt where deviceId = 1 and
+  location = `loc1 and timestamp &gt;= 2017.08.07</code></pre></div>
+        </div>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title23" id="topic_n5d_54y_bdc">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title23">最新值查询（context by）示例</h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p">前文介绍，最新值查询的优化有最新值缓存表和最新值查询优化两种方式。在满足不同条件时会用到不同的优化策略。本例为方便展示，将创建一个新的点位管理表。</p>
+                <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_n5d_54y_bdc__codeblock_w44_v4y_bdc" data-ofbid="topic_n5d_54y_bdc__codeblock_w44_v4y_bdc"><code>dbName = "dfs://test";
+if(existsDatabase(dbName)){
+	dropDatabase(dbName)
+}
+// 创建数据库，存储引擎为IOTDB
+create database "dfs://test" 
+partitioned by HASH([LONG,1]),HASH([DATE, 1]),
+engine = 'IOTDB'
+dummy = table(1000000:0, `date`deviceId`key1`val_any, [DATE, LONG, INT, DOUBLE])
+// 创建点位表，其中 firstSortKey 为 deviceId 和 key1，lastSortKey(时间戳列)为 date
+create table "dfs://test"."pt1"(
+        date DATE,
+        deviceId LONG,
+        key1 INT,
+        val_any DOUBLE
+)
+partitioned by deviceId, date
+sortColumns = [`deviceId,`key1,`date]
+keepDuplicates = ALL
+latestKeyCache = true
+pt1 = loadTable(dbName, "pt1")
+// 导入测试数据
+n = 200000
+date = rand(2012.01.01..2012.12.31, n)
+key1 = take(200199..(200199+n), n)
+deviceId = take(200..(200+n), n)
+val = rand(double(n), n)
+t = table(date, deviceId, key1, val)
+pt1.append!(t)</code></pre>
+                <div class="- topic/p p">以下查询将使用最新值缓存优化：<pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_n5d_54y_bdc__codeblock_fhv_w4y_bdc" data-ofbid="topic_n5d_54y_bdc__codeblock_fhv_w4y_bdc"><code>select [HINT_EXPLAIN] * from pt1 where deviceId in [200, 201, 202]
+context by deviceId, key1 csort date
+limit -1
+// HINT_EXPLAIN 输出
+{
+    .......
+    "lastQuery": {
+        "optimizationMethod": LatestKeyCache
+    },
+    ......
+}</code></pre></div>
+                <div class="- topic/p p">以下查询将使用最新值查询优化：<pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_n5d_54y_bdc__codeblock_gw1_x4y_bdc" data-ofbid="topic_n5d_54y_bdc__codeblock_gw1_x4y_bdc"><code>select [HINT_EXPLAIN] * from pt1 where deviceId = 200 and key1 = 200199 
+and date &gt; 2010.12.31
+context by deviceId, key1 csort date
+limit -1
+// HINT_EXPLAIN 输出
+{
+    .......
+    "lastQuery": {
+        "optimizationMethod": LatestKeyQuery
+    },
+    ......
+}</code></pre></div>
+                <div class="- topic/p p">以下查询不会使用存储层的任何优化（过滤条件中包含了非 sortkey
+                    列）：<pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_n5d_54y_bdc__codeblock_ufc_y4y_bdc" data-ofbid="topic_n5d_54y_bdc__codeblock_ufc_y4y_bdc"><code>select [HINT_EXPLAIN] * from pt1 where deviceId = 200
+and val_any = 123
+context by deviceId, key1 csort date
+limit -1
+// HINT_EXPLAIN 输出
+{
+    .......
+    "lastQuery": {
+        "optimizationMethod": None
+    },
+    ......
+}</code></pre></div>
+                <p class="- topic/p p">相关文档：</p>
+                <ul class="- topic/ul ul" id="topic_n5d_54y_bdc__ul_icp_z4y_bdc" data-ofbid="topic_n5d_54y_bdc__ul_icp_z4y_bdc">
+                    <li class="- topic/li li"><a class="- topic/xref xref" href="../../progr/sql/create.html">create</a></li>
+                    <li class="- topic/li li"><a class="- topic/xref xref" href="../../funcs/c/createPartitionedTable.html">createPartitionedTable</a></li>
+                    <li class="- topic/li li"><a class="- topic/xref xref" href="../../funcs/s/schema.html">schema</a></li>
+                    <li class="- topic/li li"><a class="- topic/xref xref" href="../../funcs/g/getSessionMemoryStat.html">getSessionMemoryStat</a></li>
+                    <li class="- topic/li li"><a class="- topic/xref xref" href="../cfg/function_configuration.html">参数配置</a></li>
+                </ul>
+            </div>
+        </article>
+    </article>
+</article></main></div>
+                        
+                        
+                        
+                        
+                        
+                        
+                    </div>
+                    
+                        <nav role="navigation" id="wh_topic_toc" aria-label="On this page" class="col-lg-2 d-none d-lg-block navbar d-print-none"> 
+                            <div id="wh_topic_toc_content">
+		                        
+	                            <div class=" wh_topic_toc "><div class="wh_topic_label">在本页上</div><ul><li class="topic-item"><a href="#topic_g3t_1ny_bdc" data-tocid="topic_g3t_1ny_bdc">使用条件</a></li><li class="topic-item"><a href="#topic_k1x_bny_bdc" data-tocid="topic_k1x_bny_bdc">基础概念</a><ul><li class="topic-item"><a href="#topic_lyb_dny_bdc" data-tocid="topic_lyb_dny_bdc">点位</a></li><li class="topic-item"><a href="#topic_tby_dny_bdc" data-tocid="topic_tby_dny_bdc">点位数据特点</a></li><li class="topic-item"><a href="#topic_ttc_fny_bdc" data-tocid="topic_ttc_fny_bdc">物联网点位管理引擎 / IOTDB 引擎</a></li><li class="topic-item"><a href="#topic_x5q_gny_bdc" data-tocid="topic_x5q_gny_bdc">IOTANY 列</a></li><li class="topic-item"><a href="#topic_p4p_hny_bdc" data-tocid="topic_p4p_hny_bdc">最新值缓存功能</a></li><li class="topic-item"><a href="#topic_cdm_3ny_bdc" data-tocid="topic_cdm_3ny_bdc">点位管理表</a></li><li class="topic-item"><a href="#topic_orr_jny_bdc" data-tocid="topic_orr_jny_bdc">静态表</a></li></ul></li><li class="topic-item"><a href="#topic_gfs_kny_bdc" data-tocid="topic_gfs_kny_bdc">功能说明</a><ul><li class="topic-item"><a href="#topic_nmr_lny_bdc" data-tocid="topic_nmr_lny_bdc">IOTANY 列</a></li><li class="topic-item"><a href="#topic_v2z_4ny_bdc" data-tocid="topic_v2z_4ny_bdc">最新值查询优化</a><ul><li class="topic-item"><a href="#topic_mkg_b4y_bdc" data-tocid="topic_mkg_b4y_bdc">通过 HINT_EXPLAIN 查看是否使用优化</a></li><li class="topic-item"><a href="#topic_r2y_c4y_bdc" data-tocid="topic_r2y_c4y_bdc">有重复数据时的最新值查询语义</a><ul><li class="section-item"><div class="section-title"><a href="#topic_r2y_c4y_bdc__%E6%9C%80%E6%96%B0%E5%80%BC%E7%BC%93%E5%AD%98%E8%A1%A8%E7%AE%A1%E7%90%86" data-tocid="topic_r2y_c4y_bdc__最新值缓存表管理">最新值缓存表管理</a></div></li></ul></li></ul></li></ul></li><li class="topic-item"><a href="#topic_ivt_h4y_bdc" data-tocid="topic_ivt_h4y_bdc">数据类型</a></li><li class="topic-item"><a href="#topic_u4w_j4y_bdc" data-tocid="topic_u4w_j4y_bdc">使用示例</a><ul><li class="topic-item"><a href="#topic_elz_l4y_bdc" data-tocid="topic_elz_l4y_bdc">创建示例</a></li><li class="topic-item"><a href="#topic_x44_n4y_bdc" data-tocid="topic_x44_n4y_bdc">写入示例</a></li><li class="topic-item"><a href="#topic_ogj_r4y_bdc" data-tocid="topic_ogj_r4y_bdc">更新示例</a></li><li class="topic-item"><a href="#topic_skv_s4y_bdc" data-tocid="topic_skv_s4y_bdc">IOTANY 列查询示例</a></li></ul></li><li class="topic-item"><a href="#topic_imj_wt5_hdc" data-tocid="topic_imj_wt5_hdc">IOTANY 列计算示例</a><ul><li class="topic-item"><a href="#topic_n5d_54y_bdc" data-tocid="topic_n5d_54y_bdc">最新值查询（context by）示例</a></li></ul></li></ul></div>
+	                        	
+                        	</div>
+                        </nav>
+                    
+                </div>
+            </div>
+            
+            
+            
+        </div> 
+        <footer class="navbar navbar-default wh_footer">
+  <div class=" footer-container mx-auto ">
+<title>Copyright</title><p><b> ©2025 浙江智臾科技有限公司 浙ICP备18048711号-3</b></p>
+  </div>
+</footer>
+        
+        <div id="go2top" class="d-print-none">
+            <span class="oxy-icon oxy-icon-up"></span>
+        </div>
+        
+        <div id="modal_img_large" class="modal">
+            <span class="close oxy-icon oxy-icon-remove"></span>
+            <div id="modal_img_container"></div>
+            <div id="caption"></div>
+        </div>
+        
+        
+        
+    </body>
+</html>

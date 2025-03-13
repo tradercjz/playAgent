@@ -1,0 +1,50 @@
+
+
+```dolphindb
+# bondYield
+
+## 语法
+
+`bondYield(settlement, maturity, coupon, price, redemption, frequency, [basis=1], [method='newton'], [maxIter])`
+
+## 详情
+
+通过债券净价（Clean Price）计算有价债券的收益率（Yield）。返回 DOUBLE 类型的标量或向量。
+
+**注意：**
+- 结算日距离到期日不足一个票息期时，使用特定公式计算收益率
+- 到期前有多个票息期时，使用优化算法迭代计算收益率
+- 收益率初值设置为年息票利率
+
+## 参数
+
+| 参数          | 类型                  | 说明                                                                 |
+|---------------|-----------------------|----------------------------------------------------------------------|
+| settlement    | DATE                  | 结算日（购买日期）                                                   |
+| maturity      | DATE                  | 到期日                                                               |
+| coupon        | 数值型                | 年息票利率                                                           |
+| price         | 数值型                | 面值￥100的债券净价                                                  |
+| redemption    | 数值型                | 清偿价格（面值￥100）                                                |
+| frequency     | INT/DURATION          | 年付息频率：1(年付)、2(半年付)、4(季付)、12(月付)                     |
+| basis         | INT/STRING (可选)     | 日计数基准，默认1：<br>0/"Thirty360US",1/"ActualActual",2/"Actual360",3/"Actual365",4/"Thirty360EU" |
+| method        | STRING (可选)         | 优化算法：'newton'(默认),'brent','nm','bfgs','lbfgs'                 |
+| maxIter       | INT (可选)            | 最大迭代次数，默认100                                                |
+
+## 示例
+
+计算债券收益率（不同优化算法对比）：
+
+```dolphindb
+settlement = 2008.02.15
+maturity = 2016.11.15
+coupon = 0.0575
+price = 95.04287
+redemption = 100
+frequency = 2
+basis = 0
+method = ['newton', 'nm', 'brentq', 'bfgs','lbfgs']
+bondYield(settlement, maturity, coupon, price, redemption, frequency, basis, method)
+// 输出：[0.065000006880755,0.064999847412109,0.065000006880759,0.064999999976412,0.065000004967984]
+```
+
+**相关函数**：[bondDirtyPrice](bondDirtyPrice.html)

@@ -1,0 +1,19 @@
+<!doctype html>
+<html>
+    <head>
+        <title>DolphinDB</title>
+        <meta charset='utf-8' />
+    </head>
+    <body>
+        <script type="module">
+            import { DDB, DdbObj, DdbForm, DdbType } from 'https://cdn.dolphindb.cn/assets/api.js'
+            let ddb = new DDB('ws://192.198.1.38:8200', { username: 'testUser2', password: '123456' })
+            await ddb.connect()
+            
+            const start = '2015.01.01'
+            const end = '2024.12.31'
+            const tb = await ddb.execute(`select * from query(${start}, ${end}, "*") limit 100`)
+            console.log(tb.data)
+        </script>
+    </body>
+</html>

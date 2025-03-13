@@ -1,0 +1,847 @@
+<!DOCTYPE html><html xmlns="http://www.w3.org/1999/xhtml" xml:lang="zh" lang="zh" data-whc_version="26.0">
+    <head><link rel="shortcut icon" href="../../favicon.ico"/><link rel="icon" href="../../favicon.ico"/><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><meta name="description" content="回测平台支持债券资产，包括银行间债券和上交所债券。 接口 createBacktester 的参数 config 和接口 createBacktestEngine 的参数 userConfig 的配置可参考下表： key 说明 备注 &#34;startDate&#34; 开始日期 必须配置，DATE 类型 例如 “2020.01.01” &#34;endDate&#34; 结束日期 必须配置，DATE 类型 例如 ..."/><meta name="DC.rights.owner" content="(C) 版权 2025"/><meta name="copyright" content="(C) 版权 2025"/><meta name="generator" content="DITA-OT"/><meta name="DC.type" content="topic"/><meta name="DC.coverage" content=""/><meta name="DC.relation" content="../../plugins/backtest.html"/><meta name="prodname" content="DolphinDB"/><meta name="brand" content="DolphinDB"/><meta name="DC.creator" content="DolphinDB"/><meta name="DC.publisher" content="DDB N/A DDB 200"/><meta name="DC.format" content="HTML5"/><meta name="DC.identifier" content="银行间债券"/><title>银行间债券</title><!--  Generated with Oxygen version 26.0, build number 2024012323.  --><meta name="wh-path2root" content="../../"/><meta name="wh-toc-id" content="银行间债券-d9713e94908"/><meta name="wh-source-relpath" content="plugins/backtest/interbank_bonds.dita"/><meta name="wh-out-relpath" content="plugins/backtest/interbank_bonds.html"/>
+
+    <link rel="stylesheet" type="text/css" href="../../oxygen-webhelp/app/commons.css?buildId=2024012323"/>
+    <link rel="stylesheet" type="text/css" href="../../oxygen-webhelp/app/topic.css?buildId=2024012323"/>
+
+    <script src="../../oxygen-webhelp/app/options/properties.js?buildId=20250305183303"></script>
+    <script src="../../oxygen-webhelp/app/localization/strings.js?buildId=2024012323"></script>
+    <script src="../../oxygen-webhelp/app/search/index/keywords.js?buildId=20250305183303"></script>
+    <script defer="defer" src="../../oxygen-webhelp/app/commons.js?buildId=2024012323"></script>
+    <script defer="defer" src="../../oxygen-webhelp/app/topic.js?buildId=2024012323"></script>
+<link rel="stylesheet" type="text/css" href="../../oxygen-webhelp/template/styles.css?buildId=2024012323"/><script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script><script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script></head>
+
+    <body id="银行间债券" class="wh_topic_page frmBody">
+        <a href="#wh_topic_body" class="sr-only sr-only-focusable">
+            跳转到主要内容
+        </a>
+        
+        
+        
+        
+        <header class="navbar navbar-default wh_header">
+    <div class="container-fluid">
+        <div xmlns:whc="http://www.oxygenxml.com/webhelp/components" class="wh_header_flex_container navbar-nav navbar-expand-md navbar-dark">
+            <div class="wh_logo_and_publication_title_container">
+                <div class="wh_logo_and_publication_title">
+                    
+                    <a href="https://docs.dolphindb.cn/zh/index.html" class=" wh_logo d-none d-sm-block "><img src="../../logo.png" alt="  DolphinDB 文档中心  "/></a>
+                    <div class=" wh_publication_title "><a href="../../index.html"><span class="booktitle">  <span class="ph mainbooktitle">DolphinDB 文档中心</span>  </span></a></div>
+                    
+                </div>
+                
+                
+            </div>
+
+            <div class="wh_top_menu_and_indexterms_link collapse navbar-collapse" id="wh_top_menu_and_indexterms_link">
+                
+                
+                
+                
+            </div>
+        <div class=" wh_search_input navbar-form wh_topic_page_search search " role="form">
+            
+            
+            
+            <form id="searchForm" method="get" role="search" action="../../search.html"><div><input type="search" placeholder="搜索 " class="wh_search_textfield" id="textToSearch" name="searchQuery" aria-label="搜索查询" required="required"/><button type="submit" class="wh_search_button" aria-label="搜索"><span class="search_input_text">搜索</span></button></div></form>
+            
+            <script src="/vendors/react/umd/react.production.min.js" defer="defer"></script>
+<script src="/vendors/react-dom/umd/react-dom.production.min.js" defer="defer"></script>
+<script src="/vendors/dayjs/dayjs.min.js" defer="defer"></script>
+<script src="/vendors/antd/dist/antd.min.js" defer="defer"></script>
+<script src="/vendors/@ant-design/icons/dist/index.umd.min.js" defer="defer"></script>
+<script src="/zh/index.js" type="module"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" defer="defer"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML" defer="defer"><!--
+
+
+--></script>
+<script defer="defer"><!--
+
+// 从主页重定向
+const currentUrl = window.location.href;
+
+// 判断当前URL是否包含index.html并且路径最后部分是index.html
+if (currentUrl.endsWith('index.html')) {
+    // 处理根目录下的index.html跳转
+    const baseUrl = currentUrl.split('/index.html')[0]; // 获取index.html之前的部分
+    const redirectUrl = `${baseUrl}/about/ddb_intro.html`; // 构建跳转路径
+    window.location.href = redirectUrl; // 执行跳转
+}
+
+--></script>
+            
+        </div></div>
+    </div>
+</header>
+        
+        
+         
+        
+        
+        
+        <div class="container-fluid" id="wh_topic_container">
+            <div class="row">
+
+                <nav class="wh_tools d-print-none navbar-expand-md" aria-label="Tools">
+                    
+                    <div data-tooltip-position="bottom" class=" wh_breadcrumb "><ol class="d-print-none"><li><span class="home"><a href="../../index.html"><span>主页</span></a></span></li><li><div class="topicref" data-id="chap6_plugin"><div class="title"><a href="../../plugins/plg_intro.html"><span class="keyword label">插件</span></a><div class="wh-tooltip"><p class="shortdesc">多个应用场景的插件使用说明和插件开发指导</p></div></div></div></li><li><div class="topicref" data-id="backtest"><div class="title"><a href="../../plugins/backtest.html">Backtest</a></div></div></li><li class="active"><div class="topicref" data-id="银行间债券"><div class="title"><a href="../../plugins/backtest/interbank_bonds.html">银行间债券</a></div></div></li></ol></div>
+                    
+                    
+                    
+                    <div class="wh_right_tools">
+                        <button class="wh_hide_highlight" aria-label="切换搜索突出显示" title="切换搜索突出显示"></button>
+                        <button class="webhelp_expand_collapse_sections" data-next-state="collapsed" aria-label="折叠截面" title="折叠截面"></button>
+                        
+                        
+                        
+                        
+                        <div class=" wh_print_link print d-none d-md-inline-block "><button onClick="window.print()" title="打印此页" aria-label="打印此页"></button></div>
+                        
+                        <button type="button" id="wh_toc_button" class="custom-toggler navbar-toggler collapsed wh_toggle_button navbar-light" aria-expanded="false" aria-label="Toggle publishing table of content" aria-controls="wh_publication_toc">
+                            <span class="navbar-toggler-icon"></span>
+                        </button>
+                    </div>
+                    
+                </nav>
+            </div>
+            
+            
+            
+            
+            <div class="wh_content_area">
+                <div class="row">
+                    
+                        <nav id="wh_publication_toc" class="col-lg-3 col-md-3 col-sm-12 d-md-block d-none d-print-none" aria-label="Table of Contents Container">
+                            <div id="wh_publication_toc_content">
+		                        
+                            	<div class=" wh_publication_toc " data-tooltip-position="right"><span class="expand-button-action-labels"><span id="button-expand-action" role="button" aria-label="Expand"></span><span id="button-collapse-action" role="button" aria-label="Collapse"></span><span id="button-pending-action" role="button" aria-label="Pending"></span></span><ul role="tree" aria-label="Table of Contents"><li role="treeitem"><div data-tocid="ddb_intro-d9713e87" class="topicref" data-id="ddb_intro" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../about/ddb_intro.html" id="ddb_intro-d9713e87-link">关于DolphinDB</a></div></div></li><li role="treeitem"><div data-tocid="chap1_getstarted-d9713e136" class="topicref" data-id="chap1_getstarted" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../getstarted/chap1_getstarted.html" id="chap1_getstarted-d9713e136-link">快速上手</a><div class="wh-tooltip"><p class="shortdesc">如何快速部署 DolphinDB、建库建表、写入和查询数据</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="sectionddb_deployment-d9713e189" class="topicref" data-id="sectionddb_deployment" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action sectionddb_deployment-d9713e189-link" class="wh-expand-btn"></span><div class="title"><a href="../../deploy/deploy_intro.html" id="sectionddb_deployment-d9713e189-link"><span class="keyword label">部署</span></a><div class="wh-tooltip"><p class="shortdesc">如何在不同的场景中部署 DolphinDB</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="new_chap_database_manage_new_chap_dbmanage_landing_page-d9713e2259" class="topicref" data-id="new_chap_database_manage_new_chap_dbmanage_landing_page" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action new_chap_database_manage_new_chap_dbmanage_landing_page-d9713e2259-link" class="wh-expand-btn"></span><div class="title"><a href="../../db_distr_comp/cfg/db_intro.html" id="new_chap_database_manage_new_chap_dbmanage_landing_page-d9713e2259-link"><span class="keyword label">数据库</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 数据库的基本概念</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="chap7_tutorials_streaming-d9713e3760" class="topicref" data-id="chap7_tutorials_streaming" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action chap7_tutorials_streaming-d9713e3760-link" class="wh-expand-btn"></span><div class="title"><a href="../../stream/str_intro.html" id="chap7_tutorials_streaming-d9713e3760-link"><span class="keyword label">流数据</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 流数据引擎及流数据计算的基本概念</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e7513" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e7513-link" class="wh-expand-btn"></span><div class="title"><a href="../../db_distr_comp/db_oper/import_data.html" id="tocId-d9713e7513-link">数据迁移</a><div class="wh-tooltip"><p class="shortdesc">如何从不同数据源向 DolphinDB 迁移数据</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="chap7_tutorials_system_management-d9713e7940" class="topicref" data-id="chap7_tutorials_system_management" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action chap7_tutorials_system_management-d9713e7940-link" class="wh-expand-btn"></span><div class="title"><a href="../../sys_man/om_intro.html" id="chap7_tutorials_system_management-d9713e7940-link"><span class="keyword label">系统运维</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 的系统运维功能及方法</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="troubleshooting-d9713e8780" class="topicref" data-id="troubleshooting" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action troubleshooting-d9713e8780-link" class="wh-expand-btn"></span><div class="title"><a href="../../error_codes/troubleshooting.html" id="troubleshooting-d9713e8780-link">故障排查</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="about_language_resources-d9713e20911" class="topicref" data-id="about_language_resources" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action about_language_resources-d9713e20911-link" class="wh-expand-btn"></span><div class="title"><a href="../../progr/progr_intro.html" id="about_language_resources-d9713e20911-link"><span class="keyword label">编程语言</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 编程基本概念与方法、SQL 在 DolphinDB 的应用</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="functions_references-d9713e30925" class="topicref" data-id="functions_references" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action functions_references-d9713e30925-link" class="wh-expand-btn"></span><div class="title"><a href="../../funcs/funcs_intro.html" id="functions_references-d9713e30925-link"><span class="keyword label">函数参考</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 函数分类、语法、详解及示例</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="api_protocol-d9713e94064" class="topicref" data-id="api_protocol" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action api_protocol-d9713e94064-link" class="wh-expand-btn"></span><div class="title"><a href="../../api/connapi_intro.html" id="api_protocol-d9713e94064-link"><span class="keyword label">连接器 &amp; API</span></a><div class="wh-tooltip"><p class="shortdesc">面向不同编程语言的 DolphinDB API 及连接器，相关协议和用法</p></div></div></div></li><li role="treeitem" aria-expanded="true"><div data-tocid="chap6_plugin-d9713e94210" class="topicref" data-id="chap6_plugin" data-state="expanded"><span role="button" tabindex="0" aria-labelledby="button-collapse-action chap6_plugin-d9713e94210-link" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/plg_intro.html" id="chap6_plugin-d9713e94210-link"><span class="keyword label">插件</span></a><div class="wh-tooltip"><p class="shortdesc">多个应用场景的插件使用说明和插件开发指导</p></div></div></div><ul role="group" class="navbar-nav nav-list"><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e94263" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e94263-link" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/plg_howtos.html" id="tocId-d9713e94263-link">插件使用与开发</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="amdquote-d9713e94448" class="topicref" data-id="amdquote" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action amdquote-d9713e94448-link" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/amdquote/amdquote_2.html" id="amdquote-d9713e94448-link">amdQuote</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="arrow-d9713e94540" class="topicref" data-id="arrow" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action arrow-d9713e94540-link" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/Arrow/arrow.html" id="arrow-d9713e94540-link">Arrow</a></div></div></li><li role="treeitem"><div data-tocid="awss3-d9713e94632" class="topicref" data-id="awss3" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/aws/aws.html" id="awss3-d9713e94632-link">AWSS3</a></div></div></li><li role="treeitem" aria-expanded="true"><div data-tocid="backtest-d9713e94678" class="topicref" data-id="backtest" data-state="expanded"><span role="button" tabindex="0" aria-labelledby="button-collapse-action backtest-d9713e94678-link" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/backtest.html" id="backtest-d9713e94678-link">Backtest</a></div></div><ul role="group" class="navbar-nav nav-list"><li role="treeitem"><div data-tocid="interface_description-d9713e94724" class="topicref" data-id="interface_description" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/backtest/interface_description.html" id="interface_description-d9713e94724-link">接口说明</a></div></div></li><li role="treeitem"><div data-tocid="股票-d9713e94770" class="topicref" data-id="股票" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/backtest/stock.html" id="股票-d9713e94770-link">股票</a></div></div></li><li role="treeitem"><div data-tocid="期权-d9713e94816" class="topicref" data-id="期权" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/backtest/option.html" id="期权-d9713e94816-link">期权</a></div></div></li><li role="treeitem"><div data-tocid="期货-d9713e94862" class="topicref" data-id="期货" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/backtest/futures.html" id="期货-d9713e94862-link">期货</a></div></div></li><li role="treeitem" class="active"><div data-tocid="银行间债券-d9713e94908" class="topicref" data-id="银行间债券" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/backtest/interbank_bonds.html" id="银行间债券-d9713e94908-link">银行间债券</a></div></div></li><li role="treeitem"><div data-tocid="数字货币-d9713e94954" class="topicref" data-id="数字货币" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/backtest/digital_currency.html" id="数字货币-d9713e94954-link">数字货币</a></div></div></li><li role="treeitem"><div data-tocid="performance_comparison-d9713e95000" class="topicref" data-id="performance_comparison" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/performance_comparison.html" id="performance_comparison-d9713e95000-link">DolphinDB 回测平台与其它回测产品的对比分析</a></div></div></li><li role="treeitem"><div data-tocid="dolphindb_回测平台使用和性能优化攻略-d9713e95046" class="topicref" data-id="dolphindb_回测平台使用和性能优化攻略" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/backtest/performance_tuning.html" id="dolphindb_回测平台使用和性能优化攻略-d9713e95046-link">DolphinDB 回测平台使用和性能优化攻略</a></div></div></li><li role="treeitem"><div data-tocid="release_notes-d9713e95092" class="topicref" data-id="release_notes" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/release_notes.html" id="release_notes-d9713e95092-link">版本说明</a></div></div></li></ul></li><li role="treeitem" aria-expanded="false"><div data-tocid="ctp-d9713e95138" class="topicref" data-id="ctp" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action ctp-d9713e95138-link" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/ctp_2.html" id="ctp-d9713e95138-link">CTP</a></div></div></li><li role="treeitem"><div data-tocid="datafeed-d9713e95230" class="topicref" data-id="datafeed" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/datafeed.html" id="datafeed-d9713e95230-link">DataFeed</a></div></div></li><li role="treeitem"><div data-tocid="efh-d9713e95276" class="topicref" data-id="efh" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/efh.html" id="efh-d9713e95276-link">EFH</a></div></div></li><li role="treeitem"><div data-tocid="encoderdecoder-d9713e95322" class="topicref" data-id="encoderdecoder" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/EncoderDecoder.html" id="encoderdecoder-d9713e95322-link">EncoderDecoder</a></div></div></li><li role="treeitem"><div data-tocid="excel_add_in-d9713e95368" class="topicref" data-id="excel_add_in" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/excel_add_in.html" id="excel_add_in-d9713e95368-link">Excel Add-In</a></div></div></li><li role="treeitem"><div data-tocid="feather-d9713e95415" class="topicref" data-id="feather" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/feather/feather.html" id="feather-d9713e95415-link">Feather</a></div></div></li><li role="treeitem"><div data-tocid="gp-d9713e95461" class="topicref" data-id="gp" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/gp/gp.html" id="gp-d9713e95461-link">GP</a></div></div></li><li role="treeitem"><div data-tocid="gurobi-d9713e95507" class="topicref" data-id="gurobi" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/gurobi.html" id="gurobi-d9713e95507-link">gurobi</a></div></div></li><li role="treeitem"><div data-tocid="hbase-d9713e95553" class="topicref" data-id="hbase" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/hbase/hbase.html" id="hbase-d9713e95553-link">HBase</a></div></div></li><li role="treeitem"><div data-tocid="hdf5-d9713e95599" class="topicref" data-id="hdf5" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/hdf5/hdf5.html" id="hdf5-d9713e95599-link">HDF5</a></div></div></li><li role="treeitem"><div data-tocid="hdfs-d9713e95645" class="topicref" data-id="hdfs" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/hdfs/hdfs.html" id="hdfs-d9713e95645-link">HDFS</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="httpclient-d9713e95691" class="topicref" data-id="httpclient" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action httpclient-d9713e95691-link" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/httpClient/httpclient.html" id="httpclient-d9713e95691-link">HttpClient</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="insight-d9713e95783" class="topicref" data-id="insight" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action insight-d9713e95783-link" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/insight/insight_2.html" id="insight-d9713e95783-link">INSIGHT</a></div></div></li><li role="treeitem"><div data-tocid="kafka-d9713e95875" class="topicref" data-id="kafka" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/kafka/kafka.html" id="kafka-d9713e95875-link">Kafka</a></div></div></li><li role="treeitem"><div data-tocid="kdb-d9713e95921" class="topicref" data-id="kdb" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/kdb/kdb.html" id="kdb-d9713e95921-link">Kdb+</a></div></div></li><li role="treeitem"><div data-tocid="ldap-d9713e95967" class="topicref" data-id="ldap" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/LDAP.html" id="ldap-d9713e95967-link">LDAP</a></div></div></li><li role="treeitem"><div data-tocid="lgmb-d9713e96014" class="topicref" data-id="lgmb" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/lgbm.html" id="lgmb-d9713e96014-link">lgbm</a></div></div></li><li role="treeitem"><div data-tocid="libtorch-d9713e96060" class="topicref" data-id="libtorch" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/libtorch/libtorch.html" id="libtorch-d9713e96060-link">LibTorch</a></div></div></li><li role="treeitem"><div data-tocid="mat-d9713e96106" class="topicref" data-id="mat" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/mat/mat.html" id="mat-d9713e96106-link">mat</a></div></div></li><li role="treeitem"><div data-tocid="matchingengine-d9713e96152" class="topicref" data-id="matchingengine" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/MatchingEngine/me.html" id="matchingengine-d9713e96152-link">MatchingEngine</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="mes-d9713e96198" class="topicref" data-id="mes" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action mes-d9713e96198-link" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/matchingEngineSimulator/mes.html" id="mes-d9713e96198-link">MatchingEngineSimulator</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="mdl-d9713e96336" class="topicref" data-id="mdl" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action mdl-d9713e96336-link" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/MDL.html" id="mdl-d9713e96336-link">MDL</a></div></div></li><li role="treeitem"><div data-tocid="mongodb-d9713e96428" class="topicref" data-id="mongodb" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/mongodb/mongodb.html" id="mongodb-d9713e96428-link">MongoDB</a></div></div></li><li role="treeitem"><div data-tocid="mqtt-d9713e96474" class="topicref" data-id="mqtt" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/mqtt/mqtt.html" id="mqtt-d9713e96474-link">mqtt</a></div></div></li><li role="treeitem"><div data-tocid="mseed-d9713e96520" class="topicref" data-id="mseed" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/mseed/mseed.html" id="mseed-d9713e96520-link">mseed</a></div></div></li><li role="treeitem"><div data-tocid="mysql-d9713e96566" class="topicref" data-id="mysql" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/mysql/mysql.html" id="mysql-d9713e96566-link">MySQL</a></div></div></li><li role="treeitem"><div data-tocid="nsq-d9713e96612" class="topicref" data-id="nsq" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/nsq/nsq_2.html" id="nsq-d9713e96612-link">NSQ</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="odbc-d9713e96659" class="topicref" data-id="odbc" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action odbc-d9713e96659-link" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/odbc/odbc.html" id="odbc-d9713e96659-link">ODBC</a></div></div></li><li role="treeitem"><div data-tocid="opcua-d9713e96751" class="topicref" data-id="opcua" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/opcua/opcua.html" id="opcua-d9713e96751-link">OPCUA</a></div></div></li><li role="treeitem"><div data-tocid="opc-d9713e96797" class="topicref" data-id="opc" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/opc/opc.html" id="opc-d9713e96797-link">OPC</a></div></div></li><li role="treeitem"><div data-tocid="orc-d9713e96843" class="topicref" data-id="orc" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/orc.html" id="orc-d9713e96843-link">ORC</a></div></div></li><li role="treeitem"><div data-tocid="parquet-d9713e96889" class="topicref" data-id="parquet" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/parquet/parquet.html" id="parquet-d9713e96889-link">Parquet</a></div></div></li><li role="treeitem"><div data-tocid="py-d9713e96935" class="topicref" data-id="py" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/py/py.html" id="py-d9713e96935-link">Py</a></div></div></li><li role="treeitem"><div data-tocid="rabbitmq-d9713e96981" class="topicref" data-id="rabbitmq" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/rabbitMQ.html" id="rabbitmq-d9713e96981-link">RabbitMQ</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="redis-d9713e97027" class="topicref" data-id="redis" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action redis-d9713e97027-link" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/redis.html" id="redis-d9713e97027-link">Redis</a></div></div></li><li role="treeitem"><div data-tocid="quantlib-d9713e97119" class="topicref" data-id="quantlib" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/quantlib/quantlib.html" id="quantlib-d9713e97119-link">QuantLib</a></div></div></li><li role="treeitem"><div data-tocid="rocketmq-d9713e97165" class="topicref" data-id="rocketmq" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/rocketMQ.html" id="rocketmq-d9713e97165-link">RocketMQ</a></div></div></li><li role="treeitem"><div data-tocid="sevenzip-d9713e97211" class="topicref" data-id="sevenzip" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/sevenzip.html" id="sevenzip-d9713e97211-link">SevenZip</a></div></div></li><li role="treeitem"><div data-tocid="schemalesswriter-d9713e97258" class="topicref" data-id="schemalesswriter" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/slwriter.html" id="schemalesswriter-d9713e97258-link">SchemalessWriter</a></div></div></li><li role="treeitem"><div data-tocid="signal-d9713e97304" class="topicref" data-id="signal" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/signal/signal.html" id="signal-d9713e97304-link">signal</a></div></div></li><li role="treeitem"><div data-tocid="ssequotationfile-d9713e97350" class="topicref" data-id="ssequotationfile" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/SSEQuotationFile.html" id="ssequotationfile-d9713e97350-link">SSEQuotationFile</a></div></div></li><li role="treeitem"><div data-tocid="svm-d9713e97396" class="topicref" data-id="svm" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/svm/svm.html" id="svm-d9713e97396-link">SVM</a></div></div></li><li role="treeitem"><div data-tocid="tcpsocket-d9713e97442" class="topicref" data-id="tcpsocket" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/tcpsocket.html" id="tcpsocket-d9713e97442-link">TCPSocket</a></div></div></li><li role="treeitem"><div data-tocid="websocket-d9713e97488" class="topicref" data-id="websocket" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/websocket.html" id="websocket-d9713e97488-link">WebSocket</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="windtdf-d9713e97534" class="topicref" data-id="windtdf" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action windtdf-d9713e97534-link" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/windtdf.html" id="windtdf-d9713e97534-link">WindTDF</a></div></div></li><li role="treeitem"><div data-tocid="xgboost-d9713e97626" class="topicref" data-id="xgboost" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/xgboost/xgboost.html" id="xgboost-d9713e97626-link">xgboost</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="xtp-d9713e97672" class="topicref" data-id="xtp" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action xtp-d9713e97672-link" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/xtp.html" id="xtp-d9713e97672-link">XTP</a></div></div></li><li role="treeitem"><div data-tocid="zip-d9713e97764" class="topicref" data-id="zip" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/zip/zip.html" id="zip-d9713e97764-link">zip</a></div></div></li><li role="treeitem"><div data-tocid="zlib-d9713e97810" class="topicref" data-id="zlib" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/zlib/zlib.html" id="zlib-d9713e97810-link">Zlib</a></div></div></li><li role="treeitem"><div data-tocid="zmq-d9713e97857" class="topicref" data-id="zmq" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/zmq/zmq.html" id="zmq-d9713e97857-link">zmq</a></div></div></li></ul></li><li role="treeitem" aria-expanded="false"><div data-tocid="third_party-d9713e97904" class="topicref" data-id="third_party" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action third_party-d9713e97904-link" class="wh-expand-btn"></span><div class="title"><a href="../../third_party.html" id="third_party-d9713e97904-link">第三方工具</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="about_tutorials-d9713e98227" class="topicref" data-id="about_tutorials" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action about_tutorials-d9713e98227-link" class="wh-expand-btn"></span><div class="title"><a href="../../tutorials/about_tutorials.html" id="about_tutorials-d9713e98227-link"><span class="keyword label">教程</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 产品使用教程</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e105982" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e105982-link" class="wh-expand-btn"></span><div class="title"><a href="../../rn/server/3_00_2.html" id="tocId-d9713e105982-link">版本说明</a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 版本发布历史</p></div></div></div></li></ul></div>
+		                        
+                            </div>
+                        </nav>
+                    
+                    
+                    <div class="col-lg-7 col-md-9 col-sm-12" id="wh_topic_body">
+                        <button id="wh_close_publication_toc_button" class="close-toc-button d-none" aria-label="Toggle publishing table of content" aria-controls="wh_publication_toc" aria-expanded="true">
+                            <span class="close-toc-icon-container">
+                                <span class="close-toc-icon"></span>     
+                            </span>
+                        </button>
+                        <button id="wh_close_topic_toc_button" class="close-toc-button d-none" aria-label="Toggle topic table of content" aria-controls="wh_topic_toc" aria-expanded="true">
+                            <span class="close-toc-icon-container">
+                                <span class="close-toc-icon"></span>     
+                            </span>
+                        </button>
+                        
+                        <div class=" wh_topic_content body "><main role="main"><article class="- topic/topic topic" role="article" aria-labelledby="ariaid-title1">
+    <h1 class="- topic/title title topictitle1" id="ariaid-title1">银行间债券</h1>
+    <div class="- topic/body body">
+        <p class="- topic/p p">回测平台支持债券资产，包括银行间债券和上交所债券。</p>
+    </div>
+    <article class="- topic/topic topic nested1" aria-labelledby="ariaid-title2" id="topic_ab3_3y3_wdc">
+        <h2 class="- topic/title title topictitle2" id="ariaid-title2">银行间债券</h2>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title3" id="id-银行间债券-引擎配置说明">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title3">引擎配置说明</h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p">接口 <code class="+ topic/ph pr-d/codeph ph codeph">createBacktester</code> 的参数 <em class="+ topic/ph hi-d/i ph i">config</em> 和接口
+                        <code class="+ topic/ph pr-d/codeph ph codeph">createBacktestEngine</code> 的参数 <em class="+ topic/ph hi-d/i ph i">userConfig</em> 的配置可参考下表：</p>
+                <div class="table-container"><table class="- topic/table table frame-all" id="id-银行间债券-引擎配置说明__table_ks1_py3_wdc" data-ofbid="id-银行间债券-引擎配置说明__table_ks1_py3_wdc" data-cols="3"><caption></caption><colgroup><col/><col/><col/></colgroup><thead class="- topic/thead thead">
+                            <tr class="- topic/row">
+                                <th class="- topic/entry entry colsep-1 rowsep-1" id="id-银行间债券-引擎配置说明__table_ks1_py3_wdc__entry__1">
+                                    <strong class="+ topic/ph hi-d/b ph b">key</strong>
+                                </th>
+                                <th class="- topic/entry entry colsep-1 rowsep-1" id="id-银行间债券-引擎配置说明__table_ks1_py3_wdc__entry__2">
+                                    <strong class="+ topic/ph hi-d/b ph b">说明</strong>
+                                </th>
+                                <th class="- topic/entry entry colsep-0 rowsep-1" id="id-银行间债券-引擎配置说明__table_ks1_py3_wdc__entry__3">
+                                    <strong class="+ topic/ph hi-d/b ph b">备注</strong>
+                                </th>
+                            </tr>
+                        </thead><tbody class="- topic/tbody tbody">
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-银行间债券-引擎配置说明__table_ks1_py3_wdc__entry__1">"startDate"</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-银行间债券-引擎配置说明__table_ks1_py3_wdc__entry__2">开始日期</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-银行间债券-引擎配置说明__table_ks1_py3_wdc__entry__3">必须配置，DATE 类型<p class="- topic/p p">例如 “2020.01.01”</p></td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-银行间债券-引擎配置说明__table_ks1_py3_wdc__entry__1">"endDate"</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-银行间债券-引擎配置说明__table_ks1_py3_wdc__entry__2">结束日期</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-银行间债券-引擎配置说明__table_ks1_py3_wdc__entry__3">必须配置，DATE 类型<p class="- topic/p p">例如 “2020.01.01”</p></td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-银行间债券-引擎配置说明__table_ks1_py3_wdc__entry__1">"strategyGroup"</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-银行间债券-引擎配置说明__table_ks1_py3_wdc__entry__2">策略类型</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-银行间债券-引擎配置说明__table_ks1_py3_wdc__entry__3"> 必须配置，“CFETSBond”</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-银行间债券-引擎配置说明__table_ks1_py3_wdc__entry__1">"cash"</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-银行间债券-引擎配置说明__table_ks1_py3_wdc__entry__2">初始资金</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-银行间债券-引擎配置说明__table_ks1_py3_wdc__entry__3">必须配置，DOUBLE 类型</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-银行间债券-引擎配置说明__table_ks1_py3_wdc__entry__1">"commission"</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-银行间债券-引擎配置说明__table_ks1_py3_wdc__entry__2">手续费</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-银行间债券-引擎配置说明__table_ks1_py3_wdc__entry__3">必须配置，DOUBLE 类型</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-银行间债券-引擎配置说明__table_ks1_py3_wdc__entry__1">"dataType"</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-银行间债券-引擎配置说明__table_ks1_py3_wdc__entry__2">行情类型</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-银行间债券-引擎配置说明__table_ks1_py3_wdc__entry__3">必须配置，INT 类型，可选值为：<p class="- topic/p p"> 2：快照+逐笔成交明细</p></td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-银行间债券-引擎配置说明__table_ks1_py3_wdc__entry__1">“matchingMode“</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-银行间债券-引擎配置说明__table_ks1_py3_wdc__entry__2">订单撮合模式</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-银行间债券-引擎配置说明__table_ks1_py3_wdc__entry__3">INT 类型，默认按模拟撮合引擎撮合订单。若设置为 3 ，则以委托价格成交，设置为 1 或 2 时无效</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-银行间债券-引擎配置说明__table_ks1_py3_wdc__entry__1">"msgAsTable"</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-银行间债券-引擎配置说明__table_ks1_py3_wdc__entry__2">行情的数据格式</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-银行间债券-引擎配置说明__table_ks1_py3_wdc__entry__3">BOOL 类型，默认为 false<p class="- topic/p p">false：字典</p><p class="- topic/p p">
+                                        true：表（只能通过接口createBacktestEngine 创建引擎）</p></td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-银行间债券-引擎配置说明__table_ks1_py3_wdc__entry__1">“benchmark”</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-银行间债券-引擎配置说明__table_ks1_py3_wdc__entry__2"> 基准标的</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-银行间债券-引擎配置说明__table_ks1_py3_wdc__entry__3"> 如”000300.XSHG“ 。在接口<code class="+ topic/ph pr-d/codeph ph codeph">getReturnSummary</code>
+                                    中使用</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-银行间债券-引擎配置说明__table_ks1_py3_wdc__entry__1">"latency"</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-银行间债券-引擎配置说明__table_ks1_py3_wdc__entry__2">订单延时</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-银行间债券-引擎配置说明__table_ks1_py3_wdc__entry__3"> 单位为毫秒，用来模拟用户订单从发出到被处理的时延</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-银行间债券-引擎配置说明__table_ks1_py3_wdc__entry__1">“enableIndicatorOptimize”</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-银行间债券-引擎配置说明__table_ks1_py3_wdc__entry__2"> 是否开启指标优化</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-银行间债券-引擎配置说明__table_ks1_py3_wdc__entry__3">BOOL 类型，默认为 false<p class="- topic/p p">true：开启</p><p class="- topic/p p">false：不开启</p></td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-银行间债券-引擎配置说明__table_ks1_py3_wdc__entry__1">”addTimeColumnInIndicator“</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-银行间债券-引擎配置说明__table_ks1_py3_wdc__entry__2"> 指标订阅时是否给指标数表增加时间列</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-银行间债券-引擎配置说明__table_ks1_py3_wdc__entry__3">BOOL 类型，默认为 false<p class="- topic/p p">true：增加</p><p class="- topic/p p">false：不增加</p></td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-银行间债券-引擎配置说明__table_ks1_py3_wdc__entry__1">“isBacktestMode“</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-银行间债券-引擎配置说明__table_ks1_py3_wdc__entry__2">是否为回测模式</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-银行间债券-引擎配置说明__table_ks1_py3_wdc__entry__3">BOOL 类型，默认为 true<p class="- topic/p p">true：回测模式</p><p class="- topic/p p"> false：模拟交易模式</p></td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-银行间债券-引擎配置说明__table_ks1_py3_wdc__entry__1">dataRetentionWindow</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-银行间债券-引擎配置说明__table_ks1_py3_wdc__entry__2"> 开始指标优化时数据保留的窗口</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-银行间债券-引擎配置说明__table_ks1_py3_wdc__entry__3">STRING 类型或 INT 类型。 当 enableIndicatorOptimize = true
+                                        时，该参数生效。<ul class="- topic/ul ul" id="id-银行间债券-引擎配置说明__ul_ls1_py3_wdc" data-ofbid="id-银行间债券-引擎配置说明__ul_ls1_py3_wdc">
+                                        <li class="- topic/li li">
+                                            <p class="- topic/p p">isBacktestMode = true 时，默认 “ALL ，可设置为：</p>
+                                            <ul class="- topic/ul ul" id="id-银行间债券-引擎配置说明__ul_ms1_py3_wdc" data-ofbid="id-银行间债券-引擎配置说明__ul_ms1_py3_wdc">
+                                                <li class="- topic/li li">
+                                                  <p class="- topic/p p"> “ALL“：全部数据保留</p>
+                                                </li>
+                                                <li class="- topic/li li">
+                                                  <p class="- topic/p p"> “20d”：支持按天保留数据，即交易日天数，如 “20d” 代表 20 个交易日</p>
+                                                </li>
+                                                <li class="- topic/li li">
+                                                  <p class="- topic/p p"> “None”：不保留数据</p>
+                                                </li>
+                                                <li class="- topic/li li">
+                                                  <p class="- topic/p p"> 20：支持按条数保留数据，如 20 代表每个 symbol 保留最新的 20 条</p>
+                                                </li>
+                                            </ul>
+                                        </li>
+                                        <li class="- topic/li li">
+                                            <p class="- topic/p p">isBacktestMode = false 时，无需设置</p>
+                                        </li>
+                                    </ul></td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-银行间债券-引擎配置说明__table_ks1_py3_wdc__entry__1">"context"</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-银行间债券-引擎配置说明__table_ks1_py3_wdc__entry__2"> 策略逻辑上下文类结构</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-银行间债券-引擎配置说明__table_ks1_py3_wdc__entry__3">DICT
+                                    类型，策略全局变量构成的字典，如：<pre class="- topic/pre pre" id="id-银行间债券-引擎配置说明__pre_ns1_py3_wdc" data-ofbid="id-银行间债券-引擎配置说明__pre_ns1_py3_wdc">context=dict(STRING,ANY)
+context["buySignalRSI"]=70.
+context["buySignalRSI"]=30. 
+userConfig["context"]=context</pre></td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-银行间债券-引擎配置说明__table_ks1_py3_wdc__entry__1">“orderBookMatchingRatio”</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-银行间债券-引擎配置说明__table_ks1_py3_wdc__entry__2"> 与行情订单薄的成交百分比</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-银行间债券-引擎配置说明__table_ks1_py3_wdc__entry__3">DOUBLE 类型，默认 1.0，取值0~1.0 之间</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-0" headers="id-银行间债券-引擎配置说明__table_ks1_py3_wdc__entry__1">“matchingRatio”</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-0" headers="id-银行间债券-引擎配置说明__table_ks1_py3_wdc__entry__2">区间撮合比例</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-0" headers="id-银行间债券-引擎配置说明__table_ks1_py3_wdc__entry__3">DOUBLE 类型，默认 1.0，取值0~1.0 之间。默认和成交百分比 orderBookMatchingRatio
+                                    相等</td>
+                            </tr>
+                        </tbody></table></div>
+            </div>
+            <article class="- topic/topic topic nested3" aria-labelledby="ariaid-title4" id="id-银行间债券-基本信息表">
+                <h4 class="- topic/title title topictitle4" id="ariaid-title4">基本信息表说明</h4>
+                <div class="- topic/body body">
+                    <p class="- topic/p p">接口 <code class="+ topic/ph pr-d/codeph ph codeph">createBacktester</code> 的参数 <code class="+ topic/ph pr-d/codeph ph codeph">securityReference</code>
+                        和接口 <code class="+ topic/ph pr-d/codeph ph codeph">createBacktestEngine</code> 的参数
+                            <code class="+ topic/ph pr-d/codeph ph codeph">securityReference</code> 的基本信息表字段可参考下表：</p>
+                    <div class="table-container"><table class="- topic/table table frame-all" id="id-银行间债券-基本信息表__table_zqx_ymb_pdc" data-ofbid="id-银行间债券-基本信息表__table_zqx_ymb_pdc" data-cols="3"><caption></caption><colgroup><col/><col/><col/></colgroup><thead class="- topic/thead thead">
+                                <tr class="- topic/row">
+                                    <th class="- topic/entry entry colsep-1 rowsep-1" id="id-银行间债券-基本信息表__table_zqx_ymb_pdc__entry__1">
+                                        <strong class="+ topic/ph hi-d/b ph b">字段</strong>
+                                    </th>
+                                    <th class="- topic/entry entry colsep-1 rowsep-1" id="id-银行间债券-基本信息表__table_zqx_ymb_pdc__entry__2">
+                                        <strong class="+ topic/ph hi-d/b ph b">类型</strong>
+                                    </th>
+                                    <th class="- topic/entry entry colsep-0 rowsep-1" id="id-银行间债券-基本信息表__table_zqx_ymb_pdc__entry__3">
+                                        <strong class="+ topic/ph hi-d/b ph b">含义</strong>
+                                    </th>
+                                </tr>
+                            </thead><tbody class="- topic/tbody tbody">
+                                <tr class="- topic/row">
+                                    <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-银行间债券-基本信息表__table_zqx_ymb_pdc__entry__1">symbol</td>
+                                    <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-银行间债券-基本信息表__table_zqx_ymb_pdc__entry__2">STRING</td>
+                                    <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-银行间债券-基本信息表__table_zqx_ymb_pdc__entry__3">标的</td>
+                                </tr>
+                                <tr class="- topic/row">
+                                    <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-银行间债券-基本信息表__table_zqx_ymb_pdc__entry__1">couponRate</td>
+                                    <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-银行间债券-基本信息表__table_zqx_ymb_pdc__entry__2">DOUBLE</td>
+                                    <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-银行间债券-基本信息表__table_zqx_ymb_pdc__entry__3">票面利率 / 票息率</td>
+                                </tr>
+                                <tr class="- topic/row">
+                                    <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-银行间债券-基本信息表__table_zqx_ymb_pdc__entry__1">frequency</td>
+                                    <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-银行间债券-基本信息表__table_zqx_ymb_pdc__entry__2">INT</td>
+                                    <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-银行间债券-基本信息表__table_zqx_ymb_pdc__entry__3">付息频率</td>
+                                </tr>
+                                <tr class="- topic/row">
+                                    <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-银行间债券-基本信息表__table_zqx_ymb_pdc__entry__1">valueDate</td>
+                                    <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-银行间债券-基本信息表__table_zqx_ymb_pdc__entry__2">DATE</td>
+                                    <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-银行间债券-基本信息表__table_zqx_ymb_pdc__entry__3">起息日</td>
+                                </tr>
+                                <tr class="- topic/row">
+                                    <td class="- topic/entry entry colsep-1 rowsep-0" headers="id-银行间债券-基本信息表__table_zqx_ymb_pdc__entry__1">maturityDate</td>
+                                    <td class="- topic/entry entry colsep-1 rowsep-0" headers="id-银行间债券-基本信息表__table_zqx_ymb_pdc__entry__2">DATE</td>
+                                    <td class="- topic/entry entry colsep-0 rowsep-0" headers="id-银行间债券-基本信息表__table_zqx_ymb_pdc__entry__3">到期日</td>
+                                </tr>
+                            </tbody></table></div>
+                </div>
+            </article>
+        </article>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title5" id="id-银行间债券-行情数据结构说明.1">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title5">行情数据结构说明</h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p">支持快照+逐笔成交明细，通过接口 <code class="+ topic/ph pr-d/codeph ph codeph">appendQuotationMsg</code> 向引擎中插入数据时，<em class="+ topic/ph hi-d/i ph i">msg</em> 结构：</p>
+                <p class="- topic/p p">执行回测时输入表 messageTable 结构:
+                        <code class="+ topic/ph pr-d/codeph ph codeph">Backtest::appendQuotationMsg(engine,messageTable)</code></p>
+                <pre class="- topic/pre pre" id="id-银行间债券-行情数据结构说明.1__pre_iyz_zy3_wdc" data-ofbid="id-银行间债券-行情数据结构说明.1__pre_iyz_zy3_wdc">colName=[`symbol,`symbolSource,`timestamp,`bidSettlType,`bidQty,`bidPrice,
+`bidYield,`askSettlType,`askQty,`askPrice,`askYield,`tradePrice,
+`tradeQty,`settlType,`yield]
+colType=["SYMBOL","SYMBOL","TIMESTAMP","INT[]","LONG[]","DOUBLE[]","DOUBLE[]",
+"INT[]","LONG[]","DOUBLE[]","DOUBLE[]","DOUBLE[]","LONG[]","INT[]","DOUBLE[]"]
+messageTable=table(10000000:0, colName, colType)</pre>
+                <p class="- topic/p p">快照+逐笔成交明细数据表结构：</p>
+                <div class="table-container"><table class="- topic/table table frame-all" id="id-银行间债券-行情数据结构说明.1__table_bqm_s1j_wdc" data-ofbid="id-银行间债券-行情数据结构说明.1__table_bqm_s1j_wdc" data-cols="3"><caption></caption><colgroup><col/><col/><col/></colgroup><thead class="- topic/thead thead">
+                            <tr class="- topic/row">
+                                <th class="- topic/entry entry colsep-1 rowsep-1" id="id-银行间债券-行情数据结构说明.1__table_bqm_s1j_wdc__entry__1"><strong class="+ topic/ph hi-d/b ph b">名称</strong></th>
+                                <th class="- topic/entry entry colsep-1 rowsep-1" id="id-银行间债券-行情数据结构说明.1__table_bqm_s1j_wdc__entry__2"><strong class="+ topic/ph hi-d/b ph b">类型</strong></th>
+                                <th class="- topic/entry entry colsep-0 rowsep-1" id="id-银行间债券-行情数据结构说明.1__table_bqm_s1j_wdc__entry__3"><strong class="+ topic/ph hi-d/b ph b">含义</strong></th>
+                            </tr>
+                        </thead><tbody class="- topic/tbody tbody">
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-银行间债券-行情数据结构说明.1__table_bqm_s1j_wdc__entry__1">symbol</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-银行间债券-行情数据结构说明.1__table_bqm_s1j_wdc__entry__2">SYMBOL</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-银行间债券-行情数据结构说明.1__table_bqm_s1j_wdc__entry__3">标的代码</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-银行间债券-行情数据结构说明.1__table_bqm_s1j_wdc__entry__1">symbolSource</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-银行间债券-行情数据结构说明.1__table_bqm_s1j_wdc__entry__2">SYMBOL</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-银行间债券-行情数据结构说明.1__table_bqm_s1j_wdc__entry__3">市场：银行间 ”X_BOND”</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-银行间债券-行情数据结构说明.1__table_bqm_s1j_wdc__entry__1">timestamp</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-银行间债券-行情数据结构说明.1__table_bqm_s1j_wdc__entry__2">TIMESTAMP</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-银行间债券-行情数据结构说明.1__table_bqm_s1j_wdc__entry__3">时间</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-银行间债券-行情数据结构说明.1__table_bqm_s1j_wdc__entry__1">bidSettlType</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-银行间债券-行情数据结构说明.1__table_bqm_s1j_wdc__entry__2">INT[]</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-银行间债券-行情数据结构说明.1__table_bqm_s1j_wdc__entry__3">买清算速度</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-银行间债券-行情数据结构说明.1__table_bqm_s1j_wdc__entry__1">bidQty</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-银行间债券-行情数据结构说明.1__table_bqm_s1j_wdc__entry__2">LONG[]</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-银行间债券-行情数据结构说明.1__table_bqm_s1j_wdc__entry__3">报买量（元）</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-银行间债券-行情数据结构说明.1__table_bqm_s1j_wdc__entry__1">bidPrice</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-银行间债券-行情数据结构说明.1__table_bqm_s1j_wdc__entry__2">DOUBLE[]</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-银行间债券-行情数据结构说明.1__table_bqm_s1j_wdc__entry__3">报买净价（元)</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-银行间债券-行情数据结构说明.1__table_bqm_s1j_wdc__entry__1">bidYield</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-银行间债券-行情数据结构说明.1__table_bqm_s1j_wdc__entry__2">DOUBLE[]</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-银行间债券-行情数据结构说明.1__table_bqm_s1j_wdc__entry__3">报买到期</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-银行间债券-行情数据结构说明.1__table_bqm_s1j_wdc__entry__1">askSettlType</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-银行间债券-行情数据结构说明.1__table_bqm_s1j_wdc__entry__2">INT[]</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-银行间债券-行情数据结构说明.1__table_bqm_s1j_wdc__entry__3">卖清算速度</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-银行间债券-行情数据结构说明.1__table_bqm_s1j_wdc__entry__1">askQty</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-银行间债券-行情数据结构说明.1__table_bqm_s1j_wdc__entry__2">LONG[]</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-银行间债券-行情数据结构说明.1__table_bqm_s1j_wdc__entry__3">报卖量（元）</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-银行间债券-行情数据结构说明.1__table_bqm_s1j_wdc__entry__1">askPrice</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-银行间债券-行情数据结构说明.1__table_bqm_s1j_wdc__entry__2">DOUBLE[]</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-银行间债券-行情数据结构说明.1__table_bqm_s1j_wdc__entry__3">报卖净价（元)</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-银行间债券-行情数据结构说明.1__table_bqm_s1j_wdc__entry__1">askYield</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-银行间债券-行情数据结构说明.1__table_bqm_s1j_wdc__entry__2">DOUBLE[]</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-银行间债券-行情数据结构说明.1__table_bqm_s1j_wdc__entry__3">报卖到期</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-银行间债券-行情数据结构说明.1__table_bqm_s1j_wdc__entry__1">tradePrice</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-银行间债券-行情数据结构说明.1__table_bqm_s1j_wdc__entry__2">DOUBLE[]</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-银行间债券-行情数据结构说明.1__table_bqm_s1j_wdc__entry__3">区间成交价格列表</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-银行间债券-行情数据结构说明.1__table_bqm_s1j_wdc__entry__1">tradeQty</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-银行间债券-行情数据结构说明.1__table_bqm_s1j_wdc__entry__2">LONG[]</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-银行间债券-行情数据结构说明.1__table_bqm_s1j_wdc__entry__3">区间成交数量列表</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-银行间债券-行情数据结构说明.1__table_bqm_s1j_wdc__entry__1">settlType</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-银行间债券-行情数据结构说明.1__table_bqm_s1j_wdc__entry__2">INT[]</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-银行间债券-行情数据结构说明.1__table_bqm_s1j_wdc__entry__3">清算速度</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-0" headers="id-银行间债券-行情数据结构说明.1__table_bqm_s1j_wdc__entry__1">yield</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-0" headers="id-银行间债券-行情数据结构说明.1__table_bqm_s1j_wdc__entry__2">DOUBLE[]</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-0" headers="id-银行间债券-行情数据结构说明.1__table_bqm_s1j_wdc__entry__3">到期收益率</td>
+                            </tr>
+                        </tbody></table></div>
+                <p class="- topic/p p"> 回测行情回放结束时，发送一条 symbol 为 “END” 的消息:</p>
+                <pre class="- topic/pre pre" id="id-银行间债券-行情数据结构说明.1__pre_kyz_zy3_wdc" data-ofbid="id-银行间债券-行情数据结构说明.1__pre_kyz_zy3_wdc">messageTable=select top 1* from messageTable where timestamp=max(timestamp)
+update messageTable set symbol="END"
+//update messageTable set msgTime=concatDateTime(timestamp.date(),16:00:00)
+Backtest::appendQuotationMsg(engine,messageTable)</pre>
+            </div>
+        </article>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title6" id="topic_jfx_x4j_wdc">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title6">策略回调函数说明</h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p">快照行情回调函数 <code class="+ topic/ph pr-d/codeph ph codeph">onSnapshot</code>：输入参数 msg</p>
+                <p class="- topic/p p">msg 为字典时，是以 symbol 为 key 值的 snapShot 数据字典，每个 snapShot 对象包含字段如下：</p>
+                <div class="table-container"><table class="- topic/table table frame-all" id="topic_jfx_x4j_wdc__table_fzz_y4j_wdc" data-ofbid="topic_jfx_x4j_wdc__table_fzz_y4j_wdc" data-cols="3"><caption></caption><colgroup><col/><col/><col/></colgroup><thead class="- topic/thead thead">
+                            <tr class="- topic/row">
+                                <th class="- topic/entry entry colsep-1 rowsep-1" id="topic_jfx_x4j_wdc__id-银行间债券-策略回调函数说明.1_entry_1"><strong class="+ topic/ph hi-d/b ph b">字段</strong></th>
+                                <th class="- topic/entry entry colsep-1 rowsep-1" id="topic_jfx_x4j_wdc__id-银行间债券-策略回调函数说明.1_entry_2"><strong class="+ topic/ph hi-d/b ph b">类型</strong></th>
+                                <th class="- topic/entry entry colsep-0 rowsep-1" id="topic_jfx_x4j_wdc__id-银行间债券-策略回调函数说明.1_entry_3"><strong class="+ topic/ph hi-d/b ph b">备注</strong></th>
+                            </tr>
+                        </thead><tbody class="- topic/tbody tbody">
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_jfx_x4j_wdc__id-银行间债券-策略回调函数说明.1_entry_1">symbol</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_jfx_x4j_wdc__id-银行间债券-策略回调函数说明.1_entry_2">SYMBOL</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="topic_jfx_x4j_wdc__id-银行间债券-策略回调函数说明.1_entry_3">标的代码</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_jfx_x4j_wdc__id-银行间债券-策略回调函数说明.1_entry_1">messageSource</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_jfx_x4j_wdc__id-银行间债券-策略回调函数说明.1_entry_2">SYMBOL</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="topic_jfx_x4j_wdc__id-银行间债券-策略回调函数说明.1_entry_3">市场：银行间 ”X_BOND”</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_jfx_x4j_wdc__id-银行间债券-策略回调函数说明.1_entry_1">byield</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_jfx_x4j_wdc__id-银行间债券-策略回调函数说明.1_entry_2">TIMESTAMP</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="topic_jfx_x4j_wdc__id-银行间债券-策略回调函数说明.1_entry_3">时间戳</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_jfx_x4j_wdc__id-银行间债券-策略回调函数说明.1_entry_1">ayield</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_jfx_x4j_wdc__id-银行间债券-策略回调函数说明.1_entry_2">DOUBLE[]</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="topic_jfx_x4j_wdc__id-银行间债券-策略回调函数说明.1_entry_3">报买到期</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_jfx_x4j_wdc__id-银行间债券-策略回调函数说明.1_entry_1">bmdEntryPrice</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_jfx_x4j_wdc__id-银行间债券-策略回调函数说明.1_entry_2">DOUBLE[]</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="topic_jfx_x4j_wdc__id-银行间债券-策略回调函数说明.1_entry_3">报买净价（元）</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_jfx_x4j_wdc__id-银行间债券-策略回调函数说明.1_entry_1">amdEntryPrice</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_jfx_x4j_wdc__id-银行间债券-策略回调函数说明.1_entry_2">DOUBLE[]</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="topic_jfx_x4j_wdc__id-银行间债券-策略回调函数说明.1_entry_3">报卖净价（元）</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_jfx_x4j_wdc__id-银行间债券-策略回调函数说明.1_entry_1">bmdEntrySize</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_jfx_x4j_wdc__id-银行间债券-策略回调函数说明.1_entry_2">LONG[]</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="topic_jfx_x4j_wdc__id-银行间债券-策略回调函数说明.1_entry_3">报买量（元）</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_jfx_x4j_wdc__id-银行间债券-策略回调函数说明.1_entry_1">amdEntrySize</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_jfx_x4j_wdc__id-银行间债券-策略回调函数说明.1_entry_2">LONG[]</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="topic_jfx_x4j_wdc__id-银行间债券-策略回调函数说明.1_entry_3">报卖量（元）</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_jfx_x4j_wdc__id-银行间债券-策略回调函数说明.1_entry_1">bsettlType</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_jfx_x4j_wdc__id-银行间债券-策略回调函数说明.1_entry_2">LONG[]</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="topic_jfx_x4j_wdc__id-银行间债券-策略回调函数说明.1_entry_3">买清算速度</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_jfx_x4j_wdc__id-银行间债券-策略回调函数说明.1_entry_1">asettlType</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_jfx_x4j_wdc__id-银行间债券-策略回调函数说明.1_entry_2">LONG[]</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="topic_jfx_x4j_wdc__id-银行间债券-策略回调函数说明.1_entry_3">卖清算速度</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_jfx_x4j_wdc__id-银行间债券-策略回调函数说明.1_entry_1">settlType</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_jfx_x4j_wdc__id-银行间债券-策略回调函数说明.1_entry_2">LONG[]</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="topic_jfx_x4j_wdc__id-银行间债券-策略回调函数说明.1_entry_3">区间清算速度</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_jfx_x4j_wdc__id-银行间债券-策略回调函数说明.1_entry_1">tradePrice</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_jfx_x4j_wdc__id-银行间债券-策略回调函数说明.1_entry_2">DOUBLE[]</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="topic_jfx_x4j_wdc__id-银行间债券-策略回调函数说明.1_entry_3">区间成交价格列表</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_jfx_x4j_wdc__id-银行间债券-策略回调函数说明.1_entry_1">tradeYield</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_jfx_x4j_wdc__id-银行间债券-策略回调函数说明.1_entry_2">DOUBLE[]</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="topic_jfx_x4j_wdc__id-银行间债券-策略回调函数说明.1_entry_3">到期收益率</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-0" headers="topic_jfx_x4j_wdc__id-银行间债券-策略回调函数说明.1_entry_1">tradeQty</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-0" headers="topic_jfx_x4j_wdc__id-银行间债券-策略回调函数说明.1_entry_2">LONG[]</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-0" headers="topic_jfx_x4j_wdc__id-银行间债券-策略回调函数说明.1_entry_3">区间成交数量列表</td>
+                            </tr>
+                        </tbody></table></div>
+            </div>
+        </article>
+    </article>
+    <article class="- topic/topic topic nested1" aria-labelledby="ariaid-title7" id="topic_xb5_3y3_wdc">
+        <h2 class="- topic/title title topictitle2" id="ariaid-title7">上交所债券</h2>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title8" id="topic_mrw_xlj_wdc">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title8">引擎配置说明</h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p">接口 <code class="+ topic/ph pr-d/codeph ph codeph">createBacktester</code> 的参数 <em class="+ topic/ph hi-d/i ph i">config</em> ：</p>
+                <div class="table-container"><table class="- topic/table table frame-all" id="topic_mrw_xlj_wdc__table_txz_ylj_wdc" data-ofbid="topic_mrw_xlj_wdc__table_txz_ylj_wdc" data-cols="3"><caption></caption><colgroup><col/><col/><col/></colgroup><thead class="- topic/thead thead">
+                            <tr class="- topic/row">
+                                <th class="- topic/entry entry colsep-1 rowsep-1" id="topic_mrw_xlj_wdc__table_txz_ylj_wdc__entry__1"><strong class="+ topic/ph hi-d/b ph b">key</strong></th>
+                                <th class="- topic/entry entry colsep-1 rowsep-1" id="topic_mrw_xlj_wdc__table_txz_ylj_wdc__entry__2"><strong class="+ topic/ph hi-d/b ph b">说明</strong></th>
+                                <th class="- topic/entry entry colsep-0 rowsep-1" id="topic_mrw_xlj_wdc__table_txz_ylj_wdc__entry__3"><strong class="+ topic/ph hi-d/b ph b">备注</strong></th>
+                            </tr>
+                        </thead><tbody class="- topic/tbody tbody">
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_mrw_xlj_wdc__table_txz_ylj_wdc__entry__1">"startDate"</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_mrw_xlj_wdc__table_txz_ylj_wdc__entry__2">开始日期</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="topic_mrw_xlj_wdc__table_txz_ylj_wdc__entry__3">必须配置，DATE 类型<p class="- topic/p p">例如 “2020.01.01”</p></td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_mrw_xlj_wdc__table_txz_ylj_wdc__entry__1">"endDate"</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_mrw_xlj_wdc__table_txz_ylj_wdc__entry__2">结束日期</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="topic_mrw_xlj_wdc__table_txz_ylj_wdc__entry__3">必须配置，DATE 类型<p class="- topic/p p">例如 “2020.01.01”</p></td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_mrw_xlj_wdc__table_txz_ylj_wdc__entry__1">"strategyGroup"</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_mrw_xlj_wdc__table_txz_ylj_wdc__entry__2">策略类型</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="topic_mrw_xlj_wdc__table_txz_ylj_wdc__entry__3">必须配置，“XSHGBond”</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_mrw_xlj_wdc__table_txz_ylj_wdc__entry__1">"cash"</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_mrw_xlj_wdc__table_txz_ylj_wdc__entry__2">初始资金</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="topic_mrw_xlj_wdc__table_txz_ylj_wdc__entry__3">必须配置，DOUBLE 类型</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_mrw_xlj_wdc__table_txz_ylj_wdc__entry__1">"commission"</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_mrw_xlj_wdc__table_txz_ylj_wdc__entry__2">手续费</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="topic_mrw_xlj_wdc__table_txz_ylj_wdc__entry__3">必须配置，DOUBLE 类型</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_mrw_xlj_wdc__table_txz_ylj_wdc__entry__1">"tax"</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_mrw_xlj_wdc__table_txz_ylj_wdc__entry__2">印花税</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="topic_mrw_xlj_wdc__table_txz_ylj_wdc__entry__3">必须配置，DOUBLE 类型</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_mrw_xlj_wdc__table_txz_ylj_wdc__entry__1">"dataType"</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_mrw_xlj_wdc__table_txz_ylj_wdc__entry__2">行情类型</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="topic_mrw_xlj_wdc__table_txz_ylj_wdc__entry__3">必须配置，INT 类型，可选值为：<p class="- topic/p p">2：快照+逐笔成交明细</p></td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_mrw_xlj_wdc__table_txz_ylj_wdc__entry__1">"orderBookMatchingRatio"</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_mrw_xlj_wdc__table_txz_ylj_wdc__entry__2">与行情订单薄的成交百分比</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="topic_mrw_xlj_wdc__table_txz_ylj_wdc__entry__3">DOUBLE 类型，默认 1.0，取值0~1.0 之间</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_mrw_xlj_wdc__table_txz_ylj_wdc__entry__1">"matchingRatio"</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_mrw_xlj_wdc__table_txz_ylj_wdc__entry__2">区间撮合比例</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="topic_mrw_xlj_wdc__table_txz_ylj_wdc__entry__3">DOUBLE 类型，默认 1.0，取值0~1.0 之间。默认和成交百分比 orderBookMatchingRatio
+                                    相等</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-0" headers="topic_mrw_xlj_wdc__table_txz_ylj_wdc__entry__1">"setLastDayPosition"</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-0" headers="topic_mrw_xlj_wdc__table_txz_ylj_wdc__entry__2"> 底仓设置</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-0" headers="topic_mrw_xlj_wdc__table_txz_ylj_wdc__entry__3">底仓信息表，表结构见下表</td>
+                            </tr>
+                        </tbody></table></div>
+                <p class="- topic/p p">底仓信息表结构如下：</p>
+                <div class="table-container"><table class="- topic/table table frame-all" id="topic_mrw_xlj_wdc__table_fzw_1mj_wdc" data-ofbid="topic_mrw_xlj_wdc__table_fzw_1mj_wdc" data-cols="3"><caption></caption><colgroup><col/><col/><col/></colgroup><thead class="- topic/thead thead">
+                            <tr class="- topic/row">
+                                <th class="- topic/entry entry colsep-1 rowsep-1" id="topic_mrw_xlj_wdc__table_fzw_1mj_wdc__entry__1"><strong class="+ topic/ph hi-d/b ph b">字段</strong></th>
+                                <th class="- topic/entry entry colsep-1 rowsep-1" id="topic_mrw_xlj_wdc__table_fzw_1mj_wdc__entry__2"><strong class="+ topic/ph hi-d/b ph b">类型</strong></th>
+                                <th class="- topic/entry entry colsep-0 rowsep-1" id="topic_mrw_xlj_wdc__table_fzw_1mj_wdc__entry__3"><strong class="+ topic/ph hi-d/b ph b">含义</strong></th>
+                            </tr>
+                        </thead><tbody class="- topic/tbody tbody">
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_mrw_xlj_wdc__table_fzw_1mj_wdc__entry__1">symbol</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_mrw_xlj_wdc__table_fzw_1mj_wdc__entry__2">SYMBOL</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="topic_mrw_xlj_wdc__table_fzw_1mj_wdc__entry__3">股票代码</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_mrw_xlj_wdc__table_fzw_1mj_wdc__entry__1">longPosition</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_mrw_xlj_wdc__table_fzw_1mj_wdc__entry__2">LONG 或者 INT</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="topic_mrw_xlj_wdc__table_fzw_1mj_wdc__entry__3">买入持仓量</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-0" headers="topic_mrw_xlj_wdc__table_fzw_1mj_wdc__entry__1">costPrice</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-0" headers="topic_mrw_xlj_wdc__table_fzw_1mj_wdc__entry__2">DOUBLE</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-0" headers="topic_mrw_xlj_wdc__table_fzw_1mj_wdc__entry__3">成本价</td>
+                            </tr>
+                        </tbody></table></div>
+            </div>
+            <article class="- topic/topic topic nested3" aria-labelledby="ariaid-title9" id="topic_rrw_xlj_wdc">
+                <h4 class="- topic/title title topictitle4" id="ariaid-title9">基本信息表说明</h4>
+                <div class="- topic/body body">
+                    <p class="- topic/p p">接口 <code class="+ topic/ph pr-d/codeph ph codeph">createBacktester</code> 的参数 <code class="+ topic/ph pr-d/codeph ph codeph">securityReference</code>
+                        的基本信息表字段可参考下表：</p>
+                    <div class="table-container"><table class="- topic/table table frame-all" id="topic_rrw_xlj_wdc__table_bjw_cmj_wdc" data-ofbid="topic_rrw_xlj_wdc__table_bjw_cmj_wdc" data-cols="3"><caption></caption><colgroup><col/><col/><col/></colgroup><thead class="- topic/thead thead">
+                                <tr class="- topic/row">
+                                    <th class="- topic/entry entry colsep-1 rowsep-1" id="topic_rrw_xlj_wdc__table_bjw_cmj_wdc__entry__1"><strong class="+ topic/ph hi-d/b ph b">字段</strong></th>
+                                    <th class="- topic/entry entry colsep-1 rowsep-1" id="topic_rrw_xlj_wdc__table_bjw_cmj_wdc__entry__2"><strong class="+ topic/ph hi-d/b ph b">类型</strong></th>
+                                    <th class="- topic/entry entry colsep-0 rowsep-1" id="topic_rrw_xlj_wdc__table_bjw_cmj_wdc__entry__3"><strong class="+ topic/ph hi-d/b ph b">含义</strong></th>
+                                </tr>
+                            </thead><tbody class="- topic/tbody tbody">
+                                <tr class="- topic/row">
+                                    <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_rrw_xlj_wdc__table_bjw_cmj_wdc__entry__1">symbol</td>
+                                    <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_rrw_xlj_wdc__table_bjw_cmj_wdc__entry__2">STRING</td>
+                                    <td class="- topic/entry entry colsep-0 rowsep-1" headers="topic_rrw_xlj_wdc__table_bjw_cmj_wdc__entry__3">标的</td>
+                                </tr>
+                                <tr class="- topic/row">
+                                    <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_rrw_xlj_wdc__table_bjw_cmj_wdc__entry__1">couponRate</td>
+                                    <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_rrw_xlj_wdc__table_bjw_cmj_wdc__entry__2">DOUBLE</td>
+                                    <td class="- topic/entry entry colsep-0 rowsep-1" headers="topic_rrw_xlj_wdc__table_bjw_cmj_wdc__entry__3">票面利率 / 票息率</td>
+                                </tr>
+                                <tr class="- topic/row">
+                                    <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_rrw_xlj_wdc__table_bjw_cmj_wdc__entry__1">frequency</td>
+                                    <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_rrw_xlj_wdc__table_bjw_cmj_wdc__entry__2">INT</td>
+                                    <td class="- topic/entry entry colsep-0 rowsep-1" headers="topic_rrw_xlj_wdc__table_bjw_cmj_wdc__entry__3">付息频率</td>
+                                </tr>
+                                <tr class="- topic/row">
+                                    <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_rrw_xlj_wdc__table_bjw_cmj_wdc__entry__1">valueDate</td>
+                                    <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_rrw_xlj_wdc__table_bjw_cmj_wdc__entry__2">DATE</td>
+                                    <td class="- topic/entry entry colsep-0 rowsep-1" headers="topic_rrw_xlj_wdc__table_bjw_cmj_wdc__entry__3">起息日</td>
+                                </tr>
+                                <tr class="- topic/row">
+                                    <td class="- topic/entry entry colsep-1 rowsep-0" headers="topic_rrw_xlj_wdc__table_bjw_cmj_wdc__entry__1">maturityDate</td>
+                                    <td class="- topic/entry entry colsep-1 rowsep-0" headers="topic_rrw_xlj_wdc__table_bjw_cmj_wdc__entry__2">DATE</td>
+                                    <td class="- topic/entry entry colsep-0 rowsep-0" headers="topic_rrw_xlj_wdc__table_bjw_cmj_wdc__entry__3">到期日</td>
+                                </tr>
+                            </tbody></table></div>
+                </div>
+            </article>
+        </article>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title10" id="topic_n34_2mj_wdc">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title10">行情数据结构说明</h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p">输入的行情支持由“确定报价行情”和“成交明细”组成的宽表，表结构如下：</p>
+                <div class="table-container"><table class="- topic/table table frame-all" id="topic_n34_2mj_wdc__table_obp_gmj_wdc" data-ofbid="topic_n34_2mj_wdc__table_obp_gmj_wdc" data-cols="3"><caption></caption><colgroup><col/><col/><col/></colgroup><thead class="- topic/thead thead">
+                            <tr class="- topic/row">
+                                <th class="- topic/entry entry colsep-1 rowsep-1" id="topic_n34_2mj_wdc__table_obp_gmj_wdc__entry__1"><strong class="+ topic/ph hi-d/b ph b">字段</strong></th>
+                                <th class="- topic/entry entry colsep-1 rowsep-1" id="topic_n34_2mj_wdc__table_obp_gmj_wdc__entry__2"><strong class="+ topic/ph hi-d/b ph b">数据类型</strong></th>
+                                <th class="- topic/entry entry colsep-0 rowsep-1" id="topic_n34_2mj_wdc__table_obp_gmj_wdc__entry__3"><strong class="+ topic/ph hi-d/b ph b">备注</strong></th>
+                            </tr>
+                        </thead><tbody class="- topic/tbody tbody">
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_n34_2mj_wdc__table_obp_gmj_wdc__entry__1">symbol</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_n34_2mj_wdc__table_obp_gmj_wdc__entry__2"> SYMBOL 或 STRING</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="topic_n34_2mj_wdc__table_obp_gmj_wdc__entry__3">证券代码</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_n34_2mj_wdc__table_obp_gmj_wdc__entry__1">timestamp</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_n34_2mj_wdc__table_obp_gmj_wdc__entry__2">TIMESTAMP</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="topic_n34_2mj_wdc__table_obp_gmj_wdc__entry__3">时间戳</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_n34_2mj_wdc__table_obp_gmj_wdc__entry__1">msgType</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_n34_2mj_wdc__table_obp_gmj_wdc__entry__2">INT</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="topic_n34_2mj_wdc__table_obp_gmj_wdc__entry__3">行情类型，可选值为：<ul class="- topic/ul ul" id="topic_n34_2mj_wdc__ul_pbp_gmj_wdc" data-ofbid="topic_n34_2mj_wdc__ul_pbp_gmj_wdc">
+                                        <li class="- topic/li li">
+                                            <p class="- topic/p p">0：确定报价行情</p>
+                                        </li>
+                                        <li class="- topic/li li">
+                                            <p class="- topic/p p">1：成交明细</p>
+                                        </li>
+                                    </ul></td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_n34_2mj_wdc__table_obp_gmj_wdc__entry__1">symbolName</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_n34_2mj_wdc__table_obp_gmj_wdc__entry__2">STRING</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="topic_n34_2mj_wdc__table_obp_gmj_wdc__entry__3">证券简称</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_n34_2mj_wdc__table_obp_gmj_wdc__entry__1"> bidId</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_n34_2mj_wdc__table_obp_gmj_wdc__entry__2">INT</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="topic_n34_2mj_wdc__table_obp_gmj_wdc__entry__3">买入订单编号</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_n34_2mj_wdc__table_obp_gmj_wdc__entry__1"> bidTime</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_n34_2mj_wdc__table_obp_gmj_wdc__entry__2">TIMESTAMP</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="topic_n34_2mj_wdc__table_obp_gmj_wdc__entry__3">买入报价时间</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_n34_2mj_wdc__table_obp_gmj_wdc__entry__1"> bidParty</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_n34_2mj_wdc__table_obp_gmj_wdc__entry__2">SYMBOL 或 STRING</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="topic_n34_2mj_wdc__table_obp_gmj_wdc__entry__3">买入报价方</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_n34_2mj_wdc__table_obp_gmj_wdc__entry__1"> bidClean</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_n34_2mj_wdc__table_obp_gmj_wdc__entry__2">DOUBLE</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="topic_n34_2mj_wdc__table_obp_gmj_wdc__entry__3">买入价（净价）</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_n34_2mj_wdc__table_obp_gmj_wdc__entry__1"> bidQty</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_n34_2mj_wdc__table_obp_gmj_wdc__entry__2">LONG</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="topic_n34_2mj_wdc__table_obp_gmj_wdc__entry__3">买入数量</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_n34_2mj_wdc__table_obp_gmj_wdc__entry__1"> bidDirty</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_n34_2mj_wdc__table_obp_gmj_wdc__entry__2">DOUBLE</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="topic_n34_2mj_wdc__table_obp_gmj_wdc__entry__3">买入全价</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_n34_2mj_wdc__table_obp_gmj_wdc__entry__1"> bidYield</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_n34_2mj_wdc__table_obp_gmj_wdc__entry__2">DOUBLE</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="topic_n34_2mj_wdc__table_obp_gmj_wdc__entry__3">买入到期收益 率</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_n34_2mj_wdc__table_obp_gmj_wdc__entry__1"> askId</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_n34_2mj_wdc__table_obp_gmj_wdc__entry__2">INT</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="topic_n34_2mj_wdc__table_obp_gmj_wdc__entry__3">卖出订单编号</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_n34_2mj_wdc__table_obp_gmj_wdc__entry__1"> askTime</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_n34_2mj_wdc__table_obp_gmj_wdc__entry__2">TIMESTAMP</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="topic_n34_2mj_wdc__table_obp_gmj_wdc__entry__3">卖出报价时间</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_n34_2mj_wdc__table_obp_gmj_wdc__entry__1">askParty</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_n34_2mj_wdc__table_obp_gmj_wdc__entry__2">SYMBOL 或 STRING</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="topic_n34_2mj_wdc__table_obp_gmj_wdc__entry__3">卖出报价方</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_n34_2mj_wdc__table_obp_gmj_wdc__entry__1">askClean</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_n34_2mj_wdc__table_obp_gmj_wdc__entry__2">DOUBLE</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="topic_n34_2mj_wdc__table_obp_gmj_wdc__entry__3">卖出价（净价）</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_n34_2mj_wdc__table_obp_gmj_wdc__entry__1"> askQty</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_n34_2mj_wdc__table_obp_gmj_wdc__entry__2">LONG</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="topic_n34_2mj_wdc__table_obp_gmj_wdc__entry__3">卖出数量</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_n34_2mj_wdc__table_obp_gmj_wdc__entry__1"> askDirty</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_n34_2mj_wdc__table_obp_gmj_wdc__entry__2">DOUBLE</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="topic_n34_2mj_wdc__table_obp_gmj_wdc__entry__3">卖出全价</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_n34_2mj_wdc__table_obp_gmj_wdc__entry__1"> askYield</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_n34_2mj_wdc__table_obp_gmj_wdc__entry__2">DOUBLE</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="topic_n34_2mj_wdc__table_obp_gmj_wdc__entry__3">卖出到期收益率</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_n34_2mj_wdc__table_obp_gmj_wdc__entry__1"> accruedInterest</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_n34_2mj_wdc__table_obp_gmj_wdc__entry__2">DOUBLE</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="topic_n34_2mj_wdc__table_obp_gmj_wdc__entry__3">应计利息</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_n34_2mj_wdc__table_obp_gmj_wdc__entry__1"> tradeTime</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_n34_2mj_wdc__table_obp_gmj_wdc__entry__2">TIMESTAMP</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="topic_n34_2mj_wdc__table_obp_gmj_wdc__entry__3">成交时间</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_n34_2mj_wdc__table_obp_gmj_wdc__entry__1"> tradeClean</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_n34_2mj_wdc__table_obp_gmj_wdc__entry__2">DOUBLE</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="topic_n34_2mj_wdc__table_obp_gmj_wdc__entry__3">成交净价</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_n34_2mj_wdc__table_obp_gmj_wdc__entry__1"> tradeAccruedInterest</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_n34_2mj_wdc__table_obp_gmj_wdc__entry__2">DOUBLE</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="topic_n34_2mj_wdc__table_obp_gmj_wdc__entry__3">应计利息</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_n34_2mj_wdc__table_obp_gmj_wdc__entry__1"> tradeDirty</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_n34_2mj_wdc__table_obp_gmj_wdc__entry__2">DOUBLE</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="topic_n34_2mj_wdc__table_obp_gmj_wdc__entry__3">成交全价</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_n34_2mj_wdc__table_obp_gmj_wdc__entry__1">yield</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_n34_2mj_wdc__table_obp_gmj_wdc__entry__2">DOUBLE</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="topic_n34_2mj_wdc__table_obp_gmj_wdc__entry__3">到期收益率</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_n34_2mj_wdc__table_obp_gmj_wdc__entry__1"> tradeVolume</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_n34_2mj_wdc__table_obp_gmj_wdc__entry__2">INT</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="topic_n34_2mj_wdc__table_obp_gmj_wdc__entry__3">成交量</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_n34_2mj_wdc__table_obp_gmj_wdc__entry__1"> tradeValue</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_n34_2mj_wdc__table_obp_gmj_wdc__entry__2">DOUBLE</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="topic_n34_2mj_wdc__table_obp_gmj_wdc__entry__3">成交金额</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-0" headers="topic_n34_2mj_wdc__table_obp_gmj_wdc__entry__1"> tradeType</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-0" headers="topic_n34_2mj_wdc__table_obp_gmj_wdc__entry__2">INT</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-0" headers="topic_n34_2mj_wdc__table_obp_gmj_wdc__entry__3">成交方式，可选值为：<p class="- topic/p p">1：确定报价成交</p><p class="- topic/p p">2：待定报价成交</p><p class="- topic/p p">3：询价成交
+                                        </p><p class="- topic/p p">4：协议交易 </p><p class="- topic/p p">6：协商成交（含合并申报）</p><p class="- topic/p p">7：竞买</p></td>
+                            </tr>
+                        </tbody></table></div>
+            </div>
+        </article>
+    </article>
+</article></main></div>
+                        
+                        
+                        
+                        
+                        
+                        
+                    </div>
+                    
+                        <nav role="navigation" id="wh_topic_toc" aria-label="On this page" class="col-lg-2 d-none d-lg-block navbar d-print-none"> 
+                            <div id="wh_topic_toc_content">
+		                        
+	                            <div class=" wh_topic_toc "><div class="wh_topic_label">在本页上</div><ul><li class="topic-item"><a href="#topic_ab3_3y3_wdc" data-tocid="topic_ab3_3y3_wdc">银行间债券</a><ul><li class="topic-item"><a href="#id-%E9%93%B6%E8%A1%8C%E9%97%B4%E5%80%BA%E5%88%B8-%E5%BC%95%E6%93%8E%E9%85%8D%E7%BD%AE%E8%AF%B4%E6%98%8E" data-tocid="id-银行间债券-引擎配置说明">引擎配置说明</a><ul><li class="topic-item"><a href="#id-%E9%93%B6%E8%A1%8C%E9%97%B4%E5%80%BA%E5%88%B8-%E5%9F%BA%E6%9C%AC%E4%BF%A1%E6%81%AF%E8%A1%A8" data-tocid="id-银行间债券-基本信息表">基本信息表说明</a></li></ul></li><li class="topic-item"><a href="#id-%E9%93%B6%E8%A1%8C%E9%97%B4%E5%80%BA%E5%88%B8-%E8%A1%8C%E6%83%85%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E8%AF%B4%E6%98%8E.1" data-tocid="id-银行间债券-行情数据结构说明.1">行情数据结构说明</a></li><li class="topic-item"><a href="#topic_jfx_x4j_wdc" data-tocid="topic_jfx_x4j_wdc">策略回调函数说明</a></li></ul></li><li class="topic-item"><a href="#topic_xb5_3y3_wdc" data-tocid="topic_xb5_3y3_wdc">上交所债券</a><ul><li class="topic-item"><a href="#topic_mrw_xlj_wdc" data-tocid="topic_mrw_xlj_wdc">引擎配置说明</a><ul><li class="topic-item"><a href="#topic_rrw_xlj_wdc" data-tocid="topic_rrw_xlj_wdc">基本信息表说明</a></li></ul></li><li class="topic-item"><a href="#topic_n34_2mj_wdc" data-tocid="topic_n34_2mj_wdc">行情数据结构说明</a></li></ul></li></ul></div>
+	                        	
+                        	</div>
+                        </nav>
+                    
+                </div>
+            </div>
+            
+            
+            
+        </div> 
+        <footer class="navbar navbar-default wh_footer">
+  <div class=" footer-container mx-auto ">
+<title>Copyright</title><p><b> ©2025 浙江智臾科技有限公司 浙ICP备18048711号-3</b></p>
+  </div>
+</footer>
+        
+        <div id="go2top" class="d-print-none">
+            <span class="oxy-icon oxy-icon-up"></span>
+        </div>
+        
+        <div id="modal_img_large" class="modal">
+            <span class="close oxy-icon oxy-icon-remove"></span>
+            <div id="modal_img_container"></div>
+            <div id="caption"></div>
+        </div>
+        
+        
+        
+    </body>
+</html>

@@ -1,0 +1,1 @@
+oxy_webhelp_navlinks = {"tocId-d9713e5385":{"topics":[{"title":"amdQuote","href":"plugins\/amdquote\/amdquote.html","attributes":{"data-id":"amdquote"},"menu":{"hasChildren":false},"tocID":"amdquote-d9713e5386","topics":[]}]}};

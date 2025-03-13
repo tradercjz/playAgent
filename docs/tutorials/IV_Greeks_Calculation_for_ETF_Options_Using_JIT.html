@@ -1,0 +1,795 @@
+<!DOCTYPE html><html xmlns="http://www.w3.org/1999/xhtml" xml:lang="zh" lang="zh" data-whc_version="26.0">
+    <head><link rel="shortcut icon" href="../favicon.ico"/><link rel="icon" href="../favicon.ico"/><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><meta name="description" content="期权的隐含波动率可以反应市场对未来的预期，通常使用牛顿法和二分法来计算。这两种方法都需要频繁迭代，且迭代次数不能确定，核心代码无法向量化，因此只能通过循环来逼近求解。这就导致在期权相关计算中，隐含波动率往往容易成为性能的瓶颈。 DolphinDB 的计算逻辑使用脚本语言编写，但底层调用的是 C++ 代码，存在脚本解释的过程。为了提高脚本的执行效率，DolphinDB ..."/><meta name="DC.rights.owner" content="(C) 版权 2025"/><meta name="copyright" content="(C) 版权 2025"/><meta name="generator" content="DITA-OT"/><meta name="DC.type" content="topic"/><meta name="DC.coverage" content=""/><meta name="DC.relation" content="../tutorials/about_tutorials.html"/><meta name="prodname" content="DolphinDB"/><meta name="brand" content="DolphinDB"/><meta name="DC.creator" content="DolphinDB"/><meta name="DC.publisher" content="DDB N/A DDB 200"/><meta name="DC.format" content="HTML5"/><meta name="DC.identifier" content="利用jit加速计算-etf-期权隐含波动率和希腊值"/><title>利用JIT加速计算 ETF 期权隐含波动率和希腊值</title><!--  Generated with Oxygen version 26.0, build number 2024012323.  --><meta name="wh-path2root" content="../"/><meta name="wh-toc-id" content="利用jit加速计算-etf-期权隐含波动率和希腊值-d9713e104320"/><meta name="wh-source-relpath" content="tutorials/IV_Greeks_Calculation_for_ETF_Options_Using_JIT.dita"/><meta name="wh-out-relpath" content="tutorials/IV_Greeks_Calculation_for_ETF_Options_Using_JIT.html"/>
+
+    <link rel="stylesheet" type="text/css" href="../oxygen-webhelp/app/commons.css?buildId=2024012323"/>
+    <link rel="stylesheet" type="text/css" href="../oxygen-webhelp/app/topic.css?buildId=2024012323"/>
+
+    <script src="../oxygen-webhelp/app/options/properties.js?buildId=20250305183303"></script>
+    <script src="../oxygen-webhelp/app/localization/strings.js?buildId=2024012323"></script>
+    <script src="../oxygen-webhelp/app/search/index/keywords.js?buildId=20250305183303"></script>
+    <script defer="defer" src="../oxygen-webhelp/app/commons.js?buildId=2024012323"></script>
+    <script defer="defer" src="../oxygen-webhelp/app/topic.js?buildId=2024012323"></script>
+<link rel="stylesheet" type="text/css" href="../oxygen-webhelp/template/styles.css?buildId=2024012323"/><script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script><script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script></head>
+
+    <body id="利用jit加速计算-etf-期权隐含波动率和希腊值" class="wh_topic_page frmBody">
+        <a href="#wh_topic_body" class="sr-only sr-only-focusable">
+            跳转到主要内容
+        </a>
+        
+        
+        
+        
+        <header class="navbar navbar-default wh_header">
+    <div class="container-fluid">
+        <div xmlns:whc="http://www.oxygenxml.com/webhelp/components" class="wh_header_flex_container navbar-nav navbar-expand-md navbar-dark">
+            <div class="wh_logo_and_publication_title_container">
+                <div class="wh_logo_and_publication_title">
+                    
+                    <a href="https://docs.dolphindb.cn/zh/index.html" class=" wh_logo d-none d-sm-block "><img src="../logo.png" alt="  DolphinDB 文档中心  "/></a>
+                    <div class=" wh_publication_title "><a href="../index.html"><span class="booktitle">  <span class="ph mainbooktitle">DolphinDB 文档中心</span>  </span></a></div>
+                    
+                </div>
+                
+                
+            </div>
+
+            <div class="wh_top_menu_and_indexterms_link collapse navbar-collapse" id="wh_top_menu_and_indexterms_link">
+                
+                
+                
+                
+            </div>
+        <div class=" wh_search_input navbar-form wh_topic_page_search search " role="form">
+            
+            
+            
+            <form id="searchForm" method="get" role="search" action="../search.html"><div><input type="search" placeholder="搜索 " class="wh_search_textfield" id="textToSearch" name="searchQuery" aria-label="搜索查询" required="required"/><button type="submit" class="wh_search_button" aria-label="搜索"><span class="search_input_text">搜索</span></button></div></form>
+            
+            <script src="/vendors/react/umd/react.production.min.js" defer="defer"></script>
+<script src="/vendors/react-dom/umd/react-dom.production.min.js" defer="defer"></script>
+<script src="/vendors/dayjs/dayjs.min.js" defer="defer"></script>
+<script src="/vendors/antd/dist/antd.min.js" defer="defer"></script>
+<script src="/vendors/@ant-design/icons/dist/index.umd.min.js" defer="defer"></script>
+<script src="/zh/index.js" type="module"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" defer="defer"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML" defer="defer"><!--
+
+
+--></script>
+<script defer="defer"><!--
+
+// 从主页重定向
+const currentUrl = window.location.href;
+
+// 判断当前URL是否包含index.html并且路径最后部分是index.html
+if (currentUrl.endsWith('index.html')) {
+    // 处理根目录下的index.html跳转
+    const baseUrl = currentUrl.split('/index.html')[0]; // 获取index.html之前的部分
+    const redirectUrl = `${baseUrl}/about/ddb_intro.html`; // 构建跳转路径
+    window.location.href = redirectUrl; // 执行跳转
+}
+
+--></script>
+            
+        </div></div>
+    </div>
+</header>
+        
+        
+         
+        
+        
+        
+        <div class="container-fluid" id="wh_topic_container">
+            <div class="row">
+
+                <nav class="wh_tools d-print-none navbar-expand-md" aria-label="Tools">
+                    
+                    <div data-tooltip-position="bottom" class=" wh_breadcrumb "><ol class="d-print-none"><li><span class="home"><a href="../index.html"><span>主页</span></a></span></li><li><div class="topicref" data-id="about_tutorials"><div class="title"><a href="../tutorials/about_tutorials.html"><span class="keyword label">教程</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 产品使用教程</p></div></div></div></li><li><div class="topicref"><div class="title"><a href="../tutorials/OHLC_2.html">金融场景案例</a></div></div></li><li class="active"><div class="topicref" data-id="利用jit加速计算-etf-期权隐含波动率和希腊值"><div class="title"><a href="../tutorials/IV_Greeks_Calculation_for_ETF_Options_Using_JIT.html">利用JIT加速计算 ETF 期权隐含波动率和希腊值</a></div></div></li></ol></div>
+                    
+                    
+                    
+                    <div class="wh_right_tools">
+                        <button class="wh_hide_highlight" aria-label="切换搜索突出显示" title="切换搜索突出显示"></button>
+                        <button class="webhelp_expand_collapse_sections" data-next-state="collapsed" aria-label="折叠截面" title="折叠截面"></button>
+                        
+                        
+                        
+                        
+                        <div class=" wh_print_link print d-none d-md-inline-block "><button onClick="window.print()" title="打印此页" aria-label="打印此页"></button></div>
+                        
+                        <button type="button" id="wh_toc_button" class="custom-toggler navbar-toggler collapsed wh_toggle_button navbar-light" aria-expanded="false" aria-label="Toggle publishing table of content" aria-controls="wh_publication_toc">
+                            <span class="navbar-toggler-icon"></span>
+                        </button>
+                    </div>
+                    
+                </nav>
+            </div>
+            
+            
+            
+            
+            <div class="wh_content_area">
+                <div class="row">
+                    
+                        <nav id="wh_publication_toc" class="col-lg-3 col-md-3 col-sm-12 d-md-block d-none d-print-none" aria-label="Table of Contents Container">
+                            <div id="wh_publication_toc_content">
+		                        
+                            	<div class=" wh_publication_toc " data-tooltip-position="right"><span class="expand-button-action-labels"><span id="button-expand-action" role="button" aria-label="Expand"></span><span id="button-collapse-action" role="button" aria-label="Collapse"></span><span id="button-pending-action" role="button" aria-label="Pending"></span></span><ul role="tree" aria-label="Table of Contents"><li role="treeitem"><div data-tocid="ddb_intro-d9713e87" class="topicref" data-id="ddb_intro" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../about/ddb_intro.html" id="ddb_intro-d9713e87-link">关于DolphinDB</a></div></div></li><li role="treeitem"><div data-tocid="chap1_getstarted-d9713e136" class="topicref" data-id="chap1_getstarted" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../getstarted/chap1_getstarted.html" id="chap1_getstarted-d9713e136-link">快速上手</a><div class="wh-tooltip"><p class="shortdesc">如何快速部署 DolphinDB、建库建表、写入和查询数据</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="sectionddb_deployment-d9713e189" class="topicref" data-id="sectionddb_deployment" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action sectionddb_deployment-d9713e189-link" class="wh-expand-btn"></span><div class="title"><a href="../deploy/deploy_intro.html" id="sectionddb_deployment-d9713e189-link"><span class="keyword label">部署</span></a><div class="wh-tooltip"><p class="shortdesc">如何在不同的场景中部署 DolphinDB</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="new_chap_database_manage_new_chap_dbmanage_landing_page-d9713e2259" class="topicref" data-id="new_chap_database_manage_new_chap_dbmanage_landing_page" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action new_chap_database_manage_new_chap_dbmanage_landing_page-d9713e2259-link" class="wh-expand-btn"></span><div class="title"><a href="../db_distr_comp/cfg/db_intro.html" id="new_chap_database_manage_new_chap_dbmanage_landing_page-d9713e2259-link"><span class="keyword label">数据库</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 数据库的基本概念</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="chap7_tutorials_streaming-d9713e3760" class="topicref" data-id="chap7_tutorials_streaming" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action chap7_tutorials_streaming-d9713e3760-link" class="wh-expand-btn"></span><div class="title"><a href="../stream/str_intro.html" id="chap7_tutorials_streaming-d9713e3760-link"><span class="keyword label">流数据</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 流数据引擎及流数据计算的基本概念</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e7513" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e7513-link" class="wh-expand-btn"></span><div class="title"><a href="../db_distr_comp/db_oper/import_data.html" id="tocId-d9713e7513-link">数据迁移</a><div class="wh-tooltip"><p class="shortdesc">如何从不同数据源向 DolphinDB 迁移数据</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="chap7_tutorials_system_management-d9713e7940" class="topicref" data-id="chap7_tutorials_system_management" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action chap7_tutorials_system_management-d9713e7940-link" class="wh-expand-btn"></span><div class="title"><a href="../sys_man/om_intro.html" id="chap7_tutorials_system_management-d9713e7940-link"><span class="keyword label">系统运维</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 的系统运维功能及方法</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="troubleshooting-d9713e8780" class="topicref" data-id="troubleshooting" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action troubleshooting-d9713e8780-link" class="wh-expand-btn"></span><div class="title"><a href="../error_codes/troubleshooting.html" id="troubleshooting-d9713e8780-link">故障排查</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="about_language_resources-d9713e20911" class="topicref" data-id="about_language_resources" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action about_language_resources-d9713e20911-link" class="wh-expand-btn"></span><div class="title"><a href="../progr/progr_intro.html" id="about_language_resources-d9713e20911-link"><span class="keyword label">编程语言</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 编程基本概念与方法、SQL 在 DolphinDB 的应用</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="functions_references-d9713e30925" class="topicref" data-id="functions_references" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action functions_references-d9713e30925-link" class="wh-expand-btn"></span><div class="title"><a href="../funcs/funcs_intro.html" id="functions_references-d9713e30925-link"><span class="keyword label">函数参考</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 函数分类、语法、详解及示例</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="api_protocol-d9713e94064" class="topicref" data-id="api_protocol" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action api_protocol-d9713e94064-link" class="wh-expand-btn"></span><div class="title"><a href="../api/connapi_intro.html" id="api_protocol-d9713e94064-link"><span class="keyword label">连接器 &amp; API</span></a><div class="wh-tooltip"><p class="shortdesc">面向不同编程语言的 DolphinDB API 及连接器，相关协议和用法</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="chap6_plugin-d9713e94210" class="topicref" data-id="chap6_plugin" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action chap6_plugin-d9713e94210-link" class="wh-expand-btn"></span><div class="title"><a href="../plugins/plg_intro.html" id="chap6_plugin-d9713e94210-link"><span class="keyword label">插件</span></a><div class="wh-tooltip"><p class="shortdesc">多个应用场景的插件使用说明和插件开发指导</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="third_party-d9713e97904" class="topicref" data-id="third_party" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action third_party-d9713e97904-link" class="wh-expand-btn"></span><div class="title"><a href="../third_party.html" id="third_party-d9713e97904-link">第三方工具</a></div></div></li><li role="treeitem" aria-expanded="true"><div data-tocid="about_tutorials-d9713e98227" class="topicref" data-id="about_tutorials" data-state="expanded"><span role="button" tabindex="0" aria-labelledby="button-collapse-action about_tutorials-d9713e98227-link" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/about_tutorials.html" id="about_tutorials-d9713e98227-link"><span class="keyword label">教程</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 产品使用教程</p></div></div></div><ul role="group" class="navbar-nav nav-list"><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e98280" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e98280-link" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/new_users_finance.html" id="tocId-d9713e98280-link">新用户入门</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e98327" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e98327-link" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/database.html" id="tocId-d9713e98327-link">数据库</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e99111" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e99111-link" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/std_sql_ddb.html" id="tocId-d9713e99111-link">编程</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e100448" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e100448-link" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/streaming-real-time-correlation-processing_2.html" id="tocId-d9713e100448-link">流数据</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e100955" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e100955-link" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/scheduledJob_2.html" id="tocId-d9713e100955-link">系统运维</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="模块概述-d9713e101923" class="topicref" data-id="模块概述" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action 模块概述-d9713e101923-link" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/tu_modules.html" id="模块概述-d9713e101923-link">模块</a></div></div></li><li role="treeitem" aria-expanded="true"><div data-tocid="tocId-d9713e102568" class="topicref" data-state="expanded"><span role="button" tabindex="0" aria-labelledby="button-collapse-action tocId-d9713e102568-link" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/OHLC_2.html" id="tocId-d9713e102568-link">金融场景案例</a></div></div><ul role="group" class="navbar-nav nav-list"><li role="treeitem"><div data-tocid="k-线计算-d9713e102569" class="topicref" data-id="k-线计算" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/OHLC_2.html" id="k-线计算-d9713e102569-link">K 线计算</a></div></div></li><li role="treeitem"><div data-tocid="使用-klinechart-展示-dolphindb-k-线-d9713e102615" class="topicref" data-id="使用-klinechart-展示-dolphindb-k-线" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/displaying_the_dolphindb_k-line_with_klinechart.html" id="使用-klinechart-展示-dolphindb-k-线-d9713e102615-link">使用 KLineChart 展示 DolphinDB K 线</a></div></div></li><li role="treeitem"><div data-tocid="python--hdf5-因子计算与-dolphindb-一体化因子计算方案对比-d9713e102661" class="topicref" data-id="python--hdf5-因子计算与-dolphindb-一体化因子计算方案对比" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/Python_HDF5_vs_DolphinDB.html" id="python--hdf5-因子计算与-dolphindb-一体化因子计算方案对比-d9713e102661-link">Python + HDF5 因子计算与 DolphinDB 一体化因子计算方案对比</a></div></div></li><li role="treeitem"><div data-tocid="python--文件存储与-dolphindb-因子计算性能比较-d9713e102707" class="topicref" data-id="python--文件存储与-dolphindb-因子计算性能比较" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/DolphinDB_VS_PythonFile_Storage.html" id="python--文件存储与-dolphindb-因子计算性能比较-d9713e102707-link">Python + 文件存储与 DolphinDB 因子计算性能比较</a></div></div></li><li role="treeitem"><div data-tocid="python-parser-在金融量化分析场景的应用入门-d9713e102753" class="topicref" data-id="python-parser-在金融量化分析场景的应用入门" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/py_parser__quant_fin.html" id="python-parser-在金融量化分析场景的应用入门-d9713e102753-link">Python Parser 在金融量化分析场景的应用入门</a></div></div></li><li role="treeitem"><div data-tocid="处理-level-2-行情数据实例-d9713e102799" class="topicref" data-id="处理-level-2-行情数据实例" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/l2_stk_data_proc_2.html" id="处理-level-2-行情数据实例-d9713e102799-link">处理 Level-2 行情数据实例</a></div></div></li><li role="treeitem"><div data-tocid="存储金融数据的分区方案最佳实践-d9713e102845" class="topicref" data-id="存储金融数据的分区方案最佳实践" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/best_practices_for_partitioned_storage.html" id="存储金融数据的分区方案最佳实践-d9713e102845-link">存储金融数据的分区方案最佳实践</a></div></div></li><li role="treeitem"><div data-tocid="公募基金历史数据基础分析教程-d9713e102891" class="topicref" data-id="公募基金历史数据基础分析教程" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/public_fund_basic_analysis.html" id="公募基金历史数据基础分析教程-d9713e102891-link">公募基金历史数据基础分析教程</a></div></div></li><li role="treeitem"><div data-tocid="股票行情回放-d9713e102937" class="topicref" data-id="股票行情回放" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/stock_market_replay_2.html" id="股票行情回放-d9713e102937-link">股票行情回放</a></div></div></li><li role="treeitem"><div data-tocid="搭建行情回放服务的最佳实践-d9713e102983" class="topicref" data-id="搭建行情回放服务的最佳实践" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/appendices_market_replay_bp.html" id="搭建行情回放服务的最佳实践-d9713e102983-link">搭建行情回放服务的最佳实践</a></div></div></li><li role="treeitem"><div data-tocid="国内股票行情数据导入实例-d9713e103029" class="topicref" data-id="国内股票行情数据导入实例" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/stockdata_csv_import_demo.html" id="国内股票行情数据导入实例-d9713e103029-link">国内股票行情数据导入实例</a></div></div></li><li role="treeitem"><div data-tocid="基金份额参考价值-iopv-计算-d9713e103076" class="topicref" data-id="基金份额参考价值-iopv-计算" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/streaming_IOPV_2.html" id="基金份额参考价值-iopv-计算-d9713e103076-link">基金份额参考价值 IOPV 计算</a></div></div></li><li role="treeitem"><div data-tocid="基于快照行情的股票和基金-k-线合成-d9713e103122" class="topicref" data-id="基于快照行情的股票和基金-k-线合成" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/k.html" id="基于快照行情的股票和基金-k-线合成-d9713e103122-link">基于快照行情的股票和基金 K 线合成</a></div></div></li><li role="treeitem"><div data-tocid="计算基金日频因子-d9713e103168" class="topicref" data-id="计算基金日频因子" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/fund_factor_contrasted_by_py.html" id="计算基金日频因子-d9713e103168-link">计算基金日频因子</a></div></div></li><li role="treeitem"><div data-tocid="基于逐笔数据合成高频-orderbookdolphindb-orderbook-引擎-d9713e103214" class="topicref" data-id="基于逐笔数据合成高频-orderbookdolphindb-orderbook-引擎" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/orderBookSnapshotEngine.html" id="基于逐笔数据合成高频-orderbookdolphindb-orderbook-引擎-d9713e103214-link">基于逐笔数据合成高频 Orderbook：DolphinDB Orderbook 引擎</a></div></div></li><li role="treeitem"><div data-tocid="金融-poc-用户历史数据导入指导手册之股票-level-2-逐笔篇-d9713e103260" class="topicref" data-id="金融-poc-用户历史数据导入指导手册之股票-level-2-逐笔篇" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/LoadDataForPoc.html" id="金融-poc-用户历史数据导入指导手册之股票-level-2-逐笔篇-d9713e103260-link">金融 PoC 用户历史数据导入指导手册之股票 Level-2 逐笔篇</a></div></div></li><li role="treeitem"><div data-tocid="金融实时实际波动率预测-d9713e103306" class="topicref" data-id="金融实时实际波动率预测" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/ml_volatility_2.html" id="金融实时实际波动率预测-d9713e103306-link">金融实时实际波动率预测</a></div></div></li><li role="treeitem"><div data-tocid="金融因子流式实现-d9713e103352" class="topicref" data-id="金融因子流式实现" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/str_comp_fin_quant_2.html" id="金融因子流式实现-d9713e103352-link">金融因子流式实现</a></div></div></li><li role="treeitem"><div data-tocid="开发股票波动率预测模型的-676-个输入特征-d9713e103398" class="topicref" data-id="开发股票波动率预测模型的-676-个输入特征" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/metacode_derived_features_2.html" id="开发股票波动率预测模型的-676-个输入特征-d9713e103398-link">开发股票波动率预测模型的 676 个输入特征</a></div></div></li><li role="treeitem"><div data-tocid="快速搭建-level-2-快照数据流批一体因子计算平台最佳实践-d9713e103444" class="topicref" data-id="快速搭建-level-2-快照数据流批一体因子计算平台最佳实践" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/l2_snapshot_factor_calc_2.html" id="快速搭建-level-2-快照数据流批一体因子计算平台最佳实践-d9713e103444-link">快速搭建 Level-2 快照数据流批一体因子计算平台最佳实践</a></div></div></li><li role="treeitem"><div data-tocid="量化金融范例-d9713e103490" class="topicref" data-id="量化金融范例" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/quant_finance_examples.html" id="量化金融范例-d9713e103490-link">量化金融范例</a></div></div></li><li role="treeitem"><div data-tocid="流式计算中证-1000-指数主买主卖交易量-d9713e103536" class="topicref" data-id="流式计算中证-1000-指数主买主卖交易量" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/CSI_1000_2.html" id="流式计算中证-1000-指数主买主卖交易量-d9713e103536-link">流式计算中证 1000 指数主买/主卖交易量</a></div></div></li><li role="treeitem"><div data-tocid="深度不平衡买卖压力指标波动率计算-d9713e103583" class="topicref" data-id="深度不平衡买卖压力指标波动率计算" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/sql_performance_optimization_wap_di_rv.html" id="深度不平衡买卖压力指标波动率计算-d9713e103583-link">深度不平衡、买卖压力指标、波动率计算</a></div></div></li><li role="treeitem"><div data-tocid="实时合成自定义频订单簿快照dolphindb-insight-行情插件与订单簿引擎应用-d9713e103629" class="topicref" data-id="实时合成自定义频订单簿快照dolphindb-insight-行情插件与订单簿引擎应用" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/insight_plugin_orderbook_engine_application.html" id="实时合成自定义频订单簿快照dolphindb-insight-行情插件与订单簿引擎应用-d9713e103629-link">实时合成自定义频订单簿快照：DolphinDB INSIGHT 行情插件与订单簿引擎应用</a></div></div></li><li role="treeitem"><div data-tocid="实时计算分钟资金流-d9713e103675" class="topicref" data-id="实时计算分钟资金流" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/streaming_capital_flow_order_by_order_2.html" id="实时计算分钟资金流-d9713e103675-link">实时计算分钟资金流</a></div></div></li><li role="treeitem"><div data-tocid="实时计算高频因子-d9713e103721" class="topicref" data-id="实时计算高频因子" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/hf_factor_streaming_2.html" id="实时计算高频因子-d9713e103721-link">实时计算高频因子</a></div></div></li><li role="treeitem"><div data-tocid="实时计算日累计逐单资金流-d9713e103767" class="topicref" data-id="实时计算日累计逐单资金流" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/streaming_capital_flow_daily_2.html" id="实时计算日累计逐单资金流-d9713e103767-link">实时计算日累计逐单资金流</a></div></div></li><li role="treeitem"><div data-tocid="实时计算涨幅榜-d9713e103813" class="topicref" data-id="实时计算涨幅榜" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/rt_stk_price_inc_calc_2.html" id="实时计算涨幅榜-d9713e103813-link">实时计算涨幅榜</a></div></div></li><li role="treeitem"><div data-tocid="实时选取外汇行情多价源最优价-d9713e103859" class="topicref" data-id="实时选取外汇行情多价源最优价" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/best_price_selection.html" id="实时选取外汇行情多价源最优价-d9713e103859-link">实时选取外汇行情多价源最优价</a></div></div></li><li role="treeitem"><div data-tocid="外汇掉期估值计算-d9713e103905" class="topicref" data-id="外汇掉期估值计算" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/FxSwapValuation.html" id="外汇掉期估值计算-d9713e103905-link">外汇掉期估值计算</a></div></div></li><li role="treeitem"><div data-tocid="因子计算平台构建-d9713e103951" class="topicref" data-id="因子计算平台构建" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/Python_Celery.html" id="因子计算平台构建-d9713e103951-link">因子计算平台构建</a></div></div></li><li role="treeitem"><div data-tocid="因子计算最佳实践-d9713e103997" class="topicref" data-id="因子计算最佳实践" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/best_practice_for_factor_calculation.html" id="因子计算最佳实践-d9713e103997-link">因子计算最佳实践</a></div></div></li><li role="treeitem"><div data-tocid="mvo_tutorial-d9713e104043" class="topicref" data-id="mvo_tutorial" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/MVO.html" id="mvo_tutorial-d9713e104043-link">优化投资组合：DolphinDB 最优化求解系列函数应用指南</a></div></div></li><li role="treeitem"><div data-tocid="中高频多因子库存储最佳实践-d9713e104090" class="topicref" data-id="中高频多因子库存储最佳实践" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/best_practices_for_multi_factor.html" id="中高频多因子库存储最佳实践-d9713e104090-link">中高频多因子库存储最佳实践</a></div></div></li><li role="treeitem"><div data-tocid="alphalens-在-dolphindb-中的应用因子分析建模实践-d9713e104136" class="topicref" data-id="alphalens-在-dolphindb-中的应用因子分析建模实践" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/Practical_Factor_Analysis_Modeling.html" id="alphalens-在-dolphindb-中的应用因子分析建模实践-d9713e104136-link">Alphalens 在 DolphinDB 中的应用：因子分析建模实践</a></div></div></li><li role="treeitem"><div data-tocid="dolphindb-与-dolphinscheduler-的集成-d9713e104182" class="topicref" data-id="dolphindb-与-dolphinscheduler-的集成" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/dolphinscheduler_integration.html" id="dolphindb-与-dolphinscheduler-的集成-d9713e104182-link">DolphinDB 与 DolphinScheduler 的集成</a></div></div></li><li role="treeitem"><div data-tocid="dolphindb-与-python-airflow-最佳实践-d9713e104228" class="topicref" data-id="dolphindb-与-python-airflow-最佳实践" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/ddb_airflow.html" id="dolphindb-与-python-airflow-最佳实践-d9713e104228-link">DolphinDB 与 Python AirFlow 最佳实践</a></div></div></li><li role="treeitem"><div data-tocid="gplearn-d9713e104274" class="topicref" data-id="gplearn" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/gplearn.html" id="gplearn-d9713e104274-link">Shark GPLearn 快速上手</a></div></div></li><li role="treeitem" class="active"><div data-tocid="利用jit加速计算-etf-期权隐含波动率和希腊值-d9713e104320" class="topicref" data-id="利用jit加速计算-etf-期权隐含波动率和希腊值" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/IV_Greeks_Calculation_for_ETF_Options_Using_JIT.html" id="利用jit加速计算-etf-期权隐含波动率和希腊值-d9713e104320-link">利用JIT加速计算 ETF 期权隐含波动率和希腊值</a></div></div></li><li role="treeitem"><div data-tocid="基于-dolphindb-的-brinson-绩效归因模型实践-d9713e104366" class="topicref" data-id="基于-dolphindb-的-brinson-绩效归因模型实践" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/brinson.html" id="基于-dolphindb-的-brinson-绩效归因模型实践-d9713e104366-link">基于 DolphinDB 的 Brinson 绩效归因模型实践</a></div></div></li><li role="treeitem"><div data-tocid="基于-dolphindb-的-campisi-绩效归因模型实践-d9713e104412" class="topicref" data-id="基于-dolphindb-的-campisi-绩效归因模型实践" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/campisi.html" id="基于-dolphindb-的-campisi-绩效归因模型实践-d9713e104412-link">基于 DolphinDB 的 Campisi 绩效归因模型实践</a></div></div></li><li role="treeitem"><div data-tocid="期货分钟频cta策略回测案例-d9713e104458" class="topicref" data-id="期货分钟频cta策略回测案例" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/futures_minute_frequency_cta_strategy_backtest_example.html" id="期货分钟频cta策略回测案例-d9713e104458-link">期货分钟频CTA策略回测案例</a></div></div></li><li role="treeitem"><div data-tocid="exchdata-交易所历史股票数据自动化导入功能模块使用教程-d9713e104504" class="topicref" data-id="exchdata-交易所历史股票数据自动化导入功能模块使用教程" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/exchdata_exchange_historical_stock_data_auto_import_module_tutorial.html" id="exchdata-交易所历史股票数据自动化导入功能模块使用教程-d9713e104504-link">ExchData 交易所历史股票数据自动化导入功能模块使用教程</a></div></div></li><li role="treeitem"><div data-tocid="ficc_func_uasge_and_performance-d9713e104550" class="topicref" data-id="ficc_func_uasge_and_performance" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/ficc_func_uasge_and_performance.html" id="ficc_func_uasge_and_performance-d9713e104550-link">FICC 固收系列函数使用示例及性能</a></div></div></li><li role="treeitem"><div data-tocid="title1-d9713e104597" class="topicref" data-id="title1" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/ficc_funcs_application.html" id="title1-d9713e104597-link">FICC 固收系列函数应用场景</a></div></div></li><li role="treeitem"><div data-tocid="最优化函数_socp_的使用及转化案例-d9713e104643" class="topicref" data-id="最优化函数_socp_的使用及转化案例" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/socp_usage_case.html" id="最优化函数_socp_的使用及转化案例-d9713e104643-link">最优化函数 socp 的使用及转化案例</a></div></div></li><li role="treeitem"><div data-tocid="k_line_calculation-d9713e104689" class="topicref" data-id="k_line_calculation" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/k_line_calculation%20.html" id="k_line_calculation-d9713e104689-link">基于期货快照行情数据计算合约 K 线以及主连行情</a></div></div></li><li role="treeitem"><div data-tocid="backtest_introduction_usage-d9713e104735" class="topicref" data-id="backtest_introduction_usage" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/backtest_introduction_usage.html" id="backtest_introduction_usage-d9713e104735-link">融资融券策略回测使用说明及回测案例</a></div></div></li><li role="treeitem"><div data-tocid="stock_backtest-d9713e104781" class="topicref" data-id="stock_backtest" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/stock_backtest.html" id="stock_backtest-d9713e104781-link">股票中低频投资组合回测案例实现</a></div></div></li></ul></li><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e104827" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e104827-link" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/streaming_engine_anomaly_alerts_2.html" id="tocId-d9713e104827-link">物联网场景案例</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e105795" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e105795-link" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/dolphindb_tensor_libtorch_tutorial.html" id="tocId-d9713e105795-link">机器学习</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e105842" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e105842-link" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/api_performance.html" id="tocId-d9713e105842-link">测试报告</a></div></div></li></ul></li><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e105982" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e105982-link" class="wh-expand-btn"></span><div class="title"><a href="../rn/server/3_00_2.html" id="tocId-d9713e105982-link">版本说明</a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 版本发布历史</p></div></div></div></li></ul></div>
+		                        
+                            </div>
+                        </nav>
+                    
+                    
+                    <div class="col-lg-7 col-md-9 col-sm-12" id="wh_topic_body">
+                        <button id="wh_close_publication_toc_button" class="close-toc-button d-none" aria-label="Toggle publishing table of content" aria-controls="wh_publication_toc" aria-expanded="true">
+                            <span class="close-toc-icon-container">
+                                <span class="close-toc-icon"></span>     
+                            </span>
+                        </button>
+                        <button id="wh_close_topic_toc_button" class="close-toc-button d-none" aria-label="Toggle topic table of content" aria-controls="wh_topic_toc" aria-expanded="true">
+                            <span class="close-toc-icon-container">
+                                <span class="close-toc-icon"></span>     
+                            </span>
+                        </button>
+                        
+                        <div class=" wh_topic_content body "><main role="main"><article class="- topic/topic topic" role="article" aria-labelledby="ariaid-title1">
+    <h1 class="- topic/title title topictitle1" id="ariaid-title1">利用JIT加速计算 ETF 期权隐含波动率和希腊值</h1>
+    <div class="- topic/body body">
+        <p class="- topic/p p">期权的隐含波动率可以反应市场对未来的预期，通常使用牛顿法和二分法来计算。这两种方法都需要频繁迭代，且迭代次数不能确定，核心代码无法向量化，因此只能通过循环来逼近求解。这就导致在期权相关计算中，隐含波动率往往容易成为性能的瓶颈。</p>
+        <p class="- topic/p p">DolphinDB 的计算逻辑使用脚本语言编写，但底层调用的是 C++ 代码，存在脚本解释的过程。为了提高脚本的执行效率，DolphinDB
+            从1.01版本开始支持即时编译（JIT）功能，特别适合于无法使用向量化运算但又对运行速度有极高要求的场景。</p>
+        <p class="- topic/p p">本教程将基于客户的实际需求，以二分法计算 ETF 期权的隐含波动率及希腊值为例，为大家示范如何使用 DolphinDB 的 JIT 功能给计算过程加速，并与 C++
+            原生代码进行了计算性能对比测试，结果表明 DolphinDB 脚本计算耗时为 C++ 原生代码的1.5倍。</p>
+    </div>
+    <article class="- topic/topic topic nested1" aria-labelledby="ariaid-title2" id="数据表结构">
+        <h2 class="- topic/title title topictitle2" id="ariaid-title2">数据表结构</h2>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title3" id="期权日频数据表">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title3">期权日频数据表</h3>
+            <div class="- topic/body body">
+                <div class="table-container"><table class="- topic/table table" data-cols="3"><caption></caption><colgroup><col/><col/><col/></colgroup><thead class="- topic/thead thead">
+                            <tr class="- topic/row">
+                                <th class="- topic/entry entry colsep-0 rowsep-0" id="期权日频数据表__entry__1">
+                                    <strong class="+ topic/ph hi-d/b ph b">字段</strong>
+                                </th>
+                                <th class="- topic/entry entry colsep-0 rowsep-0" id="期权日频数据表__entry__2">
+                                    <strong class="+ topic/ph hi-d/b ph b">字段类型</strong>
+                                </th>
+                                <th class="- topic/entry entry colsep-0 rowsep-0" id="期权日频数据表__entry__3">
+                                    <strong class="+ topic/ph hi-d/b ph b">含义</strong>
+                                </th>
+                            </tr>
+                        </thead><tbody class="- topic/tbody tbody">
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-0 rowsep-0" headers="期权日频数据表__entry__1">tradedate</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-0" headers="期权日频数据表__entry__2">DATE</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-0" headers="期权日频数据表__entry__3">交易日期</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-0 rowsep-0" headers="期权日频数据表__entry__1">sym</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-0" headers="期权日频数据表__entry__2">SYMBOL</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-0" headers="期权日频数据表__entry__3">标的代码</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-0 rowsep-0" headers="期权日频数据表__entry__1">codes</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-0" headers="期权日频数据表__entry__2">SYMBOL</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-0" headers="期权日频数据表__entry__3">期权合约代码</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-0 rowsep-0" headers="期权日频数据表__entry__1">closeprice</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-0" headers="期权日频数据表__entry__2">DOUBLE</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-0" headers="期权日频数据表__entry__3">日收盘价格</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-0 rowsep-0" headers="期权日频数据表__entry__1">etf</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-0" headers="期权日频数据表__entry__2">SYMBOL</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-0" headers="期权日频数据表__entry__3">期权合成价格的两个合约代码</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-0 rowsep-0" headers="期权日频数据表__entry__1">etfprice</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-0" headers="期权日频数据表__entry__2">DOUBLE</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-0" headers="期权日频数据表__entry__3">期权合成价格</td>
+                            </tr>
+                        </tbody></table></div>
+                <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">注意</strong>： 字符串字段使用 SYMBOL 类型和 STRING 类型存储的差异。</p>
+                <p class="- topic/p p">期权日频数据表在 DolphinDB 中存储时，建议在时间维度按年分区即可，创建库表的代码如下：</p>
+                <pre class="+ topic/pre pr-d/codeblock pre codeblock"><code>login("admin", "123456")
+dbName = "dfs://optionPrice"
+tbName = "optionPrice"
+if(existsDatabase(dbName)){
+	dropDatabase(dbName)
+}
+db = database(dbName, RANGE, date(datetimeAdd(2000.01M,0..50*12,'M')))
+colNames = `tradedate`sym`codes`closeprice`etf`etfprice
+colTypes = [DATE, SYMBOL, SYMBOL, DOUBLE, SYMBOL, DOUBLE]
+schemaTable = table(1:0, colNames, colTypes)
+db.createPartitionedTable(table=schemaTable, tableName=tbName, partitionColumns=`tradedate)</code></pre>
+                <p class="- topic/p p">读取 50 ETF 日频数据，代码如下：</p>
+                <pre class="+ topic/pre pr-d/codeblock pre codeblock"><code>data = select * from loadTable("dfs://optionPrice", "optionPrice") where sym =`510050</code></pre>
+                <p class="- topic/p p">data 是表变量，具体数据内容如下图所示：</p>
+                <img class="- topic/image image" src="images/IV_Greeks_Calculation_for_ETF_Options_Using_JIT/1-1.png"/>
+                <p class="- topic/p p">通过<code class="+ topic/ph pr-d/codeph ph codeph">panel</code>函数对 data 进行透视操作，将窄表数据展成矩阵，生成期权日收盘价矩阵，代码如下：</p>
+                <pre class="+ topic/pre pr-d/codeblock pre codeblock"><code>closPriceWideMatrix = panel(data.codes, data.tradeDate, data.closePrice)</code></pre>
+                <p class="- topic/p p">closPriceWideMatrix 是矩阵变量，具体数据内容如下图所示：</p>
+                <img class="- topic/image image" src="images/IV_Greeks_Calculation_for_ETF_Options_Using_JIT/1-2.png"/>
+                <p class="- topic/p p">通过<code class="+ topic/ph pr-d/codeph ph codeph">panel</code>函数对 data 进行透视操作，将窄表数据展成矩阵，生成期权合成价格矩阵，代码如下：</p>
+                <pre class="+ topic/pre pr-d/codeblock pre codeblock"><code>etfPriceWideMatrix = panel(data.codes, data.tradeDate, data.etfprice)</code></pre>
+                <p class="- topic/p p">etfPriceWideMatrix 是矩阵变量，具体数据内容如下图所示：</p>
+                <img class="- topic/image image" src="images/IV_Greeks_Calculation_for_ETF_Options_Using_JIT/1-3.png"/>
+            </div>
+        </article>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title4" id="期权信息">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title4">期权信息</h3>
+            <div class="- topic/body body">
+                <div class="table-container"><table class="- topic/table table" data-cols="3"><caption></caption><colgroup><col/><col/><col/></colgroup><thead class="- topic/thead thead">
+                            <tr class="- topic/row">
+                                <th class="- topic/entry entry colsep-0 rowsep-0" id="期权信息__entry__1">
+                                    <strong class="+ topic/ph hi-d/b ph b">字段</strong>
+                                </th>
+                                <th class="- topic/entry entry colsep-0 rowsep-0" id="期权信息__entry__2">
+                                    <strong class="+ topic/ph hi-d/b ph b">字段类型</strong>
+                                </th>
+                                <th class="- topic/entry entry colsep-0 rowsep-0" id="期权信息__entry__3">
+                                    <strong class="+ topic/ph hi-d/b ph b">含义</strong>
+                                </th>
+                            </tr>
+                        </thead><tbody class="- topic/tbody tbody">
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-0 rowsep-0" headers="期权信息__entry__1">code</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-0" headers="期权信息__entry__2">STRING</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-0" headers="期权信息__entry__3">期权合约代码</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-0 rowsep-0" headers="期权信息__entry__1">name</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-0" headers="期权信息__entry__2">STRING</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-0" headers="期权信息__entry__3">期权合约名称</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-0 rowsep-0" headers="期权信息__entry__1">exemode</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-0" headers="期权信息__entry__2">INT</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-0" headers="期权信息__entry__3">期权类型（认购认沽类型）</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-0 rowsep-0" headers="期权信息__entry__1">exeprice</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-0" headers="期权信息__entry__2">DOUBLE</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-0" headers="期权信息__entry__3">行权价</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-0 rowsep-0" headers="期权信息__entry__1">startdate</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-0" headers="期权信息__entry__2">DATE</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-0" headers="期权信息__entry__3">开始日期</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-0 rowsep-0" headers="期权信息__entry__1">lastdate</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-0" headers="期权信息__entry__2">DATE</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-0" headers="期权信息__entry__3">结束日期</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-0 rowsep-0" headers="期权信息__entry__1">sym</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-0" headers="期权信息__entry__2">SYMBOL</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-0" headers="期权信息__entry__3">标的代码</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-0 rowsep-0" headers="期权信息__entry__1">exeratio</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-0" headers="期权信息__entry__2">DOUBLE</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-0" headers="期权信息__entry__3">乘数</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-0 rowsep-0" headers="期权信息__entry__1">exeprice2</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-0" headers="期权信息__entry__2">DOUBLE</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-0" headers="期权信息__entry__3">分红后的行权价</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-0 rowsep-0" headers="期权信息__entry__1">dividenddate</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-0" headers="期权信息__entry__2">DATE</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-0" headers="期权信息__entry__3">分红日</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-0 rowsep-0" headers="期权信息__entry__1">tradecode</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-0" headers="期权信息__entry__2">STRING</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-0" headers="期权信息__entry__3">交易代码</td>
+                            </tr>
+                        </tbody></table></div>
+                <p class="- topic/p p">期权信息数据在 DolphinDB 中存储时，建议在证券代码维度按值分区即可，创建库表的代码如下：</p>
+                <pre class="+ topic/pre pr-d/codeblock pre codeblock"><code>login("admin", "123456")
+dbName = "dfs://optionInfo"
+tbName = "optionInfo"
+if(existsDatabase(dbName)){
+	dropDatabase(dbName)
+}
+db = database(dbName, VALUE, `510050`510300)
+colNames = `code`name`exemode`exeprice`startdate`lastdate`sym`exeratio`exeprice2`dividenddate`tradecode
+colTypes = [STRING, STRING, INT, DOUBLE, DATE, DATE, SYMBOL, DOUBLE, DOUBLE, DATE, STRING]
+schemaTable = table(1:0, colNames, colTypes)
+db.createPartitionedTable(table=schemaTable, tableName=tbName, partitionColumns=`sym)</code></pre>
+                <p class="- topic/p p">读取数据：</p>
+                <pre class="+ topic/pre pr-d/codeblock pre codeblock"><code>contractInfo = select * from loadTable("dfs://optionInfo", "optionInfo") where sym =`510050</code></pre>
+                <p class="- topic/p p">contractInfo 是表变量，具体数据内容如下图所示：</p>
+                <img class="- topic/image image" src="images/IV_Greeks_Calculation_for_ETF_Options_Using_JIT/1-4.png"/>
+            </div>
+        </article>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title5" id="交易日历">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title5">交易日历</h3>
+            <div class="- topic/body body">
+                <div class="table-container"><table class="- topic/table table" data-cols="3"><caption></caption><colgroup><col/><col/><col/></colgroup><thead class="- topic/thead thead">
+                            <tr class="- topic/row">
+                                <th class="- topic/entry entry colsep-0 rowsep-0" id="交易日历__entry__1">
+                                    <strong class="+ topic/ph hi-d/b ph b">字段</strong>
+                                </th>
+                                <th class="- topic/entry entry colsep-0 rowsep-0" id="交易日历__entry__2">
+                                    <strong class="+ topic/ph hi-d/b ph b">字段类型</strong>
+                                </th>
+                                <th class="- topic/entry entry colsep-0 rowsep-0" id="交易日历__entry__3">
+                                    <strong class="+ topic/ph hi-d/b ph b">含义</strong>
+                                </th>
+                            </tr>
+                        </thead><tbody class="- topic/tbody tbody">
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-0 rowsep-0" headers="交易日历__entry__1">tradedate</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-0" headers="交易日历__entry__2">DATE</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-0" headers="交易日历__entry__3">交易日期</td>
+                            </tr>
+                        </tbody></table></div>
+                <p class="- topic/p p">交易日历存放在单列 csv 文件中，可以使用 DolphinDB 的<code class="+ topic/ph pr-d/codeph ph codeph">loadText</code>函数接口直接读取：</p>
+                <pre class="+ topic/pre pr-d/codeblock pre codeblock"><code>//交易日历csv文件路径
+tradingDatesAbsoluteFilename = "/hdd/hdd9/tutorials/jitAccelerated/tradedate.csv"
+startDate = 2015.02.01
+endDate = 2022.03.01
+//读取csv文件
+allTradingDates = loadText(tradingDatesAbsoluteFilename)
+//生成交易日向量
+tradingDates = exec tradedate from allTradingDates where tradedate&lt;endDate and tradedate &gt;startDate</code></pre>
+                <p class="- topic/p p">allTradingDates 是表变量，可以使用 exec 函数将表中的某一列转成向量变量，tradingDates 是向量变量。</p>
+            </div>
+        </article>
+    </article>
+    <article class="- topic/topic topic nested1" aria-labelledby="ariaid-title6" id="计算函数代码开发">
+        <h2 class="- topic/title title topictitle2" id="ariaid-title6">计算函数代码开发</h2>
+        <div class="- topic/body body"></div>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title7" id="隐含波动率">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title7">隐含波动率</h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p">DolphinDB 脚本语言需要先解释再执行，计算密集的代码如果不能向量化，在脚本层面使用 while 和 for
+                    循环以及条件分支，就会比较耗时。期权隐含波动率计算的步骤，由于使用了上下限值循环逼近的二分法，正是需要 JIT
+                    加速的计算类型。以下就是二分法逼近隐含波动率的代码：</p>
+                <pre class="+ topic/pre pr-d/codeblock pre codeblock"><code>@jit
+def calculateD1JIT(etfTodayPrice, KPrice, r, dayRatio, HLMean){
+	skRatio = etfTodayPrice / KPrice
+	denominator = HLMean * sqrt(dayRatio)
+	result = (log(skRatio) + (r + 0.5 * pow(HLMean, 2)) * dayRatio) / denominator
+	return result
+}
+
+@jit
+def calculatePriceJIT(etfTodayPrice, KPrice , r , dayRatio , HLMean , CPMode){
+	testResult = 0.0
+	if (HLMean &lt;= 0){
+		testResult = CPMode * (etfTodayPrice - KPrice)
+		if(testResult&lt;0){
+			return 0.0
+		}
+		return testResult
+	}
+	d1 = calculateD1JIT(etfTodayPrice, KPrice, r, dayRatio, HLMean)
+	d2 = d1 - HLMean * sqrt(dayRatio)
+	price = CPMode * (etfTodayPrice * cdfNormal(0, 1, CPMode * d1) - KPrice * cdfNormal(0, 1, CPMode * d2) * exp(-r * dayRatio))
+	return price
+}
+
+@jit
+def calculateImpvJIT(optionTodayClose, etfTodayPrice, KPrice, r, dayRatio, CPMode){
+	v = 0.0	
+	high = 2.0
+	low = 0.0
+	do{
+		if ((high - low) &lt;= 0.00001){
+			break
+		}
+		HLMean = (high + low) / 2.0
+		if (calculatePriceJIT(etfTodayPrice, KPrice, r, dayRatio, HLMean, CPMode) &gt; optionTodayClose){
+			high = HLMean
+		}
+		else{
+			low = HLMean
+		}
+	}
+	while(true)
+	v = (high + low) / 2.0
+	return v
+}
+
+def calculateImpv(optionTodayClose, etfTodayPrice, KPrice, r, dayRatio, CPMode){
+	originalShape = optionTodayClose.shape()
+	optionTodayClose_vec = optionTodayClose.reshape()
+	etfTodayPrice_vec = etfTodayPrice.reshape()
+	KPrice_vec = KPrice.reshape()
+	dayRatio_vec = dayRatio.reshape()
+	CPMode_vec = CPMode.reshape()
+	impvTmp = each(calculateImpvJIT, optionTodayClose_vec, etfTodayPrice_vec, KPrice_vec, r, dayRatio_vec, CPMode_vec)	
+	impv = impvTmp.reshape(originalShape)	
+	return impv
+}</code></pre>
+                <p class="- topic/p p">calculateImpvJIT 是计算隐含波动的核心代码，其入参 optionTodayClose, etfTodayPrice, KPrice, r,
+                    dayRatio, CPMode 都是标量对象，其调用的 calculatePriceJIT 函数和 calculateD1JIT 函数都通过 @jit
+                    装饰器的方式封装成JIT函数，以达到加速计算的目的。</p>
+                <p class="- topic/p p">calculateImpv 是计算隐含波动的最终调用函数，其入参 optionTodayClose, etfTodayPrice, KPrice,
+                    dayRatio, CPMode 都是矩阵对象，其主要作用是把输入和输出进行矩阵和向量的转换，以适不同函数的入参和输出。在后面 delta, gamma,
+                    vega, theta 计算时，也会用到这些矩阵入参，这里以 2015年2月16日的 50ETF 为例进行展示。</p>
+                <ul class="- topic/ul ul">
+                    <li class="- topic/li li">
+                        <p class="- topic/p p">optionTodayClose</p>
+                        <br/><div class="imageleft"><img class="- topic/image image imageleft" id="隐含波动率__image_bb1_sh5_tzb" src="images/IV_Greeks_Calculation_for_ETF_Options_Using_JIT/2-1.png"/></div><br/>
+                    </li>
+                    <li class="- topic/li li">
+                        <p class="- topic/p p">etfTodayPrice</p>
+                        <br/><div class="imageleft"><img class="- topic/image image imageleft" id="隐含波动率__image_jlm_sh5_tzb" src="images/IV_Greeks_Calculation_for_ETF_Options_Using_JIT/2-2.png"/></div><br/>
+                    </li>
+                    <li class="- topic/li li">
+                        <p class="- topic/p p">KPrice</p>
+                        <br/><div class="imageleft"><img class="- topic/image image imageleft" id="隐含波动率__image_u1x_sh5_tzb" src="images/IV_Greeks_Calculation_for_ETF_Options_Using_JIT/2-3.png"/></div><br/>
+                    </li>
+                    <li class="- topic/li li">
+                        <p class="- topic/p p">dayRatio</p>
+                        <figure class="- topic/fig fig fignone" id="隐含波动率__fig_f55_d35_tzb" data-ofbid="隐含波动率__fig_f55_d35_tzb">
+                            <br/><div class="imageleft"><img class="- topic/image image imageleft" id="隐含波动率__image_e3d_th5_tzb" src="images/IV_Greeks_Calculation_for_ETF_Options_Using_JIT/2-4.png"/></div><br/>
+                        </figure>
+                    </li>
+                    <li class="- topic/li li">
+                        <p class="- topic/p p">CPMode</p>
+                        <figure class="- topic/fig fig fignone" id="隐含波动率__fig_yv4_d35_tzb" data-ofbid="隐含波动率__fig_yv4_d35_tzb">
+                            <br/><div class="imageleft"><img class="- topic/image image imageleft" id="隐含波动率__image_tjj_th5_tzb" src="images/IV_Greeks_Calculation_for_ETF_Options_Using_JIT/2-5.png"/></div><br/>
+                        </figure>
+                    </li>
+                </ul>
+            </div>
+        </article>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title8" id="delta">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title8">delta</h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p">delta 表示期权价格对标的资产价格的变动率，即标的资产价格每变动一个单位，期权价格产生的变化。</p>
+                <p class="- topic/p p">delta 的计算可以方便地实现向量化计算，所以不需要调用 JIT 功能，其代码如下：</p>
+                <pre class="+ topic/pre pr-d/codeblock pre codeblock"><code>def calculateD1(etfTodayPrice, KPrice, r, dayRatio, HLMean){
+	skRatio = etfTodayPrice / KPrice
+	denominator = HLMean * sqrt(dayRatio)
+	result = (log(skRatio) + (r + 0.5 * pow(HLMean, 2)) * dayRatio) / denominator
+	return result
+}
+
+def cdfNormalMatrix(mean, stdev, X){
+	originalShape = X.shape()
+	X_vec = X.reshape()
+	result = cdfNormal(mean, stdev, X_vec)
+	return result.reshape(originalShape)
+}
+
+def calculateDelta(etfTodayPrice, KPrice, r, dayRatio, impvMatrix, CPMode){
+	delta = iif(
+			impvMatrix &lt;= 0,
+			0,
+			0.01*etfTodayPrice*CPMode*cdfNormalMatrix(0, 1, CPMode * calculateD1(etfTodayPrice, KPrice, r, dayRatio, impvMatrix))
+		)
+	return delta
+}</code></pre>
+                <p class="- topic/p p">calculateDelta 是计算 delta 的最终调用函数，其入参 etfTodayPrice, KPrice, dayRatio, impvMatrix,
+                    CPMode 都是矩阵对象。</p>
+            </div>
+        </article>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title9" id="gamma">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title9">gamma</h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p">gamma 表示 delta 对于标的资产价格的变动率，即标的资产价格每变动一个单位，delta 值产生的变化。</p>
+                <p class="- topic/p p">gamma 的计算可以方便地实现向量化计算，所以不需要调用 JIT 功能，其代码如下：</p>
+                <pre class="+ topic/pre pr-d/codeblock pre codeblock"><code>def normpdf(x){
+	return exp(-pow(x, 2)/2.0)/sqrt(2*pi)
+}
+
+def calculateD1(etfTodayPrice, KPrice, r, dayRatio, HLMean){
+	skRatio = etfTodayPrice / KPrice
+	denominator = HLMean * sqrt(dayRatio)
+	result = (log(skRatio) + (r + 0.5 * pow(HLMean, 2)) * dayRatio) / denominator
+	return result
+}
+
+def calculateGamma(etfTodayPrice, KPrice, r, dayRatio, impvMatrix){
+	gamma = iif(
+			impvMatrix &lt;= 0,
+			0,
+			(normpdf(calculateD1(etfTodayPrice,  KPrice, r, dayRatio, impvMatrix)) \ (etfTodayPrice * impvMatrix * sqrt(dayRatio))) * pow(etfTodayPrice, 2) * 0.0001
+		)	
+	return gamma
+}</code></pre>
+                <p class="- topic/p p">calculateGamma 是计算 gamma 的最终调用函数，其入参 etfTodayPrice, KPrice, dayRatio, impvMatrix
+                    都是矩阵对象。</p>
+            </div>
+        </article>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title10" id="vega">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title10">vega</h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p">vega 表示波动率单位变动对期权价格产生的变化。</p>
+                <p class="- topic/p p">vega 的计算可以方便地实现向量化计算，所以不需要调用 JIT 功能，其代码如下：</p>
+                <pre class="+ topic/pre pr-d/codeblock pre codeblock"><code>def normpdf(x){
+	return exp(-pow(x, 2)/2.0)/sqrt(2*pi)
+}
+
+def calculateD1(etfTodayPrice, KPrice, r, dayRatio, HLMean){
+	skRatio = etfTodayPrice / KPrice
+	denominator = HLMean * sqrt(dayRatio)
+	result = (log(skRatio) + (r + 0.5 * pow(HLMean, 2)) * dayRatio) / denominator
+	return result
+}
+
+def calculateVega(etfTodayPrice, KPrice, r, dayRatio, impvMatrix){
+	vega = iif(
+			impvMatrix &lt;= 0,
+			0,
+			etfTodayPrice * normpdf(calculateD1(etfTodayPrice, KPrice, r, dayRatio, impvMatrix)) * sqrt(dayRatio)
+		)
+	return vega \ 100.0
+}</code></pre>
+                <p class="- topic/p p">calculateVega 是计算 vega 的最终调用函数，其入参 etfTodayPrice, KPrice, dayRatio, impvMatrix
+                    都是矩阵对象。</p>
+            </div>
+        </article>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title11" id="theta">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title11">theta</h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p">theta 表示时间流逝对期权价格产生的变化，即每减少一天，期权价格的变化值。</p>
+                <p class="- topic/p p">theta 的计算可以方便地实现向量化计算，所以不需要调用 JIT 功能，其代码如下：</p>
+                <pre class="+ topic/pre pr-d/codeblock pre codeblock"><code>def calculateD1(etfTodayPrice, KPrice, r, dayRatio, HLMean){
+	skRatio = etfTodayPrice / KPrice
+	denominator = HLMean * sqrt(dayRatio)
+	result = (log(skRatio) + (r + 0.5 * pow(HLMean, 2)) * dayRatio) / denominator
+	return result
+}
+
+def normpdf(x){
+	return exp(-pow(x, 2)/2.0)/sqrt(2*pi)
+}
+
+def cdfNormalMatrix(mean, stdev, X){
+	originalShape = X.shape()
+	X_vec = X.reshape()
+	result = cdfNormal(mean, stdev, X_vec)
+	return result.reshape(originalShape)
+}
+
+
+def calculateTheta(etfTodayPrice, KPrice, r, dayRatio, impvMatrix, CPMode){
+	annualDays = 365
+	d1 = calculateD1(etfTodayPrice, KPrice, r, dayRatio, impvMatrix)
+	d2 = d1 - impvMatrix * sqrt(dayRatio)
+	theta = (-etfTodayPrice * normpdf(d1) * impvMatrix \ (2 * sqrt(dayRatio)) - CPMode * r * KPrice * exp(-r * dayRatio) *cdfNormalMatrix(0, 1, CPMode * d2)) \ annualDays
+	result = iif(impvMatrix&lt;= 0, 0, theta)	
+	return result
+}</code></pre>
+                <p class="- topic/p p">calculateTheta 是计算 theta 的最终调用函数，其入参 etfTodayPrice, KPrice, dayRatio, impvMatrix,
+                    CPMode 都是矩阵对象。</p>
+            </div>
+        </article>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title12" id="单日计算函数">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title12">单日计算函数</h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p">开发完最核心的计算函数后，可以自定义一个单日计算函数，计算指定日期的隐含波动率和希腊值，其代码如下：</p>
+                <pre class="+ topic/pre pr-d/codeblock pre codeblock"><code>def calculateOneDayGreek(closPriceWideMatrix, etfPriceWideMatrix, contractInfo, targetDate){
+	targetDate_vec = [targetDate]
+	r = 0
+	optionTodayClose = getTargetDayOptionClose(closPriceWideMatrix, targetDate_vec)
+	validContractsToday = optionTodayClose.columnNames()
+	etfTodayPrice = getTargetDayEtfPrice(etfPriceWideMatrix, targetDate_vec)
+	KPrice, dayRatio, CPMode = getTargetDayContractInfo(contractInfo, validContractsToday, targetDate_vec)
+	impvMatrix = calculateImpv(optionTodayClose, etfTodayPrice, KPrice, r, dayRatio, CPMode)
+	deltaMatrix = calculateDelta(etfTodayPrice, KPrice, r, dayRatio, impvMatrix, CPMode)\(etfTodayPrice*0.01)
+	gammaMatrix = calculateGamma(etfTodayPrice, KPrice, r, dayRatio, impvMatrix)\(pow(etfTodayPrice, 2) * 0.0001)
+	vegaMatrix = calculateVega(etfTodayPrice, KPrice, r, dayRatio, impvMatrix)
+	thetaMatrix = calculateTheta(etfTodayPrice, KPrice, r, dayRatio, impvMatrix, CPMode)
+	todayTable = table(validContractsToday as optionID, impvMatrix.reshape() as impv, deltaMatrix.reshape() as delta, gammaMatrix.reshape() as gamma, vegaMatrix.reshape() as vega, thetaMatrix.reshape() as theta)
+	todayTable["tradingDate"] = targetDate
+	todayTable.reorderColumns!(["optionID", "tradingDate"])
+	return todayTable
+}</code></pre>
+                <p class="- topic/p p">calculateOneDayGreek 的入参 closPriceWideMatrix, etfPriceWideMatrix
+                    是矩阵对象（参考第1章节的读取数据），contractInfo 是表对象（参考第1章节的读取数据），targetDate 是标量对象。</p>
+                <p class="- topic/p p">calculateOneDayGreek 函数还调用了 getTargetDayOptionClose 函数， getTargetDayEtfPrice
+                    函数和getTargetDayContractInfo 函数，调用的目的是从全量数据中获取计算当日的有效信息，代码如下：</p>
+                <pre class="+ topic/pre pr-d/codeblock pre codeblock"><code>/*
+ * 按合约和交易日在期权日频收盘价矩阵中寻找对应价格
+ */
+def getTargetDayOptionClose(closPriceWideMatrix, targetDate){
+	colNum = closPriceWideMatrix.colNames().find(targetDate)
+	return closPriceWideMatrix[colNum].transpose().dropna(byRow = false)
+}
+
+/*
+ * 按合约和交易日在期权合成期货价格矩阵中寻找对应价格
+ */
+def getTargetDayEtfPrice(etfPriceWideMatrix, targetDate){
+	colNum = etfPriceWideMatrix.colNames().find(targetDate)
+	return etfPriceWideMatrix[colNum].transpose().dropna(byRow = false)
+}
+
+/*
+ * 根据合约和交易日在期权信息表中寻找 KPrice, dayRatio, CPMode
+ */
+def getTargetDayContractInfo(contractInfo, validContractsToday, targetDate){
+	targetContractInfo = select code, exemode, exeprice, lastdate, exeprice2, dividenddate, targetDate[0] as tradingDate from contractInfo where Code in validContractsToday
+	KPrice = exec iif(tradingDate&lt;dividenddate, exeprice2, exeprice) from targetContractInfo pivot by tradingDate, code
+	dayRatio = exec (lastdate-tradingDate)\365.0 from targetContractInfo pivot by tradingDate, Code
+	CPMode = exec exemode from targetContractInfo pivot by tradingDate, Code
+	return KPrice, dayRatio, CPMode
+}</code></pre>
+                <p class="- topic/p p">calculateOneDayGreek 函数的具体使用方法会在下一章说明。</p>
+            </div>
+        </article>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title13" id="多日并行计算函数">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title13">多日并行计算函数</h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p">自定义单日计算函数后，可以再自定义一个多日并行计算函数，其代码如下：</p>
+                <pre class="+ topic/pre pr-d/codeblock pre codeblock"><code>def calculateAll(closPriceWideMatrix, etfPriceWideMatrix, contractInfo, tradingDates, mutable result){
+	calculator = partial(calculateOneDayGreek, closPriceWideMatrix, etfPriceWideMatrix, contractInfo)
+	timer{
+		allResult = ploop(calculator, tradingDates)
+	}
+	for(oneDayResult in allResult){
+		append!(result, oneDayResult)
+	}	
+}</code></pre>
+                <p class="- topic/p p">calculateAll 是自定义的多日并行计算函数，主要用到了 DolphinDB
+                        内置的<code class="+ topic/ph pr-d/codeph ph codeph">partial</code>部分应用函数和<code class="+ topic/ph pr-d/codeph ph codeph">ploop</code>并行计算函数，直接传入要并行的函数和入参，不必像其他语言一样先定义线程池/进程池。calculateAll
+                    函数的具体使用方法会在下一章说明。</p>
+            </div>
+        </article>
+    </article>
+    <article class="- topic/topic topic nested1" aria-labelledby="ariaid-title14" id="计算性能测试">
+        <h2 class="- topic/title title topictitle2" id="ariaid-title14">计算性能测试</h2>
+        <div class="- topic/body body">
+            <p class="- topic/p p">测试的交易日范围从2015年2月到2022年3月，实际交易日1729天。测试的期权品种是 50 ETF，证券代码为510050，涉及期权合约共3124个。</p>
+        </div>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title15" id="测试环境">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title15">测试环境</h3>
+            <div class="- topic/body body">
+                <ul class="- topic/ul ul">
+                    <li class="- topic/li li">CPU 类型：Intel(R) Xeon(R) Silver 4216 CPU @ 2.10GHz</li>
+                    <li class="- topic/li li">逻辑 CPU 总数：8</li>
+                    <li class="- topic/li li">内存：64GB</li>
+                    <li class="- topic/li li">OS：64位 CentOS Linux 7 (Core)</li>
+                    <li class="- topic/li li">DolphinDB server 版本：<a class="- topic/xref xref" href="https://www.dolphindb.cn/downloads/DolphinDB_Linux64_V2.00.8.12_JIT.zip" target="_blank" rel="external noopener">2.00.8 JIT</a></li>
+                </ul>
+            </div>
+        </article>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title16" id="单日计算性能测试">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title16">单日计算性能测试</h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p">单线程单日计算性能测试代码如下：</p>
+                <pre class="+ topic/pre pr-d/codeblock pre codeblock"><code>//定义单日性能测试函数
+def testOneDayPerformance(closPriceWideMatrix, etfPriceWideMatrix, contractInfo, targetDate){
+	targetDate_vec = [targetDate]
+	r = 0
+	optionTodayClose = getTargetDayOptionClose(closPriceWideMatrix, targetDate_vec)
+	validContractsToday = optionTodayClose.columnNames()
+	etfTodayPrice = getTargetDayEtfPrice(etfPriceWideMatrix, targetDate_vec)
+	KPrice, dayRatio, CPMode = getTargetDayContractInfo(contractInfo, validContractsToday, targetDate_vec)
+	timer{
+		impvMatrix = calculateImpv(optionTodayClose, etfTodayPrice, KPrice, r, dayRatio, CPMode)
+		deltaMatrix = calculateDelta(etfTodayPrice, KPrice, r, dayRatio, impvMatrix, CPMode)\(etfTodayPrice*0.01)
+		gammaMatrix = calculateGamma(etfTodayPrice, KPrice, r, dayRatio, impvMatrix)\(pow(etfTodayPrice, 2) * 0.0001)
+		vegaMatrix = calculateVega(etfTodayPrice, KPrice, r, dayRatio, impvMatrix)
+		thetaMatrix = calculateTheta(etfTodayPrice, KPrice, r, dayRatio, impvMatrix, CPMode)
+	}
+	todayTable = table(validContractsToday as optionID, impvMatrix.reshape() as impv, deltaMatrix.reshape() as delta, gammaMatrix.reshape() as gamma, vegaMatrix.reshape() as vega, thetaMatrix.reshape() as theta)
+	todayTable["tradingDate"] = targetDate
+	todayTable.reorderColumns!(["optionID", "tradingDate"])
+	return todayTable
+}
+//执行单日性能测试函数
+oneDay = testOneDayPerformance(closPriceWideMatrix, etfPriceWideMatrix, contractInfo, 2022.02.28)</code></pre>
+                <p class="- topic/p p">测试结果如下：</p>
+                <ul class="- topic/ul ul">
+                    <li class="- topic/li li">计算日期为 2022年2月28日</li>
+                    <li class="- topic/li li">测试的期权品种是 50 ETF，涉及期权合约共136个</li>
+                    <li class="- topic/li li">DolphinDB 脚本计算总耗时为2.1 ms</li>
+                    <li class="- topic/li li">C++ 原生代码计算总耗时为1.02 ms</li>
+                </ul>
+                <img class="- topic/image image" src="images/IV_Greeks_Calculation_for_ETF_Options_Using_JIT/3-1.png"/>
+            </div>
+        </article>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title17" id="多日并行计算性能测试">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title17">多日并行计算性能测试</h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p">多日并行计算性能测试代码如下：</p>
+                <pre class="+ topic/pre pr-d/codeblock pre codeblock"><code>//创建存储计算结果的表变量
+result = table(
+		array(SYMBOL, 0) as optionID,
+		array(DATE, 0) as tradingDate,
+		array(DOUBLE, 0) as impv,
+		array(DOUBLE, 0) as delta,
+		array(DOUBLE, 0) as gamma,
+		array(DOUBLE, 0) as vega,
+		array(DOUBLE, 0) as theta
+	)
+//执行多日并行计算函数
+calculateAll(closPriceWideMatrix, etfPriceWideMatrix, contractInfo, tradingDates, result)</code></pre>
+                <p class="- topic/p p">测试结果如下：</p>
+                <ul class="- topic/ul ul">
+                    <li class="- topic/li li">计算日期为 2015年2月到2022年3月</li>
+                    <li class="- topic/li li">测试的期权品种是 50 ETF，涉及期权合约共3124个</li>
+                    <li class="- topic/li li">计算的并行度为8，测试环境的8个 CPU 满负荷运行</li>
+                    <li class="- topic/li li">DolphinDB 脚本计算总耗时为300 ms</li>
+                    <li class="- topic/li li">C++ 原生代码计算总耗时为200 ms</li>
+                </ul>
+                <img class="- topic/image image" src="images/IV_Greeks_Calculation_for_ETF_Options_Using_JIT/3-2.png"/>
+                <p class="- topic/p p">计算过程中的 CPU 使用率：</p>
+                <img class="- topic/image image" src="images/IV_Greeks_Calculation_for_ETF_Options_Using_JIT/3-3.png"/>
+            </div>
+        </article>
+    </article>
+    <article class="- topic/topic topic nested1" aria-labelledby="ariaid-title18" id="总结">
+        <h2 class="- topic/title title topictitle2" id="ariaid-title18">总结</h2>
+        <div class="- topic/body body">
+            <p class="- topic/p p">本教程中期权隐含波动率的计算使用了 JIT 功能提速，其余希腊值的计算使用了向量化计算。我们测试了2015年2月到2022年3月 50 ETF
+                所有期权合约的隐含波动率和希腊值的计算性能，在8个 CPU 满负荷运行下，DolphinDB 脚本计算总耗时为300 ms，C++ 原生代码计算总耗时为200
+                ms，耗时相差50%左右。</p>
+            <p class="- topic/p p">关于 DolphinDB JIT 的更多详细特性，可以参考 <a class="- topic/xref xref" href="jit.html">DolphinDB
+                JIT教程</a>。</p>
+            <p class="- topic/p p">通过 <a class="- topic/xref xref" href="https://www.dolphindb.cn/alone/alone.php?id=10" target="_blank" rel="external noopener">DolphinDB 下载连接</a>下载 DolphinDB server 进行测试的时候，必须选择包含 JIT
+                功能的安装包，如下图所示：</p>
+            <img class="- topic/image image" src="images/IV_Greeks_Calculation_for_ETF_Options_Using_JIT/4-1.png"/>
+        </div>
+    </article>
+    <article class="- topic/topic topic nested1" aria-labelledby="ariaid-title19" id="附录">
+        <h2 class="- topic/title title topictitle2" id="ariaid-title19">附录</h2>
+        <div class="- topic/body body">
+            <ul class="- topic/ul ul">
+                <li class="- topic/li li">
+                    <a class="- topic/xref xref" href="script/IV_Greeks_Calculation_for_ETF_Options_Using_JIT/calculation_scripts.txt">调用计算函数的计算脚本.txt</a>
+                </li>
+                <li class="- topic/li li">
+                    <a class="- topic/xref xref" href="script/IV_Greeks_Calculation_for_ETF_Options_Using_JIT/Option_IV_and_GreekS_Calculation_Functions.txt">期权隐含波动率和希腊值计算函数.txt</a>
+                </li>
+            </ul>
+        </div>
+    </article>
+</article></main></div>
+                        
+                        
+                        
+                        
+                        
+                        
+                    </div>
+                    
+                        <nav role="navigation" id="wh_topic_toc" aria-label="On this page" class="col-lg-2 d-none d-lg-block navbar d-print-none"> 
+                            <div id="wh_topic_toc_content">
+		                        
+	                            <div class=" wh_topic_toc "><div class="wh_topic_label">在本页上</div><ul><li class="topic-item"><a href="#%E6%95%B0%E6%8D%AE%E8%A1%A8%E7%BB%93%E6%9E%84" data-tocid="数据表结构">数据表结构</a><ul><li class="topic-item"><a href="#%E6%9C%9F%E6%9D%83%E6%97%A5%E9%A2%91%E6%95%B0%E6%8D%AE%E8%A1%A8" data-tocid="期权日频数据表">期权日频数据表</a></li><li class="topic-item"><a href="#%E6%9C%9F%E6%9D%83%E4%BF%A1%E6%81%AF" data-tocid="期权信息">期权信息</a></li><li class="topic-item"><a href="#%E4%BA%A4%E6%98%93%E6%97%A5%E5%8E%86" data-tocid="交易日历">交易日历</a></li></ul></li><li class="topic-item"><a href="#%E8%AE%A1%E7%AE%97%E5%87%BD%E6%95%B0%E4%BB%A3%E7%A0%81%E5%BC%80%E5%8F%91" data-tocid="计算函数代码开发">计算函数代码开发</a><ul><li class="topic-item"><a href="#%E9%9A%90%E5%90%AB%E6%B3%A2%E5%8A%A8%E7%8E%87" data-tocid="隐含波动率">隐含波动率</a></li><li class="topic-item"><a href="#delta" data-tocid="delta">delta</a></li><li class="topic-item"><a href="#gamma" data-tocid="gamma">gamma</a></li><li class="topic-item"><a href="#vega" data-tocid="vega">vega</a></li><li class="topic-item"><a href="#theta" data-tocid="theta">theta</a></li><li class="topic-item"><a href="#%E5%8D%95%E6%97%A5%E8%AE%A1%E7%AE%97%E5%87%BD%E6%95%B0" data-tocid="单日计算函数">单日计算函数</a></li><li class="topic-item"><a href="#%E5%A4%9A%E6%97%A5%E5%B9%B6%E8%A1%8C%E8%AE%A1%E7%AE%97%E5%87%BD%E6%95%B0" data-tocid="多日并行计算函数">多日并行计算函数</a></li></ul></li><li class="topic-item"><a href="#%E8%AE%A1%E7%AE%97%E6%80%A7%E8%83%BD%E6%B5%8B%E8%AF%95" data-tocid="计算性能测试">计算性能测试</a><ul><li class="topic-item"><a href="#%E6%B5%8B%E8%AF%95%E7%8E%AF%E5%A2%83" data-tocid="测试环境">测试环境</a></li><li class="topic-item"><a href="#%E5%8D%95%E6%97%A5%E8%AE%A1%E7%AE%97%E6%80%A7%E8%83%BD%E6%B5%8B%E8%AF%95" data-tocid="单日计算性能测试">单日计算性能测试</a></li><li class="topic-item"><a href="#%E5%A4%9A%E6%97%A5%E5%B9%B6%E8%A1%8C%E8%AE%A1%E7%AE%97%E6%80%A7%E8%83%BD%E6%B5%8B%E8%AF%95" data-tocid="多日并行计算性能测试">多日并行计算性能测试</a></li></ul></li><li class="topic-item"><a href="#%E6%80%BB%E7%BB%93" data-tocid="总结">总结</a></li><li class="topic-item"><a href="#%E9%99%84%E5%BD%95" data-tocid="附录">附录</a></li></ul></div>
+	                        	
+                        	</div>
+                        </nav>
+                    
+                </div>
+            </div>
+            
+            
+            
+        </div> 
+        <footer class="navbar navbar-default wh_footer">
+  <div class=" footer-container mx-auto ">
+<title>Copyright</title><p><b> ©2025 浙江智臾科技有限公司 浙ICP备18048711号-3</b></p>
+  </div>
+</footer>
+        
+        <div id="go2top" class="d-print-none">
+            <span class="oxy-icon oxy-icon-up"></span>
+        </div>
+        
+        <div id="modal_img_large" class="modal">
+            <span class="close oxy-icon oxy-icon-remove"></span>
+            <div id="modal_img_container"></div>
+            <div id="caption"></div>
+        </div>
+        
+        
+        
+    </body>
+</html>

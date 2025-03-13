@@ -1,0 +1,41 @@
+
+
+### bondAccrInt
+
+#### 语法  
+```DolphinDB
+bondAccrInt(settlement, maturity, coupon, frequency, [par=100], [basis=1])
+```
+
+#### 详情  
+返回有价证券的应付利息（Accrued Interest），类型为 DOUBLE 标量或向量。应付利息是自上次票息支付到交易日（settlement）所赚取的利息。该值用于计算除息价格：  
+```
+除息价格（Clean Price） = 含息价格（Dirty Price） - 应付利息（Accrued Interest）
+```
+
+#### 参数  
+- **settlement**：DATE 类型，结算日（购买日期）。  
+- **maturity**：DATE 类型，到期日。  
+- **coupon**：数值类型，年息票利率。  
+- **frequency**：整型或 DURATION 类型，年付息频率：  
+  - 1 / 1y：按年支付  
+  - 2 / 6M：半年支付  
+  - 4 / 3M：按季支付  
+  - 12 / 1M：按月支付  
+- **par**（可选）：数值类型，票面值（默认 100）。  
+- **basis**（可选）：日计数基准类型（默认 1）：  
+  - 0 / "Thirty360US"：US (NASD) 30/360  
+  - 1 / "ActualActual"：实际/实际  
+  - 2 / "Actual360"：实际/360  
+  - 3 / "Actual365"：实际/365  
+  - 4 / "Thirty360EU"：欧洲 30/360  
+
+#### 示例  
+面值 1000 的债券，结算日 2024.01.01，到期日 2030.12.31，年息票利率 10%，半年付息，日计数基准为 US 30/360：  
+```DolphinDB
+bondAccrInt(settlement=2024.01.01, maturity=2030.12.31, coupon=0.1, frequency=2, par=1000, basis=0)
+// 返回 0.277778
+```
+
+#### 参考函数  
+- [bondDirtyPrice](bondDirtyPrice.html)

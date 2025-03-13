@@ -1,0 +1,390 @@
+<!DOCTYPE html><html xmlns="http://www.w3.org/1999/xhtml" xml:lang="zh" lang="zh" data-whc_version="26.0">
+    <head><link rel="shortcut icon" href="../favicon.ico"/><link rel="icon" href="../favicon.ico"/><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><meta name="description" content="在日常的数据开发、分析和数据库运维中，一款优秀的 IDE 能够极大地提升工作效率。DBEaver 是一款由 Java 编写的一站式跨平台连接器，其社区版本已能支持连接近百种数据库，受到广大开发者的喜爱。近期， DolphinDB 与 DBeaver 团队共同努力，发布了 DBeaver 24.2.1 版本，新增 DolphinDB 驱动程序，支持在 DBeaver 中访问和管理 ..."/><meta name="DC.rights.owner" content="(C) 版权 2025"/><meta name="copyright" content="(C) 版权 2025"/><meta name="generator" content="DITA-OT"/><meta name="DC.type" content="topic"/><meta name="DC.coverage" content=""/><meta name="DC.relation" content="../third_party.html"/><meta name="prodname" content="DolphinDB"/><meta name="brand" content="DolphinDB"/><meta name="DC.creator" content="DolphinDB"/><meta name="DC.publisher" content="DDB N/A DDB 200"/><meta name="DC.format" content="HTML5"/><meta name="DC.identifier" content="dbeaver"/><title>使用 DBEaver 连接 DolphinDB</title><!--  Generated with Oxygen version 26.0, build number 2024012323.  --><meta name="wh-path2root" content="../"/><meta name="wh-toc-id" content="dbeaver-d9713e98180"/><meta name="wh-source-relpath" content="tools/dbeaver.dita"/><meta name="wh-out-relpath" content="tools/dbeaver.html"/>
+
+    <link rel="stylesheet" type="text/css" href="../oxygen-webhelp/app/commons.css?buildId=2024012323"/>
+    <link rel="stylesheet" type="text/css" href="../oxygen-webhelp/app/topic.css?buildId=2024012323"/>
+
+    <script src="../oxygen-webhelp/app/options/properties.js?buildId=20250305183303"></script>
+    <script src="../oxygen-webhelp/app/localization/strings.js?buildId=2024012323"></script>
+    <script src="../oxygen-webhelp/app/search/index/keywords.js?buildId=20250305183303"></script>
+    <script defer="defer" src="../oxygen-webhelp/app/commons.js?buildId=2024012323"></script>
+    <script defer="defer" src="../oxygen-webhelp/app/topic.js?buildId=2024012323"></script>
+<link rel="stylesheet" type="text/css" href="../oxygen-webhelp/template/styles.css?buildId=2024012323"/><script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script><script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script></head>
+
+    <body id="dbeaver" class="wh_topic_page frmBody">
+        <a href="#wh_topic_body" class="sr-only sr-only-focusable">
+            跳转到主要内容
+        </a>
+        
+        
+        
+        
+        <header class="navbar navbar-default wh_header">
+    <div class="container-fluid">
+        <div xmlns:whc="http://www.oxygenxml.com/webhelp/components" class="wh_header_flex_container navbar-nav navbar-expand-md navbar-dark">
+            <div class="wh_logo_and_publication_title_container">
+                <div class="wh_logo_and_publication_title">
+                    
+                    <a href="https://docs.dolphindb.cn/zh/index.html" class=" wh_logo d-none d-sm-block "><img src="../logo.png" alt="  DolphinDB 文档中心  "/></a>
+                    <div class=" wh_publication_title "><a href="../index.html"><span class="booktitle">  <span class="ph mainbooktitle">DolphinDB 文档中心</span>  </span></a></div>
+                    
+                </div>
+                
+                
+            </div>
+
+            <div class="wh_top_menu_and_indexterms_link collapse navbar-collapse" id="wh_top_menu_and_indexterms_link">
+                
+                
+                
+                
+            </div>
+        <div class=" wh_search_input navbar-form wh_topic_page_search search " role="form">
+            
+            
+            
+            <form id="searchForm" method="get" role="search" action="../search.html"><div><input type="search" placeholder="搜索 " class="wh_search_textfield" id="textToSearch" name="searchQuery" aria-label="搜索查询" required="required"/><button type="submit" class="wh_search_button" aria-label="搜索"><span class="search_input_text">搜索</span></button></div></form>
+            
+            <script src="/vendors/react/umd/react.production.min.js" defer="defer"></script>
+<script src="/vendors/react-dom/umd/react-dom.production.min.js" defer="defer"></script>
+<script src="/vendors/dayjs/dayjs.min.js" defer="defer"></script>
+<script src="/vendors/antd/dist/antd.min.js" defer="defer"></script>
+<script src="/vendors/@ant-design/icons/dist/index.umd.min.js" defer="defer"></script>
+<script src="/zh/index.js" type="module"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" defer="defer"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML" defer="defer"><!--
+
+
+--></script>
+<script defer="defer"><!--
+
+// 从主页重定向
+const currentUrl = window.location.href;
+
+// 判断当前URL是否包含index.html并且路径最后部分是index.html
+if (currentUrl.endsWith('index.html')) {
+    // 处理根目录下的index.html跳转
+    const baseUrl = currentUrl.split('/index.html')[0]; // 获取index.html之前的部分
+    const redirectUrl = `${baseUrl}/about/ddb_intro.html`; // 构建跳转路径
+    window.location.href = redirectUrl; // 执行跳转
+}
+
+--></script>
+            
+        </div></div>
+    </div>
+</header>
+        
+        
+         
+        
+        
+        
+        <div class="container-fluid" id="wh_topic_container">
+            <div class="row">
+
+                <nav class="wh_tools d-print-none navbar-expand-md" aria-label="Tools">
+                    
+                    <div data-tooltip-position="bottom" class=" wh_breadcrumb "><ol class="d-print-none"><li><span class="home"><a href="../index.html"><span>主页</span></a></span></li><li><div class="topicref" data-id="third_party"><div class="title"><a href="../third_party.html">第三方工具</a></div></div></li><li class="active"><div class="topicref" data-id="dbeaver"><div class="title"><a href="../tools/dbeaver.html">使用 DBEaver 连接 DolphinDB</a></div></div></li></ol></div>
+                    
+                    
+                    
+                    <div class="wh_right_tools">
+                        <button class="wh_hide_highlight" aria-label="切换搜索突出显示" title="切换搜索突出显示"></button>
+                        <button class="webhelp_expand_collapse_sections" data-next-state="collapsed" aria-label="折叠截面" title="折叠截面"></button>
+                        
+                        
+                        
+                        
+                        <div class=" wh_print_link print d-none d-md-inline-block "><button onClick="window.print()" title="打印此页" aria-label="打印此页"></button></div>
+                        
+                        <button type="button" id="wh_toc_button" class="custom-toggler navbar-toggler collapsed wh_toggle_button navbar-light" aria-expanded="false" aria-label="Toggle publishing table of content" aria-controls="wh_publication_toc">
+                            <span class="navbar-toggler-icon"></span>
+                        </button>
+                    </div>
+                    
+                </nav>
+            </div>
+            
+            
+            
+            
+            <div class="wh_content_area">
+                <div class="row">
+                    
+                        <nav id="wh_publication_toc" class="col-lg-3 col-md-3 col-sm-12 d-md-block d-none d-print-none" aria-label="Table of Contents Container">
+                            <div id="wh_publication_toc_content">
+		                        
+                            	<div class=" wh_publication_toc " data-tooltip-position="right"><span class="expand-button-action-labels"><span id="button-expand-action" role="button" aria-label="Expand"></span><span id="button-collapse-action" role="button" aria-label="Collapse"></span><span id="button-pending-action" role="button" aria-label="Pending"></span></span><ul role="tree" aria-label="Table of Contents"><li role="treeitem"><div data-tocid="ddb_intro-d9713e87" class="topicref" data-id="ddb_intro" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../about/ddb_intro.html" id="ddb_intro-d9713e87-link">关于DolphinDB</a></div></div></li><li role="treeitem"><div data-tocid="chap1_getstarted-d9713e136" class="topicref" data-id="chap1_getstarted" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../getstarted/chap1_getstarted.html" id="chap1_getstarted-d9713e136-link">快速上手</a><div class="wh-tooltip"><p class="shortdesc">如何快速部署 DolphinDB、建库建表、写入和查询数据</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="sectionddb_deployment-d9713e189" class="topicref" data-id="sectionddb_deployment" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action sectionddb_deployment-d9713e189-link" class="wh-expand-btn"></span><div class="title"><a href="../deploy/deploy_intro.html" id="sectionddb_deployment-d9713e189-link"><span class="keyword label">部署</span></a><div class="wh-tooltip"><p class="shortdesc">如何在不同的场景中部署 DolphinDB</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="new_chap_database_manage_new_chap_dbmanage_landing_page-d9713e2259" class="topicref" data-id="new_chap_database_manage_new_chap_dbmanage_landing_page" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action new_chap_database_manage_new_chap_dbmanage_landing_page-d9713e2259-link" class="wh-expand-btn"></span><div class="title"><a href="../db_distr_comp/cfg/db_intro.html" id="new_chap_database_manage_new_chap_dbmanage_landing_page-d9713e2259-link"><span class="keyword label">数据库</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 数据库的基本概念</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="chap7_tutorials_streaming-d9713e3760" class="topicref" data-id="chap7_tutorials_streaming" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action chap7_tutorials_streaming-d9713e3760-link" class="wh-expand-btn"></span><div class="title"><a href="../stream/str_intro.html" id="chap7_tutorials_streaming-d9713e3760-link"><span class="keyword label">流数据</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 流数据引擎及流数据计算的基本概念</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e7513" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e7513-link" class="wh-expand-btn"></span><div class="title"><a href="../db_distr_comp/db_oper/import_data.html" id="tocId-d9713e7513-link">数据迁移</a><div class="wh-tooltip"><p class="shortdesc">如何从不同数据源向 DolphinDB 迁移数据</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="chap7_tutorials_system_management-d9713e7940" class="topicref" data-id="chap7_tutorials_system_management" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action chap7_tutorials_system_management-d9713e7940-link" class="wh-expand-btn"></span><div class="title"><a href="../sys_man/om_intro.html" id="chap7_tutorials_system_management-d9713e7940-link"><span class="keyword label">系统运维</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 的系统运维功能及方法</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="troubleshooting-d9713e8780" class="topicref" data-id="troubleshooting" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action troubleshooting-d9713e8780-link" class="wh-expand-btn"></span><div class="title"><a href="../error_codes/troubleshooting.html" id="troubleshooting-d9713e8780-link">故障排查</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="about_language_resources-d9713e20911" class="topicref" data-id="about_language_resources" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action about_language_resources-d9713e20911-link" class="wh-expand-btn"></span><div class="title"><a href="../progr/progr_intro.html" id="about_language_resources-d9713e20911-link"><span class="keyword label">编程语言</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 编程基本概念与方法、SQL 在 DolphinDB 的应用</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="functions_references-d9713e30925" class="topicref" data-id="functions_references" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action functions_references-d9713e30925-link" class="wh-expand-btn"></span><div class="title"><a href="../funcs/funcs_intro.html" id="functions_references-d9713e30925-link"><span class="keyword label">函数参考</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 函数分类、语法、详解及示例</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="api_protocol-d9713e94064" class="topicref" data-id="api_protocol" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action api_protocol-d9713e94064-link" class="wh-expand-btn"></span><div class="title"><a href="../api/connapi_intro.html" id="api_protocol-d9713e94064-link"><span class="keyword label">连接器 &amp; API</span></a><div class="wh-tooltip"><p class="shortdesc">面向不同编程语言的 DolphinDB API 及连接器，相关协议和用法</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="chap6_plugin-d9713e94210" class="topicref" data-id="chap6_plugin" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action chap6_plugin-d9713e94210-link" class="wh-expand-btn"></span><div class="title"><a href="../plugins/plg_intro.html" id="chap6_plugin-d9713e94210-link"><span class="keyword label">插件</span></a><div class="wh-tooltip"><p class="shortdesc">多个应用场景的插件使用说明和插件开发指导</p></div></div></div></li><li role="treeitem" aria-expanded="true"><div data-tocid="third_party-d9713e97904" class="topicref" data-id="third_party" data-state="expanded"><span role="button" tabindex="0" aria-labelledby="button-collapse-action third_party-d9713e97904-link" class="wh-expand-btn"></span><div class="title"><a href="../third_party.html" id="third_party-d9713e97904-link">第三方工具</a></div></div><ul role="group" class="navbar-nav nav-list"><li role="treeitem"><div data-tocid="基于-datax-的-dolphindb-数据导入工具-d9713e97950" class="topicref" data-id="基于-datax-的-dolphindb-数据导入工具" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../plugins/dataxwriter/README_CN.html" id="基于-datax-的-dolphindb-数据导入工具-d9713e97950-link">基于 DataX 的 DolphinDB 数据导入工具</a></div></div></li><li role="treeitem"><div data-tocid="基于-datax-的-dolphindb-数据读取工具-d9713e97996" class="topicref" data-id="基于-datax-的-dolphindb-数据读取工具" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tools/datax_reader.html" id="基于-datax-的-dolphindb-数据读取工具-d9713e97996-link">基于 DataX 的 DolphinDB 数据读取工具</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="grafana-数据源插件-d9713e98042" class="topicref" data-id="grafana-数据源插件" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action grafana-数据源插件-d9713e98042-link" class="wh-expand-btn"></span><div class="title"><a href="../tools/grafana_overview.html" id="grafana-数据源插件-d9713e98042-link">Grafana 数据源插件</a></div></div></li><li role="treeitem" class="active"><div data-tocid="dbeaver-d9713e98180" class="topicref" data-id="dbeaver" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tools/dbeaver.html" id="dbeaver-d9713e98180-link">使用 DBEaver 连接 DolphinDB</a></div></div></li></ul></li><li role="treeitem" aria-expanded="false"><div data-tocid="about_tutorials-d9713e98227" class="topicref" data-id="about_tutorials" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action about_tutorials-d9713e98227-link" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/about_tutorials.html" id="about_tutorials-d9713e98227-link"><span class="keyword label">教程</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 产品使用教程</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e105982" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e105982-link" class="wh-expand-btn"></span><div class="title"><a href="../rn/server/3_00_2.html" id="tocId-d9713e105982-link">版本说明</a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 版本发布历史</p></div></div></div></li></ul></div>
+		                        
+                            </div>
+                        </nav>
+                    
+                    
+                    <div class="col-lg-7 col-md-9 col-sm-12" id="wh_topic_body">
+                        <button id="wh_close_publication_toc_button" class="close-toc-button d-none" aria-label="Toggle publishing table of content" aria-controls="wh_publication_toc" aria-expanded="true">
+                            <span class="close-toc-icon-container">
+                                <span class="close-toc-icon"></span>     
+                            </span>
+                        </button>
+                        <button id="wh_close_topic_toc_button" class="close-toc-button d-none" aria-label="Toggle topic table of content" aria-controls="wh_topic_toc" aria-expanded="true">
+                            <span class="close-toc-icon-container">
+                                <span class="close-toc-icon"></span>     
+                            </span>
+                        </button>
+                        
+                        <div class=" wh_topic_content body "><main role="main"><article class="- topic/topic topic" role="article" aria-labelledby="ariaid-title1">
+    <h1 class="- topic/title title topictitle1" id="ariaid-title1">使用 DBEaver 连接 DolphinDB</h1>
+    <div class="- topic/body body">
+        <p class="- topic/p p">在日常的数据开发、分析和数据库运维中，一款优秀的 IDE 能够极大地提升工作效率。DBEaver 是一款由 Java
+            编写的一站式跨平台连接器，其社区版本已能支持连接近百种数据库，受到广大开发者的喜爱。近期，</p>
+        <p class="- topic/p p">DolphinDB 与 DBeaver 团队共同努力，发布了<a class="- topic/xref xref" href="https://github.com/dbeaver/dbeaver/releases/tag/24.2.1" target="_blank" rel="external noopener"> DBeaver 24.2.1</a> 版本，新增 DolphinDB 驱动程序，支持在 DBeaver 中访问和管理
+            DolphinDB。</p>
+        <p class="- topic/p p">本文基于 DBeaver 24.2.1，DolphinDB 3.00.0 版本编写， 用于指导用户如何通过 DBEaver 连接和操作 DolphinDB。</p>
+    </div>
+    <article class="- topic/topic topic nested1" aria-labelledby="ariaid-title2" id="topic_gfg_p2r_5dc">
+        <h2 class="- topic/title title topictitle2" id="ariaid-title2">1. DBeaver 简介及安装准备</h2>
+        <div class="- topic/body body">
+            <p class="- topic/p p"><a class="- topic/xref xref" href="https://dbeaver.io/" target="_blank" rel="external noopener">DBeaver</a>
+                是一款开源的数据库管理工具，广泛支持多种数据库，包括关系型、时序、 图、键值数据库等。它为数据库管理员和开发者提供了丰富的功能，如数据库连接管理、SQL
+                编辑器、数据可视化、查询结果的导出和分析、数据迁移，以及数据库的结构查看和修改等。DBeaver 支持在多种平台（Mac, Linux,
+                windows）上运行。其直观的用户界面和丰富的功能，极大地提升了数据应用与开发效率，受到了广大开发者的喜爱。</p>
+            <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">安装 DolphinDB</strong></p>
+            <p class="- topic/p p">DolphinDB 的版本需大于等于 3.00.0。这是因为 DBeaver 使用 JDBC DatabaseMetaData 接口中的
+                getCatalogs，getSchemas，getColumns 等相关方法访问数据库，而 DolphinDB 2.0 版本并没有实现
+                    catalog。安装请参阅<a class="- topic/xref xref" href="../deploy/deploy_intro.html">部署</a>文档。</p>
+            <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">安装 DBeaver Community</strong></p>
+            <p class="- topic/p p">点击<a class="- topic/xref xref" href="https://dbeaver.io/download/" target="_blank" rel="external noopener">Download</a> 下载 DBeaver Community 版本。根据平台选择对应版本的安装包，版本需要 &gt;= <a class="- topic/xref xref" href="https://github.com/dbeaver/dbeaver/releases/tag/24.2.1" target="_blank" rel="external noopener">24.2.1</a>。</p>
+            <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">了解 catalog</strong></p>
+            <p class="- topic/p p">DBeaver 访问的分布式库表需纳入 catalog 管理。若尚未了解 catalog，请先阅读文档 <a class="- topic/xref xref" href="../db_distr_comp/db/catalog.html">数据目录</a> 。以下是在使用 DBEaver
+                时可能用到的函数。</p>
+            <div class="table-container"><table class="- topic/table table frame-all" id="topic_gfg_p2r_5dc__table_bdy_pfr_5dc" data-ofbid="topic_gfg_p2r_5dc__table_bdy_pfr_5dc" data-cols="3"><caption></caption><colgroup><col/><col/><col/></colgroup><thead class="- topic/thead thead">
+                        <tr class="- topic/row">
+                            <th class="- topic/entry entry align-left colsep-1 rowsep-1" id="topic_gfg_p2r_5dc__table_bdy_pfr_5dc__entry__1"><strong class="+ topic/ph hi-d/b ph b">函数</strong></th>
+                            <th class="- topic/entry entry align-left colsep-1 rowsep-1" id="topic_gfg_p2r_5dc__table_bdy_pfr_5dc__entry__2"><strong class="+ topic/ph hi-d/b ph b">作用</strong></th>
+                            <th class="- topic/entry entry align-left colsep-0 rowsep-1" id="topic_gfg_p2r_5dc__table_bdy_pfr_5dc__entry__3"><strong class="+ topic/ph hi-d/b ph b">示例</strong></th>
+                        </tr>
+                    </thead><tbody class="- topic/tbody tbody">
+                        <tr class="- topic/row">
+                            <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_gfg_p2r_5dc__table_bdy_pfr_5dc__entry__1"><a class="- topic/xref xref" href="../funcs/c/createCatalog.html">createCatalog</a>(catalog)</td>
+                            <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_gfg_p2r_5dc__table_bdy_pfr_5dc__entry__2">创建 catalog</td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_gfg_p2r_5dc__table_bdy_pfr_5dc__entry__3">
+                                <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_gfg_p2r_5dc__codeblock_llw_sfr_5dc" data-ofbid="topic_gfg_p2r_5dc__codeblock_llw_sfr_5dc"><code>createCatalog("test")</code></pre>
+                                <p class="- topic/p p">创建 catalog test</p>
+                            </td>
+                        </tr>
+                        <tr class="- topic/row">
+                            <td class="- topic/entry entry align-left colsep-1 rowsep-0" headers="topic_gfg_p2r_5dc__table_bdy_pfr_5dc__entry__1"><a class="- topic/xref xref" href="../funcs/c/createSchema.html">createSchema</a>(catalog, dbUrl, schema)</td>
+                            <td class="- topic/entry entry align-left colsep-1 rowsep-0" headers="topic_gfg_p2r_5dc__table_bdy_pfr_5dc__entry__2">把已有的数据库添加到指定的 catalog/schema 中</td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="topic_gfg_p2r_5dc__table_bdy_pfr_5dc__entry__3">
+                                <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_gfg_p2r_5dc__codeblock_p1t_tfr_5dc" data-ofbid="topic_gfg_p2r_5dc__codeblock_p1t_tfr_5dc"><code>createSchema("catalog1", "dfs://db1", "schema1")</code></pre>
+                            </td>
+                        </tr>
+                    </tbody></table></div>
+        </div>
+    </article>
+    <article class="- topic/topic topic nested1" aria-labelledby="ariaid-title3" id="topic_xq3_s2r_5dc">
+        <h2 class="- topic/title title topictitle2" id="ariaid-title3">2. 配置并连接 DolphinDB</h2>
+        <div class="- topic/body body">
+            <p class="- topic/p p">本节介绍如何通过 DBEaver 连接 DolphinDB、如何离线配置 JDBC，以及如何进行连接配置。</p>
+        </div>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title4" id="topic_zds_v2r_5dc">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title4">2.1 创建连接</h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p">安装完成后, 按图示创建 DolphinDB 数据库连接。</p>
+                <img class="- topic/image image" id="topic_zds_v2r_5dc__image_wfx_dgr_5dc" src="dbeaver/2-1.png"/>
+                <p class="- topic/p p">1. 创建连接</p>
+                <p class="- topic/p p">点击 <strong class="+ topic/ph hi-d/b ph b">Next </strong>创建连接，输入主机、端口、用户名、密码这些基本的连接信息。</p>
+                <p class="- topic/p p">2. JDBC 配置及连接测试</p>
+                <p class="- topic/p p">点击<strong class="+ topic/ph hi-d/b ph b">测试连接</strong>。若本地没有 DolphinDB JDBC 驱动，DBEaver 会自动从互联网进行下载。成功连接会提示”已连接“，若失败请检查 ip
+                    、端口、用户名、密码的正确性以及防火墙。</p>
+                <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">离线环境配置 JDBC</strong></p>
+                <p class="- topic/p p">可以手动下载 <a class="- topic/xref xref" href="https://mvnrepository.com/artifact/com.dolphindb/jdbc" target="_blank" rel="external noopener">DolphinDB JDBC</a>（版本 &gt;=3.00.1.0)，请选择
+                        <a class="- topic/xref xref" href="https://repo1.maven.org/maven2/com/dolphindb/jdbc/3.00.1.0/jdbc-3.00.1.0-jar-with-dependencies.jar" target="_blank" rel="external noopener">jar-with-dependencies</a> 后缀的 jar
+                    包。下载完成后，手动添加 JDBC 驱动。</p>
+                <img class="- topic/image image" id="topic_zds_v2r_5dc__image_wmb_kgr_5dc" src="dbeaver/2-2.png"/>
+                <p class="- topic/p p">在连接设置页面，点击 <strong class="+ topic/ph hi-d/b ph b">编辑驱动设置</strong> → <strong class="+ topic/ph hi-d/b ph b">库</strong> → <strong class="+ topic/ph hi-d/b ph b">添加文件</strong>，添加所下载的 jar
+                    包。也可以通过这种方式更新DolphinDB JDBC 版本。更新版本的jdbc会实现更多的接口，使得DBEaver DolphinDB Connector
+                    可以使用更多的功能。</p>
+            </div>
+        </article>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title5" id="topic_lsl_w2r_5dc">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title5">2.2 连接配置</h3>
+            <div class="- topic/body body">
+                <img class="- topic/image image" id="topic_lsl_w2r_5dc__image_zdb_5gr_5dc" src="dbeaver/2-3.png"/>
+                <p class="- topic/p p">在上述界面中选择 高级参数 → <strong class="+ topic/ph hi-d/b ph b">Queries</strong> → <strong class="+ topic/ph hi-d/b ph b">Set active database</strong>，填入属性值</p>
+                <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_lsl_w2r_5dc__codeblock_mbt_wgr_5dc" data-ofbid="topic_lsl_w2r_5dc__codeblock_mbt_wgr_5dc"><code>use catalog  ?</code></pre>
+                <p class="- topic/p p">至此，配置工作完成。另外，在<strong class="+ topic/ph hi-d/b ph b">常规</strong>-&gt;<strong class="+ topic/ph hi-d/b ph b">连接名称</strong>
+                    选项中，可以设置连接名称。可以输入一个具有辨识度的名称，以便工程化管理多个数据库。</p>
+                <img class="- topic/image image" id="topic_lsl_w2r_5dc__image_t1x_zgr_5dc" src="dbeaver/2-4.png"/>
+            </div>
+        </article>
+    </article>
+    <article class="- topic/topic topic nested1" aria-labelledby="ariaid-title6" id="topic_ed2_t2r_5dc">
+        <h2 class="- topic/title title topictitle2" id="ariaid-title6">3. DolphinDB Driver 使用案例</h2>
+        <div class="- topic/body body">
+            <p class="- topic/p p">目前的 DolphinDB Driver 支持以下功能，可以满足数据开发的需求。</p>
+            <ul class="- topic/ul ul" id="topic_ed2_t2r_5dc__ul_gty_1hr_5dc" data-ofbid="topic_ed2_t2r_5dc__ul_gty_1hr_5dc">
+                <li class="- topic/li li">查看分布式库表结构</li>
+                <li class="- topic/li li">查询数据</li>
+                <li class="- topic/li li">执行 DolphinDB 脚本</li>
+                <li class="- topic/li li">导出分布式库表数据</li>
+            </ul>
+            <p class="- topic/p p">以下是一个简单的使用案例，以及给出一些使用建议。</p>
+        </div>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title7" id="topic_amh_x2r_5dc">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title7">3.1 查看分布式库表结构 </h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p">分布式库表需要纳入 catalog 管理。分别创建 catalog, schema, 及分布式库表，并写入数据。右键数据库连接 → SQL 编辑器，在 SQL
+                    编辑器中，点击 <img class="- topic/image image" id="topic_amh_x2r_5dc__image_jtq_2hr_5dc" src="dbeaver/3.png"/>按钮执行脚本。</p>
+                <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_amh_x2r_5dc__codeblock_vz2_fhr_5dc" data-ofbid="topic_amh_x2r_5dc__codeblock_vz2_fhr_5dc"><code>login("admin", "123456")
+createCatalog("trading")
+go
+use catalog trading 
+
+create database stock 
+partitioned by VALUE(2019.11.07..2019.11.08), HASH([SYMBOL,25])
+engine='TSDB'
+go
+
+create table stock.trade(
+	date DATE,
+	time TIME,
+	timestamp TIMESTAMP,
+	symbol SYMBOL,
+	price DOUBLE,
+	volume LONG,
+)
+partitioned by date, symbol
+sortColumns=["symbol", "timestamp"]
+</code></pre>
+                <p class="- topic/p p">执行成功后，右键 DolphinDB连接 -&gt; <strong class="+ topic/ph hi-d/b ph b">Refresh</strong>，就可以看到新建的库表信息。</p>
+                <img class="- topic/image image" id="topic_amh_x2r_5dc__image_a4h_djr_5dc" src="dbeaver/3-1.png"/>
+                <p class="- topic/p p">接着尝试写入一些数据。</p>
+                <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_amh_x2r_5dc__codeblock_kcr_hhr_5dc" data-ofbid="topic_amh_x2r_5dc__codeblock_kcr_hhr_5dc"><code>n = 10000
+date = take(2019.11.07 2019.11.08, n)
+time = (09:30:00.000 + rand(int(6.5*60*60*1000), n)).sort!()
+timestamp = concatDateTime(date, time)
+price = 100+cumsum(rand(0.02, n)-0.01)
+volume = rand(1000, n)
+symbol = rand(`AAPL`FB`AMZN`MSFT, n)
+data = table(date, time, timestamp, symbol, price, volume).sortBy!(`symbol`timestamp)
+tableInsert(stock.trade, data)</code></pre>
+                <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">注意：</strong></p>
+                <ul class="- topic/ul ul" id="topic_amh_x2r_5dc__ul_mr3_3hr_5dc" data-ofbid="topic_amh_x2r_5dc__ul_mr3_3hr_5dc">
+                    <li class="- topic/li li">你可以通过 <a class="- topic/xref xref" href="../funcs/c/createSchema.html">createSchema</a> 函数将已有的
+                        DFS 表加入到某个 schema 中。</li>
+                    <li class="- topic/li li">在“查看表”菜单中的“数据”子选项会对 DFS 表的数据进行逻辑分页查询，执行全表扫描并在 DBeaver 的进程中缓存数据。因此，不建议对 DFS
+                        表使用此选项。</li>
+                </ul>
+            </div>
+        </article>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title8" id="topic_d1l_x2r_5dc">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title8">3.2 执行 SQL 查询</h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p">在SQLEditor 中，执行SQL查询。</p>
+                <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_d1l_x2r_5dc__codeblock_dgc_lhr_5dc" data-ofbid="topic_d1l_x2r_5dc__codeblock_dgc_lhr_5dc"><code>select first(price) as open, max(price) as high
+, min(price) as low, last(price) as close, sum(volume) as volume 
+from stock.trade 
+group by symbol, date, bar(time, 5*60*1000) as barStart</code></pre>
+                <img class="- topic/image image" id="topic_d1l_x2r_5dc__image_mdr_lhr_5dc" src="dbeaver/3-2.png"/>
+                <p class="- topic/p p">在数据窗格中可以进一步对结果数据进行排序过滤，分页查看。需要注意的是，当前 DolphinDB Driver 使用的是 DBeaver Generic JDBC
+                    连接器，其分页查询采用逻辑分页。这意味着 DBeaver 会从 DolphinDB 中查询所有结果数据，并将其缓存到 DBeaver
+                    的内存中。因此，请避免查询大量数据（或在 SQL 中未通过 TOP/LIMIT 进行限制），否则可能会导致 DBeaver 出现 “Java heap out
+                    of memory” 错误，甚至卡死。</p>
+                <p class="- topic/p p">如果不想手动编写 SQL 语句，可以通过右键点击表名，选择“生成 SQL” → “SELECT” 来自动生成查询 SQL 语句。</p>
+            </div>
+        </article>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title9" id="topic_cnl_x2r_5dc">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title9">3.3 执行 DolphinDB 脚本 </h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p">除 SQL 外，DolphinDB Driver 还支持在编辑器中执行脚本语句，进行一些简单的数据分析或运维工作。</p>
+                <div class="- topic/p p">
+                    <ul class="- topic/ul ul" id="topic_cnl_x2r_5dc__ul_aqw_shr_5dc" data-ofbid="topic_cnl_x2r_5dc__ul_aqw_shr_5dc">
+                        <li class="- topic/li li">矩阵计算<pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_cnl_x2r_5dc__codeblock_atz_5hr_5dc" data-ofbid="topic_cnl_x2r_5dc__codeblock_atz_5hr_5dc"><code>m = select first(price) as open, max(price) as high
+, min(price) as low, last(price) as close, sum(volume) as volume 
+from stock.trade 
+group by symbol, date, bar(time, 5*60*1000) as barStart
+
+U,s,v = matrix(m[,3:]).svd()
+s</code></pre></li>
+                        <li class="- topic/li li">集群运维<pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_cnl_x2r_5dc__codeblock_m2k_vhr_5dc" data-ofbid="topic_cnl_x2r_5dc__codeblock_m2k_vhr_5dc"><code>getSessionMemoryStat()
+clearAllCache()
+setMaxConnections(1024)</code></pre></li>
+                    </ul>
+                </div>
+                <p class="- topic/p p">对于脚本执行，DBeaver 会针对有无返回结果（ execute方法的返回值 true/false) 进行设计。如上文中的 <code class="+ topic/ph pr-d/codeph ph codeph">U,s,v =
+                        matrix(m[,3:]).svd()</code> 没有返回结果，意味着 DBeaver 不会展示 U, s, v 的值。而运行变量 s
+                    可以查看具体的值：</p>
+                <img class="- topic/image image" id="topic_cnl_x2r_5dc__image_htj_yhr_5dc" src="dbeaver/3-3.png"/>
+                <p class="- topic/p p">如果想批量执行多行脚本需要点击按钮 <img class="- topic/image image" id="topic_cnl_x2r_5dc__image_sjr_13r_5dc" src="dbeaver/4.png"/> 。</p>
+            </div>
+        </article>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title10" id="topic_i1m_x2r_5dc">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title10">3.4 导出数据至 csv </h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p">如果想要导出一些样例数据，可以右键对应的表 → <strong class="+ topic/ph hi-d/b ph b">导出数据</strong> 。</p>
+                <img class="- topic/image image" id="topic_i1m_x2r_5dc__image_zgf_c3r_5dc" src="dbeaver/3-4.png"/>
+                <p class="- topic/p p">通常按导航的默认设置点击 “Next” 即可完成导出。至此，本文对如何通过 DBeaver 连接
+                    DolphinDB，并在其中查看库表结构，读取数据，编写脚本等操作进行了详细的介绍。通过阅读本文，您可以在 DBeaver 中对 DolphinDB
+                    有效地管理和操作数据 。</p>
+            </div>
+        </article>
+    </article>
+    <article class="- topic/topic topic nested1" aria-labelledby="ariaid-title11" id="topic_hck_52r_5dc">
+        <h2 class="- topic/title title topictitle2" id="ariaid-title11">4. 小结 </h2>
+        <div class="- topic/body body">
+            <p class="- topic/p p">目前 DolphinDB Driver 实现了基本的使用功能，可以满足 DolphinDB 用户的查看库表结构、查询数据、编写脚本的需求。当然，目前基于 Generic
+                JDBC 的连接器实现存在一定的局限性。例如某些类型的变量无法直接查看。这是因为在 JDBC 的 ResultSet 接口设计中，将数据库的返回定义为一个表。</p>
+            <div class="- topic/note note note note_note" id="topic_hck_52r_5dc__note_xrh_vmh_wdc" data-ofbid="topic_hck_52r_5dc__note_xrh_vmh_wdc"><span class="note__title">注：</span> A table of data representing a database result set, which is
+                usually generated by executing a statement that queries the database.</div>
+            <p class="- topic/p p">而 DolphinDB 脚本语言做为一门多范式编程语言支持多种数量结构。针对这个冲突，DolphinDB JDBC 做了一定程度的包装（Wrap)，将
+                scalar，vector, matrix 包装为一个表。目前不支持 dict 结构的包装，因此无法查看 dict 类型的数据。</p>
+            <p class="- topic/p p">在后续版本中，我们会进一步地完善 DolphinDB Driver 的功能，提升用户体验。</p>
+        </div>
+    </article>
+</article></main></div>
+                        
+                        
+                        
+                        
+                        
+                        
+                    </div>
+                    
+                        <nav role="navigation" id="wh_topic_toc" aria-label="On this page" class="col-lg-2 d-none d-lg-block navbar d-print-none"> 
+                            <div id="wh_topic_toc_content">
+		                        
+	                            <div class=" wh_topic_toc "><div class="wh_topic_label">在本页上</div><ul><li class="topic-item"><a href="#topic_gfg_p2r_5dc" data-tocid="topic_gfg_p2r_5dc">1. DBeaver 简介及安装准备</a></li><li class="topic-item"><a href="#topic_xq3_s2r_5dc" data-tocid="topic_xq3_s2r_5dc">2. 配置并连接 DolphinDB</a><ul><li class="topic-item"><a href="#topic_zds_v2r_5dc" data-tocid="topic_zds_v2r_5dc">2.1 创建连接</a></li><li class="topic-item"><a href="#topic_lsl_w2r_5dc" data-tocid="topic_lsl_w2r_5dc">2.2 连接配置</a></li></ul></li><li class="topic-item"><a href="#topic_ed2_t2r_5dc" data-tocid="topic_ed2_t2r_5dc">3. DolphinDB Driver 使用案例</a><ul><li class="topic-item"><a href="#topic_amh_x2r_5dc" data-tocid="topic_amh_x2r_5dc">3.1 查看分布式库表结构 </a></li><li class="topic-item"><a href="#topic_d1l_x2r_5dc" data-tocid="topic_d1l_x2r_5dc">3.2 执行 SQL 查询</a></li><li class="topic-item"><a href="#topic_cnl_x2r_5dc" data-tocid="topic_cnl_x2r_5dc">3.3 执行 DolphinDB 脚本 </a></li><li class="topic-item"><a href="#topic_i1m_x2r_5dc" data-tocid="topic_i1m_x2r_5dc">3.4 导出数据至 csv </a></li></ul></li><li class="topic-item"><a href="#topic_hck_52r_5dc" data-tocid="topic_hck_52r_5dc">4. 小结 </a></li></ul></div>
+	                        	
+                        	</div>
+                        </nav>
+                    
+                </div>
+            </div>
+            
+            
+            
+        </div> 
+        <footer class="navbar navbar-default wh_footer">
+  <div class=" footer-container mx-auto ">
+<title>Copyright</title><p><b> ©2025 浙江智臾科技有限公司 浙ICP备18048711号-3</b></p>
+  </div>
+</footer>
+        
+        <div id="go2top" class="d-print-none">
+            <span class="oxy-icon oxy-icon-up"></span>
+        </div>
+        
+        <div id="modal_img_large" class="modal">
+            <span class="close oxy-icon oxy-icon-remove"></span>
+            <div id="modal_img_container"></div>
+            <div id="caption"></div>
+        </div>
+        
+        
+        
+    </body>
+</html>

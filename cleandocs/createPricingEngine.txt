@@ -1,0 +1,114 @@
+
+
+# createPricingEngine
+
+## 语法
+
+```DolphinDB
+createPricingEngine(name, dummyTable, timeColumn, typeColumn, securityType, method, outputTable, [securityReference], [keyColumn], [extraMetrics])
+```
+
+## 详情  
+
+本函数用于计算估值定价。该引擎支持调用 DolphinDB 内置估值定价函数、自定义函数或表达式，适用于多种金融工具的定价场景。
+
+## 参数
+
+**name** 字符串标量，表示引擎的唯一标识（需字母开头，可含数字和下划线）
+
+**dummyTable** 表对象，定义输入数据的表结构
+
+**timeColumn** 字符串向量，指定输入表的时间列名
+
+**typeColumn** 字符串向量，指定债券类型列名
+
+**securityType** 整型向量，需定价的债券类型列表
+
+**method** 元代码元组，指定各债券类型对应的定价算法：
+- 支持内置函数（如`bondDirtyPrice`）、自定义函数或表达式
+- 参数可来自输入表列、`securityReference`表列或常量
+- 使用`dummyTable.X`格式避免列名冲突
+
+**outputTable** 输出表结构，列顺序为：
+1. 时间列（与`timeColumn`一致）
+2. 债券类型列（与`typeColumn`一致） 
+3. 合约代码列（与`keyColumn`一致）
+4. 定价结果（DOUBLE数组向量）
+5. 额外指标（与`extraMetrics`一致）
+
+**securityReference** 可选内存表，包含合约基础信息字段：
+
+| 字段         | 类型    | 说明                          |
+|------------|-------|-----------------------------|
+| type       | INT   | 标的类型                       |
+| assetType  | INT   | 资产类型                       |
+| symbol     | SYMBOL| 合约代码                       |
+| maturity   | DOUBLE| 到期日                        |
+| coupon     | DOUBLE| 票面利率                       |
+| frequency  | INT   | 付息频率                       |
+| basis      | INT   | 日计数基准类型                   |
+
+**keyColumn** 可选，字符串标量或元组，指定合约代码列名
+
+**extraMetrics** 可选元代码元组，定义额外输出指标（不可含常量）
+
+## 示例
+
+```DolphinDB
+// 定义输入表结构
+dummyTable = table(1:0, `tradeTime`Symbol`realTimeX`predictY`price, [TIMESTAMP,SYMBOL, DOUBLE, DOUBLE, DOUBLE])
+
+// 创建合约基础信息表
+securityReference = table(
+    take(0 1 2, 100) as type,
+    take(1 2 3 4, 100) as assetType,
+    "s"+string(1..100) as symbol,
+    2025.07.25+1..100 as maturity,
+    rand(10.0, 100) as coupon,
+    rand(10,100) as frequency,
+    take([1],100) as basis 
+)
+
+// 定义输出表结构
+outputTable = table(1:0, `tradeTime`type`symbol`result`factor1`factor2, [TIMESTAMP, INT, SYMBOL, DOUBLE, DOUBLE, DOUBLE])
+
+// 配置定价算法
+typeList = [0, 1, 2]
+methodList = [
+    <bondDirtyPrice(2024.07.25, maturity, coupon, predictY, frequency, basis)>,
+    <bondAccrInt(2024.07.25, maturity, coupon, frequency, 100, basis)>,
+    <bondDuration(2024.07.25, maturity, coupon, predictY, frequency, basis)>
+]
+
+// 创建定价引擎
+createPricingEngine(
+    name = "engine1",
+    dummyTable = dummyTable,
+    timeColumn = `tradeTime,
+    typeColumn = `type,
+    securityType = typeList,
+    method = methodList,
+    outputTable = outputTable,
+    securityReference = securityReference,
+    keyColumn = `Symbol,
+    extraMetrics = [<price * predictY>, <coupon + price>]
+)
+
+// 输入数据计算
+data = table(
+    take(now(), 100) as tradeTime,
+    "s"+string(1..100) as symbol,
+    rand(10.0, 100) as realTimeX,
+    rand(10.0, 100) as predictY,
+    rand(10.0, 100) as price
+)
+getStreamEngine(`engine1).append!(data)
+```
+
+## 相关函数
+- `bondDirtyPrice`: 计算债券含息价格
+- `bondAccrInt`: 计算应计利息
+- `bondDuration`: 计算债券久期
+- `bondConvexity`: 计算债券凸性
+- `bondYield`: 计算债券收益率
+- `irs`: 利率互换定价

@@ -1,0 +1,774 @@
+<!DOCTYPE html><html xmlns="http://www.w3.org/1999/xhtml" xml:lang="zh" lang="zh" data-whc_version="26.0">
+    <head><link rel="shortcut icon" href="../favicon.ico"/><link rel="icon" href="../favicon.ico"/><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><meta name="description" content="在高并发的读写场景中，了解资源使用情况对于快速定位性能问题至关重要。作为一种企业级分布式开源监控解决方案，Zabbix 在各行各业都得到广泛应用。本教程提供 Zabbix 对 DolphinDB 集群的资源监控、告警和预警方案。 本方案适用于对多（或单）服务器以及 DolphinDB 高可用集群（或单节点）资源的监控、告警、预警。 Zabbix 是一种基于 Server-Client ..."/><meta name="DC.rights.owner" content="(C) 版权 2025"/><meta name="copyright" content="(C) 版权 2025"/><meta name="generator" content="DITA-OT"/><meta name="DC.type" content="topic"/><meta name="DC.coverage" content=""/><meta name="DC.relation" content="../tutorials/about_tutorials.html"/><meta name="prodname" content="DolphinDB"/><meta name="brand" content="DolphinDB"/><meta name="DC.creator" content="DolphinDB"/><meta name="DC.publisher" content="DDB N/A DDB 200"/><meta name="DC.format" content="HTML5"/><meta name="DC.identifier" content="基于_zabbix_的_dolphindb_集群运维监控"/><title>基于 Zabbix 的 DolphinDB 集群运维监控</title><!--  Generated with Oxygen version 26.0, build number 2024012323.  --><meta name="wh-path2root" content="../"/><meta name="wh-toc-id" content="基于_zabbix_的_dolphindb_集群运维监控-d9713e101877"/><meta name="wh-source-relpath" content="tutorials/zabbix_cluster_monitoring.dita"/><meta name="wh-out-relpath" content="tutorials/zabbix_cluster_monitoring.html"/>
+
+    <link rel="stylesheet" type="text/css" href="../oxygen-webhelp/app/commons.css?buildId=2024012323"/>
+    <link rel="stylesheet" type="text/css" href="../oxygen-webhelp/app/topic.css?buildId=2024012323"/>
+
+    <script src="../oxygen-webhelp/app/options/properties.js?buildId=20250305183303"></script>
+    <script src="../oxygen-webhelp/app/localization/strings.js?buildId=2024012323"></script>
+    <script src="../oxygen-webhelp/app/search/index/keywords.js?buildId=20250305183303"></script>
+    <script defer="defer" src="../oxygen-webhelp/app/commons.js?buildId=2024012323"></script>
+    <script defer="defer" src="../oxygen-webhelp/app/topic.js?buildId=2024012323"></script>
+<link rel="stylesheet" type="text/css" href="../oxygen-webhelp/template/styles.css?buildId=2024012323"/><script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script><script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script></head>
+
+    <body id="基于_zabbix_的_dolphindb_集群运维监控" class="wh_topic_page frmBody">
+        <a href="#wh_topic_body" class="sr-only sr-only-focusable">
+            跳转到主要内容
+        </a>
+        
+        
+        
+        
+        <header class="navbar navbar-default wh_header">
+    <div class="container-fluid">
+        <div xmlns:whc="http://www.oxygenxml.com/webhelp/components" class="wh_header_flex_container navbar-nav navbar-expand-md navbar-dark">
+            <div class="wh_logo_and_publication_title_container">
+                <div class="wh_logo_and_publication_title">
+                    
+                    <a href="https://docs.dolphindb.cn/zh/index.html" class=" wh_logo d-none d-sm-block "><img src="../logo.png" alt="  DolphinDB 文档中心  "/></a>
+                    <div class=" wh_publication_title "><a href="../index.html"><span class="booktitle">  <span class="ph mainbooktitle">DolphinDB 文档中心</span>  </span></a></div>
+                    
+                </div>
+                
+                
+            </div>
+
+            <div class="wh_top_menu_and_indexterms_link collapse navbar-collapse" id="wh_top_menu_and_indexterms_link">
+                
+                
+                
+                
+            </div>
+        <div class=" wh_search_input navbar-form wh_topic_page_search search " role="form">
+            
+            
+            
+            <form id="searchForm" method="get" role="search" action="../search.html"><div><input type="search" placeholder="搜索 " class="wh_search_textfield" id="textToSearch" name="searchQuery" aria-label="搜索查询" required="required"/><button type="submit" class="wh_search_button" aria-label="搜索"><span class="search_input_text">搜索</span></button></div></form>
+            
+            <script src="/vendors/react/umd/react.production.min.js" defer="defer"></script>
+<script src="/vendors/react-dom/umd/react-dom.production.min.js" defer="defer"></script>
+<script src="/vendors/dayjs/dayjs.min.js" defer="defer"></script>
+<script src="/vendors/antd/dist/antd.min.js" defer="defer"></script>
+<script src="/vendors/@ant-design/icons/dist/index.umd.min.js" defer="defer"></script>
+<script src="/zh/index.js" type="module"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" defer="defer"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML" defer="defer"><!--
+
+
+--></script>
+<script defer="defer"><!--
+
+// 从主页重定向
+const currentUrl = window.location.href;
+
+// 判断当前URL是否包含index.html并且路径最后部分是index.html
+if (currentUrl.endsWith('index.html')) {
+    // 处理根目录下的index.html跳转
+    const baseUrl = currentUrl.split('/index.html')[0]; // 获取index.html之前的部分
+    const redirectUrl = `${baseUrl}/about/ddb_intro.html`; // 构建跳转路径
+    window.location.href = redirectUrl; // 执行跳转
+}
+
+--></script>
+            
+        </div></div>
+    </div>
+</header>
+        
+        
+         
+        
+        
+        
+        <div class="container-fluid" id="wh_topic_container">
+            <div class="row">
+
+                <nav class="wh_tools d-print-none navbar-expand-md" aria-label="Tools">
+                    
+                    <div data-tooltip-position="bottom" class=" wh_breadcrumb "><ol class="d-print-none"><li><span class="home"><a href="../index.html"><span>主页</span></a></span></li><li><div class="topicref" data-id="about_tutorials"><div class="title"><a href="../tutorials/about_tutorials.html"><span class="keyword label">教程</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 产品使用教程</p></div></div></div></li><li><div class="topicref"><div class="title"><a href="../tutorials/scheduledJob_2.html">系统运维</a></div></div></li><li class="active"><div class="topicref" data-id="基于_zabbix_的_dolphindb_集群运维监控"><div class="title"><a href="../tutorials/zabbix_cluster_monitoring.html">基于 Zabbix 的 DolphinDB 集群运维监控</a></div></div></li></ol></div>
+                    
+                    
+                    
+                    <div class="wh_right_tools">
+                        <button class="wh_hide_highlight" aria-label="切换搜索突出显示" title="切换搜索突出显示"></button>
+                        <button class="webhelp_expand_collapse_sections" data-next-state="collapsed" aria-label="折叠截面" title="折叠截面"></button>
+                        
+                        
+                        
+                        
+                        <div class=" wh_print_link print d-none d-md-inline-block "><button onClick="window.print()" title="打印此页" aria-label="打印此页"></button></div>
+                        
+                        <button type="button" id="wh_toc_button" class="custom-toggler navbar-toggler collapsed wh_toggle_button navbar-light" aria-expanded="false" aria-label="Toggle publishing table of content" aria-controls="wh_publication_toc">
+                            <span class="navbar-toggler-icon"></span>
+                        </button>
+                    </div>
+                    
+                </nav>
+            </div>
+            
+            
+            
+            
+            <div class="wh_content_area">
+                <div class="row">
+                    
+                        <nav id="wh_publication_toc" class="col-lg-3 col-md-3 col-sm-12 d-md-block d-none d-print-none" aria-label="Table of Contents Container">
+                            <div id="wh_publication_toc_content">
+		                        
+                            	<div class=" wh_publication_toc " data-tooltip-position="right"><span class="expand-button-action-labels"><span id="button-expand-action" role="button" aria-label="Expand"></span><span id="button-collapse-action" role="button" aria-label="Collapse"></span><span id="button-pending-action" role="button" aria-label="Pending"></span></span><ul role="tree" aria-label="Table of Contents"><li role="treeitem"><div data-tocid="ddb_intro-d9713e87" class="topicref" data-id="ddb_intro" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../about/ddb_intro.html" id="ddb_intro-d9713e87-link">关于DolphinDB</a></div></div></li><li role="treeitem"><div data-tocid="chap1_getstarted-d9713e136" class="topicref" data-id="chap1_getstarted" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../getstarted/chap1_getstarted.html" id="chap1_getstarted-d9713e136-link">快速上手</a><div class="wh-tooltip"><p class="shortdesc">如何快速部署 DolphinDB、建库建表、写入和查询数据</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="sectionddb_deployment-d9713e189" class="topicref" data-id="sectionddb_deployment" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action sectionddb_deployment-d9713e189-link" class="wh-expand-btn"></span><div class="title"><a href="../deploy/deploy_intro.html" id="sectionddb_deployment-d9713e189-link"><span class="keyword label">部署</span></a><div class="wh-tooltip"><p class="shortdesc">如何在不同的场景中部署 DolphinDB</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="new_chap_database_manage_new_chap_dbmanage_landing_page-d9713e2259" class="topicref" data-id="new_chap_database_manage_new_chap_dbmanage_landing_page" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action new_chap_database_manage_new_chap_dbmanage_landing_page-d9713e2259-link" class="wh-expand-btn"></span><div class="title"><a href="../db_distr_comp/cfg/db_intro.html" id="new_chap_database_manage_new_chap_dbmanage_landing_page-d9713e2259-link"><span class="keyword label">数据库</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 数据库的基本概念</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="chap7_tutorials_streaming-d9713e3760" class="topicref" data-id="chap7_tutorials_streaming" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action chap7_tutorials_streaming-d9713e3760-link" class="wh-expand-btn"></span><div class="title"><a href="../stream/str_intro.html" id="chap7_tutorials_streaming-d9713e3760-link"><span class="keyword label">流数据</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 流数据引擎及流数据计算的基本概念</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e7513" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e7513-link" class="wh-expand-btn"></span><div class="title"><a href="../db_distr_comp/db_oper/import_data.html" id="tocId-d9713e7513-link">数据迁移</a><div class="wh-tooltip"><p class="shortdesc">如何从不同数据源向 DolphinDB 迁移数据</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="chap7_tutorials_system_management-d9713e7940" class="topicref" data-id="chap7_tutorials_system_management" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action chap7_tutorials_system_management-d9713e7940-link" class="wh-expand-btn"></span><div class="title"><a href="../sys_man/om_intro.html" id="chap7_tutorials_system_management-d9713e7940-link"><span class="keyword label">系统运维</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 的系统运维功能及方法</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="troubleshooting-d9713e8780" class="topicref" data-id="troubleshooting" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action troubleshooting-d9713e8780-link" class="wh-expand-btn"></span><div class="title"><a href="../error_codes/troubleshooting.html" id="troubleshooting-d9713e8780-link">故障排查</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="about_language_resources-d9713e20911" class="topicref" data-id="about_language_resources" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action about_language_resources-d9713e20911-link" class="wh-expand-btn"></span><div class="title"><a href="../progr/progr_intro.html" id="about_language_resources-d9713e20911-link"><span class="keyword label">编程语言</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 编程基本概念与方法、SQL 在 DolphinDB 的应用</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="functions_references-d9713e30925" class="topicref" data-id="functions_references" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action functions_references-d9713e30925-link" class="wh-expand-btn"></span><div class="title"><a href="../funcs/funcs_intro.html" id="functions_references-d9713e30925-link"><span class="keyword label">函数参考</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 函数分类、语法、详解及示例</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="api_protocol-d9713e94064" class="topicref" data-id="api_protocol" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action api_protocol-d9713e94064-link" class="wh-expand-btn"></span><div class="title"><a href="../api/connapi_intro.html" id="api_protocol-d9713e94064-link"><span class="keyword label">连接器 &amp; API</span></a><div class="wh-tooltip"><p class="shortdesc">面向不同编程语言的 DolphinDB API 及连接器，相关协议和用法</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="chap6_plugin-d9713e94210" class="topicref" data-id="chap6_plugin" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action chap6_plugin-d9713e94210-link" class="wh-expand-btn"></span><div class="title"><a href="../plugins/plg_intro.html" id="chap6_plugin-d9713e94210-link"><span class="keyword label">插件</span></a><div class="wh-tooltip"><p class="shortdesc">多个应用场景的插件使用说明和插件开发指导</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="third_party-d9713e97904" class="topicref" data-id="third_party" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action third_party-d9713e97904-link" class="wh-expand-btn"></span><div class="title"><a href="../third_party.html" id="third_party-d9713e97904-link">第三方工具</a></div></div></li><li role="treeitem" aria-expanded="true"><div data-tocid="about_tutorials-d9713e98227" class="topicref" data-id="about_tutorials" data-state="expanded"><span role="button" tabindex="0" aria-labelledby="button-collapse-action about_tutorials-d9713e98227-link" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/about_tutorials.html" id="about_tutorials-d9713e98227-link"><span class="keyword label">教程</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 产品使用教程</p></div></div></div><ul role="group" class="navbar-nav nav-list"><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e98280" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e98280-link" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/new_users_finance.html" id="tocId-d9713e98280-link">新用户入门</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e98327" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e98327-link" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/database.html" id="tocId-d9713e98327-link">数据库</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e99111" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e99111-link" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/std_sql_ddb.html" id="tocId-d9713e99111-link">编程</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e100448" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e100448-link" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/streaming-real-time-correlation-processing_2.html" id="tocId-d9713e100448-link">流数据</a></div></div></li><li role="treeitem" aria-expanded="true"><div data-tocid="tocId-d9713e100955" class="topicref" data-state="expanded"><span role="button" tabindex="0" aria-labelledby="button-collapse-action tocId-d9713e100955-link" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/scheduledJob_2.html" id="tocId-d9713e100955-link">系统运维</a></div></div><ul role="group" class="navbar-nav nav-list"><li role="treeitem"><div data-tocid="定时作业-d9713e100956" class="topicref" data-id="定时作业" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/scheduledJob_2.html" id="定时作业-d9713e100956-link">定时作业</a></div></div></li><li role="treeitem"><div data-tocid="作业管理-d9713e101002" class="topicref" data-id="作业管理" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/job_management_tutorial_2.html" id="作业管理-d9713e101002-link">作业管理</a></div></div></li><li role="treeitem"><div data-tocid="用户权限管理-d9713e101048" class="topicref" data-id="用户权限管理" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/ACL_and_Security_2.html" id="用户权限管理-d9713e101048-link">用户权限管理</a></div></div></li><li role="treeitem"><div data-tocid="数据备份以及恢复-130202008及之后版本-d9713e101094" class="topicref" data-id="数据备份以及恢复-130202008及之后版本" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/backup-restore-new.html" id="数据备份以及恢复-130202008及之后版本-d9713e101094-link">数据备份以及恢复 （1.30.20/2.00.8及之后版本）</a></div></div></li><li role="treeitem"><div data-tocid="数据备份以及恢复-130202008以前版本-d9713e101140" class="topicref" data-id="数据备份以及恢复-130202008以前版本" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/backup_restore_before_208.html" id="数据备份以及恢复-130202008以前版本-d9713e101140-link">数据备份以及恢复 （1.30.20/2.00.8以前版本）</a></div></div></li><li role="treeitem"><div data-tocid="数据再平衡-d9713e101186" class="topicref" data-id="数据再平衡" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/Data_Move_Rebalance.html" id="数据再平衡-d9713e101186-link">数据再平衡</a></div></div></li><li role="treeitem"><div data-tocid="集群间数据库同步-d9713e101232" class="topicref" data-id="集群间数据库同步" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/data_sync_among_clusters.html" id="集群间数据库同步-d9713e101232-link">集群间数据库同步</a></div></div></li><li role="treeitem"><div data-tocid="集群间异步复制-d9713e101278" class="topicref" data-id="集群间异步复制" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/async_replication.html" id="集群间异步复制-d9713e101278-link">集群间异步复制</a></div></div></li><li role="treeitem"><div data-tocid="数据导入最容易忽略的十个细节-d9713e101324" class="topicref" data-id="数据导入最容易忽略的十个细节" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/data_import_details.html" id="数据导入最容易忽略的十个细节-d9713e101324-link">数据导入最容易忽略的十个细节</a></div></div></li><li role="treeitem"><div data-tocid="线程模型-d9713e101370" class="topicref" data-id="线程模型" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/threading_model.html" id="线程模型-d9713e101370-link">线程模型</a></div></div></li><li role="treeitem"><div data-tocid="线程简介-d9713e101416" class="topicref" data-id="线程简介" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/thread_intro_2.html" id="线程简介-d9713e101416-link">线程简介</a></div></div></li><li role="treeitem"><div data-tocid="内存管理-d9713e101463" class="topicref" data-id="内存管理" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/memory_management.html" id="内存管理-d9713e101463-link">内存管理</a></div></div></li><li role="treeitem"><div data-tocid="out-of-memory-d9713e101509" class="topicref" data-id="out-of-memory" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/oom_settlement_2.html" id="out-of-memory-d9713e101509-link">Out of Memory</a></div></div></li><li role="treeitem"><div data-tocid="非标权限管理-d9713e101555" class="topicref" data-id="非标权限管理" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/non-standard_permission_management.html" id="非标权限管理-d9713e101555-link">非标权限管理</a></div></div></li><li role="treeitem"><div data-tocid="节点启动流程简析与常见问题-d9713e101601" class="topicref" data-id="节点启动流程简析与常见问题" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/node_startup_process_and_questions.html" id="节点启动流程简析与常见问题-d9713e101601-link">节点启动流程简析与常见问题</a></div></div></li><li role="treeitem"><div data-tocid="用户级别的资源跟踪详解-d9713e101647" class="topicref" data-id="用户级别的资源跟踪详解" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/user_level_resource_tracking.html" id="用户级别的资源跟踪详解-d9713e101647-link">用户级别的资源跟踪详解</a></div></div></li><li role="treeitem"><div data-tocid="使用-prometheus-监控告警-d9713e101693" class="topicref" data-id="使用-prometheus-监控告警" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/promethues2.html" id="使用-prometheus-监控告警-d9713e101693-link">使用 Prometheus 监控告警</a></div></div></li><li role="treeitem"><div data-tocid="redash-连接-dolphindb-数据源-d9713e101739" class="topicref" data-id="redash-连接-dolphindb-数据源" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/data_interface_for_redash.html" id="redash-连接-dolphindb-数据源-d9713e101739-link">Redash 连接 DolphinDB 数据源</a></div></div></li><li role="treeitem"><div data-tocid="使用-chart-组件展示数据-d9713e101785" class="topicref" data-id="使用-chart-组件展示数据" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/web_chart_integration.html" id="使用-chart-组件展示数据-d9713e101785-link">使用 chart 组件展示数据</a></div></div></li><li role="treeitem"><div data-tocid="debezium--kafka-实时同步-oracle-11g-数据到-dolphindb-运维手册-d9713e101831" class="topicref" data-id="debezium--kafka-实时同步-oracle-11g-数据到-dolphindb-运维手册" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/debezium_kafka_real_time_synchronization_of_oracle_11g_data.html" id="debezium--kafka-实时同步-oracle-11g-数据到-dolphindb-运维手册-d9713e101831-link">Debezium + Kafka 实时同步 Oracle 11g 数据到 DolphinDB 运维手册</a></div></div></li><li role="treeitem" class="active"><div data-tocid="基于_zabbix_的_dolphindb_集群运维监控-d9713e101877" class="topicref" data-id="基于_zabbix_的_dolphindb_集群运维监控" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/zabbix_cluster_monitoring.html" id="基于_zabbix_的_dolphindb_集群运维监控-d9713e101877-link">基于 Zabbix 的 DolphinDB 集群运维监控</a></div></div></li></ul></li><li role="treeitem" aria-expanded="false"><div data-tocid="模块概述-d9713e101923" class="topicref" data-id="模块概述" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action 模块概述-d9713e101923-link" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/tu_modules.html" id="模块概述-d9713e101923-link">模块</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e102568" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e102568-link" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/OHLC_2.html" id="tocId-d9713e102568-link">金融场景案例</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e104827" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e104827-link" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/streaming_engine_anomaly_alerts_2.html" id="tocId-d9713e104827-link">物联网场景案例</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e105795" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e105795-link" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/dolphindb_tensor_libtorch_tutorial.html" id="tocId-d9713e105795-link">机器学习</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e105842" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e105842-link" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/api_performance.html" id="tocId-d9713e105842-link">测试报告</a></div></div></li></ul></li><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e105982" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e105982-link" class="wh-expand-btn"></span><div class="title"><a href="../rn/server/3_00_2.html" id="tocId-d9713e105982-link">版本说明</a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 版本发布历史</p></div></div></div></li></ul></div>
+		                        
+                            </div>
+                        </nav>
+                    
+                    
+                    <div class="col-lg-7 col-md-9 col-sm-12" id="wh_topic_body">
+                        <button id="wh_close_publication_toc_button" class="close-toc-button d-none" aria-label="Toggle publishing table of content" aria-controls="wh_publication_toc" aria-expanded="true">
+                            <span class="close-toc-icon-container">
+                                <span class="close-toc-icon"></span>     
+                            </span>
+                        </button>
+                        <button id="wh_close_topic_toc_button" class="close-toc-button d-none" aria-label="Toggle topic table of content" aria-controls="wh_topic_toc" aria-expanded="true">
+                            <span class="close-toc-icon-container">
+                                <span class="close-toc-icon"></span>     
+                            </span>
+                        </button>
+                        
+                        <div class=" wh_topic_content body "><main role="main"><article class="- topic/topic topic" role="article" aria-labelledby="ariaid-title1">
+    <h1 class="- topic/title title topictitle1" id="ariaid-title1">基于 Zabbix 的 DolphinDB 集群运维监控</h1>
+    <div class="- topic/body body">
+        <p class="- topic/p p">在高并发的读写场景中，了解资源使用情况对于快速定位性能问题至关重要。作为一种企业级分布式开源监控解决方案，Zabbix 在各行各业都得到广泛应用。本教程提供 Zabbix 对
+            DolphinDB 集群的资源监控、告警和预警方案。</p>
+    </div>
+    <article class="- topic/topic topic nested1" aria-labelledby="ariaid-title2" id="id-基于Zabbix的DolphinDB集群运维监控-1.方案概述">
+        <h2 class="- topic/title title topictitle2" id="ariaid-title2">1. 方案概述</h2>
+        <div class="- topic/body body">
+            <p class="- topic/p p"> 本方案适用于对多（或单）服务器以及 DolphinDB 高可用集群（或单节点）资源的监控、告警、预警。</p>
+        </div>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title3" id="id-基于Zabbix的DolphinDB集群运维监控-1.1Zabbix概述">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title3">1.1 Zabbix 概述</h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p">Zabbix 是一种基于 Server-Client 架构的网络监视和管理系统，由 Alexei Vladishev
+                    开发。它用于监视各种网络服务、服务器和网络设备的状态。</p>
+                <p class="- topic/p p">Zabbix Server 是整个 Zabbix 软件的核心程序。它通过轮询和捕获数据，计算是否满足触发器条件，并向用户发送通知。</p>
+                <p class="- topic/p p">Zabbix Agent 是用于监控和管理远程主机的代理程序，定期收集系统性能数据并将其发送给 Zabbix 服务器进行分析和报告。通过安装 Zabbix
+                    Agent，管理员可以监控远程主机的 CPU 利用率、内存使用情况、磁盘空间、网络流量等系统性能指标，及时发现并解决潜在问题。</p>
+                <p class="- topic/p p">Zabbix Web 提供了监控数据的可视化呈现，通过图形、表格等方式展示监控数据，帮助用户更直观地了解系统状态和性能数据。</p>
+            </div>
+        </article>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title4" id="id-基于Zabbix的DolphinDB集群运维监控-1.2监控方案概述">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title4">1.2 监控方案概述</h3>
+            <div class="- topic/body body">
+                <img class="- topic/image image" id="id-基于Zabbix的DolphinDB集群运维监控-1.2监控方案概述__image_rjx_c3r_ldc" src="images/zabbix_cluster_monitoring/1-1.png" width="740"/>
+                <p class="- topic/p p">本方案旨在监控 DolphinDB 进程对服务器资源的使用情况和 DolphinDB 的运行情况，包括 DolphinDB 进程的 CPU
+                    占用情况、内存占用情况和磁盘资源使用情况等。为了获取当前节点的资源使用情况，DolphinDB 需要定义相应的运维函数。在本方案中，Zabbix Agent
+                    可以抓取这些指标，并将其发送给 Zabbix Server 进行分析和报告。通过 Zabbix Web 对 Zabbix Server
+                    采集的指标信息进行可视化，用户可以更直观地了解 DolphinDB 的性能和资源使用情况。</p>
+            </div>
+        </article>
+    </article>
+    <article class="- topic/topic topic nested1" aria-labelledby="ariaid-title5" id="id-基于Zabbix的DolphinDB集群运维监控-2.软件部署">
+        <h2 class="- topic/title title topictitle2" id="ariaid-title5">2. 软件部署</h2>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title6" id="id-基于Zabbix的DolphinDB集群运维监控-2.1Zabbix部署">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title6">2.1 Zabbix 部署</h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p">从官网下载 Zabbix，下载链接为：<a class="- topic/xref xref" href="https://www.zabbix.com/cn/download" target="_blank" rel="external noopener">https://www.zabbix.com/cn/download</a> 。相关文档可参阅<a class="- topic/xref xref" href="https://www.zabbix.com/documentation/6.4/zh/manual/quickstart/login" target="_blank" rel="external noopener"><u class="+ topic/ph hi-d/u ph u">官方帮助</u></a>。</p>
+                <p class="- topic/p p"> 本文所使用的软件版本如下：</p>
+                <ul class="- topic/ul ul" id="id-基于Zabbix的DolphinDB集群运维监控-2.1Zabbix部署__ul_u5r_z3r_ldc" data-ofbid="id-基于Zabbix的DolphinDB集群运维监控-2.1Zabbix部署__ul_u5r_z3r_ldc">
+                    <li class="- topic/li li">
+                        <p class="- topic/p p">Zabbix 版本：6.4</p>
+                    </li>
+                    <li class="- topic/li li">
+                        <p class="- topic/p p"> 操作系统分布：Ubuntu</p>
+                    </li>
+                    <li class="- topic/li li">
+                        <p class="- topic/p p"> 操作系统版本：22.04(Jammy)</p>
+                    </li>
+                    <li class="- topic/li li">
+                        <p class="- topic/p p">数据库：MySQL</p>
+                    </li>
+                    <li class="- topic/li li">
+                        <p class="- topic/p p">Web服务器：Nginx</p>
+                    </li>
+                </ul>
+            </div>
+        </article>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title7" id="id-基于Zabbix的DolphinDB集群运维监控-2.2DolphinDB部署">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title7">2.2 DolphinDB 部署</h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p">DolphinDB 支持单节点、集群等多种部署方式，Zabbix 也支持监控这些不同部署方式的 DolphinDB 服务。</p>
+                <p class="- topic/p p"> 在本文中，我们使用的是 DolphinDB 2.00.12.1 版本的高可用集群，包括三个控制节点、三个数据节点和三个代理节点。</p>
+                <div class="- topic/note note note note_note" id="id-基于Zabbix的DolphinDB集群运维监控-2.2DolphinDB部署__note_pjr_zjr_ldc" data-ofbid="id-基于Zabbix的DolphinDB集群运维监控-2.2DolphinDB部署__note_pjr_zjr_ldc"><span class="note__title">注：</span> 部署 DolphinDB 的相关文档可查阅：<a class="- topic/xref xref" href="../deploy/deploy_intro.html"><u class="+ topic/ph hi-d/u ph u">DolphinDB教程</u></a></div>
+            </div>
+        </article>
+    </article>
+    <article class="- topic/topic topic nested1" aria-labelledby="ariaid-title8" id="id-基于Zabbix的DolphinDB集群运维监控-3.DolphinDB监控项配置">
+        <h2 class="- topic/title title topictitle2" id="ariaid-title8">3. DolphinDB 监控项配置</h2>
+        <div class="- topic/body body">
+            <p class="- topic/p p">为了让 Zabbix Agent 能够获取 DolphinDB 的各种指标信息，需要进行以下准备工作：</p>
+            <ul class="- topic/ul ul" id="id-基于Zabbix的DolphinDB集群运维监控-3.DolphinDB监控项配置__ul_m2x_c3r_ldc" data-ofbid="id-基于Zabbix的DolphinDB集群运维监控-3.DolphinDB监控项配置__ul_m2x_c3r_ldc">
+                <li class="- topic/li li">
+                    <p class="- topic/p p">确保 DolphinDB 中包含获取指标信息的函数。</p>
+                </li>
+                <li class="- topic/li li">
+                    <p class="- topic/p p">编写 Zabbix Agent 调用的 shell 文件。</p>
+                </li>
+                <li class="- topic/li li">
+                    <p class="- topic/p p">配置 Zabbix Server 监控所需的指标。</p>
+                </li>
+            </ul>
+        </div>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title9" id="id-基于Zabbix的DolphinDB集群运维监控-3.1DolphinDB的监控指标">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title9">3.1 DolphinDB 的监控指标</h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p">DolphinDB 目前支持的指标如下所示：</p>
+                <div class="table-container"><table class="- topic/table table frame-all" id="id-基于Zabbix的DolphinDB集群运维监控-3.1DolphinDB的监控指标__table_n2x_c3r_ldc" data-ofbid="id-基于Zabbix的DolphinDB集群运维监控-3.1DolphinDB的监控指标__table_n2x_c3r_ldc" data-cols="2"><caption></caption><colgroup><col/><col/></colgroup><thead class="- topic/thead thead">
+                            <tr class="- topic/row">
+                                <th class="- topic/entry entry colsep-1 rowsep-1" id="id-基于Zabbix的DolphinDB集群运维监控-3.1DolphinDB的监控指标__table_n2x_c3r_ldc__entry__1">指标</th>
+                                <th class="- topic/entry entry colsep-0 rowsep-1" id="id-基于Zabbix的DolphinDB集群运维监控-3.1DolphinDB的监控指标__table_n2x_c3r_ldc__entry__2">含义</th>
+                            </tr>
+                        </thead><tbody class="- topic/tbody tbody">
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-基于Zabbix的DolphinDB集群运维监控-3.1DolphinDB的监控指标__table_n2x_c3r_ldc__entry__1">cpuUsage</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-基于Zabbix的DolphinDB集群运维监控-3.1DolphinDB的监控指标__table_n2x_c3r_ldc__entry__2">DolphinDB 进程占用 CPU 的百分比（单位：无）</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-基于Zabbix的DolphinDB集群运维监控-3.1DolphinDB的监控指标__table_n2x_c3r_ldc__entry__1">memoryUsed</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-基于Zabbix的DolphinDB集群运维监控-3.1DolphinDB的监控指标__table_n2x_c3r_ldc__entry__2"> 节点使用的内存（单位：字节）</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-基于Zabbix的DolphinDB集群运维监控-3.1DolphinDB的监控指标__table_n2x_c3r_ldc__entry__1">memoryAlloc</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-基于Zabbix的DolphinDB集群运维监控-3.1DolphinDB的监控指标__table_n2x_c3r_ldc__entry__2">节点中 DolphinDB 当前内存池的容量（单位：字节）</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-基于Zabbix的DolphinDB集群运维监控-3.1DolphinDB的监控指标__table_n2x_c3r_ldc__entry__1">diskCapacity</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-基于Zabbix的DolphinDB集群运维监控-3.1DolphinDB的监控指标__table_n2x_c3r_ldc__entry__2"> 磁盘容量（单位：字节）</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-基于Zabbix的DolphinDB集群运维监控-3.1DolphinDB的监控指标__table_n2x_c3r_ldc__entry__1">diskFreeSpace</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-基于Zabbix的DolphinDB集群运维监控-3.1DolphinDB的监控指标__table_n2x_c3r_ldc__entry__2"> 磁盘剩余空间（单位：字节）</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-基于Zabbix的DolphinDB集群运维监控-3.1DolphinDB的监控指标__table_n2x_c3r_ldc__entry__1">lastMinuteWriteVolume</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-基于Zabbix的DolphinDB集群运维监控-3.1DolphinDB的监控指标__table_n2x_c3r_ldc__entry__2"> 前一分钟写磁盘容量(单位：字节)</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-基于Zabbix的DolphinDB集群运维监控-3.1DolphinDB的监控指标__table_n2x_c3r_ldc__entry__1">lastMinuteReadVolume</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-基于Zabbix的DolphinDB集群运维监控-3.1DolphinDB的监控指标__table_n2x_c3r_ldc__entry__2"> 前一分钟读磁盘容量（单位：字节）</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-基于Zabbix的DolphinDB集群运维监控-3.1DolphinDB的监控指标__table_n2x_c3r_ldc__entry__1">lastMinuteNetworkRecv</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-基于Zabbix的DolphinDB集群运维监控-3.1DolphinDB的监控指标__table_n2x_c3r_ldc__entry__2"> 前一分钟网络接收字节数（单位：字节）</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-基于Zabbix的DolphinDB集群运维监控-3.1DolphinDB的监控指标__table_n2x_c3r_ldc__entry__1">lastMinuteNetworkSend</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-基于Zabbix的DolphinDB集群运维监控-3.1DolphinDB的监控指标__table_n2x_c3r_ldc__entry__2"> 前一分钟网络发送字节数（单位：字节）</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-基于Zabbix的DolphinDB集群运维监控-3.1DolphinDB的监控指标__table_n2x_c3r_ldc__entry__1">diskReadRate</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-基于Zabbix的DolphinDB集群运维监控-3.1DolphinDB的监控指标__table_n2x_c3r_ldc__entry__2"> 磁盘读速率（单位：字节/秒）</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-基于Zabbix的DolphinDB集群运维监控-3.1DolphinDB的监控指标__table_n2x_c3r_ldc__entry__1">diskWriteRate</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-基于Zabbix的DolphinDB集群运维监控-3.1DolphinDB的监控指标__table_n2x_c3r_ldc__entry__2"> 磁盘写速率（单位：字节/秒）</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-基于Zabbix的DolphinDB集群运维监控-3.1DolphinDB的监控指标__table_n2x_c3r_ldc__entry__1">networkSendRate</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-基于Zabbix的DolphinDB集群运维监控-3.1DolphinDB的监控指标__table_n2x_c3r_ldc__entry__2"> 网络发送速率（单位：字节/秒）</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-基于Zabbix的DolphinDB集群运维监控-3.1DolphinDB的监控指标__table_n2x_c3r_ldc__entry__1">networkRecvRate</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-基于Zabbix的DolphinDB集群运维监控-3.1DolphinDB的监控指标__table_n2x_c3r_ldc__entry__2"> 网络接收速率（单位：字节/秒）</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-基于Zabbix的DolphinDB集群运维监控-3.1DolphinDB的监控指标__table_n2x_c3r_ldc__entry__1">cumMsgLatency</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-基于Zabbix的DolphinDB集群运维监控-3.1DolphinDB的监控指标__table_n2x_c3r_ldc__entry__2"> 流数据订阅节点所有已接收的消息的平均延时（单位：纳秒）</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-基于Zabbix的DolphinDB集群运维监控-3.1DolphinDB的监控指标__table_n2x_c3r_ldc__entry__1">lastMsgLatency</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-基于Zabbix的DolphinDB集群运维监控-3.1DolphinDB的监控指标__table_n2x_c3r_ldc__entry__2"> 流数据订阅节点最后收到的消息的延时（单位：纳秒）</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-基于Zabbix的DolphinDB集群运维监控-3.1DolphinDB的监控指标__table_n2x_c3r_ldc__entry__1">maxLast10QueryTime</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-基于Zabbix的DolphinDB集群运维监控-3.1DolphinDB的监控指标__table_n2x_c3r_ldc__entry__2"> 前10个完成的查询执行所耗费时间的最大值（单位：纳秒）</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-基于Zabbix的DolphinDB集群运维监控-3.1DolphinDB的监控指标__table_n2x_c3r_ldc__entry__1">medLast10QueryTime</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-基于Zabbix的DolphinDB集群运维监控-3.1DolphinDB的监控指标__table_n2x_c3r_ldc__entry__2"> 前10个完成的查询执行所耗费时间的中间值（单位：纳秒）</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-基于Zabbix的DolphinDB集群运维监控-3.1DolphinDB的监控指标__table_n2x_c3r_ldc__entry__1">medLast100QueryTime</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-基于Zabbix的DolphinDB集群运维监控-3.1DolphinDB的监控指标__table_n2x_c3r_ldc__entry__2"> 前100个完成的查询执行所耗费时间的中间值（单位：纳秒）</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-基于Zabbix的DolphinDB集群运维监控-3.1DolphinDB的监控指标__table_n2x_c3r_ldc__entry__1">maxLast100QueryTime</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-基于Zabbix的DolphinDB集群运维监控-3.1DolphinDB的监控指标__table_n2x_c3r_ldc__entry__2"> 前100个完成的查询执行所耗费时间的最大值（单位：纳秒</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-基于Zabbix的DolphinDB集群运维监控-3.1DolphinDB的监控指标__table_n2x_c3r_ldc__entry__1">maxRunningQueryTime</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-基于Zabbix的DolphinDB集群运维监控-3.1DolphinDB的监控指标__table_n2x_c3r_ldc__entry__2"> 当前正在执行的查询的耗费时间的最大值（单位：纳秒）</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-基于Zabbix的DolphinDB集群运维监控-3.1DolphinDB的监控指标__table_n2x_c3r_ldc__entry__1">avgLoad</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-基于Zabbix的DolphinDB集群运维监控-3.1DolphinDB的监控指标__table_n2x_c3r_ldc__entry__2"> 平均负载（单位：无）</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-基于Zabbix的DolphinDB集群运维监控-3.1DolphinDB的监控指标__table_n2x_c3r_ldc__entry__1">jobLoad</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-基于Zabbix的DolphinDB集群运维监控-3.1DolphinDB的监控指标__table_n2x_c3r_ldc__entry__2"> 作业负载（单位：无）</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-基于Zabbix的DolphinDB集群运维监控-3.1DolphinDB的监控指标__table_n2x_c3r_ldc__entry__1">runningJobs</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-基于Zabbix的DolphinDB集群运维监控-3.1DolphinDB的监控指标__table_n2x_c3r_ldc__entry__2"> 正在执行中的作业和任务数（单位：无）</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-基于Zabbix的DolphinDB集群运维监控-3.1DolphinDB的监控指标__table_n2x_c3r_ldc__entry__1">queuedJobs</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-基于Zabbix的DolphinDB集群运维监控-3.1DolphinDB的监控指标__table_n2x_c3r_ldc__entry__2"> 队列中的作业和任务数（单位：无）</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-0" headers="id-基于Zabbix的DolphinDB集群运维监控-3.1DolphinDB的监控指标__table_n2x_c3r_ldc__entry__1">connectionNum</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-0" headers="id-基于Zabbix的DolphinDB集群运维监控-3.1DolphinDB的监控指标__table_n2x_c3r_ldc__entry__2">节点连接数</td>
+                            </tr>
+                        </tbody></table></div>
+            </div>
+        </article>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title10" id="id-基于Zabbix的DolphinDB集群运维监控-3.2定义获得DolphinDB监控指标的接口">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title10">3.2 定义获得 DolphinDB 监控指标的接口</h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p">在 DolphinDB 中运行以下脚本，添加 functionView 来定义获取 DolphinDB 监控指标的接口。</p>
+                <p class="- topic/p p">在脚本中，使用 <code class="+ topic/ph pr-d/codeph ph codeph">login("admin","123456")</code> 函数来登录 DolphinDB。请注意，账号应为
+                    admin，密码应根据实际情况进行更改。</p>
+                <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="id-基于Zabbix的DolphinDB集群运维监控-3.2定义获得DolphinDB监控指标的接口__pre_o2x_c3r_ldc" data-ofbid="id-基于Zabbix的DolphinDB集群运维监控-3.2定义获得DolphinDB监控指标的接口__pre_o2x_c3r_ldc"><code>login("admin","123456")
+def zabbix_dolphindb(node_item){
+    dataNode = select * from rpc(getControllerAlias(),getClusterPerf{1})    
+    // 如果节点名称包含 . ，需要进行特殊判断
+    if(node_item.split(".").size()==2){
+        nodeAlias = node_item.split(".")[0]
+        metrics = node_item.split(".")[1]
+        whereConditions = expr(sqlCol("site"),like,"%"+nodeAlias+"%")
+        return sql(sqlCol(metrics),dataNode,whereConditions).eval()[metrics][0]
+    } else {
+        size = node_item.split(".").size()
+        nodeAlias = concat(node_item.split(".")[:size-1],".")
+        metrics = node_item.split(".")[size-1]
+        whereConditions = expr(sqlCol("site"),like,"%"+nodeAlias+"%")
+        return sql(sqlCol(metrics),dataNode,whereConditions).eval()[metrics][0]
+    }
+}
+addFunctionView(zabbix_dolphindb)</code></pre>
+            </div>
+        </article>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title11" id="id-基于Zabbix的DolphinDB集群运维监控-3.3定义Shell文件用于ZabbixAgent采集信息">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title11">3.3 定义 Shell 文件用于 Zabbix Agent 采集信息</h3>
+            <div class="- topic/body body">
+                <ul class="- topic/ul ul" id="id-基于Zabbix的DolphinDB集群运维监控-3.3定义Shell文件用于ZabbixAgent采集信息__ul_p2x_c3r_ldc" data-ofbid="id-基于Zabbix的DolphinDB集群运维监控-3.3定义Shell文件用于ZabbixAgent采集信息__ul_p2x_c3r_ldc">
+                    <li class="- topic/li li">
+                        <p class="- topic/p p">定义 Shell 文件</p>
+                    </li>
+                </ul>
+                <p class="- topic/p p">请将以下 shell 文件命名为 <em class="+ topic/ph hi-d/i ph i">zabbix_dolphindb.sh</em> 并将其放置在
+                        <em class="+ topic/ph hi-d/i ph i">/etc/zabbix/zabbix_agentd.d</em> 目录下。Zabbix Agent 将根据此 shell 脚本调用
+                    DolphinDB 的 <code class="+ topic/ph pr-d/codeph ph codeph">zabbix_dolphindb</code> 函数，以获取 DolphinDB 的各种指标。</p>
+                <p class="- topic/p p"> 以下是需要更改的脚本参数：</p>
+                <ul class="- topic/ul ul" id="id-基于Zabbix的DolphinDB集群运维监控-3.3定义Shell文件用于ZabbixAgent采集信息__ul_q2x_c3r_ldc" data-ofbid="id-基于Zabbix的DolphinDB集群运维监控-3.3定义Shell文件用于ZabbixAgent采集信息__ul_q2x_c3r_ldc">
+                    <li class="- topic/li li">
+                        <p class="- topic/p p">dolphindbIp：DolphinDB 的 IP 地址。</p>
+                    </li>
+                    <li class="- topic/li li">
+                        <p class="- topic/p p">dolphindbPort：DolphinDB 的端口号。</p>
+                    </li>
+                    <li class="- topic/li li">
+                        <p class="- topic/p p">dolphindbAdmin：DolphinDB 的用户名，需要使用 admin 账户。</p>
+                    </li>
+                    <li class="- topic/li li">
+                        <p class="- topic/p p">dolphindbPassword：DolphinDB 的密码，需要使用 admin 账户的密码。</p>
+                    </li>
+                </ul>
+                <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="id-基于Zabbix的DolphinDB集群运维监控-3.3定义Shell文件用于ZabbixAgent采集信息__pre_r2x_c3r_ldc" data-ofbid="id-基于Zabbix的DolphinDB集群运维监控-3.3定义Shell文件用于ZabbixAgent采集信息__pre_r2x_c3r_ldc"><code>dolphindbIp=192.198.1.31
+dolphindbPort=8742
+dolphindbAdmin=admin
+dolphindbPassword=
+
+dolphindb_command=$1
+
+getDolphindbMessage(){
+    script='{"sessionID": "0","functionName": "executeCode","params": [{"name": "script","form": "scalar","type": "string","value": "login(\"'$dolphindbAdmin'\",\"'$dolphindbPassword'\");zabbix_dolphindb(\"'$dolphindb_command'\")"}]}'
+    command="curl -H \"Content-Type: application/json\" -X POST -d '$script' $dolphindbIp:$dolphindbPort -s"
+    result=$(eval $command)
+    echo $result | awk -F '"' '{print $34}' | xargs | bc
+}
+getDolphindbMessage</code></pre>
+                <p class="- topic/p p">请按照以下步骤为 Zabbix Agent 添加配置：</p>
+                <ul class="- topic/ul ul" id="id-基于Zabbix的DolphinDB集群运维监控-3.3定义Shell文件用于ZabbixAgent采集信息__ul_s2x_c3r_ldc" data-ofbid="id-基于Zabbix的DolphinDB集群运维监控-3.3定义Shell文件用于ZabbixAgent采集信息__ul_s2x_c3r_ldc">
+                    <li class="- topic/li li">
+                        <p class="- topic/p p">在
+                            <em class="+ topic/ph hi-d/i ph i">/etc/zabbix/zabbix_agentd.d</em>目录下创建一个名为<em class="+ topic/ph hi-d/i ph i">dolphindbMsg.conf</em>的文件。</p>
+                    </li>
+                    <li class="- topic/li li">
+                        <p class="- topic/p p">将以下内容添加到 <em class="+ topic/ph hi-d/i ph i">dolphindbMsg.conf</em>文件中：</p>
+                    </li>
+                </ul>
+                <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="id-基于Zabbix的DolphinDB集群运维监控-3.3定义Shell文件用于ZabbixAgent采集信息__pre_t2x_c3r_ldc" data-ofbid="id-基于Zabbix的DolphinDB集群运维监控-3.3定义Shell文件用于ZabbixAgent采集信息__pre_t2x_c3r_ldc"><code>UserParameter=dolphindb_status[*],/bin/bash /etc/zabbix/zabbix_agentd.d/zabbix_dolphindb.sh \$1</code></pre>
+                <p class="- topic/p p">这个配置文件会将 * 号中的内容传递给 <em class="+ topic/ph hi-d/i ph i">zabbix_dolphindb.sh</em> 这个 shell 文件，从而调用 DolphinDB 的
+                        <code class="+ topic/ph pr-d/codeph ph codeph">zabbix_dolphindb</code> 函数。* 号中的内容即为函数的输入参数。</p>
+            </div>
+        </article>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title12" id="id-基于Zabbix的DolphinDB集群运维监控-3.4生成Zabbix监控模板">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title12">3.4 生成 Zabbix 监控模板</h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p">对于快速实现 DolphinDB 高可用集群与服务器资源的监控，我们提供了监控模板。您可以在 Zabbix Web
+                    中导入相应的模板，从而实现监控指标的拉取、可视化和触发器功能。通过执行一个 Python3 脚本，您可以生成针对特定 DolphinDB
+                    服务器的监控模板。</p>
+                <p class="- topic/p p"> 以下是需要更改的脚本参数：</p>
+                <ul class="- topic/ul ul" id="id-基于Zabbix的DolphinDB集群运维监控-3.4生成Zabbix监控模板__ul_u2x_c3r_ldc" data-ofbid="id-基于Zabbix的DolphinDB集群运维监控-3.4生成Zabbix监控模板__ul_u2x_c3r_ldc">
+                    <li class="- topic/li li">
+                        <p class="- topic/p p">dolphindbIp：DolphinDB 服务器的 IP 地址。</p>
+                    </li>
+                    <li class="- topic/li li">
+                        <p class="- topic/p p">dolphindbPort：DolphinDB 服务器的端口号。</p>
+                    </li>
+                    <li class="- topic/li li">
+                        <p class="- topic/p p">dolphindbAdmin：DolphinDB 的用户名，需使用 <code class="+ topic/ph pr-d/codeph ph codeph">admin</code>。</p>
+                    </li>
+                    <li class="- topic/li li">
+                        <p class="- topic/p p">dolphindbPassword：DolphinDB 的密码。</p>
+                    </li>
+                    <li class="- topic/li li">
+                        <p class="- topic/p p">hostName：对应 Zabbix Agent 配置文件中的 <code class="+ topic/ph pr-d/codeph ph codeph">Hostname</code> 配置项。</p>
+                    </li>
+                    <li class="- topic/li li">
+                        <p class="- topic/p p">groupName：Zabbix 中的主机组名称，可自定义填写。</p>
+                    </li>
+                    <li class="- topic/li li">
+                        <p class="- topic/p p">ip：对应 Zabbix Agent 配置文件中的 <code class="+ topic/ph pr-d/codeph ph codeph">Server</code> 配置项。</p>
+                    </li>
+                </ul>
+                <p class="- topic/p p">执行该 Python 3 脚本后，在当前目录下将生成一个名为 <em class="+ topic/ph hi-d/i ph i">dolphindb.xml</em> 的文件，这个文件即为 Zabbix Web
+                    所需的监控模板。</p>
+                <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="id-基于Zabbix的DolphinDB集群运维监控-3.4生成Zabbix监控模板__pre_v2x_c3r_ldc" data-ofbid="id-基于Zabbix的DolphinDB集群运维监控-3.4生成Zabbix监控模板__pre_v2x_c3r_ldc"><code>from xml.etree import ElementTree as ET
+import xmltodict
+
+import dolphindb as ddb
+
+dolphindbIp="192.168.100.43"
+dolphindbPort=8742
+dolphindbAdmin="admin"
+dolphindbPassword=""
+
+hostName="Zabbix server"
+groupName="QuantDataCenter"
+ip="127.0.0.1"
+
+s = ddb.Session()
+s.connect(dolphindbIp, dolphindbPort, dolphindbAdmin, dolphindbPassword)
+nodes = s.run('exec name from rpc(getControllerAlias(),getClusterPerf{1}) where mode in [0,2,3,4]')
+metrics = ["connectionNum","memoryUsed","memoryAlloc","cpuUsage","avgLoad","medLast10QueryTime","maxLast10QueryTime","medLast100QueryTime","maxLast100QueryTime","maxRunningQueryTime","runningJobs","queuedJobs","jobLoad","diskCapacity","diskFreeSpace","diskFreeSpaceRatio","diskWriteRate","diskReadRate","lastMinuteWriteVolume","lastMinuteReadVolume","networkSendRate","networkRecvRate","lastMinuteNetworkSend","lastMinuteNetworkRecv","lastMsgLatency","cumMsgLatency"]
+
+example = {}
+example['zabbix_export'] = []
+
+item = []
+for node in nodes:
+    for metric in metrics:
+        name = node + "." + metric
+
+        if metric == "connectionNum":
+            maxConnections = s.run("int(int(rpc('"+node+"', getConfig).maxConnections)*0.8)")
+            triggers = {"trigger": [{"expression": "{last()}&gt;="+str(maxConnections)+""},{"name": name},{"url": "http://" + dolphindbIp + ":" + str(dolphindbPort)},{"priority": "HIGH"}]}
+            item.append({"name": name, "type": "ZABBIX_ACTIVE", "key": "dolphindb_status[" + name + "]", "value_type": "FLOAT","triggers": triggers})
+
+
+        elif metric == "memoryUsed":
+            maxMemSize = s.run("long(rpc('"+node+"', getConfig).maxMemSize)*1024*1024*1024*0.8")
+            triggers = {"trigger": [{"expression": "{last()}&gt;="+str(maxMemSize)+""},{"name": name},{"url": "http://" + dolphindbIp + ":" + str(dolphindbPort)},{"priority": "HIGH"}]}
+            item.append({"name": name, "type": "ZABBIX_ACTIVE", "key": "dolphindb_status[" + name + "]", "value_type": "FLOAT","triggers": triggers})
+
+        elif metric == "cpuUsage":
+            workerNum = s.run("int(int(rpc('"+node+"', getConfig).workerNum)*100*0.8)")
+            print(workerNum)
+            triggers = {"trigger": [{"expression": "{last()}&gt;="+str(workerNum)+""},{"name": name},{"url": "http://" + dolphindbIp + ":" + str(dolphindbPort)},{"priority": "HIGH"}]}
+            item.append({"name": name, "type": "ZABBIX_ACTIVE", "key": "dolphindb_status[" + name + "]", "value_type": "FLOAT","triggers": triggers})
+
+        elif metric == "avgLoad":
+            triggers = {"trigger": [{"expression": "{last()}&gt;=4"},{"name": name},{"url": "http://" + dolphindbIp + ":" + str(dolphindbPort)},{"priority": "HIGH"}]}
+            item.append({"name": name, "type": "ZABBIX_ACTIVE", "key": "dolphindb_status[" + name + "]", "value_type": "FLOAT","triggers": triggers})
+
+        else:
+            item.append({"name": name, "type": "ZABBIX_ACTIVE", "key": "dolphindb_status[" + name + "]", "value_type": "FLOAT"})
+
+host = []
+host.append({"host": hostName})
+host.append({"name": hostName})
+host.append({"groups": {"group":{"name": groupName}}})
+host.append({"interfaces": {"interface":[{"ip": "10.6.0.2"},{"interface_ref": "if1"}]}})
+host.append({"items": {"item": item}})
+
+colorList = ["1A7C11","2774A4","F63100","9FA8DA","303F9F","512DA8","FF5722","FFEE58","33691E"]
+
+graphs = []
+for metric in metrics:
+    i = 0
+    graph_item = []
+    for node in nodes:
+        name = node + "." + metric
+        if i == 0:
+            graph_item.append({"color": colorList[i], "item": {"host": hostName, "key": "dolphindb_status[" + name + "]"}})
+        else:
+            graph_item.append({"color": colorList[i], "sortorder": i,"item": {"host": hostName, "key": "dolphindb_status[" + name + "]"}})
+        i += 1
+    graphs.append({"graph":{"name": metric, "ymin_type_1": "FIXED","ymax_type_1": "FIXED","graph_items": {"graph_item": graph_item}}})
+
+example['zabbix_export'].append({"version": 4.4})
+example['zabbix_export'].append({"date": "2024-01-15T08:18:08Z"})
+example['zabbix_export'].append({"groups": {"group": {"name": "QuantDataCenter"}}})
+example['zabbix_export'].append({"hosts": {"host": host}})
+example['zabbix_export'].append({"graphs": graphs})
+
+xml_string = xmltodict.unparse({'root': example}, pretty=False)
+
+f = open("dolphindb.xml","w")
+f.write(xml_string.replace("&lt;/zabbix_export&gt;&lt;zabbix_export&gt;","").replace("&lt;/graphs&gt;&lt;graphs&gt;","").replace("&lt;/host&gt;&lt;host&gt;","").replace("&lt;/interface&gt;&lt;interface&gt;","").replace("&lt;root&gt;","").replace("&lt;/root&gt;","").replace("&lt;/trigger&gt;&lt;trigger&gt;",""))
+f.close()</code></pre>
+                <p class="- topic/p p">这个 py3 脚本会生成一个 XML 文件，其文件大致结构如下。</p>
+                <img class="- topic/image image" id="id-基于Zabbix的DolphinDB集群运维监控-3.4生成Zabbix监控模板__image_w2x_c3r_ldc" src="images/zabbix_cluster_monitoring/3-1.png" width="760"/>
+                <p class="- topic/p p"> 其中各节点含义为：</p>
+                <ul class="- topic/ul ul" id="id-基于Zabbix的DolphinDB集群运维监控-3.4生成Zabbix监控模板__ul_x2x_c3r_ldc" data-ofbid="id-基于Zabbix的DolphinDB集群运维监控-3.4生成Zabbix监控模板__ul_x2x_c3r_ldc">
+                    <li class="- topic/li li">
+                        <strong class="+ topic/ph hi-d/b ph b">zabbix_export</strong>：整个 XML 文件的根节点。
+                    </li>
+                    <li class="- topic/li li"><strong class="+ topic/ph hi-d/b ph b">version</strong>：模板的版本号。</li>
+                    <li class="- topic/li li"><strong class="+ topic/ph hi-d/b ph b">date</strong>：模板的创建日期时间。</li>
+                    <li class="- topic/li li"><strong class="+ topic/ph hi-d/b ph b">groups</strong>：定义主机群组的节点。<ul class="- topic/ul ul" id="id-基于Zabbix的DolphinDB集群运维监控-3.4生成Zabbix监控模板__ul_y2x_c3r_ldc" data-ofbid="id-基于Zabbix的DolphinDB集群运维监控-3.4生成Zabbix监控模板__ul_y2x_c3r_ldc">
+                            <li class="- topic/li li"><strong class="+ topic/ph hi-d/b ph b">group</strong>：具体的主机群组。<ul class="- topic/ul ul" id="id-基于Zabbix的DolphinDB集群运维监控-3.4生成Zabbix监控模板__ul_z2x_c3r_ldc" data-ofbid="id-基于Zabbix的DolphinDB集群运维监控-3.4生成Zabbix监控模板__ul_z2x_c3r_ldc">
+                                    <li class="- topic/li li"><strong class="+ topic/ph hi-d/b ph b">name</strong>：主机群组的名称。</li>
+                                </ul></li>
+                        </ul></li>
+                    <li class="- topic/li li"><strong class="+ topic/ph hi-d/b ph b">hosts</strong>：定义主机相关配置的节点。<ul class="- topic/ul ul" id="id-基于Zabbix的DolphinDB集群运维监控-3.4生成Zabbix监控模板__ul_afx_c3r_ldc" data-ofbid="id-基于Zabbix的DolphinDB集群运维监控-3.4生成Zabbix监控模板__ul_afx_c3r_ldc">
+                            <li class="- topic/li li"><strong class="+ topic/ph hi-d/b ph b">host</strong>：具体的主机配置。<ul class="- topic/ul ul" id="id-基于Zabbix的DolphinDB集群运维监控-3.4生成Zabbix监控模板__ul_bfx_c3r_ldc" data-ofbid="id-基于Zabbix的DolphinDB集群运维监控-3.4生成Zabbix监控模板__ul_bfx_c3r_ldc">
+                                    <li class="- topic/li li"><strong class="+ topic/ph hi-d/b ph b">name</strong>：主机的名称。</li>
+                                    <li class="- topic/li li"><strong class="+ topic/ph hi-d/b ph b">interfaces</strong>：定义主机的网络接口信息。<ul class="- topic/ul ul" id="id-基于Zabbix的DolphinDB集群运维监控-3.4生成Zabbix监控模板__ul_cfx_c3r_ldc" data-ofbid="id-基于Zabbix的DolphinDB集群运维监控-3.4生成Zabbix监控模板__ul_cfx_c3r_ldc">
+                                            <li class="- topic/li li"><strong class="+ topic/ph hi-d/b ph b">interface</strong>：具体的网络接口配置。<ul class="- topic/ul ul" id="id-基于Zabbix的DolphinDB集群运维监控-3.4生成Zabbix监控模板__ul_dfx_c3r_ldc" data-ofbid="id-基于Zabbix的DolphinDB集群运维监控-3.4生成Zabbix监控模板__ul_dfx_c3r_ldc">
+                                                  <li class="- topic/li li"><strong class="+ topic/ph hi-d/b ph b">ip</strong>：主机的 IP 地址。</li>
+                                                  <li class="- topic/li li"><strong class="+ topic/ph hi-d/b ph b">port</strong>：Zabbix 客户端使用的端口。</li>
+                                                  <li class="- topic/li li"><strong class="+ topic/ph hi-d/b ph b">useip</strong>：指定是否使用 IP 地址。</li>
+                                                </ul></li>
+                                        </ul></li>
+                                    <li class="- topic/li li"><strong class="+ topic/ph hi-d/b ph b">items</strong>：定义监控项的节点。<ul class="- topic/ul ul" id="id-基于Zabbix的DolphinDB集群运维监控-3.4生成Zabbix监控模板__ul_efx_c3r_ldc" data-ofbid="id-基于Zabbix的DolphinDB集群运维监控-3.4生成Zabbix监控模板__ul_efx_c3r_ldc">
+                                            <li class="- topic/li li"><strong class="+ topic/ph hi-d/b ph b">item</strong>：具体的监控项配置。<ul class="- topic/ul ul" id="id-基于Zabbix的DolphinDB集群运维监控-3.4生成Zabbix监控模板__ul_ffx_c3r_ldc" data-ofbid="id-基于Zabbix的DolphinDB集群运维监控-3.4生成Zabbix监控模板__ul_ffx_c3r_ldc">
+                                                  <li class="- topic/li li"><strong class="+ topic/ph hi-d/b ph b">name</strong>：监控项的名称。</li>
+                                                  <li class="- topic/li li"><strong class="+ topic/ph hi-d/b ph b">type</strong>：监控项的类型。</li>
+                                                  <li class="- topic/li li"><strong class="+ topic/ph hi-d/b ph b">key</strong>：监控项的键值。</li>
+                                                  <li class="- topic/li li"><strong class="+ topic/ph hi-d/b ph b">value_type</strong>：信息类型。</li>
+                                                </ul></li>
+                                        </ul></li>
+                                    <li class="- topic/li li"><strong class="+ topic/ph hi-d/b ph b">triggers</strong>：定义触发器的节点。<ul class="- topic/ul ul" id="id-基于Zabbix的DolphinDB集群运维监控-3.4生成Zabbix监控模板__ul_gfx_c3r_ldc" data-ofbid="id-基于Zabbix的DolphinDB集群运维监控-3.4生成Zabbix监控模板__ul_gfx_c3r_ldc">
+                                            <li class="- topic/li li"><strong class="+ topic/ph hi-d/b ph b">trigger</strong>：具体的触发器配置。<ul class="- topic/ul ul" id="id-基于Zabbix的DolphinDB集群运维监控-3.4生成Zabbix监控模板__ul_hfx_c3r_ldc" data-ofbid="id-基于Zabbix的DolphinDB集群运维监控-3.4生成Zabbix监控模板__ul_hfx_c3r_ldc">
+                                                  <li class="- topic/li li"><strong class="+ topic/ph hi-d/b ph b">expression</strong>：触发器的表达式。</li>
+                                                  <li class="- topic/li li"><strong class="+ topic/ph hi-d/b ph b">name</strong>：触发器的名称。</li>
+                                                  <li class="- topic/li li"><strong class="+ topic/ph hi-d/b ph b">url</strong>：菜单条目 URL。</li>
+                                                  <li class="- topic/li li"><strong class="+ topic/ph hi-d/b ph b">priority</strong>：触发器的严重性。</li>
+                                                </ul></li>
+                                        </ul></li>
+                                    <li class="- topic/li li"><strong class="+ topic/ph hi-d/b ph b">graphs</strong>：定义图形的节点。<ul class="- topic/ul ul" id="id-基于Zabbix的DolphinDB集群运维监控-3.4生成Zabbix监控模板__ul_ifx_c3r_ldc" data-ofbid="id-基于Zabbix的DolphinDB集群运维监控-3.4生成Zabbix监控模板__ul_ifx_c3r_ldc">
+                                            <li class="- topic/li li"><strong class="+ topic/ph hi-d/b ph b">graph</strong>：具体的图形配置。<ul class="- topic/ul ul" id="id-基于Zabbix的DolphinDB集群运维监控-3.4生成Zabbix监控模板__ul_jfx_c3r_ldc" data-ofbid="id-基于Zabbix的DolphinDB集群运维监控-3.4生成Zabbix监控模板__ul_jfx_c3r_ldc">
+                                                  <li class="- topic/li li"><strong class="+ topic/ph hi-d/b ph b">name</strong>：图形的名称。</li>
+                                                  <li class="- topic/li li"><strong class="+ topic/ph hi-d/b ph b">ymin_type_1</strong>：图形 y 轴的最小值。</li>
+                                                  <li class="- topic/li li"><strong class="+ topic/ph hi-d/b ph b">ymax_type_1</strong>：图形 y 轴的最大值。</li>
+                                                  <li class="- topic/li li"><strong class="+ topic/ph hi-d/b ph b">graph_items</strong>：定义图形项的节点。<ul class="- topic/ul ul" id="id-基于Zabbix的DolphinDB集群运维监控-3.4生成Zabbix监控模板__ul_kfx_c3r_ldc" data-ofbid="id-基于Zabbix的DolphinDB集群运维监控-3.4生成Zabbix监控模板__ul_kfx_c3r_ldc">
+                                                  <li class="- topic/li li"><strong class="+ topic/ph hi-d/b ph b">graph_item</strong>：具体的图形项配置。<ul class="- topic/ul ul" id="id-基于Zabbix的DolphinDB集群运维监控-3.4生成Zabbix监控模板__ul_lfx_c3r_ldc" data-ofbid="id-基于Zabbix的DolphinDB集群运维监控-3.4生成Zabbix监控模板__ul_lfx_c3r_ldc">
+                                                  <li class="- topic/li li"><strong class="+ topic/ph hi-d/b ph b">color</strong>：指标显示的颜色。</li>
+                                                  <li class="- topic/li li"><strong class="+ topic/ph hi-d/b ph b">sortorder</strong>：指标的排名。</li>
+                                                  <li class="- topic/li li"><strong class="+ topic/ph hi-d/b ph b">item</strong>：需要显示的指标。</li>
+                                                  <li class="- topic/li li"><strong class="+ topic/ph hi-d/b ph b">host</strong>：主机的名称。</li>
+                                                  <li class="- topic/li li"><strong class="+ topic/ph hi-d/b ph b">key</strong>：显示的指标的键值。</li>
+                                                  </ul></li>
+                                                  </ul></li>
+                                                </ul></li>
+                                        </ul></li>
+                                </ul></li>
+                        </ul></li>
+                </ul>
+            </div>
+        </article>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title13" id="id-基于Zabbix的DolphinDB集群运维监控-3.5导入Zabbix监控模板">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title13">3.5 导入 Zabbix 监控模板</h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p">在 Zabbix Web 界面中，依次点击 "数据采集" -&gt; "主机" -&gt; "导入"，然后选择使用 Python3 生成的 Zabbix
+                    监控模板进行导入。</p>
+                <img class="- topic/image image" id="id-基于Zabbix的DolphinDB集群运维监控-3.5导入Zabbix监控模板__image_mfx_c3r_ldc" src="images/zabbix_cluster_monitoring/3-2.png" width="760"/>
+                <p class="- topic/p p"> 导入后，应包含监控项、触发器和图形。</p>
+                <img class="- topic/image image" id="id-基于Zabbix的DolphinDB集群运维监控-3.5导入Zabbix监控模板__image_nfx_c3r_ldc" src="images/zabbix_cluster_monitoring/3-3.png" width="760"/>
+                <ul class="- topic/ul ul" id="id-基于Zabbix的DolphinDB集群运维监控-3.5导入Zabbix监控模板__ul_ofx_c3r_ldc" data-ofbid="id-基于Zabbix的DolphinDB集群运维监控-3.5导入Zabbix监控模板__ul_ofx_c3r_ldc">
+                    <li class="- topic/li li">
+                        <p class="- topic/p p"> 监控项：名称应为“节点名 + 监控指标”，用于监控 DolphinDB 的各项指标。</p>
+                    </li>
+                </ul>
+                <img class="- topic/image image" id="id-基于Zabbix的DolphinDB集群运维监控-3.5导入Zabbix监控模板__image_pfx_c3r_ldc" src="images/zabbix_cluster_monitoring/3-4.png" width="760"/>
+                <ul class="- topic/ul ul" id="id-基于Zabbix的DolphinDB集群运维监控-3.5导入Zabbix监控模板__ul_qfx_c3r_ldc" data-ofbid="id-基于Zabbix的DolphinDB集群运维监控-3.5导入Zabbix监控模板__ul_qfx_c3r_ldc">
+                    <li class="- topic/li li">
+                        <p class="- topic/p p">触发器：当 DolphinDB 的指标符合触发器条件时，触发警报。</p>
+                    </li>
+                </ul>
+                <img class="- topic/image image" id="id-基于Zabbix的DolphinDB集群运维监控-3.5导入Zabbix监控模板__image_rfx_c3r_ldc" src="images/zabbix_cluster_monitoring/3-5.png" width="760"/>
+                <ul class="- topic/ul ul" id="id-基于Zabbix的DolphinDB集群运维监控-3.5导入Zabbix监控模板__ul_sfx_c3r_ldc" data-ofbid="id-基于Zabbix的DolphinDB集群运维监控-3.5导入Zabbix监控模板__ul_sfx_c3r_ldc">
+                    <li class="- topic/li li">
+                        <p class="- topic/p p">图形：展示 DolphinDB 指标的可视化界面。</p>
+                    </li>
+                </ul>
+                <img class="- topic/image image" id="id-基于Zabbix的DolphinDB集群运维监控-3.5导入Zabbix监控模板__image_tfx_c3r_ldc" src="images/zabbix_cluster_monitoring/3-6.png" width="760"/>
+                <p class="- topic/p p">下图是 CPU 使用率的可视化界面。</p>
+                <img class="- topic/image image" id="id-基于Zabbix的DolphinDB集群运维监控-3.5导入Zabbix监控模板__image_ufx_c3r_ldc" src="images/zabbix_cluster_monitoring/3-7.png" width="760"/>
+            </div>
+        </article>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title14" id="id-基于Zabbix的DolphinDB集群运维监控-3.6监控指标的可视化效果展示">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title14">3.6 监控指标的可视化效果展示</h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p">在 Zabbix Web 界面中，依次点击 "仪表盘" -&gt; "编辑仪表盘" -&gt; "添加"。</p>
+                <ul class="- topic/ul ul" id="id-基于Zabbix的DolphinDB集群运维监控-3.6监控指标的可视化效果展示__ul_vfx_c3r_ldc" data-ofbid="id-基于Zabbix的DolphinDB集群运维监控-3.6监控指标的可视化效果展示__ul_vfx_c3r_ldc">
+                    <li class="- topic/li li">
+                        <p class="- topic/p p">类型：选择 "图表（经典）"。</p>
+                    </li>
+                    <li class="- topic/li li">
+                        <p class="- topic/p p">图形：选择包含 DolphinDB 监控项的主机。</p>
+                    </li>
+                </ul>
+                <img class="- topic/image image" id="id-基于Zabbix的DolphinDB集群运维监控-3.6监控指标的可视化效果展示__image_wfx_c3r_ldc" src="images/zabbix_cluster_monitoring/3-8.png" width="672"/>
+                <p class="- topic/p p"> 以下是仪表盘的显示。</p>
+                <img class="- topic/image image" id="id-基于Zabbix的DolphinDB集群运维监控-3.6监控指标的可视化效果展示__image_xfx_c3r_ldc" src="images/zabbix_cluster_monitoring/3-9.png" width="760"/>
+            </div>
+        </article>
+    </article>
+    <article class="- topic/topic topic nested1" aria-labelledby="ariaid-title15" id="id-基于Zabbix的DolphinDB集群运维监控-4.告警">
+        <h2 class="- topic/title title topictitle2" id="ariaid-title15">4. 告警</h2>
+        <div class="- topic/body body">
+            <p class="- topic/p p">在第 3.5 步导入模板后，已设置触发器。一旦触发触发器，警告将显示在 Zabbix Web
+                界面上。​警报和预警的主要目的是帮助相关人员了解服务器当前运行状况。当出现异常时，警报会提醒专业人员进行维护。不同的警报需要不同部门或运维人员介入处理，因此需要将不同的警报消息发送给不同的人员。</p>
+        </div>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title16" id="id-基于Zabbix的DolphinDB集群运维监控-4.1告警媒介">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title16">4.1 告警媒介</h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p">警报媒介的作用是按照制定的策略发送警报消息。</p>
+                <p class="- topic/p p">以下是 Zabbix 自带的警报媒介列表，配置后即可使用。</p>
+                <img class="- topic/image image" id="id-基于Zabbix的DolphinDB集群运维监控-4.1告警媒介__image_wzw_c3r_ldc" src="images/zabbix_cluster_monitoring/4-1.png" width="760"/>
+                <p class="- topic/p p"> 以下是一个使用自定义 shell 脚本进行企微告警的示例：</p>
+                <p class="- topic/p p">在 Zabbix Web 界面中，依次点击 "告警 " -&gt; "媒介" -&gt; "创建媒介类型"。</p>
+                <img class="- topic/image image" id="id-基于Zabbix的DolphinDB集群运维监控-4.1告警媒介__image_xzw_c3r_ldc" src="images/zabbix_cluster_monitoring/4-2.png" width="760"/>
+                <p class="- topic/p p"> 名称：发送信息到企业微信</p>
+                <p class="- topic/p p">类型：脚本</p>
+                <p class="- topic/p p">脚本名称：zabbix_sendMsg.sh</p>
+                <p class="- topic/p p">脚本参数：</p>
+                <ul class="- topic/ul ul" id="id-基于Zabbix的DolphinDB集群运维监控-4.1告警媒介__ul_yzw_c3r_ldc" data-ofbid="id-基于Zabbix的DolphinDB集群运维监控-4.1告警媒介__ul_yzw_c3r_ldc">
+                    <li class="- topic/li li">
+                        <p class="- topic/p p"> 第一个参数为发送的信息，固定格式为{ALERT.MESSAGE}</p>
+                    </li>
+                    <li class="- topic/li li">
+                        <p class="- topic/p p"> 第二个参数为企业微信机器人的 key（<a class="- topic/xref xref" href="https://open.work.weixin.qq.com/help2/pc/14931?person_id=1&amp;is_tencent=" target="_blank" rel="external noopener">如何设置群机器人 -帮助中心-企业微信
+                            (qq.com)</a>）</p>
+                    </li>
+                </ul>
+                <img class="- topic/image image" id="id-基于Zabbix的DolphinDB集群运维监控-4.1告警媒介__image_zzw_c3r_ldc" src="images/zabbix_cluster_monitoring/4-3.png" width="538"/>
+                <p class="- topic/p p">请按照以下步骤为 Zabbix Server 添加配置：</p>
+                <ul class="- topic/ul ul" id="id-基于Zabbix的DolphinDB集群运维监控-4.1告警媒介__ul_a1x_c3r_ldc" data-ofbid="id-基于Zabbix的DolphinDB集群运维监控-4.1告警媒介__ul_a1x_c3r_ldc">
+                    <li class="- topic/li li">
+                        <p class="- topic/p p">取消注释 Zabbix Server 的 <em class="+ topic/ph hi-d/i ph i">AlertScriptsPath</em> 配置项。</p>
+                    </li>
+                    <li class="- topic/li li">
+                        <p class="- topic/p p">下面是
+                                <em class="+ topic/ph hi-d/i ph i">zabbix_sendMsg.sh</em>脚本的内容，将其放置到<em class="+ topic/ph hi-d/i ph i">zabbix_server.conf</em>的<em class="+ topic/ph hi-d/i ph i">AlertScriptsPath</em>
+                            配置项指定的路径下：</p>
+                    </li>
+                </ul>
+                <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="id-基于Zabbix的DolphinDB集群运维监控-4.1告警媒介__pre_b1x_c3r_ldc" data-ofbid="id-基于Zabbix的DolphinDB集群运维监控-4.1告警媒介__pre_b1x_c3r_ldc"><code>script='{"msgtype": "text","text": {"content": "'$1'"}}'
+echo $1
+command="curl -H \"Content-Type: application/json\" -X POST -d '$script' https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key="$2" -s"
+echo $(eval $command)</code></pre>
+            </div>
+        </article>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title17" id="id-基于Zabbix的DolphinDB集群运维监控-4.2创建报警动作">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title17">4.2 创建报警动作</h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p">在 Zabbix Web 界面中，依次点击 "告警" → "动作" → "触发器动作" → "创建动作"。</p>
+                <p class="- topic/p p">动作配置如下：</p>
+                <ul class="- topic/ul ul" id="id-基于Zabbix的DolphinDB集群运维监控-4.2创建报警动作__ul_c1x_c3r_ldc" data-ofbid="id-基于Zabbix的DolphinDB集群运维监控-4.2创建报警动作__ul_c1x_c3r_ldc">
+                    <li class="- topic/li li">
+                        <p class="- topic/p p"> 名称：自定义内容</p>
+                    </li>
+                    <li class="- topic/li li">
+                        <p class="- topic/p p"> 新的触发条件：主机等于 hostName</p>
+                    </li>
+                </ul>
+                <img class="- topic/image image" id="id-基于Zabbix的DolphinDB集群运维监控-4.2创建报警动作__image_d1x_c3r_ldc" src="images/zabbix_cluster_monitoring/4-4.png" width="760"/>
+                <ul class="- topic/ul ul" id="id-基于Zabbix的DolphinDB集群运维监控-4.2创建报警动作__ul_e1x_c3r_ldc" data-ofbid="id-基于Zabbix的DolphinDB集群运维监控-4.2创建报警动作__ul_e1x_c3r_ldc">
+                    <li class="- topic/li li">
+                        <p class="- topic/p p">操作</p>
+                    </li>
+                </ul>
+                <p class="- topic/p p">发送给用户：选择 Admin</p>
+                <p class="- topic/p p">主题：Problem: {EVENT:NAME}</p>
+                <p class="- topic/p p">信息内容模板：</p>
+                <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="id-基于Zabbix的DolphinDB集群运维监控-4.2创建报警动作__pre_f1x_c3r_ldc" data-ofbid="id-基于Zabbix的DolphinDB集群运维监控-4.2创建报警动作__pre_f1x_c3r_ldc"><code>ZABBIX WARNING
+告警时间: {EVENT.DATE} {EVENT.TIME} 
+告警项目: {EVENT.NAME}
+告警等级: {EVENT.SEVERITY}
+当前状态:{TRIGGER.STATUS}:{ITEM.VALUE1}
+
+告警项目:{TRIGGER.KEY1}
+问题详情:{ITEM.NAME}:{ITEM.VALUE}
+
+{TRIGGER.URL}</code></pre>
+                <img class="- topic/image image" id="id-基于Zabbix的DolphinDB集群运维监控-4.2创建报警动作__image_g1x_c3r_ldc" src="images/zabbix_cluster_monitoring/4-5.png" width="760"/>
+                <p class="- topic/p p"> 触发告警规则后，企业微信收到的信息样式如下：</p>
+                <img class="- topic/image image" id="id-基于Zabbix的DolphinDB集群运维监控-4.2创建报警动作__image_h1x_c3r_ldc" src="images/zabbix_cluster_monitoring/4-6.png" width="349"/>
+                <p class="- topic/p p"> 至此，企业微信告警部署完毕，用户可根据上述步骤开启 DolphinDB 集群监控的企业微信告警。</p>
+            </div>
+        </article>
+    </article>
+    <article class="- topic/topic topic nested1" aria-labelledby="ariaid-title18" id="id-基于Zabbix的DolphinDB集群运维监控-5.总结">
+        <h2 class="- topic/title title topictitle2" id="ariaid-title18">5. 总结</h2>
+        <div class="- topic/body body">
+            <p class="- topic/p p">本文讲述了 Zabbix agent 如何调用 shell 脚本来获取 DolphinDB 的各种指标，并定义报警媒介向企业微信报警。</p>
+        </div>
+    </article>
+</article></main></div>
+                        
+                        
+                        
+                        
+                        
+                        
+                    </div>
+                    
+                        <nav role="navigation" id="wh_topic_toc" aria-label="On this page" class="col-lg-2 d-none d-lg-block navbar d-print-none"> 
+                            <div id="wh_topic_toc_content">
+		                        
+	                            <div class=" wh_topic_toc "><div class="wh_topic_label">在本页上</div><ul><li class="topic-item"><a href="#id-%E5%9F%BA%E4%BA%8EZabbix%E7%9A%84DolphinDB%E9%9B%86%E7%BE%A4%E8%BF%90%E7%BB%B4%E7%9B%91%E6%8E%A7-1.%E6%96%B9%E6%A1%88%E6%A6%82%E8%BF%B0" data-tocid="id-基于Zabbix的DolphinDB集群运维监控-1.方案概述">1. 方案概述</a><ul><li class="topic-item"><a href="#id-%E5%9F%BA%E4%BA%8EZabbix%E7%9A%84DolphinDB%E9%9B%86%E7%BE%A4%E8%BF%90%E7%BB%B4%E7%9B%91%E6%8E%A7-1.1Zabbix%E6%A6%82%E8%BF%B0" data-tocid="id-基于Zabbix的DolphinDB集群运维监控-1.1Zabbix概述">1.1 Zabbix 概述</a></li><li class="topic-item"><a href="#id-%E5%9F%BA%E4%BA%8EZabbix%E7%9A%84DolphinDB%E9%9B%86%E7%BE%A4%E8%BF%90%E7%BB%B4%E7%9B%91%E6%8E%A7-1.2%E7%9B%91%E6%8E%A7%E6%96%B9%E6%A1%88%E6%A6%82%E8%BF%B0" data-tocid="id-基于Zabbix的DolphinDB集群运维监控-1.2监控方案概述">1.2 监控方案概述</a></li></ul></li><li class="topic-item"><a href="#id-%E5%9F%BA%E4%BA%8EZabbix%E7%9A%84DolphinDB%E9%9B%86%E7%BE%A4%E8%BF%90%E7%BB%B4%E7%9B%91%E6%8E%A7-2.%E8%BD%AF%E4%BB%B6%E9%83%A8%E7%BD%B2" data-tocid="id-基于Zabbix的DolphinDB集群运维监控-2.软件部署">2. 软件部署</a><ul><li class="topic-item"><a href="#id-%E5%9F%BA%E4%BA%8EZabbix%E7%9A%84DolphinDB%E9%9B%86%E7%BE%A4%E8%BF%90%E7%BB%B4%E7%9B%91%E6%8E%A7-2.1Zabbix%E9%83%A8%E7%BD%B2" data-tocid="id-基于Zabbix的DolphinDB集群运维监控-2.1Zabbix部署">2.1 Zabbix 部署</a></li><li class="topic-item"><a href="#id-%E5%9F%BA%E4%BA%8EZabbix%E7%9A%84DolphinDB%E9%9B%86%E7%BE%A4%E8%BF%90%E7%BB%B4%E7%9B%91%E6%8E%A7-2.2DolphinDB%E9%83%A8%E7%BD%B2" data-tocid="id-基于Zabbix的DolphinDB集群运维监控-2.2DolphinDB部署">2.2 DolphinDB 部署</a></li></ul></li><li class="topic-item"><a href="#id-%E5%9F%BA%E4%BA%8EZabbix%E7%9A%84DolphinDB%E9%9B%86%E7%BE%A4%E8%BF%90%E7%BB%B4%E7%9B%91%E6%8E%A7-3.DolphinDB%E7%9B%91%E6%8E%A7%E9%A1%B9%E9%85%8D%E7%BD%AE" data-tocid="id-基于Zabbix的DolphinDB集群运维监控-3.DolphinDB监控项配置">3. DolphinDB 监控项配置</a><ul><li class="topic-item"><a href="#id-%E5%9F%BA%E4%BA%8EZabbix%E7%9A%84DolphinDB%E9%9B%86%E7%BE%A4%E8%BF%90%E7%BB%B4%E7%9B%91%E6%8E%A7-3.1DolphinDB%E7%9A%84%E7%9B%91%E6%8E%A7%E6%8C%87%E6%A0%87" data-tocid="id-基于Zabbix的DolphinDB集群运维监控-3.1DolphinDB的监控指标">3.1 DolphinDB 的监控指标</a></li><li class="topic-item"><a href="#id-%E5%9F%BA%E4%BA%8EZabbix%E7%9A%84DolphinDB%E9%9B%86%E7%BE%A4%E8%BF%90%E7%BB%B4%E7%9B%91%E6%8E%A7-3.2%E5%AE%9A%E4%B9%89%E8%8E%B7%E5%BE%97DolphinDB%E7%9B%91%E6%8E%A7%E6%8C%87%E6%A0%87%E7%9A%84%E6%8E%A5%E5%8F%A3" data-tocid="id-基于Zabbix的DolphinDB集群运维监控-3.2定义获得DolphinDB监控指标的接口">3.2 定义获得 DolphinDB 监控指标的接口</a></li><li class="topic-item"><a href="#id-%E5%9F%BA%E4%BA%8EZabbix%E7%9A%84DolphinDB%E9%9B%86%E7%BE%A4%E8%BF%90%E7%BB%B4%E7%9B%91%E6%8E%A7-3.3%E5%AE%9A%E4%B9%89Shell%E6%96%87%E4%BB%B6%E7%94%A8%E4%BA%8EZabbixAgent%E9%87%87%E9%9B%86%E4%BF%A1%E6%81%AF" data-tocid="id-基于Zabbix的DolphinDB集群运维监控-3.3定义Shell文件用于ZabbixAgent采集信息">3.3 定义 Shell 文件用于 Zabbix Agent 采集信息</a></li><li class="topic-item"><a href="#id-%E5%9F%BA%E4%BA%8EZabbix%E7%9A%84DolphinDB%E9%9B%86%E7%BE%A4%E8%BF%90%E7%BB%B4%E7%9B%91%E6%8E%A7-3.4%E7%94%9F%E6%88%90Zabbix%E7%9B%91%E6%8E%A7%E6%A8%A1%E6%9D%BF" data-tocid="id-基于Zabbix的DolphinDB集群运维监控-3.4生成Zabbix监控模板">3.4 生成 Zabbix 监控模板</a></li><li class="topic-item"><a href="#id-%E5%9F%BA%E4%BA%8EZabbix%E7%9A%84DolphinDB%E9%9B%86%E7%BE%A4%E8%BF%90%E7%BB%B4%E7%9B%91%E6%8E%A7-3.5%E5%AF%BC%E5%85%A5Zabbix%E7%9B%91%E6%8E%A7%E6%A8%A1%E6%9D%BF" data-tocid="id-基于Zabbix的DolphinDB集群运维监控-3.5导入Zabbix监控模板">3.5 导入 Zabbix 监控模板</a></li><li class="topic-item"><a href="#id-%E5%9F%BA%E4%BA%8EZabbix%E7%9A%84DolphinDB%E9%9B%86%E7%BE%A4%E8%BF%90%E7%BB%B4%E7%9B%91%E6%8E%A7-3.6%E7%9B%91%E6%8E%A7%E6%8C%87%E6%A0%87%E7%9A%84%E5%8F%AF%E8%A7%86%E5%8C%96%E6%95%88%E6%9E%9C%E5%B1%95%E7%A4%BA" data-tocid="id-基于Zabbix的DolphinDB集群运维监控-3.6监控指标的可视化效果展示">3.6 监控指标的可视化效果展示</a></li></ul></li><li class="topic-item"><a href="#id-%E5%9F%BA%E4%BA%8EZabbix%E7%9A%84DolphinDB%E9%9B%86%E7%BE%A4%E8%BF%90%E7%BB%B4%E7%9B%91%E6%8E%A7-4.%E5%91%8A%E8%AD%A6" data-tocid="id-基于Zabbix的DolphinDB集群运维监控-4.告警">4. 告警</a><ul><li class="topic-item"><a href="#id-%E5%9F%BA%E4%BA%8EZabbix%E7%9A%84DolphinDB%E9%9B%86%E7%BE%A4%E8%BF%90%E7%BB%B4%E7%9B%91%E6%8E%A7-4.1%E5%91%8A%E8%AD%A6%E5%AA%92%E4%BB%8B" data-tocid="id-基于Zabbix的DolphinDB集群运维监控-4.1告警媒介">4.1 告警媒介</a></li><li class="topic-item"><a href="#id-%E5%9F%BA%E4%BA%8EZabbix%E7%9A%84DolphinDB%E9%9B%86%E7%BE%A4%E8%BF%90%E7%BB%B4%E7%9B%91%E6%8E%A7-4.2%E5%88%9B%E5%BB%BA%E6%8A%A5%E8%AD%A6%E5%8A%A8%E4%BD%9C" data-tocid="id-基于Zabbix的DolphinDB集群运维监控-4.2创建报警动作">4.2 创建报警动作</a></li></ul></li><li class="topic-item"><a href="#id-%E5%9F%BA%E4%BA%8EZabbix%E7%9A%84DolphinDB%E9%9B%86%E7%BE%A4%E8%BF%90%E7%BB%B4%E7%9B%91%E6%8E%A7-5.%E6%80%BB%E7%BB%93" data-tocid="id-基于Zabbix的DolphinDB集群运维监控-5.总结">5. 总结</a></li></ul></div>
+	                        	
+                        	</div>
+                        </nav>
+                    
+                </div>
+            </div>
+            
+            
+            
+        </div> 
+        <footer class="navbar navbar-default wh_footer">
+  <div class=" footer-container mx-auto ">
+<title>Copyright</title><p><b> ©2025 浙江智臾科技有限公司 浙ICP备18048711号-3</b></p>
+  </div>
+</footer>
+        
+        <div id="go2top" class="d-print-none">
+            <span class="oxy-icon oxy-icon-up"></span>
+        </div>
+        
+        <div id="modal_img_large" class="modal">
+            <span class="close oxy-icon oxy-icon-remove"></span>
+            <div id="modal_img_container"></div>
+            <div id="caption"></div>
+        </div>
+        
+        
+        
+    </body>
+</html>

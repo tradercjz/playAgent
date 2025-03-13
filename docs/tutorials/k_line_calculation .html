@@ -1,0 +1,1241 @@
+<!DOCTYPE html><html xmlns="http://www.w3.org/1999/xhtml" xml:lang="zh" lang="zh" data-whc_version="26.0">
+    <head><link rel="shortcut icon" href="../favicon.ico"/><link rel="icon" href="../favicon.ico"/><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><meta name="description" content="由于不同期货品种的交易时间存在差异，且不同期货合约的活跃度各不相同，因此基于期货快照行情数据合成分钟K线的计算方法在时间对齐上需要进行不同的处理。 本教程旨在提升 DolphinDB 在具体业务场景中的应用效率，并降低其在实际业务中的开发难度。为此，我们开发了 FuturesOLHC 模块，通过调用该模块中定义的函数，用户可以轻松实现以下需求： 基于期货历史快照行情数据合成分钟K线 ..."/><meta name="DC.rights.owner" content="(C) 版权 2025"/><meta name="copyright" content="(C) 版权 2025"/><meta name="generator" content="DITA-OT"/><meta name="DC.type" content="topic"/><meta name="DC.coverage" content=""/><meta name="DC.relation" content="../tutorials/about_tutorials.html"/><meta name="prodname" content="DolphinDB"/><meta name="brand" content="DolphinDB"/><meta name="DC.creator" content="DolphinDB"/><meta name="DC.publisher" content="DDB N/A DDB 200"/><meta name="DC.format" content="HTML5"/><meta name="DC.identifier" content="k_line_calculation"/><title>基于期货快照行情数据计算合约 K 线以及主连行情</title><!--  Generated with Oxygen version 26.0, build number 2024012323.  --><meta name="wh-path2root" content="../"/><meta name="wh-toc-id" content="k_line_calculation-d9713e104689"/><meta name="wh-source-relpath" content="tutorials/k_line_calculation%20.dita"/><meta name="wh-out-relpath" content="tutorials/k_line_calculation .html"/>
+
+    <link rel="stylesheet" type="text/css" href="../oxygen-webhelp/app/commons.css?buildId=2024012323"/>
+    <link rel="stylesheet" type="text/css" href="../oxygen-webhelp/app/topic.css?buildId=2024012323"/>
+
+    <script src="../oxygen-webhelp/app/options/properties.js?buildId=20250305183303"></script>
+    <script src="../oxygen-webhelp/app/localization/strings.js?buildId=2024012323"></script>
+    <script src="../oxygen-webhelp/app/search/index/keywords.js?buildId=20250305183303"></script>
+    <script defer="defer" src="../oxygen-webhelp/app/commons.js?buildId=2024012323"></script>
+    <script defer="defer" src="../oxygen-webhelp/app/topic.js?buildId=2024012323"></script>
+<link rel="stylesheet" type="text/css" href="../oxygen-webhelp/template/styles.css?buildId=2024012323"/><script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script><script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script></head>
+
+    <body id="k_line_calculation" class="wh_topic_page frmBody">
+        <a href="#wh_topic_body" class="sr-only sr-only-focusable">
+            跳转到主要内容
+        </a>
+        
+        
+        
+        
+        <header class="navbar navbar-default wh_header">
+    <div class="container-fluid">
+        <div xmlns:whc="http://www.oxygenxml.com/webhelp/components" class="wh_header_flex_container navbar-nav navbar-expand-md navbar-dark">
+            <div class="wh_logo_and_publication_title_container">
+                <div class="wh_logo_and_publication_title">
+                    
+                    <a href="https://docs.dolphindb.cn/zh/index.html" class=" wh_logo d-none d-sm-block "><img src="../logo.png" alt="  DolphinDB 文档中心  "/></a>
+                    <div class=" wh_publication_title "><a href="../index.html"><span class="booktitle">  <span class="ph mainbooktitle">DolphinDB 文档中心</span>  </span></a></div>
+                    
+                </div>
+                
+                
+            </div>
+
+            <div class="wh_top_menu_and_indexterms_link collapse navbar-collapse" id="wh_top_menu_and_indexterms_link">
+                
+                
+                
+                
+            </div>
+        <div class=" wh_search_input navbar-form wh_topic_page_search search " role="form">
+            
+            
+            
+            <form id="searchForm" method="get" role="search" action="../search.html"><div><input type="search" placeholder="搜索 " class="wh_search_textfield" id="textToSearch" name="searchQuery" aria-label="搜索查询" required="required"/><button type="submit" class="wh_search_button" aria-label="搜索"><span class="search_input_text">搜索</span></button></div></form>
+            
+            <script src="/vendors/react/umd/react.production.min.js" defer="defer"></script>
+<script src="/vendors/react-dom/umd/react-dom.production.min.js" defer="defer"></script>
+<script src="/vendors/dayjs/dayjs.min.js" defer="defer"></script>
+<script src="/vendors/antd/dist/antd.min.js" defer="defer"></script>
+<script src="/vendors/@ant-design/icons/dist/index.umd.min.js" defer="defer"></script>
+<script src="/zh/index.js" type="module"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" defer="defer"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML" defer="defer"><!--
+
+
+--></script>
+<script defer="defer"><!--
+
+// 从主页重定向
+const currentUrl = window.location.href;
+
+// 判断当前URL是否包含index.html并且路径最后部分是index.html
+if (currentUrl.endsWith('index.html')) {
+    // 处理根目录下的index.html跳转
+    const baseUrl = currentUrl.split('/index.html')[0]; // 获取index.html之前的部分
+    const redirectUrl = `${baseUrl}/about/ddb_intro.html`; // 构建跳转路径
+    window.location.href = redirectUrl; // 执行跳转
+}
+
+--></script>
+            
+        </div></div>
+    </div>
+</header>
+        
+        
+         
+        
+        
+        
+        <div class="container-fluid" id="wh_topic_container">
+            <div class="row">
+
+                <nav class="wh_tools d-print-none navbar-expand-md" aria-label="Tools">
+                    
+                    <div data-tooltip-position="bottom" class=" wh_breadcrumb "><ol class="d-print-none"><li><span class="home"><a href="../index.html"><span>主页</span></a></span></li><li><div class="topicref" data-id="about_tutorials"><div class="title"><a href="../tutorials/about_tutorials.html"><span class="keyword label">教程</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 产品使用教程</p></div></div></div></li><li><div class="topicref"><div class="title"><a href="../tutorials/OHLC_2.html">金融场景案例</a></div></div></li><li class="active"><div class="topicref" data-id="k_line_calculation"><div class="title"><a href="../tutorials/k_line_calculation%20.html">基于期货快照行情数据计算合约 K 线以及主连行情</a></div></div></li></ol></div>
+                    
+                    
+                    
+                    <div class="wh_right_tools">
+                        <button class="wh_hide_highlight" aria-label="切换搜索突出显示" title="切换搜索突出显示"></button>
+                        <button class="webhelp_expand_collapse_sections" data-next-state="collapsed" aria-label="折叠截面" title="折叠截面"></button>
+                        
+                        
+                        
+                        
+                        <div class=" wh_print_link print d-none d-md-inline-block "><button onClick="window.print()" title="打印此页" aria-label="打印此页"></button></div>
+                        
+                        <button type="button" id="wh_toc_button" class="custom-toggler navbar-toggler collapsed wh_toggle_button navbar-light" aria-expanded="false" aria-label="Toggle publishing table of content" aria-controls="wh_publication_toc">
+                            <span class="navbar-toggler-icon"></span>
+                        </button>
+                    </div>
+                    
+                </nav>
+            </div>
+            
+            
+            
+            
+            <div class="wh_content_area">
+                <div class="row">
+                    
+                        <nav id="wh_publication_toc" class="col-lg-3 col-md-3 col-sm-12 d-md-block d-none d-print-none" aria-label="Table of Contents Container">
+                            <div id="wh_publication_toc_content">
+		                        
+                            	<div class=" wh_publication_toc " data-tooltip-position="right"><span class="expand-button-action-labels"><span id="button-expand-action" role="button" aria-label="Expand"></span><span id="button-collapse-action" role="button" aria-label="Collapse"></span><span id="button-pending-action" role="button" aria-label="Pending"></span></span><ul role="tree" aria-label="Table of Contents"><li role="treeitem"><div data-tocid="ddb_intro-d9713e87" class="topicref" data-id="ddb_intro" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../about/ddb_intro.html" id="ddb_intro-d9713e87-link">关于DolphinDB</a></div></div></li><li role="treeitem"><div data-tocid="chap1_getstarted-d9713e136" class="topicref" data-id="chap1_getstarted" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../getstarted/chap1_getstarted.html" id="chap1_getstarted-d9713e136-link">快速上手</a><div class="wh-tooltip"><p class="shortdesc">如何快速部署 DolphinDB、建库建表、写入和查询数据</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="sectionddb_deployment-d9713e189" class="topicref" data-id="sectionddb_deployment" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action sectionddb_deployment-d9713e189-link" class="wh-expand-btn"></span><div class="title"><a href="../deploy/deploy_intro.html" id="sectionddb_deployment-d9713e189-link"><span class="keyword label">部署</span></a><div class="wh-tooltip"><p class="shortdesc">如何在不同的场景中部署 DolphinDB</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="new_chap_database_manage_new_chap_dbmanage_landing_page-d9713e2259" class="topicref" data-id="new_chap_database_manage_new_chap_dbmanage_landing_page" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action new_chap_database_manage_new_chap_dbmanage_landing_page-d9713e2259-link" class="wh-expand-btn"></span><div class="title"><a href="../db_distr_comp/cfg/db_intro.html" id="new_chap_database_manage_new_chap_dbmanage_landing_page-d9713e2259-link"><span class="keyword label">数据库</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 数据库的基本概念</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="chap7_tutorials_streaming-d9713e3760" class="topicref" data-id="chap7_tutorials_streaming" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action chap7_tutorials_streaming-d9713e3760-link" class="wh-expand-btn"></span><div class="title"><a href="../stream/str_intro.html" id="chap7_tutorials_streaming-d9713e3760-link"><span class="keyword label">流数据</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 流数据引擎及流数据计算的基本概念</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e7513" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e7513-link" class="wh-expand-btn"></span><div class="title"><a href="../db_distr_comp/db_oper/import_data.html" id="tocId-d9713e7513-link">数据迁移</a><div class="wh-tooltip"><p class="shortdesc">如何从不同数据源向 DolphinDB 迁移数据</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="chap7_tutorials_system_management-d9713e7940" class="topicref" data-id="chap7_tutorials_system_management" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action chap7_tutorials_system_management-d9713e7940-link" class="wh-expand-btn"></span><div class="title"><a href="../sys_man/om_intro.html" id="chap7_tutorials_system_management-d9713e7940-link"><span class="keyword label">系统运维</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 的系统运维功能及方法</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="troubleshooting-d9713e8780" class="topicref" data-id="troubleshooting" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action troubleshooting-d9713e8780-link" class="wh-expand-btn"></span><div class="title"><a href="../error_codes/troubleshooting.html" id="troubleshooting-d9713e8780-link">故障排查</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="about_language_resources-d9713e20911" class="topicref" data-id="about_language_resources" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action about_language_resources-d9713e20911-link" class="wh-expand-btn"></span><div class="title"><a href="../progr/progr_intro.html" id="about_language_resources-d9713e20911-link"><span class="keyword label">编程语言</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 编程基本概念与方法、SQL 在 DolphinDB 的应用</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="functions_references-d9713e30925" class="topicref" data-id="functions_references" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action functions_references-d9713e30925-link" class="wh-expand-btn"></span><div class="title"><a href="../funcs/funcs_intro.html" id="functions_references-d9713e30925-link"><span class="keyword label">函数参考</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 函数分类、语法、详解及示例</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="api_protocol-d9713e94064" class="topicref" data-id="api_protocol" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action api_protocol-d9713e94064-link" class="wh-expand-btn"></span><div class="title"><a href="../api/connapi_intro.html" id="api_protocol-d9713e94064-link"><span class="keyword label">连接器 &amp; API</span></a><div class="wh-tooltip"><p class="shortdesc">面向不同编程语言的 DolphinDB API 及连接器，相关协议和用法</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="chap6_plugin-d9713e94210" class="topicref" data-id="chap6_plugin" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action chap6_plugin-d9713e94210-link" class="wh-expand-btn"></span><div class="title"><a href="../plugins/plg_intro.html" id="chap6_plugin-d9713e94210-link"><span class="keyword label">插件</span></a><div class="wh-tooltip"><p class="shortdesc">多个应用场景的插件使用说明和插件开发指导</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="third_party-d9713e97904" class="topicref" data-id="third_party" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action third_party-d9713e97904-link" class="wh-expand-btn"></span><div class="title"><a href="../third_party.html" id="third_party-d9713e97904-link">第三方工具</a></div></div></li><li role="treeitem" aria-expanded="true"><div data-tocid="about_tutorials-d9713e98227" class="topicref" data-id="about_tutorials" data-state="expanded"><span role="button" tabindex="0" aria-labelledby="button-collapse-action about_tutorials-d9713e98227-link" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/about_tutorials.html" id="about_tutorials-d9713e98227-link"><span class="keyword label">教程</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 产品使用教程</p></div></div></div><ul role="group" class="navbar-nav nav-list"><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e98280" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e98280-link" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/new_users_finance.html" id="tocId-d9713e98280-link">新用户入门</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e98327" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e98327-link" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/database.html" id="tocId-d9713e98327-link">数据库</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e99111" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e99111-link" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/std_sql_ddb.html" id="tocId-d9713e99111-link">编程</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e100448" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e100448-link" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/streaming-real-time-correlation-processing_2.html" id="tocId-d9713e100448-link">流数据</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e100955" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e100955-link" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/scheduledJob_2.html" id="tocId-d9713e100955-link">系统运维</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="模块概述-d9713e101923" class="topicref" data-id="模块概述" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action 模块概述-d9713e101923-link" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/tu_modules.html" id="模块概述-d9713e101923-link">模块</a></div></div></li><li role="treeitem" aria-expanded="true"><div data-tocid="tocId-d9713e102568" class="topicref" data-state="expanded"><span role="button" tabindex="0" aria-labelledby="button-collapse-action tocId-d9713e102568-link" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/OHLC_2.html" id="tocId-d9713e102568-link">金融场景案例</a></div></div><ul role="group" class="navbar-nav nav-list"><li role="treeitem"><div data-tocid="k-线计算-d9713e102569" class="topicref" data-id="k-线计算" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/OHLC_2.html" id="k-线计算-d9713e102569-link">K 线计算</a></div></div></li><li role="treeitem"><div data-tocid="使用-klinechart-展示-dolphindb-k-线-d9713e102615" class="topicref" data-id="使用-klinechart-展示-dolphindb-k-线" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/displaying_the_dolphindb_k-line_with_klinechart.html" id="使用-klinechart-展示-dolphindb-k-线-d9713e102615-link">使用 KLineChart 展示 DolphinDB K 线</a></div></div></li><li role="treeitem"><div data-tocid="python--hdf5-因子计算与-dolphindb-一体化因子计算方案对比-d9713e102661" class="topicref" data-id="python--hdf5-因子计算与-dolphindb-一体化因子计算方案对比" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/Python_HDF5_vs_DolphinDB.html" id="python--hdf5-因子计算与-dolphindb-一体化因子计算方案对比-d9713e102661-link">Python + HDF5 因子计算与 DolphinDB 一体化因子计算方案对比</a></div></div></li><li role="treeitem"><div data-tocid="python--文件存储与-dolphindb-因子计算性能比较-d9713e102707" class="topicref" data-id="python--文件存储与-dolphindb-因子计算性能比较" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/DolphinDB_VS_PythonFile_Storage.html" id="python--文件存储与-dolphindb-因子计算性能比较-d9713e102707-link">Python + 文件存储与 DolphinDB 因子计算性能比较</a></div></div></li><li role="treeitem"><div data-tocid="python-parser-在金融量化分析场景的应用入门-d9713e102753" class="topicref" data-id="python-parser-在金融量化分析场景的应用入门" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/py_parser__quant_fin.html" id="python-parser-在金融量化分析场景的应用入门-d9713e102753-link">Python Parser 在金融量化分析场景的应用入门</a></div></div></li><li role="treeitem"><div data-tocid="处理-level-2-行情数据实例-d9713e102799" class="topicref" data-id="处理-level-2-行情数据实例" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/l2_stk_data_proc_2.html" id="处理-level-2-行情数据实例-d9713e102799-link">处理 Level-2 行情数据实例</a></div></div></li><li role="treeitem"><div data-tocid="存储金融数据的分区方案最佳实践-d9713e102845" class="topicref" data-id="存储金融数据的分区方案最佳实践" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/best_practices_for_partitioned_storage.html" id="存储金融数据的分区方案最佳实践-d9713e102845-link">存储金融数据的分区方案最佳实践</a></div></div></li><li role="treeitem"><div data-tocid="公募基金历史数据基础分析教程-d9713e102891" class="topicref" data-id="公募基金历史数据基础分析教程" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/public_fund_basic_analysis.html" id="公募基金历史数据基础分析教程-d9713e102891-link">公募基金历史数据基础分析教程</a></div></div></li><li role="treeitem"><div data-tocid="股票行情回放-d9713e102937" class="topicref" data-id="股票行情回放" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/stock_market_replay_2.html" id="股票行情回放-d9713e102937-link">股票行情回放</a></div></div></li><li role="treeitem"><div data-tocid="搭建行情回放服务的最佳实践-d9713e102983" class="topicref" data-id="搭建行情回放服务的最佳实践" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/appendices_market_replay_bp.html" id="搭建行情回放服务的最佳实践-d9713e102983-link">搭建行情回放服务的最佳实践</a></div></div></li><li role="treeitem"><div data-tocid="国内股票行情数据导入实例-d9713e103029" class="topicref" data-id="国内股票行情数据导入实例" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/stockdata_csv_import_demo.html" id="国内股票行情数据导入实例-d9713e103029-link">国内股票行情数据导入实例</a></div></div></li><li role="treeitem"><div data-tocid="基金份额参考价值-iopv-计算-d9713e103076" class="topicref" data-id="基金份额参考价值-iopv-计算" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/streaming_IOPV_2.html" id="基金份额参考价值-iopv-计算-d9713e103076-link">基金份额参考价值 IOPV 计算</a></div></div></li><li role="treeitem"><div data-tocid="基于快照行情的股票和基金-k-线合成-d9713e103122" class="topicref" data-id="基于快照行情的股票和基金-k-线合成" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/k.html" id="基于快照行情的股票和基金-k-线合成-d9713e103122-link">基于快照行情的股票和基金 K 线合成</a></div></div></li><li role="treeitem"><div data-tocid="计算基金日频因子-d9713e103168" class="topicref" data-id="计算基金日频因子" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/fund_factor_contrasted_by_py.html" id="计算基金日频因子-d9713e103168-link">计算基金日频因子</a></div></div></li><li role="treeitem"><div data-tocid="基于逐笔数据合成高频-orderbookdolphindb-orderbook-引擎-d9713e103214" class="topicref" data-id="基于逐笔数据合成高频-orderbookdolphindb-orderbook-引擎" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/orderBookSnapshotEngine.html" id="基于逐笔数据合成高频-orderbookdolphindb-orderbook-引擎-d9713e103214-link">基于逐笔数据合成高频 Orderbook：DolphinDB Orderbook 引擎</a></div></div></li><li role="treeitem"><div data-tocid="金融-poc-用户历史数据导入指导手册之股票-level-2-逐笔篇-d9713e103260" class="topicref" data-id="金融-poc-用户历史数据导入指导手册之股票-level-2-逐笔篇" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/LoadDataForPoc.html" id="金融-poc-用户历史数据导入指导手册之股票-level-2-逐笔篇-d9713e103260-link">金融 PoC 用户历史数据导入指导手册之股票 Level-2 逐笔篇</a></div></div></li><li role="treeitem"><div data-tocid="金融实时实际波动率预测-d9713e103306" class="topicref" data-id="金融实时实际波动率预测" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/ml_volatility_2.html" id="金融实时实际波动率预测-d9713e103306-link">金融实时实际波动率预测</a></div></div></li><li role="treeitem"><div data-tocid="金融因子流式实现-d9713e103352" class="topicref" data-id="金融因子流式实现" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/str_comp_fin_quant_2.html" id="金融因子流式实现-d9713e103352-link">金融因子流式实现</a></div></div></li><li role="treeitem"><div data-tocid="开发股票波动率预测模型的-676-个输入特征-d9713e103398" class="topicref" data-id="开发股票波动率预测模型的-676-个输入特征" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/metacode_derived_features_2.html" id="开发股票波动率预测模型的-676-个输入特征-d9713e103398-link">开发股票波动率预测模型的 676 个输入特征</a></div></div></li><li role="treeitem"><div data-tocid="快速搭建-level-2-快照数据流批一体因子计算平台最佳实践-d9713e103444" class="topicref" data-id="快速搭建-level-2-快照数据流批一体因子计算平台最佳实践" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/l2_snapshot_factor_calc_2.html" id="快速搭建-level-2-快照数据流批一体因子计算平台最佳实践-d9713e103444-link">快速搭建 Level-2 快照数据流批一体因子计算平台最佳实践</a></div></div></li><li role="treeitem"><div data-tocid="量化金融范例-d9713e103490" class="topicref" data-id="量化金融范例" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/quant_finance_examples.html" id="量化金融范例-d9713e103490-link">量化金融范例</a></div></div></li><li role="treeitem"><div data-tocid="流式计算中证-1000-指数主买主卖交易量-d9713e103536" class="topicref" data-id="流式计算中证-1000-指数主买主卖交易量" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/CSI_1000_2.html" id="流式计算中证-1000-指数主买主卖交易量-d9713e103536-link">流式计算中证 1000 指数主买/主卖交易量</a></div></div></li><li role="treeitem"><div data-tocid="深度不平衡买卖压力指标波动率计算-d9713e103583" class="topicref" data-id="深度不平衡买卖压力指标波动率计算" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/sql_performance_optimization_wap_di_rv.html" id="深度不平衡买卖压力指标波动率计算-d9713e103583-link">深度不平衡、买卖压力指标、波动率计算</a></div></div></li><li role="treeitem"><div data-tocid="实时合成自定义频订单簿快照dolphindb-insight-行情插件与订单簿引擎应用-d9713e103629" class="topicref" data-id="实时合成自定义频订单簿快照dolphindb-insight-行情插件与订单簿引擎应用" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/insight_plugin_orderbook_engine_application.html" id="实时合成自定义频订单簿快照dolphindb-insight-行情插件与订单簿引擎应用-d9713e103629-link">实时合成自定义频订单簿快照：DolphinDB INSIGHT 行情插件与订单簿引擎应用</a></div></div></li><li role="treeitem"><div data-tocid="实时计算分钟资金流-d9713e103675" class="topicref" data-id="实时计算分钟资金流" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/streaming_capital_flow_order_by_order_2.html" id="实时计算分钟资金流-d9713e103675-link">实时计算分钟资金流</a></div></div></li><li role="treeitem"><div data-tocid="实时计算高频因子-d9713e103721" class="topicref" data-id="实时计算高频因子" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/hf_factor_streaming_2.html" id="实时计算高频因子-d9713e103721-link">实时计算高频因子</a></div></div></li><li role="treeitem"><div data-tocid="实时计算日累计逐单资金流-d9713e103767" class="topicref" data-id="实时计算日累计逐单资金流" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/streaming_capital_flow_daily_2.html" id="实时计算日累计逐单资金流-d9713e103767-link">实时计算日累计逐单资金流</a></div></div></li><li role="treeitem"><div data-tocid="实时计算涨幅榜-d9713e103813" class="topicref" data-id="实时计算涨幅榜" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/rt_stk_price_inc_calc_2.html" id="实时计算涨幅榜-d9713e103813-link">实时计算涨幅榜</a></div></div></li><li role="treeitem"><div data-tocid="实时选取外汇行情多价源最优价-d9713e103859" class="topicref" data-id="实时选取外汇行情多价源最优价" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/best_price_selection.html" id="实时选取外汇行情多价源最优价-d9713e103859-link">实时选取外汇行情多价源最优价</a></div></div></li><li role="treeitem"><div data-tocid="外汇掉期估值计算-d9713e103905" class="topicref" data-id="外汇掉期估值计算" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/FxSwapValuation.html" id="外汇掉期估值计算-d9713e103905-link">外汇掉期估值计算</a></div></div></li><li role="treeitem"><div data-tocid="因子计算平台构建-d9713e103951" class="topicref" data-id="因子计算平台构建" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/Python_Celery.html" id="因子计算平台构建-d9713e103951-link">因子计算平台构建</a></div></div></li><li role="treeitem"><div data-tocid="因子计算最佳实践-d9713e103997" class="topicref" data-id="因子计算最佳实践" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/best_practice_for_factor_calculation.html" id="因子计算最佳实践-d9713e103997-link">因子计算最佳实践</a></div></div></li><li role="treeitem"><div data-tocid="mvo_tutorial-d9713e104043" class="topicref" data-id="mvo_tutorial" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/MVO.html" id="mvo_tutorial-d9713e104043-link">优化投资组合：DolphinDB 最优化求解系列函数应用指南</a></div></div></li><li role="treeitem"><div data-tocid="中高频多因子库存储最佳实践-d9713e104090" class="topicref" data-id="中高频多因子库存储最佳实践" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/best_practices_for_multi_factor.html" id="中高频多因子库存储最佳实践-d9713e104090-link">中高频多因子库存储最佳实践</a></div></div></li><li role="treeitem"><div data-tocid="alphalens-在-dolphindb-中的应用因子分析建模实践-d9713e104136" class="topicref" data-id="alphalens-在-dolphindb-中的应用因子分析建模实践" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/Practical_Factor_Analysis_Modeling.html" id="alphalens-在-dolphindb-中的应用因子分析建模实践-d9713e104136-link">Alphalens 在 DolphinDB 中的应用：因子分析建模实践</a></div></div></li><li role="treeitem"><div data-tocid="dolphindb-与-dolphinscheduler-的集成-d9713e104182" class="topicref" data-id="dolphindb-与-dolphinscheduler-的集成" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/dolphinscheduler_integration.html" id="dolphindb-与-dolphinscheduler-的集成-d9713e104182-link">DolphinDB 与 DolphinScheduler 的集成</a></div></div></li><li role="treeitem"><div data-tocid="dolphindb-与-python-airflow-最佳实践-d9713e104228" class="topicref" data-id="dolphindb-与-python-airflow-最佳实践" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/ddb_airflow.html" id="dolphindb-与-python-airflow-最佳实践-d9713e104228-link">DolphinDB 与 Python AirFlow 最佳实践</a></div></div></li><li role="treeitem"><div data-tocid="gplearn-d9713e104274" class="topicref" data-id="gplearn" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/gplearn.html" id="gplearn-d9713e104274-link">Shark GPLearn 快速上手</a></div></div></li><li role="treeitem"><div data-tocid="利用jit加速计算-etf-期权隐含波动率和希腊值-d9713e104320" class="topicref" data-id="利用jit加速计算-etf-期权隐含波动率和希腊值" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/IV_Greeks_Calculation_for_ETF_Options_Using_JIT.html" id="利用jit加速计算-etf-期权隐含波动率和希腊值-d9713e104320-link">利用JIT加速计算 ETF 期权隐含波动率和希腊值</a></div></div></li><li role="treeitem"><div data-tocid="基于-dolphindb-的-brinson-绩效归因模型实践-d9713e104366" class="topicref" data-id="基于-dolphindb-的-brinson-绩效归因模型实践" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/brinson.html" id="基于-dolphindb-的-brinson-绩效归因模型实践-d9713e104366-link">基于 DolphinDB 的 Brinson 绩效归因模型实践</a></div></div></li><li role="treeitem"><div data-tocid="基于-dolphindb-的-campisi-绩效归因模型实践-d9713e104412" class="topicref" data-id="基于-dolphindb-的-campisi-绩效归因模型实践" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/campisi.html" id="基于-dolphindb-的-campisi-绩效归因模型实践-d9713e104412-link">基于 DolphinDB 的 Campisi 绩效归因模型实践</a></div></div></li><li role="treeitem"><div data-tocid="期货分钟频cta策略回测案例-d9713e104458" class="topicref" data-id="期货分钟频cta策略回测案例" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/futures_minute_frequency_cta_strategy_backtest_example.html" id="期货分钟频cta策略回测案例-d9713e104458-link">期货分钟频CTA策略回测案例</a></div></div></li><li role="treeitem"><div data-tocid="exchdata-交易所历史股票数据自动化导入功能模块使用教程-d9713e104504" class="topicref" data-id="exchdata-交易所历史股票数据自动化导入功能模块使用教程" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/exchdata_exchange_historical_stock_data_auto_import_module_tutorial.html" id="exchdata-交易所历史股票数据自动化导入功能模块使用教程-d9713e104504-link">ExchData 交易所历史股票数据自动化导入功能模块使用教程</a></div></div></li><li role="treeitem"><div data-tocid="ficc_func_uasge_and_performance-d9713e104550" class="topicref" data-id="ficc_func_uasge_and_performance" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/ficc_func_uasge_and_performance.html" id="ficc_func_uasge_and_performance-d9713e104550-link">FICC 固收系列函数使用示例及性能</a></div></div></li><li role="treeitem"><div data-tocid="title1-d9713e104597" class="topicref" data-id="title1" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/ficc_funcs_application.html" id="title1-d9713e104597-link">FICC 固收系列函数应用场景</a></div></div></li><li role="treeitem"><div data-tocid="最优化函数_socp_的使用及转化案例-d9713e104643" class="topicref" data-id="最优化函数_socp_的使用及转化案例" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/socp_usage_case.html" id="最优化函数_socp_的使用及转化案例-d9713e104643-link">最优化函数 socp 的使用及转化案例</a></div></div></li><li role="treeitem" class="active"><div data-tocid="k_line_calculation-d9713e104689" class="topicref" data-id="k_line_calculation" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/k_line_calculation%20.html" id="k_line_calculation-d9713e104689-link">基于期货快照行情数据计算合约 K 线以及主连行情</a></div></div></li><li role="treeitem"><div data-tocid="backtest_introduction_usage-d9713e104735" class="topicref" data-id="backtest_introduction_usage" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/backtest_introduction_usage.html" id="backtest_introduction_usage-d9713e104735-link">融资融券策略回测使用说明及回测案例</a></div></div></li><li role="treeitem"><div data-tocid="stock_backtest-d9713e104781" class="topicref" data-id="stock_backtest" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/stock_backtest.html" id="stock_backtest-d9713e104781-link">股票中低频投资组合回测案例实现</a></div></div></li></ul></li><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e104827" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e104827-link" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/streaming_engine_anomaly_alerts_2.html" id="tocId-d9713e104827-link">物联网场景案例</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e105795" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e105795-link" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/dolphindb_tensor_libtorch_tutorial.html" id="tocId-d9713e105795-link">机器学习</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e105842" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e105842-link" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/api_performance.html" id="tocId-d9713e105842-link">测试报告</a></div></div></li></ul></li><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e105982" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e105982-link" class="wh-expand-btn"></span><div class="title"><a href="../rn/server/3_00_2.html" id="tocId-d9713e105982-link">版本说明</a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 版本发布历史</p></div></div></div></li></ul></div>
+		                        
+                            </div>
+                        </nav>
+                    
+                    
+                    <div class="col-lg-7 col-md-9 col-sm-12" id="wh_topic_body">
+                        <button id="wh_close_publication_toc_button" class="close-toc-button d-none" aria-label="Toggle publishing table of content" aria-controls="wh_publication_toc" aria-expanded="true">
+                            <span class="close-toc-icon-container">
+                                <span class="close-toc-icon"></span>     
+                            </span>
+                        </button>
+                        <button id="wh_close_topic_toc_button" class="close-toc-button d-none" aria-label="Toggle topic table of content" aria-controls="wh_topic_toc" aria-expanded="true">
+                            <span class="close-toc-icon-container">
+                                <span class="close-toc-icon"></span>     
+                            </span>
+                        </button>
+                        
+                        <div class=" wh_topic_content body "><main role="main"><article class="- topic/topic topic" role="article" aria-labelledby="ariaid-title1">
+    <h1 class="- topic/title title topictitle1" id="ariaid-title1">基于期货快照行情数据计算合约 K 线以及主连行情</h1>
+    <div class="- topic/body body">
+        <p class="- topic/p p">由于不同期货品种的交易时间存在差异，且不同期货合约的活跃度各不相同，因此基于期货快照行情数据合成分钟K线的计算方法在时间对齐上需要进行不同的处理。</p>
+        <p class="- topic/p p">本教程旨在提升 DolphinDB 在具体业务场景中的应用效率，并降低其在实际业务中的开发难度。为此，我们开发了 <code class="+ topic/ph pr-d/codeph ph codeph">FuturesOLHC</code>
+            模块，通过调用该模块中定义的函数，用户可以轻松实现以下需求：</p>
+        <ul class="- topic/ul ul" id="k_line_calculation__ul_wtd_tpl_sdc" data-ofbid="k_line_calculation__ul_wtd_tpl_sdc">
+            <li class="- topic/li li">基于期货历史快照行情数据合成分钟K线</li>
+            <li class="- topic/li li">基于期货历史快照行情数据合成主连行情</li>
+            <li class="- topic/li li">基于期货实时快照行情数据合成分钟K线</li>
+        </ul>
+        <p class="- topic/p p">本教程的内容将按以下流程展开：首先详细介绍如何基于期货历史快照行情数据合成分钟K线；接着讲解如何基于期货历史快照行情数据合成主连行情；然后说明如何基于期货实时快照行情数据合成分钟K线；最后，介绍
+                <code class="+ topic/ph pr-d/codeph ph codeph">FuturesOLHC</code> 模块的结构与功能，并通过该模块中定义的函数实现上述三种场景的示例。</p>
+        <p class="- topic/p p">本教程适用多个交易所，包括：中国金融期货交易所 、 大连商品交易所 、上海期货交易所 、上海国际能源期货交易所、郑州商品交易所 、广州期货交易所。</p>
+        <p class="- topic/p p">注意：本文全部代码需要运行在 2.00.14 及以上版本的 DolphinDB server 上。</p>
+    </div>
+    <article class="- topic/topic topic nested1" aria-labelledby="ariaid-title2" id="topic_ttc_5pl_sdc">
+        <h2 class="- topic/title title topictitle2" id="ariaid-title2">1. 基于历史快照行情合成分钟 K 线</h2>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title3" id="topic_wr5_zpl_sdc">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title3">1.1 期货快照数据特征</h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p">Tick
+                    数据是市场上最为精细和完整的记录，包含了所有市场事件的信息，比如每一次交易的发生或每一个新订单的增加。它记录了市场每个事件的数据，因而被视为最精确的数据形式。与之相比，快照数据是对
+                    Tick
+                    数据的一个切片统计，换句话说，它是对市场信息在时间维度上进行一定频率切片后得到的统计结果。如果将市场信息视为一个时间序列数据流，那么快照数据相当于对这个数据流进行定时截取，呈现某一时刻的市场状态；而
+                    Tick 数据则是该数据流的完整记录。因此，Tick 数据提供更高的精度，而快照数据的精度则依赖于采样的时间间隔。</p>
+                <p class="- topic/p p">在中国期货市场，快照行情数据采样频率为 500 毫秒（即每隔 0.5
+                    秒推送一条数据），但推送频率并非严格等间隔。不同的数据供应商和交易所提供的快照行情字段也可能有所不同，因此即使采样频率为 500
+                    毫秒，具体的字段和数据格式也会有所差异。</p>
+                <p class="- topic/p p">本教程针对期货数据进行了统一处理，期货快照行情数据表中的常见字段如下: </p>
+                <div class="table-container"><table class="- topic/table table frame-all" id="topic_wr5_zpl_sdc__table_nsj_wql_sdc" data-ofbid="topic_wr5_zpl_sdc__table_nsj_wql_sdc" data-cols="3"><caption></caption><colgroup><col/><col/><col/></colgroup><thead class="- topic/thead thead">
+                            <tr class="- topic/row">
+                                <th class="- topic/entry entry align-left colsep-1 rowsep-1" id="topic_wr5_zpl_sdc__table_nsj_wql_sdc__entry__1"><strong class="+ topic/ph hi-d/b ph b">字段名称</strong>
+                                </th>
+                                <th class="- topic/entry entry align-left colsep-1 rowsep-1" id="topic_wr5_zpl_sdc__table_nsj_wql_sdc__entry__2"><strong class="+ topic/ph hi-d/b ph b">数据类型</strong>
+                                </th>
+                                <th class="- topic/entry entry align-left colsep-0 rowsep-1" id="topic_wr5_zpl_sdc__table_nsj_wql_sdc__entry__3"><strong class="+ topic/ph hi-d/b ph b">数据说明</strong>
+                                </th>
+                            </tr>
+                        </thead><tbody class="- topic/tbody tbody">
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_wr5_zpl_sdc__table_nsj_wql_sdc__entry__1">SortCo </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_wr5_zpl_sdc__table_nsj_wql_sdc__entry__2">SYMBOL </td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_wr5_zpl_sdc__table_nsj_wql_sdc__entry__3">交易所代码 </td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_wr5_zpl_sdc__table_nsj_wql_sdc__entry__1">InstruID </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_wr5_zpl_sdc__table_nsj_wql_sdc__entry__2">SYMBOL </td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_wr5_zpl_sdc__table_nsj_wql_sdc__entry__3">期货代码 </td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_wr5_zpl_sdc__table_nsj_wql_sdc__entry__1">TradeDay </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_wr5_zpl_sdc__table_nsj_wql_sdc__entry__2">DATE </td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_wr5_zpl_sdc__table_nsj_wql_sdc__entry__3">交易日</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_wr5_zpl_sdc__table_nsj_wql_sdc__entry__1">ClearingDay </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_wr5_zpl_sdc__table_nsj_wql_sdc__entry__2">DATE </td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_wr5_zpl_sdc__table_nsj_wql_sdc__entry__3">结算日</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_wr5_zpl_sdc__table_nsj_wql_sdc__entry__1">TradeTime </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_wr5_zpl_sdc__table_nsj_wql_sdc__entry__2">TIME </td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_wr5_zpl_sdc__table_nsj_wql_sdc__entry__3">交易时间 </td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_wr5_zpl_sdc__table_nsj_wql_sdc__entry__1">LastPrice </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_wr5_zpl_sdc__table_nsj_wql_sdc__entry__2">DOUBLE </td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_wr5_zpl_sdc__table_nsj_wql_sdc__entry__3">最新收盘价 </td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_wr5_zpl_sdc__table_nsj_wql_sdc__entry__1">PreSetPrice </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_wr5_zpl_sdc__table_nsj_wql_sdc__entry__2">DOUBLE </td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_wr5_zpl_sdc__table_nsj_wql_sdc__entry__3">前一日结算价 </td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_wr5_zpl_sdc__table_nsj_wql_sdc__entry__1">PreCloPrice </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_wr5_zpl_sdc__table_nsj_wql_sdc__entry__2">DOUBLE </td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_wr5_zpl_sdc__table_nsj_wql_sdc__entry__3">前一日收盘价 </td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_wr5_zpl_sdc__table_nsj_wql_sdc__entry__1">OpenPrice </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_wr5_zpl_sdc__table_nsj_wql_sdc__entry__2">DOUBLE </td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_wr5_zpl_sdc__table_nsj_wql_sdc__entry__3">最新开盘价 </td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_wr5_zpl_sdc__table_nsj_wql_sdc__entry__1">HighPrice </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_wr5_zpl_sdc__table_nsj_wql_sdc__entry__2">DOUBLE </td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_wr5_zpl_sdc__table_nsj_wql_sdc__entry__3">最高价 </td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_wr5_zpl_sdc__table_nsj_wql_sdc__entry__1">LowPrice </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_wr5_zpl_sdc__table_nsj_wql_sdc__entry__2">DOUBLE </td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_wr5_zpl_sdc__table_nsj_wql_sdc__entry__3">最低价 </td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_wr5_zpl_sdc__table_nsj_wql_sdc__entry__1">Volume </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_wr5_zpl_sdc__table_nsj_wql_sdc__entry__2">INT </td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_wr5_zpl_sdc__table_nsj_wql_sdc__entry__3">成交量 </td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_wr5_zpl_sdc__table_nsj_wql_sdc__entry__1">Turnover </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_wr5_zpl_sdc__table_nsj_wql_sdc__entry__2">DOUBLE </td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_wr5_zpl_sdc__table_nsj_wql_sdc__entry__3">成交金额 </td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_wr5_zpl_sdc__table_nsj_wql_sdc__entry__1">OpenInt </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_wr5_zpl_sdc__table_nsj_wql_sdc__entry__2">INT </td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_wr5_zpl_sdc__table_nsj_wql_sdc__entry__3">持仓量 </td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_wr5_zpl_sdc__table_nsj_wql_sdc__entry__1">SetPrice </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_wr5_zpl_sdc__table_nsj_wql_sdc__entry__2">DOUBLE </td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_wr5_zpl_sdc__table_nsj_wql_sdc__entry__3">结算价 </td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_wr5_zpl_sdc__table_nsj_wql_sdc__entry__1">ULimitPrice </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_wr5_zpl_sdc__table_nsj_wql_sdc__entry__2">DOUBLE </td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_wr5_zpl_sdc__table_nsj_wql_sdc__entry__3">当日涨停价 </td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_wr5_zpl_sdc__table_nsj_wql_sdc__entry__1">LLimitPrice </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_wr5_zpl_sdc__table_nsj_wql_sdc__entry__2">DOUBLE </td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_wr5_zpl_sdc__table_nsj_wql_sdc__entry__3">当日跌停价 </td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-0" headers="topic_wr5_zpl_sdc__table_nsj_wql_sdc__entry__1">…… </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-0" headers="topic_wr5_zpl_sdc__table_nsj_wql_sdc__entry__2">…… </td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="topic_wr5_zpl_sdc__table_nsj_wql_sdc__entry__3">快照行情字段太多，详情<strong class="+ topic/ph hi-d/b ph b"><a class="- topic/xref xref" href="#topic_lyb_vpl_sdc">参考附录</a></strong></td>
+                            </tr>
+                        </tbody></table></div>
+                <p class="- topic/p p">其中，涉及到分钟 K 线计算的<strong class="+ topic/ph hi-d/b ph b">重要字段</strong>有：</p>
+                <div class="table-container"><table class="- topic/table table frame-all" id="topic_wr5_zpl_sdc__table_osj_wql_sdc" data-ofbid="topic_wr5_zpl_sdc__table_osj_wql_sdc" data-cols="3"><caption></caption><colgroup><col/><col/><col/></colgroup><thead class="- topic/thead thead">
+                            <tr class="- topic/row">
+                                <th class="- topic/entry entry align-left colsep-1 rowsep-1" id="topic_wr5_zpl_sdc__table_osj_wql_sdc__entry__1"><strong class="+ topic/ph hi-d/b ph b">字段名称</strong>
+                                </th>
+                                <th class="- topic/entry entry align-left colsep-1 rowsep-1" id="topic_wr5_zpl_sdc__table_osj_wql_sdc__entry__2"><strong class="+ topic/ph hi-d/b ph b">数据类型</strong>
+                                </th>
+                                <th class="- topic/entry entry align-left colsep-0 rowsep-1" id="topic_wr5_zpl_sdc__table_osj_wql_sdc__entry__3"><strong class="+ topic/ph hi-d/b ph b">数据说明</strong>
+                                </th>
+                            </tr>
+                        </thead><tbody class="- topic/tbody tbody">
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_wr5_zpl_sdc__table_osj_wql_sdc__entry__1">LastPrice </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_wr5_zpl_sdc__table_osj_wql_sdc__entry__2">DOUBLE </td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_wr5_zpl_sdc__table_osj_wql_sdc__entry__3">最新收盘价 </td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_wr5_zpl_sdc__table_osj_wql_sdc__entry__1">PreSetPrice </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_wr5_zpl_sdc__table_osj_wql_sdc__entry__2">DOUBLE </td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_wr5_zpl_sdc__table_osj_wql_sdc__entry__3">前一日结算价 </td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_wr5_zpl_sdc__table_osj_wql_sdc__entry__1">PreCloPrice </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_wr5_zpl_sdc__table_osj_wql_sdc__entry__2">DOUBLE </td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_wr5_zpl_sdc__table_osj_wql_sdc__entry__3">前一日收盘价 </td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_wr5_zpl_sdc__table_osj_wql_sdc__entry__1">OpenPrice </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_wr5_zpl_sdc__table_osj_wql_sdc__entry__2">DOUBLE </td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_wr5_zpl_sdc__table_osj_wql_sdc__entry__3">最新开盘价 </td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_wr5_zpl_sdc__table_osj_wql_sdc__entry__1">HighPrice </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_wr5_zpl_sdc__table_osj_wql_sdc__entry__2">DOUBLE </td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_wr5_zpl_sdc__table_osj_wql_sdc__entry__3">最高价 </td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_wr5_zpl_sdc__table_osj_wql_sdc__entry__1">LowPrice </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_wr5_zpl_sdc__table_osj_wql_sdc__entry__2">DOUBLE </td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_wr5_zpl_sdc__table_osj_wql_sdc__entry__3">最低价 </td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_wr5_zpl_sdc__table_osj_wql_sdc__entry__1">Volume </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_wr5_zpl_sdc__table_osj_wql_sdc__entry__2">INT </td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_wr5_zpl_sdc__table_osj_wql_sdc__entry__3">成交量 </td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_wr5_zpl_sdc__table_osj_wql_sdc__entry__1">Turnover </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_wr5_zpl_sdc__table_osj_wql_sdc__entry__2">DOUBLE </td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_wr5_zpl_sdc__table_osj_wql_sdc__entry__3">成交金额 </td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_wr5_zpl_sdc__table_osj_wql_sdc__entry__1">OpenInt </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_wr5_zpl_sdc__table_osj_wql_sdc__entry__2">INT </td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_wr5_zpl_sdc__table_osj_wql_sdc__entry__3">持仓量 </td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_wr5_zpl_sdc__table_osj_wql_sdc__entry__1">SetPrice </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_wr5_zpl_sdc__table_osj_wql_sdc__entry__2">DOUBLE </td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_wr5_zpl_sdc__table_osj_wql_sdc__entry__3">结算价 </td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_wr5_zpl_sdc__table_osj_wql_sdc__entry__1">ULimitPrice </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_wr5_zpl_sdc__table_osj_wql_sdc__entry__2">DOUBLE </td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_wr5_zpl_sdc__table_osj_wql_sdc__entry__3">当日涨停价 </td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-0" headers="topic_wr5_zpl_sdc__table_osj_wql_sdc__entry__1">LLimitPrice </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-0" headers="topic_wr5_zpl_sdc__table_osj_wql_sdc__entry__2">DOUBLE </td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="topic_wr5_zpl_sdc__table_osj_wql_sdc__entry__3">当日跌停价</td>
+                            </tr>
+                        </tbody></table></div>
+                <p class="- topic/p p">基于上述字段，期货快照行情数据合成的分钟 K 线<strong class="+ topic/ph hi-d/b ph b">指标及计算规则</strong>如下(计算窗口为<strong class="+ topic/ph hi-d/b ph b">左开右闭</strong>):</p>
+                <div class="table-container"><table class="- topic/table table frame-all" id="topic_wr5_zpl_sdc__table_psj_wql_sdc" data-ofbid="topic_wr5_zpl_sdc__table_psj_wql_sdc" data-cols="4"><caption></caption><colgroup><col/><col/><col/><col/></colgroup><thead class="- topic/thead thead">
+                            <tr class="- topic/row">
+                                <th class="- topic/entry entry align-left colsep-1 rowsep-1" id="topic_wr5_zpl_sdc__table_psj_wql_sdc__entry__1"><strong class="+ topic/ph hi-d/b ph b">字段名称</strong>
+                                </th>
+                                <th class="- topic/entry entry align-left colsep-1 rowsep-1" id="topic_wr5_zpl_sdc__table_psj_wql_sdc__entry__2"><strong class="+ topic/ph hi-d/b ph b">数据类型</strong>
+                                </th>
+                                <th class="- topic/entry entry align-left colsep-1 rowsep-1" id="topic_wr5_zpl_sdc__table_psj_wql_sdc__entry__3"><strong class="+ topic/ph hi-d/b ph b">数据说明</strong>
+                                </th>
+                                <th class="- topic/entry entry align-left colsep-0 rowsep-1" id="topic_wr5_zpl_sdc__table_psj_wql_sdc__entry__4"><strong class="+ topic/ph hi-d/b ph b">计算规则</strong>
+                                </th>
+                            </tr>
+                        </thead><tbody class="- topic/tbody tbody">
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_wr5_zpl_sdc__table_psj_wql_sdc__entry__1">OpenPrice </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_wr5_zpl_sdc__table_psj_wql_sdc__entry__2">DOUBLE </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_wr5_zpl_sdc__table_psj_wql_sdc__entry__3">开始价 </td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_wr5_zpl_sdc__table_psj_wql_sdc__entry__4">
+                                    <p class="- topic/p p">计算窗口内的第一条快照行情的最新价</p>
+                                    <ul class="- topic/ul ul" id="topic_wr5_zpl_sdc__ul_qsj_wql_sdc" data-ofbid="topic_wr5_zpl_sdc__ul_qsj_wql_sdc">
+                                        <li class="- topic/li li">如果开盘后没有成交，则为 0</li>
+                                        <li class="- topic/li li">如果盘中计算窗口缺失快照行情，则填充上一根 K 线的收盘价</li>
+                                    </ul>
+                                </td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_wr5_zpl_sdc__table_psj_wql_sdc__entry__1">HighPrice </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_wr5_zpl_sdc__table_psj_wql_sdc__entry__2">DOUBLE </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_wr5_zpl_sdc__table_psj_wql_sdc__entry__3">最高价 </td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_wr5_zpl_sdc__table_psj_wql_sdc__entry__4">
+                                    <p class="- topic/p p">计算窗口内的最高价</p>
+                                    <ul class="- topic/ul ul" id="topic_wr5_zpl_sdc__ul_rsj_wql_sdc" data-ofbid="topic_wr5_zpl_sdc__ul_rsj_wql_sdc">
+                                        <li class="- topic/li li">如果开盘后没有成交，则为 0</li>
+                                        <li class="- topic/li li">如果盘中计算窗口缺失快照行情，则填充上一根 K 线的收盘价</li>
+                                    </ul>
+                                </td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_wr5_zpl_sdc__table_psj_wql_sdc__entry__1">LowPrice </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_wr5_zpl_sdc__table_psj_wql_sdc__entry__2">DOUBLE </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_wr5_zpl_sdc__table_psj_wql_sdc__entry__3">最低价 </td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_wr5_zpl_sdc__table_psj_wql_sdc__entry__4">
+                                    <p class="- topic/p p">计算窗口内的最低价</p>
+                                    <ul class="- topic/ul ul" id="topic_wr5_zpl_sdc__ul_ssj_wql_sdc" data-ofbid="topic_wr5_zpl_sdc__ul_ssj_wql_sdc">
+                                        <li class="- topic/li li">如果开盘后没有成交，则为 0</li>
+                                        <li class="- topic/li li">如果盘中计算窗口缺失快照行情，则填充上一根 K 线的收盘价</li>
+                                    </ul>
+                                </td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_wr5_zpl_sdc__table_psj_wql_sdc__entry__1">ClosePrice </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_wr5_zpl_sdc__table_psj_wql_sdc__entry__2">DOUBLE </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_wr5_zpl_sdc__table_psj_wql_sdc__entry__3">收盘价 </td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_wr5_zpl_sdc__table_psj_wql_sdc__entry__4">
+                                    <p class="- topic/p p">计算窗口内的最后一条快照行情的最新价</p>
+                                    <ul class="- topic/ul ul" id="topic_wr5_zpl_sdc__ul_tsj_wql_sdc" data-ofbid="topic_wr5_zpl_sdc__ul_tsj_wql_sdc">
+                                        <li class="- topic/li li">如果开盘后没有成交，则为 0</li>
+                                        <li class="- topic/li li">如果盘中计算窗口缺失快照行情，则填充上一根 K 线的收盘价</li>
+                                    </ul>
+                                </td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_wr5_zpl_sdc__table_psj_wql_sdc__entry__1">Volume </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_wr5_zpl_sdc__table_psj_wql_sdc__entry__2">LONG </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_wr5_zpl_sdc__table_psj_wql_sdc__entry__3">成交量 </td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_wr5_zpl_sdc__table_psj_wql_sdc__entry__4">计算窗口内的所有快照行情成交量求和，如果缺失快照行情，填充 0 </td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_wr5_zpl_sdc__table_psj_wql_sdc__entry__1">Value </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_wr5_zpl_sdc__table_psj_wql_sdc__entry__2">DOUBLE </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_wr5_zpl_sdc__table_psj_wql_sdc__entry__3">成交金额 </td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_wr5_zpl_sdc__table_psj_wql_sdc__entry__4">
+                                    <p class="- topic/p p">计算窗口内的所有快照行情成交金额求和</p>
+                                    <p class="- topic/p p">如果缺失快照行情，填充 0 </p>
+                                </td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_wr5_zpl_sdc__table_psj_wql_sdc__entry__1">Vwap </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_wr5_zpl_sdc__table_psj_wql_sdc__entry__2">DOUBLE </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_wr5_zpl_sdc__table_psj_wql_sdc__entry__3">均价 </td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_wr5_zpl_sdc__table_psj_wql_sdc__entry__4">计算窗口内的成交金额/成交量 </td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_wr5_zpl_sdc__table_psj_wql_sdc__entry__1">OpenInt </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_wr5_zpl_sdc__table_psj_wql_sdc__entry__2">INT </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_wr5_zpl_sdc__table_psj_wql_sdc__entry__3">持仓量 </td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_wr5_zpl_sdc__table_psj_wql_sdc__entry__4">当前持仓量 </td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_wr5_zpl_sdc__table_psj_wql_sdc__entry__1">PreSetPrice</td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_wr5_zpl_sdc__table_psj_wql_sdc__entry__2">DOUBLE </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_wr5_zpl_sdc__table_psj_wql_sdc__entry__3">昨日结算价 </td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_wr5_zpl_sdc__table_psj_wql_sdc__entry__4">昨日结算价 </td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_wr5_zpl_sdc__table_psj_wql_sdc__entry__1">SetPrice </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_wr5_zpl_sdc__table_psj_wql_sdc__entry__2">DOUBLE </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_wr5_zpl_sdc__table_psj_wql_sdc__entry__3">结算价 </td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_wr5_zpl_sdc__table_psj_wql_sdc__entry__4">当日结算价，在当日交易中按分钟收盘价计算 </td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_wr5_zpl_sdc__table_psj_wql_sdc__entry__1">ULimitPrice </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_wr5_zpl_sdc__table_psj_wql_sdc__entry__2">DOUBLE </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_wr5_zpl_sdc__table_psj_wql_sdc__entry__3">涨停价 </td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_wr5_zpl_sdc__table_psj_wql_sdc__entry__4">当日快照行情中的涨停价，如果盘中计算窗口缺失快照行情，填充上一根 K 线的涨停价
+                                </td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_wr5_zpl_sdc__table_psj_wql_sdc__entry__1">LLimitPrice </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_wr5_zpl_sdc__table_psj_wql_sdc__entry__2">DOUBLE </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_wr5_zpl_sdc__table_psj_wql_sdc__entry__3">跌停价 </td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_wr5_zpl_sdc__table_psj_wql_sdc__entry__4">当日快照行情中的跌停价，如果盘中计算窗口缺失快照行情，填充上一根 K 线的跌停价
+                                </td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-0" headers="topic_wr5_zpl_sdc__table_psj_wql_sdc__entry__1">PreClosePrice </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-0" headers="topic_wr5_zpl_sdc__table_psj_wql_sdc__entry__2">DOUBLE </td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-0" headers="topic_wr5_zpl_sdc__table_psj_wql_sdc__entry__3">昨收价 </td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="topic_wr5_zpl_sdc__table_psj_wql_sdc__entry__4">当日快照行情中的昨收价，如果盘中计算窗口缺失快照行情，填充上一根 K 线的昨日收盘价
+                                </td>
+                            </tr>
+                        </tbody></table></div>
+            </div>
+        </article>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title4" id="topic_tc2_1ql_sdc">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title4">1.2 快照数据合成的规则</h3>
+            <article class="- topic/topic topic nested3" aria-labelledby="ariaid-title5" id="topic_tzn_xql_sdc">
+                <h4 class="- topic/title title topictitle4" id="ariaid-title5">1.2.1. 最高价和最低价的处理 </h4>
+                <div class="- topic/body body">
+                    <p class="- topic/p p">快照行情是时间间隔的数据切片。快照行情中的最高价和最低价数据反映的是从开盘到最新切片时刻的最高价和最低价，而不是切片间隔内的最高价和最低价。但是 K
+                        线中最高价和最低价，则是计算窗口内的最高价和最低价。因此，我们不能简单的以快照行情的最高价和最低价来合成 K 线的最高价和最低价。</p>
+                    <div class="- topic/p p">如果 K 线窗口内的快照行情最高（低）价高（低）于 K 线考虑窗口前的快照行情最高（低）价，则窗口内的快照行情最高（低）价就是 K
+                        线的最高（低）情况价。譬如，窗口内切片数据的最新价分别为 [3.0, 3.0, 3.11, 3.10]，最高价分别为 [3.12, 3.12,
+                        3.12, 3.12]，该窗口前一切片的最高价为 3.11，那么该窗口内最高价为 3.12。如果该窗口前一切片的最高价为
+                        3.12，该怎么计算最高（低）价呢？此时，与业界的常用做法一致，我们选择 lastPrice 的最大（小）值作为 K 线的最大（小）值。分钟 K
+                        线的最高价的自定义计算函数如下:
+                        <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_tzn_xql_sdc__codeblock_jtf_2tl_sdc" data-ofbid="topic_tzn_xql_sdc__codeblock_jtf_2tl_sdc"><code>defg high(deltasHighPrice, highPrice, lastPrice){
+	if(sum(deltasHighPrice)&gt;0.000001){
+		return max(highPrice)
+	}
+	else{
+		return max(lastPrice)
+	}
+}</code></pre></div>
+                    <p class="- topic/p p">参数说明: </p>
+                    <ul class="- topic/ul ul" id="topic_tzn_xql_sdc__ul_xsh_yql_sdc" data-ofbid="topic_tzn_xql_sdc__ul_xsh_yql_sdc">
+                        <li class="- topic/li li"><strong class="+ topic/ph hi-d/b ph b">deltasHighPrice:</strong>
+                            同一个期货合约相邻两个切片快照的当日最高价（highPrice）的差。该差大于0，表示日内的最高价发生在该区间，此时区间内的最高价为该值</li>
+                        <li class="- topic/li li"><strong class="+ topic/ph hi-d/b ph b">highPrice:</strong> 快照行情的当日最高价 </li>
+                        <li class="- topic/li li"><strong class="+ topic/ph hi-d/b ph b">lastPrice:</strong> 快照行情的当日最新价 </li>
+                    </ul>
+                    <p class="- topic/p p">注意，此算法为近似算法，计算窗口内的每个切片最后一条 LastPrice 价格有可能反映不出来整个时间窗口内的最高价和最低价。譬如上面的例子中，K
+                        线窗口前一切片的最高价为 3.12， 根据算法最高价为 lastPrice 的最大值 3.11，但实际上很有可能存在一个成交价 3.12。要得到 K
+                        线真实的最高价和最低价，只能通过逐笔成交数据来计算，而非现在的快照数据。</p>
+                    <div class="- topic/p p">同理，分钟 K 线的最低价的自定义计算函数如下:
+                        <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_tzn_xql_sdc__codeblock_ewh_ftl_sdc" data-ofbid="topic_tzn_xql_sdc__codeblock_ewh_ftl_sdc"><code>defg low(deltasLowPrice, lowPrice, lastPrice){
+	sumDeltas = sum(deltasLowPrice)
+	if(sumDeltas&lt;-0.000001 and sumDeltas!=NULL){
+		return min(iif(LowPrice==0.0, NULL, lowPrice))
+	}
+	else{
+		return min(lastPrice)
+	}
+}</code></pre></div>
+                    <p class="- topic/p p">参数说明: </p>
+                    <ul class="- topic/ul ul" id="topic_tzn_xql_sdc__ul_zsh_yql_sdc" data-ofbid="topic_tzn_xql_sdc__ul_zsh_yql_sdc">
+                        <li class="- topic/li li"><strong class="+ topic/ph hi-d/b ph b">deltasLowPrice:</strong> 同一个期货合约相邻两个切片快照的当日最低价（LowPrice）的差
+                            。该差小于0，表示日内的最低价发生在该区间，此时区间内的最低价为该值</li>
+                        <li class="- topic/li li"><strong class="+ topic/ph hi-d/b ph b">lowPrice:</strong> 快照行情的当日最低价 </li>
+                        <li class="- topic/li li"><strong class="+ topic/ph hi-d/b ph b">lastPrice:</strong> 快照行情的当日最新价 </li>
+                    </ul>
+                </div>
+            </article>
+            <article class="- topic/topic topic nested3" aria-labelledby="ariaid-title6" id="topic_vnj_zql_sdc">
+                <h4 class="- topic/title title topictitle4" id="ariaid-title6">1.2.2. 成交量、成交额和成交笔数的处理</h4>
+                <div class="- topic/body body">
+                    <p class="- topic/p p">快照行情中的成交量、成交金额和成交笔数都是日累计求和值，所以在进行滚动窗口计算前，需要先求出两笔相邻快照的增量。使用DolphinDB 内置的 <a class="- topic/xref xref" href="../funcs/d/deltas.html">deltas</a> 函数和<a class="- topic/xref xref" href="../progr/sql/contextBy.html"> context by SQL</a>
+                        语句进行数据预处理，具体处理代码下文会详细介绍。 </p>
+                </div>
+            </article>
+            <article class="- topic/topic topic nested3" aria-labelledby="ariaid-title7" id="topic_kt2_2rl_sdc">
+                <h4 class="- topic/title title topictitle4" id="ariaid-title7">1.2.3. 开盘以后没有成交 </h4>
+                <div class="- topic/body body">
+                    <p class="- topic/p p">部分成交不活跃的期货，09:00:00 开始交易后一直没有成交，但是快照行情会正常推送。 </p>
+                    <p class="- topic/p p">针对开盘以后一直没有成交的计算窗口，本教程处理规则如下: </p>
+                    <ul class="- topic/ul ul" id="topic_kt2_2rl_sdc__ul_m3r_krl_sdc" data-ofbid="topic_kt2_2rl_sdc__ul_m3r_krl_sdc">
+                        <li class="- topic/li li">OpenPrice, HighPrice, LowPrice, ClosePrice, Volume, Value 为 0 </li>
+                        <li class="- topic/li li">PreClosePrice, ULimitPrice, LLimitPrice 为快照行情中对应的值 </li>
+                    </ul>
+                </div>
+            </article>
+            <article class="- topic/topic topic nested3" aria-labelledby="ariaid-title8" id="topic_jy3_2rl_sdc">
+                <h4 class="- topic/title title topictitle4" id="ariaid-title8">1.2.4. 盘中计算窗口内没有成交 </h4>
+                <div class="- topic/body body">
+                    <p class="- topic/p p">部分成交不活跃的期货，会出现盘中某些计算窗口内完全没有成交，但是快照行情会正常推送。 </p>
+                    <p class="- topic/p p">针对盘中没有成交的计算窗口，本教程处理规则如下: </p>
+                    <ul class="- topic/ul ul" id="topic_jy3_2rl_sdc__ul_xmy_krl_sdc" data-ofbid="topic_jy3_2rl_sdc__ul_xmy_krl_sdc">
+                        <li class="- topic/li li">OpenPrice, HighPrice, LowPrice, ClosePrice 等于前一根 K 线的 ClosePrice </li>
+                        <li class="- topic/li li">Volume, Value 为 0 </li>
+                        <li class="- topic/li li">PreClosePrice, ULimitPrice, LLimitPrice 等于前一根 K 线对应的值 </li>
+                    </ul>
+                </div>
+            </article>
+        </article>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title9" id="topic_pjf_1ql_sdc">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title9">1.3 分钟 K 线计算步骤</h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p">以下部分将详细介绍附录中模块关于历史期货快照数据进行分钟 K 线计算的步骤</p>
+            </div>
+            <article class="- topic/topic topic nested3" aria-labelledby="ariaid-title10" id="topic_bwn_mrl_sdc">
+                <h4 class="- topic/title title topictitle4" id="ariaid-title10">1.3.1. 根据不同期货品种生成分钟 K 线对齐表</h4>
+                <div class="- topic/body body">
+                    <p class="- topic/p p">由于不同期货品种的交易时间不同，需根据各期货品种的交易时段及交易代码，生成一个用于对齐分钟K线的对齐表。该对齐表将包含每个期货品种在其交易时段内的完整分钟数据。</p>
+                    <div class="- topic/p p">以上证50指数、沪深300指数、中证500指数和中证1000指数期货为例，它们的交易时间为 9:30-11:30 和13:00-15:15。为了计算 1
+                        分钟 K 线数据，对齐表将包括这些指数期货在 9:30-11:30 及 13:00-15:15 两个时段内的每一分钟数据。<div class="- topic/note note note note_note" id="topic_bwn_mrl_sdc__note_hcs_jds_sdc" data-ofbid="topic_bwn_mrl_sdc__note_hcs_jds_sdc"><span class="note__title">注：</span> 
+                            <p class="- topic/p p">关于对齐表的详细生成部分，可<strong class="+ topic/ph hi-d/b ph b"><a class="- topic/xref xref" href="#topic_lyb_vpl_sdc">参考附录模块</a></strong>。</p>
+                        </div></div>
+                </div>
+            </article>
+            <article class="- topic/topic topic nested3" aria-labelledby="ariaid-title11" id="topic_xyy_mrl_sdc">
+                <h4 class="- topic/title title topictitle4" id="ariaid-title11">1.3.2. 定义计算分钟 K 线的函数</h4>
+                <div class="- topic/body body">
+                    <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">原始快照行情数据的初步处理</strong></p>
+                    <p class="- topic/p p">以原始行情数据表为参数，对原始行情数据表按分钟频率进行处理，包括: </p>
+                    <ul class="- topic/ul ul" id="topic_xyy_mrl_sdc__ul_xj2_qpq_sdc" data-ofbid="topic_xyy_mrl_sdc__ul_xj2_qpq_sdc">
+                        <li class="- topic/li li">计算同一个期货的两笔相邻快照的最高价和最低价的变化幅度 ；</li>
+                        <li class="- topic/li li">利用 <code class="+ topic/ph pr-d/codeph ph codeph">deltas</code> 函数计算相邻元素之差，后续一分钟 K 线中 Volume、Turnover
+                            应为一分钟内的DeltasVolume、DeltasTurnover 之和。</li>
+                        <li class="- topic/li li">计算同一个期货的两笔相邻快照的成交量、成交金额和成交笔数的增量，生成表 tempTB1 。</li>
+                    </ul>
+                    <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">进行 N 分钟窗口和 N 分钟步长的聚合计算 </strong></p>
+                    <p class="- topic/p p">针对处理后的快照行情 tempTB1 进行窗口为 N 分钟、步长为 N 分钟的滚动窗口计算，生成表 tempTB2。重要处理步骤如下: </p>
+                    <ul class="- topic/ul ul" id="topic_xyy_mrl_sdc__ul_tmr_spq_sdc" data-ofbid="topic_xyy_mrl_sdc__ul_tmr_spq_sdc">
+                        <li class="- topic/li li">调用了自定义函数 <code class="+ topic/ph pr-d/codeph ph codeph">high</code> 和 <code class="+ topic/ph pr-d/codeph ph codeph">low</code> 计算 K
+                            线的最高价和最低价；</li>
+                        <li class="- topic/li li">调用 DolphinDB 内置函数 <code class="+ topic/ph pr-d/codeph ph codeph">interval</code>，以 60 秒作为 duration
+                            对数据基于日期时间进行降频处理。在此步骤时，针对盘中计算窗口缺失快照行情的情况，统一用0填充，后面会针对全部为 0 的 K
+                            线填充数据进一步处理；</li>
+                        <li class="- topic/li li">聚合计算变量包括交易所代码，期货代码，交易日，结算日以及降维之后的日期时间。<div class="- topic/note note note note_note" id="topic_xyy_mrl_sdc__note_ikk_sds_sdc" data-ofbid="topic_xyy_mrl_sdc__note_ikk_sds_sdc"><span class="note__title">注：</span> 
+                                <p class="- topic/p p">对于 interval 函数具体用法与参数可参考文档 <a class="- topic/xref xref" href="../progr/sql/interval.html">interval函数</a>。参数中的
+                                        <em class="+ topic/ph hi-d/i ph i">label</em>字符串，表示将分组区间的哪一个边界作为 label 输出，可取值为 'left' 或
+                                        'right'。本教程中期货数据的分钟频数据根据分组区间<strong class="+ topic/ph hi-d/b ph b">右边界</strong>输出，可根据具体需求调整 label
+                                    参数。</p>
+                            </div></li>
+                    </ul>
+                    <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">对齐每日 K 线，填充缺失快照行情计算窗口</strong></p>
+                    <p class="- topic/p p">对于聚合计算后生成的分钟频表 tempTB2 中的期货代码进行标准化处理后，提取 tempTB2 表中期货代码，并将 tempTB2
+                        的分钟频数据和每个期货对应品种的时间段对齐得到表 result 。</p>
+                    <p class="- topic/p p">针对 result 进行如下处理，得到最终 K 线表 res : </p>
+                    <ul class="- topic/ul ul" id="topic_xyy_mrl_sdc__ul_k2m_bqq_sdc" data-ofbid="topic_xyy_mrl_sdc__ul_k2m_bqq_sdc">
+                        <li class="- topic/li li">针对盘中没有成交的计算窗口，OpenPrice, HighPrice, LowPrice, ClosePrice用前一根 K 线的
+                            ClosePrice 填充 ，PreClosePrice 用前一根 K 线对应的值填充</li>
+                        <li class="- topic/li li">删除盘中交易时间、收盘价为空的数据</li>
+                        <li class="- topic/li li">SortCo 数据全部大写处理</li>
+                    </ul>
+                </div>
+            </article>
+        </article>
+    </article>
+    <article class="- topic/topic topic nested1" aria-labelledby="ariaid-title12" id="topic_xkz_5pl_sdc">
+        <h2 class="- topic/title title topictitle2" id="ariaid-title12">2. 基于历史快照行情合成主连行情</h2>
+        <div class="- topic/body body">
+            <p class="- topic/p p">在期货市场中，我们主要关注主连合约的报价，即主力合约的连续表现。在不同市场中，主连合约的切换遵循特定的规则。一般来说，各市场的主力合约需符合以下通用规则:</p>
+            <ul class="- topic/ul ul" id="topic_xkz_5pl_sdc__ul_opq_rrl_sdc" data-ofbid="topic_xkz_5pl_sdc__ul_opq_rrl_sdc">
+                <li class="- topic/li li">每个期货品种只能选定一个主力合约；</li>
+                <li class="- topic/li li">主力合约的最后交易日必须晚于当前日期。如果某个合约今天是最后交易日，通常它不会被选为主力合约；</li>
+                <li class="- topic/li li">主力合约通常基于日成交量、持仓量或者用户确定的切换日期来确定。</li>
+            </ul>
+            <p class="- topic/p p">基于期货快照行情数据合成的主连行情表结构相比于上文中的分钟指标表结构，增加了以下几个列：</p>
+            <div class="table-container"><table class="- topic/table table frame-all" id="topic_xkz_5pl_sdc__table_ppq_rrl_sdc" data-ofbid="topic_xkz_5pl_sdc__table_ppq_rrl_sdc" data-cols="4"><caption></caption><colgroup><col/><col/><col/><col/></colgroup><thead class="- topic/thead thead">
+                        <tr class="- topic/row">
+                            <th class="- topic/entry entry align-left colsep-1 rowsep-1" id="topic_xkz_5pl_sdc__table_ppq_rrl_sdc__entry__1"><strong class="+ topic/ph hi-d/b ph b">字段名称</strong>
+                            </th>
+                            <th class="- topic/entry entry align-left colsep-1 rowsep-1" id="topic_xkz_5pl_sdc__table_ppq_rrl_sdc__entry__2"><strong class="+ topic/ph hi-d/b ph b">数据类型</strong>
+                            </th>
+                            <th class="- topic/entry entry align-left colsep-1 rowsep-1" id="topic_xkz_5pl_sdc__table_ppq_rrl_sdc__entry__3"><strong class="+ topic/ph hi-d/b ph b">数据说明</strong>
+                            </th>
+                            <th class="- topic/entry entry align-left colsep-0 rowsep-1" id="topic_xkz_5pl_sdc__table_ppq_rrl_sdc__entry__4"><strong class="+ topic/ph hi-d/b ph b">计算规则</strong>
+                            </th>
+                        </tr>
+                    </thead><tbody class="- topic/tbody tbody">
+                        <tr class="- topic/row">
+                            <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_xkz_5pl_sdc__table_ppq_rrl_sdc__entry__1">backwardFactor</td>
+                            <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_xkz_5pl_sdc__table_ppq_rrl_sdc__entry__2">DOUBLE</td>
+                            <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_xkz_5pl_sdc__table_ppq_rrl_sdc__entry__3">后复权因子</td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_xkz_5pl_sdc__table_ppq_rrl_sdc__entry__4">后复权因子，
+                                前一次后复权因子*前主力合约ClosePrice/主力合约PreClosePrice</td>
+                        </tr>
+                        <tr class="- topic/row">
+                            <td class="- topic/entry entry align-left colsep-1 rowsep-0" headers="topic_xkz_5pl_sdc__table_ppq_rrl_sdc__entry__1">forwardFactor</td>
+                            <td class="- topic/entry entry align-left colsep-1 rowsep-0" headers="topic_xkz_5pl_sdc__table_ppq_rrl_sdc__entry__2">DOUBLE</td>
+                            <td class="- topic/entry entry align-left colsep-1 rowsep-0" headers="topic_xkz_5pl_sdc__table_ppq_rrl_sdc__entry__3">前复权因子</td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="topic_xkz_5pl_sdc__table_ppq_rrl_sdc__entry__4">前复权因子，前一次前复权因子*主力合约PreClosePrice/前主力合约ClosePrice</td>
+                        </tr>
+                    </tbody></table></div>
+            <p class="- topic/p p">期货市场中最活跃、交易量最大的合约称为主力合约。当交易者滚动持仓时，关注点转移至下一个主力合约，可能导致合约之间的跳空，即相邻合约之间出现较大的价格差距。为处理连续合约的跳空问题，采取复权调整历史数据，以更准确地反映资产的真实价值。一般有两种复权方法：</p>
+            <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">前复权（向前复权）</strong>: 将历史数据调整为当时价格变动前的价位，适用于回测和研究分析。</p>
+            <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">后复权（向后复权）</strong>: 将历史数据调整为当时价格变动后的价位，更符合实际操作情况。</p>
+        </div>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title13" id="topic_fm3_1ql_sdc">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title13">2.1 定义 <code class="+ topic/ph pr-d/codeph ph codeph">adjustFactor</code> 函数，计算复权因子 </h3>
+            <article class="- topic/topic topic nested3" aria-labelledby="ariaid-title14" id="topic_z4l_srl_sdc">
+                <h4 class="- topic/title title topictitle4" id="ariaid-title14">2.1.1 计算后复权因子</h4>
+                <div class="- topic/body body">
+                    <p class="- topic/p p">后复权方式的思路是以首日合约价格水平为基准，调整后续合约价格以保证连续性。</p>
+                    <ul class="- topic/ul ul" id="topic_z4l_srl_sdc__ul_dfl_trl_sdc" data-ofbid="topic_z4l_srl_sdc__ul_dfl_trl_sdc">
+                        <li class="- topic/li li"><code class="+ topic/ph pr-d/codeph ph codeph"><code class="+ topic/ph pr-d/codeph ph codeph">adjustFactor</code></code> 函数以 result 主力分钟频 K
+                            线表，temp 主力日频表作为输入参数，并通过主力日频表获得需要更新的交易日。</li>
+                        <li class="- topic/li li">首先设置后复权首日因子为1，并将首日与后续日期数据分开分别存入表 temImprove0 和表
+                            temImprove1。将首日之后数据的表格与完整日期的表格 temImprove
+                            进行左连接，将当日与前日对比，判断主连行情是否改变。</li>
+                        <li class="- topic/li li">计算后复权因子（adjustFactor）:若主连行情未改变，后复权因子不进行调整；若主连行情发生改变，通过公式
+                            backwardFactor（前一日复权因子）* forwardClosePrice（前一日主力合约收盘价）/
+                            PreClosePrice（当日主力合约前一日收盘价）计算后复权因子</li>
+                        <li class="- topic/li li">复权因子连乘:计算出当日复权因子之后，通过 <code class="+ topic/ph pr-d/codeph ph codeph">cumprod</code> 函数将复权因子进行连乘用于后续调整价格</li>
+                        <li class="- topic/li li">在进行左连表格操作时，需要找回首次出现的主连行情代码。注意：首次复权值均为 1 ，因此对结果没有影响。比如，5 月 14 日左连至 5 月 13
+                            日数据，但 5 月 14 日出现了 <code class="+ topic/ph pr-d/codeph ph codeph">rr</code> 品种，而 5 月 13 日没有该品种，在左连时 5 月 14 日的
+                                <code class="+ topic/ph pr-d/codeph ph codeph">rr</code> 品种会丢失，因此需要对首日丢失的数据进行复权找回。</li>
+                    </ul>
+                </div>
+            </article>
+            <article class="- topic/topic topic nested3" aria-labelledby="ariaid-title15" id="topic_wqq_srl_sdc">
+                <h4 class="- topic/title title topictitle4" id="ariaid-title15">2.1.2 计算前复权因子</h4>
+                <div class="- topic/body body">
+                    <p class="- topic/p p">前复权方式的思路是以最新主力合约价格水平为基准，调整历史合约价格以保证连续性。</p>
+                    <ul class="- topic/ul ul" id="topic_wqq_srl_sdc__ul_q15_trl_sdc" data-ofbid="topic_wqq_srl_sdc__ul_q15_trl_sdc">
+                        <li class="- topic/li li">首先设置最后一日前复权因子为 1，并将最后一日与之前日期数据分开分别存入表 temImprove0 和表
+                            temImprove1。将最后一日之前数据的表格与完整日期的表格
+                            temImprove进行左连，将当日与后一日对比，判断主连行情是否改变。</li>
+                        <li class="- topic/li li">计算前复权因子（adjustFactorRes）:若主连行情未改变，前复权因子不进行调整；若主连行情发生改变，通过公式
+                            forwardFactor（后一日复权因子）* backwardPreClosePrice（后一日主力合约收盘价）/
+                            ClosePrice（主力合约收盘价）计算前复权因子</li>
+                        <li class="- topic/li li">复权因子连乘:计算出当日复权因子之后，通过 <code class="+ topic/ph pr-d/codeph ph codeph">cumprod</code> 函数将复权因子进行连乘用于后续调整价格</li>
+                        <li class="- topic/li li">找回左连表格时，首次出现的主连行情代码。注意:首次复权都为1，因此不影响结果</li>
+                    </ul>
+                </div>
+            </article>
+        </article>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title16" id="topic_zyj_1ql_sdc">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title16">2.2 将前后复权因子以及对应 OHLC 价格加入终表</h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p">将主力分钟频 K 线表、上一步计算输出的后复权因子表 adjustFactor、前复权因子表 adjustFactorRes
+                    进行<strong class="+ topic/ph hi-d/b ph b">左连接</strong>，以此将复权因子数据以及对应的 OHLC 价格加入目标表。</p>
+            </div>
+        </article>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title17" id="topic_frk_1ql_sdc">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title17">2.3 计算 startDate 到 endDate 的主连行情</h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p">定义聚合函数，以 startDate 和 endDate 作为参数输入，计算这段时间的主连行情。</p>
+                <ul class="- topic/ul ul" id="topic_frk_1ql_sdc__ul_ok1_wrl_sdc" data-ofbid="topic_frk_1ql_sdc__ul_ok1_wrl_sdc">
+                    <li class="- topic/li li">通过 <code class="+ topic/ph pr-d/codeph ph codeph">temporalAdd</code> 函数，分别计算出 startDate 和 endDate
+                        前一个交易日的日期（startDate1、endDate1）。并从库表中导入 startDate1 到 endDate 的分钟频 K 线数据 res
+                        。</li>
+                    <li class="- topic/li li">从分钟频 K 线数据 res 中获取需要计算的交易日。</li>
+                    <li class="- topic/li li">判断主力合约:分别计算每日结束时的成交量和持仓，注意:<strong class="+ topic/ph hi-d/b ph b">国债期货</strong>与<strong class="+ topic/ph hi-d/b ph b">商品期货</strong>判断主力方式不同：<ul class="- topic/ul ul" id="topic_frk_1ql_sdc__ul_pk1_wrl_sdc" data-ofbid="topic_frk_1ql_sdc__ul_pk1_wrl_sdc">
+                            <li class="- topic/li li">商品期货代码（<strong class="+ topic/ph hi-d/b ph b">持仓量+成交量</strong>）最大，提取当日主力记作 tb。</li>
+                            <li class="- topic/li li">国债期货主力计算逻辑为（<strong class="+ topic/ph hi-d/b ph b">持仓量</strong>）最大，提取主力记作 tbCN。</li>
+                        </ul></li>
+                    <li class="- topic/li li">从 res 提取 startDate 到 endDate 分钟频数据并根据 tb 中前一日主力代码确定分钟频数据里的当日主力，得到主连行情
+                        result。</li>
+                    <li class="- topic/li li">从库表提取历史主连行情表，并与前一步生成的新的主连行情 result 进行合并。通过 <code class="+ topic/ph pr-d/codeph ph codeph">group by</code> 处理
+                        result 得到日频数据 tempt，用于计算复权因子。</li>
+                    <li class="- topic/li li">最后调用第一步定义的 <code class="+ topic/ph pr-d/codeph ph codeph"><code class="+ topic/ph pr-d/codeph ph codeph">adjustFactor</code></code> 函数得到主连行情。</li>
+                </ul>
+            </div>
+        </article>
+    </article>
+    <article class="- topic/topic topic nested1" aria-labelledby="ariaid-title18" id="topic_gy1_vpl_sdc">
+        <h2 class="- topic/title title topictitle2" id="ariaid-title18">3. 基于实时期货快照数据合成 K 线</h2>
+        <div class="- topic/body body">
+            <p class="- topic/p p">本部分将详细介绍如何在 DolphinDB 中搭建期货快照数据的分钟 K 线实时计算流框架。关于 DolphinDB 的流数据功能的基础概念可以参考官网教程: <a class="- topic/xref xref" href="../stream/str_intro.html">流数据</a>。 需要说明的是，实时数据与上文中历史数据的分钟 K
+                线计算逻辑是一致的。</p>
+            <p class="- topic/p p">基于实时快照行情合成 K 线的流程图如下:</p>
+            <img class="- topic/image image" id="topic_gy1_vpl_sdc__image_kvb_t5l_sdc" src="images/k_line_calculation/3_1.jpg"/>
+            <p class="- topic/p p">接下来介绍期货快照数据流计算框架的搭建步骤，<strong class="+ topic/ph hi-d/b ph b">详细代码</strong>可参考附录模块的 <code class="+ topic/ph pr-d/codeph ph codeph">streamFrame.dos</code> 部分</p>
+            <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">第一步:定义原始行情流表</strong></p>
+            <p class="- topic/p p">首先创建与实时数据结构一致的源数据流表。注意每次运行前需要清理掉相关的流数据表和引擎。</p>
+            <p class="- topic/p p">说明: <code class="+ topic/ph pr-d/codeph ph codeph">enableTableShareAndPersistence</code>
+                函数在使用时，需要在配置文件中（单节点：dolphindb.cfg，集群：cluster.cfg）指定配置参数
+                    <em class="+ topic/ph hi-d/i ph i">persistenceDir</em>，配置参考<a class="- topic/xref xref" href="../db_distr_comp/cfg/function_configuration.html">功能配置</a>。</p>
+            <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_gy1_vpl_sdc__codeblock_r4d_2vl_sdc" data-ofbid="topic_gy1_vpl_sdc__codeblock_r4d_2vl_sdc"><code>temp = streamTable(100:0, colNames , colTypes)
+enableTableShareAndPersistence(table=temp, tableName=`quotationTable, cacheSize=1200000)</code></pre>
+            <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">第二步:定义中间的临时流表</strong></p>
+            <p class="- topic/p p">首先定义一个临时流表，用于储存响应式状态引擎计算结果。其次通过 <code class="+ topic/ph pr-d/codeph ph codeph">createReactiveStateEngine</code>
+                创建响应式状态引擎计算中间变量，如当日最高价，当日最低价（根据自定义最高价最低价函数），日累计成交量的差，日累计成交金额的差。最后订阅原始行情，即原始行情表实时流入的数据会及时发布到引擎，实时完成对原始行情的加工。</p>
+            <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">第三步:定义分钟线输出表，通过时序聚合引擎实时计算分钟数据</strong></p>
+            <p class="- topic/p p">首先以交易时间和期货标的代码作为主键创建键值流数据表作为我们的目标表，用于实现流数据的幂等性写入，即多次写入键值相同的数据，其结果与第一次写入的结果相同，从而避免数据重复写入。向表中添加新记录时，系统会自动检查新记录的主键值:</p>
+            <ul class="- topic/ul ul" id="topic_gy1_vpl_sdc__ul_e51_fvl_sdc" data-ofbid="topic_gy1_vpl_sdc__ul_e51_fvl_sdc">
+                <li class="- topic/li li">如果新记录的主键值与内存中已有记录的主键值重复时，已有的记录不会被更新。</li>
+                <li class="- topic/li li">一次性批量插入新记录时，若有多条记录具有相同的主键值，且该主键值与已有记录的主键值不同，只有第一条记录能成功插入。</li>
+            </ul>
+            <p class="- topic/p p">接着使用 <code class="+ topic/ph pr-d/codeph ph codeph">createTimeSeriesEngine</code>
+                创建流数据时间序列引擎，以实现基于时间的滚动窗口进行实时计算。如一分钟K线的生成，参数 <em class="+ topic/ph hi-d/i ph i">windowSize </em>和 <em class="+ topic/ph hi-d/i ph i">step </em>设置为
+                60000 毫秒即 60 秒。</p>
+            <p class="- topic/p p">订阅原始行情之后，时间序列引擎会将计算结果插入之前创建的键值流表。</p>
+            <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">第四步:开始计算，往流表注入数据</strong></p>
+            <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_gy1_vpl_sdc__codeblock_kzk_fvl_sdc" data-ofbid="topic_gy1_vpl_sdc__codeblock_kzk_fvl_sdc"><code>// 这里假设流表名称为: snapStream
+objByName(`snapStream).append!(tb)
+sleep(10000)
+select top 100* from outputKlineTable</code></pre>
+            <p class="- topic/p p">以下为流表中的部分 1 分钟数据: </p>
+            <img class="- topic/image image" id="topic_gy1_vpl_sdc__image_kq5_hvl_sdc" src="images/k_line_calculation/3_2.png"/>
+        </div>
+    </article>
+    <article class="- topic/topic topic nested1" aria-labelledby="ariaid-title19" id="topic_d3b_vpl_sdc">
+        <h2 class="- topic/title title topictitle2" id="ariaid-title19">4. 期货快照数据分钟 K 线计算模块</h2>
+        <div class="- topic/body body">
+            <p class="- topic/p p">在上文中，我们详细介绍了如何通过期货快照历史数据计算分钟 K 线，以及合成主连行情；除此之外，还介绍了在流数据场景中，如何实时计算分钟 K 线。</p>
+            <p class="- topic/p p">本部分将详细介绍分钟 K 线计算模块
+                <code class="+ topic/ph pr-d/codeph ph codeph">FuturesOLHC</code>，该模块封装了上文中介绍的计算逻辑，通过调用该模块的函数，便可以方便快捷地实现期货快照数据历史计算及主连行情合成和实时计算。</p>
+        </div>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title20" id="topic_nfs_1ql_sdc">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title20">4.1 模块结构与功能</h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p"><code class="+ topic/ph pr-d/codeph ph codeph">FuturesOLHC</code> DolphinDB 模块的文件结构为：</p>
+                <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_nfs_1ql_sdc__codeblock_gqr_gsl_sdc" data-ofbid="topic_nfs_1ql_sdc__codeblock_gqr_gsl_sdc"><code>FuturesOLHC/
+├── batchFrame.dos
+├── createTable.dos
+├── streamFrame.dos
+├── tableSchema.dos
+└── utils.dos</code></pre>
+                <p class="- topic/p p">其中，每个文件的功能分别为：</p>
+                <div class="table-container"><table class="- topic/table table frame-all" id="topic_nfs_1ql_sdc__table_nxm_hsl_sdc" data-ofbid="topic_nfs_1ql_sdc__table_nxm_hsl_sdc" data-cols="2"><caption></caption><colgroup><col/><col/></colgroup><thead class="- topic/thead thead">
+                            <tr class="- topic/row">
+                                <th class="- topic/entry entry align-left colsep-1 rowsep-1" id="topic_nfs_1ql_sdc__table_nxm_hsl_sdc__entry__1"><strong class="+ topic/ph hi-d/b ph b">文件名</strong></th>
+                                <th class="- topic/entry entry align-left colsep-0 rowsep-1" id="topic_nfs_1ql_sdc__table_nxm_hsl_sdc__entry__2"><strong class="+ topic/ph hi-d/b ph b">功能</strong></th>
+                            </tr>
+                        </thead><tbody class="- topic/tbody tbody">
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_nfs_1ql_sdc__table_nxm_hsl_sdc__entry__1"><code class="+ topic/ph pr-d/codeph ph codeph">utils.dos</code></td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_nfs_1ql_sdc__table_nxm_hsl_sdc__entry__2">定义整个模块需要用到的辅助函数</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_nfs_1ql_sdc__table_nxm_hsl_sdc__entry__1"><code class="+ topic/ph pr-d/codeph ph codeph">tableSchema.dos</code></td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_nfs_1ql_sdc__table_nxm_hsl_sdc__entry__2">定义期货快照数据及分钟指标的表结构函数</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_nfs_1ql_sdc__table_nxm_hsl_sdc__entry__1"><code class="+ topic/ph pr-d/codeph ph codeph">createTable.dos</code></td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_nfs_1ql_sdc__table_nxm_hsl_sdc__entry__2">定义创建相应持久化库表的函数</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_nfs_1ql_sdc__table_nxm_hsl_sdc__entry__1"><code class="+ topic/ph pr-d/codeph ph codeph">batchFrame.dos</code></td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_nfs_1ql_sdc__table_nxm_hsl_sdc__entry__2">定义计算历史期货快照数据分钟K线和主连行情的函数</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-0" headers="topic_nfs_1ql_sdc__table_nxm_hsl_sdc__entry__1"><code class="+ topic/ph pr-d/codeph ph codeph">loadAllData.dos</code></td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="topic_nfs_1ql_sdc__table_nxm_hsl_sdc__entry__2">定义搭建实时期货快照数据分钟K线的流计算框架的函数</td>
+                            </tr>
+                        </tbody></table></div>
+            </div>
+        </article>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title21" id="topic_z1t_1ql_sdc">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title21">4.2 模块导入</h3>
+            <div class="- topic/body body">
+                <div class="- topic/bodydiv bodydiv">
+                    <p class="- topic/p p">下载 DolphinDB 模块 <code class="+ topic/ph pr-d/codeph ph codeph">FuturesOLHC</code> 之后，需要将其同步到服务器上，当在 DolphinDB
+                        调用模块时，会到相应路径下查找需要的模块文件。关于 DolphinDB 模块部分的详细介绍，可参考：<a class="- topic/xref xref" href="tu_modules.html">模块</a>。</p>
+                    <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">同步路径</strong></p>
+                    <p class="- topic/p p">将模块放置于<strong class="+ topic/ph hi-d/b ph b">节点所在 Home 目录的 module 目录下</strong>，节点所在 Home 目录可通过
+                            <code class="+ topic/ph pr-d/codeph ph codeph">getHomeDir</code> 函数获取， <strong class="+ topic/ph hi-d/b ph b">假设</strong> Home 目录为:
+                        /DolphinDB/server，那么需要将模块文件放置于 /DolphinDB/server/modules/ 路径下。</p>
+                    <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">如何同步</strong></p>
+                    <ul class="- topic/ul ul" id="topic_z1t_1ql_sdc__ul_hpb_3sl_sdc" data-ofbid="topic_z1t_1ql_sdc__ul_hpb_3sl_sdc">
+                        <li class="- topic/li li">使用 xftp 等传输软件，将模块传输至服务器上指定的路径。</li>
+                        <li class="- topic/li li">使用 scp 命令：<code class="+ topic/ph pr-d/codeph ph codeph">scp -r FuturesOLHC
+                                &lt;user&gt;@&lt;服务器ip&gt;:/DolphinDB/server/modules/</code>。</li>
+                    </ul>
+                </div>
+            </div>
+        </article>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title22" id="topic_pnt_1ql_sdc">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title22">4.3 如何使用模块</h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p">以下部分详细介绍 <code class="+ topic/ph pr-d/codeph ph codeph">FuturesOLHC</code>
+                    模块的用法，完整示例代码可参考附件：<code class="+ topic/ph pr-d/codeph ph codeph">demo.dos</code></p>
+            </div>
+            <article class="- topic/topic topic nested3" aria-labelledby="ariaid-title23" id="topic_atc_ksl_sdc">
+                <h4 class="- topic/title title topictitle4" id="ariaid-title23">4.3.1 创建期货快照数据和分钟 K 线数据持久化表 </h4>
+                <div class="- topic/body body">
+                    <p class="- topic/p p">以下示例中基于商品期货和国债期货交易频率与市场规模的特性，演示了商品期货和国债期货快照数据和分钟数据分区表的创建：</p>
+                    <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_atc_ksl_sdc__codeblock_bxj_nsl_sdc" data-ofbid="topic_atc_ksl_sdc__codeblock_bxj_nsl_sdc"><code>/ 引入模块文件
+use FuturesOLHC::createTable
+// 商品期货快照数据数据库名
+comdtySnapDbname = "dfs://comdtySnapDb"
+// 商品期货快照数据数据表名
+comdtySnapTbname = "comdtySnapTb"
+// 商品期货分钟和主连数据库名
+comdtyMinDbname = "dfs://comdtyMin"
+// 商品期货分钟数据表名
+comdtyMinTbname = "futurePrice1Min"
+// 商品期货分钟数据主连行情数据表名
+comdtyZlTbname = "futurePrice1MinZl"
+
+// 国债期货快照数据数据库名
+rtSnapDbname = "dfs://rtSnapDb"
+// 国债期货快照数据数据表名
+rtSnapTbname = "rtSnapTb"
+// 国债期货分钟和主连数据库名
+rtMinDbname = "dfs://rtMin"
+// 国债期货分钟数据表名
+rtMinTbname = "futurePrice1Min"
+// 国债期货分钟数据主连行情数据表名
+rtZlTbname = "futurePrice1MinZl"
+
+// 根据指定参数创建相应库表
+createComdtyFuturesDfs(comdtySnapDbname, comdtySnapTbname)
+createComdtyFuturesMinDfs(comdtyMinDbname, comdtyMinTbname)
+createComdtyFuturesZlDfs(comdtyMinDbname, comdtyZlTbname)
+
+createRtFuturesDfs(rtSnapDbname, rtSnapTbname)
+createRtFuturesMinDfs(rtMinDbname, rtMinTbname)
+createRtFuturesZlDfs(rtMinDbname, rtZlTbname)</code></pre>
+                    <p class="- topic/p p">其中，以创建商品期货分钟 K 线持久化库表函数 <code class="+ topic/ph pr-d/codeph ph codeph">createComdtyFuturesDfs</code>
+                        为例，需要传入两个参数，分别为：</p>
+                    <div class="table-container"><table class="- topic/table table frame-all" id="topic_atc_ksl_sdc__table_bx1_4sl_sdc" data-ofbid="topic_atc_ksl_sdc__table_bx1_4sl_sdc" data-cols="2"><caption></caption><colgroup><col/><col/></colgroup><thead class="- topic/thead thead">
+                                <tr class="- topic/row">
+                                    <th class="- topic/entry entry align-left colsep-1 rowsep-1" id="topic_atc_ksl_sdc__table_bx1_4sl_sdc__entry__1"><strong class="+ topic/ph hi-d/b ph b">参数名</strong></th>
+                                    <th class="- topic/entry entry align-left colsep-0 rowsep-1" id="topic_atc_ksl_sdc__table_bx1_4sl_sdc__entry__2"><strong class="+ topic/ph hi-d/b ph b">含义</strong></th>
+                                </tr>
+                            </thead><tbody class="- topic/tbody tbody">
+                                <tr class="- topic/row">
+                                    <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_atc_ksl_sdc__table_bx1_4sl_sdc__entry__1"><em class="+ topic/ph hi-d/i ph i">comdtyMinDbname</em></td>
+                                    <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_atc_ksl_sdc__table_bx1_4sl_sdc__entry__2">数据库名</td>
+                                </tr>
+                                <tr class="- topic/row">
+                                    <td class="- topic/entry entry align-left colsep-1 rowsep-0" headers="topic_atc_ksl_sdc__table_bx1_4sl_sdc__entry__1"><em class="+ topic/ph hi-d/i ph i">comdtyMinTbname</em></td>
+                                    <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="topic_atc_ksl_sdc__table_bx1_4sl_sdc__entry__2">数据表名</td>
+                                </tr>
+                            </tbody></table></div>
+                    <p class="- topic/p p">建库建表的具体代码可参考 <code class="+ topic/ph pr-d/codeph ph codeph">FuturesOLHC</code> 模块下的
+                            <code class="+ topic/ph pr-d/codeph ph codeph">createTable.dos</code> 文件。</p>
+                </div>
+            </article>
+            <article class="- topic/topic topic nested3" aria-labelledby="ariaid-title24" id="topic_i4s_ksl_sdc">
+                <h4 class="- topic/title title topictitle4" id="ariaid-title24">4.3.2 实时期货快照数据流计算框架搭建 </h4>
+                <div class="- topic/body body">
+                    <p class="- topic/p p">创建好库表之后，即可执行以下代码来构建流计算框架，并根据附件中提供的示例数据模拟实时计算过程。</p>
+                    <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_i4s_ksl_sdc__codeblock_nbv_psl_sdc" data-ofbid="topic_i4s_ksl_sdc__codeblock_nbv_psl_sdc"><code>// 引入模块文件
+use FuturesOLHC::streamFrame 
+use FuturesOLHC::tableSchema
+use FuturesOLHC::utils
+
+// 商品期货原始流数据表名
+rawComdtyStreamTbName = "comdtyStreamTb"
+// 国债期货原始流数据表名
+rawRtStreamTbName = "rtStreamTb"
+
+try{
+	// 先删除持久化流表
+	unsubAndDropAll(rawComdtyStreamTbName)
+    unsubAndDropAll(rawRtStreamTbName)
+	// 再创建相应持久化流表
+	enableTableShareAndPersistence(table=createComdtyRawTable(), tableName=rawComdtyStreamTbName, cacheSize=10000)
+    enableTableShareAndPersistence(table=createRTRawTable(), tableName=rawRtStreamTbName, cacheSize=10000)
+}catch(ex){
+	print(ex)
+
+// 创建商品期货快照数据流计算框架
+nMin = 1 //分钟频率 (例：1 表示生成 1 分钟 K 线)
+dbname = comdtyMinDbname // 分钟数据最终导入的数据库名
+tbname = comdtyMinTbname // 分钟数据最终导入的数据表名
+FuturesOLHC::streamFrame::buildComdtyFrame(nMin, rawComdtyStreamTbName, dbname, tbname)
+
+
+// 创建国债期货快照数据流计算框架
+nMin = 1 //分钟频率 (例：1 表示生成 1 分钟 K 线)
+dbname = rtMinDbname // 分钟数据最终导入的数据库名
+tbname = rtMinTbname // 分钟数据最终导入的数据表名
+FuturesOLHC::streamFrame::buildRtFrame(nMin, rawRtStreamTbName, dbname, tbname)
+
+// 商品期货数据文件存放路径
+comdtyPath = "/dolphindb/data/comdty_tickdata.csv"
+// 获取流表表结构
+sche = schema(objByName(rawComdtyStreamTbName,true)).colDefs
+// 将示例数据导入内存表
+comdty_tickdata = loadText(comdtyPath,,sche)
+// 回放示例数据到流表中
+replay(comdty_tickdata, objByName(rawComdtyStreamTbName,true), `trd_ts, `trd_ts, -1, false)
+
+// 国债期货数据文件存放路径
+rtPath = "/dolphindb/data/rt_tickdata.csv"
+// 获取流表表结构
+sche = schema(objByName(rawRtStreamTbName,true)).colDefs
+// 将示例数据导入内存表
+rtTickdata = loadText(rtPath,,sche)
+// 回放示例数据到流表中
+replay(rtTickdata, objByName(rawRtStreamTbName,true), `trd_ts, `trd_ts, -1, false)</code></pre>
+                    <p class="- topic/p p">其中，以创建商品期货快照数据流计算引擎函数 <code class="+ topic/ph pr-d/codeph ph codeph">buildComdtyFrame</code> 为例，需要传入四个参数，分别为：</p>
+                    <div class="table-container"><table class="- topic/table table frame-all" id="topic_i4s_ksl_sdc__table_ytk_qsl_sdc" data-ofbid="topic_i4s_ksl_sdc__table_ytk_qsl_sdc" data-cols="2"><caption></caption><colgroup><col/><col/></colgroup><thead class="- topic/thead thead">
+                                <tr class="- topic/row">
+                                    <th class="- topic/entry entry align-left colsep-1 rowsep-1" id="topic_i4s_ksl_sdc__table_ytk_qsl_sdc__entry__1"><strong class="+ topic/ph hi-d/b ph b">参数名</strong></th>
+                                    <th class="- topic/entry entry align-left colsep-0 rowsep-1" id="topic_i4s_ksl_sdc__table_ytk_qsl_sdc__entry__2"><strong class="+ topic/ph hi-d/b ph b">含义</strong></th>
+                                </tr>
+                            </thead><tbody class="- topic/tbody tbody">
+                                <tr class="- topic/row">
+                                    <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_i4s_ksl_sdc__table_ytk_qsl_sdc__entry__1"><em class="+ topic/ph hi-d/i ph i">nMin</em></td>
+                                    <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_i4s_ksl_sdc__table_ytk_qsl_sdc__entry__2">需要计算的分钟粒度，如 1 表示 1 分钟</td>
+                                </tr>
+                                <tr class="- topic/row">
+                                    <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_i4s_ksl_sdc__table_ytk_qsl_sdc__entry__1"><em class="+ topic/ph hi-d/i ph i">rawComdtyStreamTbName</em></td>
+                                    <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_i4s_ksl_sdc__table_ytk_qsl_sdc__entry__2">商品期货快照数据的流表名称，上游数据导入到该流表中</td>
+                                </tr>
+                                <tr class="- topic/row">
+                                    <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_i4s_ksl_sdc__table_ytk_qsl_sdc__entry__1"><em class="+ topic/ph hi-d/i ph i">dbname</em></td>
+                                    <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_i4s_ksl_sdc__table_ytk_qsl_sdc__entry__2">分钟 K 线计算后导入的数据库名</td>
+                                </tr>
+                                <tr class="- topic/row">
+                                    <td class="- topic/entry entry align-left colsep-1 rowsep-0" headers="topic_i4s_ksl_sdc__table_ytk_qsl_sdc__entry__1"><em class="+ topic/ph hi-d/i ph i">tbname</em></td>
+                                    <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="topic_i4s_ksl_sdc__table_ytk_qsl_sdc__entry__2">分钟 K 线计算后导入的数据表名</td>
+                                </tr>
+                            </tbody></table></div>
+                    <p class="- topic/p p">关于流计算框架的详细搭建步骤，可参考本文中<strong class="+ topic/ph hi-d/b ph b"><a class="- topic/xref xref" href="#topic_gy1_vpl_sdc">第三章</a></strong>，具体代码可参考 <code class="+ topic/ph pr-d/codeph ph codeph">FuturesOLHC</code> 模块下的
+                            <code class="+ topic/ph pr-d/codeph ph codeph">streamFrame.dos</code> 文件。</p>
+                </div>
+            </article>
+            <article class="- topic/topic topic nested3" aria-labelledby="ariaid-title25" id="topic_n3t_ksl_sdc">
+                <h4 class="- topic/title title topictitle4" id="ariaid-title25">4.3.3 历史期货快照数据分钟 K 线计算</h4>
+                <div class="- topic/body body">
+                    <p class="- topic/p p">本部分以示例数据为例，展示如何基于历史期货快照数据计算分钟 K 线</p>
+                    <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_n3t_ksl_sdc__codeblock_nyb_rsl_sdc" data-ofbid="topic_n3t_ksl_sdc__codeblock_nyb_rsl_sdc"><code>use FuturesOLHC::batchFrame
+
+// 商品期货历史快照数据 K 线计算
+dataType = "cmdty" // 
+dbname = comdtySnapDbname// 存放历史原始数据的数据库名
+tbname = comdtySnapTbname // 存放历史原始数据的数据表名
+// 将示例数据导入库表中
+pt = loadTable(dbname, tbname)
+pt.tableInsert(comdty_tickdata)
+
+startDate = 2024.10.10 // 计算开始时间 
+endDate = 2024.10.10 // 计算结束时间 
+nMin = 1 //分钟频率 (例：1 表示生成 1分钟 K 线)
+res  = getFuturesKMin(dataType, dbname, tbname, startDate, endDate, nMin)
+
+// 国债期货历史快照数据 K 线计算
+dataType = "rt" // 
+dbname = rtSnapDbname// 存放历史原始数据的数据库名
+tbname = rtSnapTbname // 存放历史原始数据的数据表名
+// 将示例数据导入库表中
+pt = loadTable(dbname, tbname)
+pt.tableInsert(rtTickdata)
+
+startDate = 2024.10.08 // 计算开始时间 
+endDate = 2024.10.08 // 计算结束时间 
+nMin = 1 //分钟频率 (例：1 表示生成 1分钟 K 线)
+res  = getFuturesKMin(dataType, dbname, tbname, startDate, endDate, nMin)</code></pre>
+                    <p class="- topic/p p">其中，计算期货快照分钟K线数据函数 <code class="+ topic/ph pr-d/codeph ph codeph">getFuturesKMin</code> 需要传入六个参数，分别为：</p>
+                    <div class="table-container"><table class="- topic/table table frame-all" id="topic_n3t_ksl_sdc__table_nlc_ssl_sdc" data-ofbid="topic_n3t_ksl_sdc__table_nlc_ssl_sdc" data-cols="2"><caption></caption><colgroup><col/><col/></colgroup><thead class="- topic/thead thead">
+                                <tr class="- topic/row">
+                                    <th class="- topic/entry entry align-left colsep-1 rowsep-1" id="topic_n3t_ksl_sdc__table_nlc_ssl_sdc__entry__1"><strong class="+ topic/ph hi-d/b ph b">参数名</strong></th>
+                                    <th class="- topic/entry entry align-left colsep-0 rowsep-1" id="topic_n3t_ksl_sdc__table_nlc_ssl_sdc__entry__2"><strong class="+ topic/ph hi-d/b ph b">含义</strong></th>
+                                </tr>
+                            </thead><tbody class="- topic/tbody tbody">
+                                <tr class="- topic/row">
+                                    <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_n3t_ksl_sdc__table_nlc_ssl_sdc__entry__1"><em class="+ topic/ph hi-d/i ph i">dataType</em></td>
+                                    <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_n3t_ksl_sdc__table_nlc_ssl_sdc__entry__2">
+                                        <p class="- topic/p p">需要计算的数据类别</p>
+                                        <ul class="- topic/ul ul" id="topic_n3t_ksl_sdc__ul_qlc_ssl_sdc" data-ofbid="topic_n3t_ksl_sdc__ul_qlc_ssl_sdc">
+                                            <li class="- topic/li li">comdty：商品期货</li>
+                                            <li class="- topic/li li">rt：国债期货</li>
+                                        </ul>
+                                    </td>
+                                </tr>
+                                <tr class="- topic/row">
+                                    <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_n3t_ksl_sdc__table_nlc_ssl_sdc__entry__1"><em class="+ topic/ph hi-d/i ph i">dbname</em></td>
+                                    <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_n3t_ksl_sdc__table_nlc_ssl_sdc__entry__2">存放历史期货快照数据的数据库名</td>
+                                </tr>
+                                <tr class="- topic/row">
+                                    <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_n3t_ksl_sdc__table_nlc_ssl_sdc__entry__1"><em class="+ topic/ph hi-d/i ph i">tbname</em></td>
+                                    <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_n3t_ksl_sdc__table_nlc_ssl_sdc__entry__2">存放历史期货快照数据的数据表名</td>
+                                </tr>
+                                <tr class="- topic/row">
+                                    <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_n3t_ksl_sdc__table_nlc_ssl_sdc__entry__1"><em class="+ topic/ph hi-d/i ph i">startDate</em></td>
+                                    <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_n3t_ksl_sdc__table_nlc_ssl_sdc__entry__2">计算开始时间</td>
+                                </tr>
+                                <tr class="- topic/row">
+                                    <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_n3t_ksl_sdc__table_nlc_ssl_sdc__entry__1"><em class="+ topic/ph hi-d/i ph i">endDate</em></td>
+                                    <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_n3t_ksl_sdc__table_nlc_ssl_sdc__entry__2">计算结束时间</td>
+                                </tr>
+                                <tr class="- topic/row">
+                                    <td class="- topic/entry entry align-left colsep-1 rowsep-0" headers="topic_n3t_ksl_sdc__table_nlc_ssl_sdc__entry__1"><em class="+ topic/ph hi-d/i ph i">nMin</em></td>
+                                    <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="topic_n3t_ksl_sdc__table_nlc_ssl_sdc__entry__2">需要计算的分钟粒度，如 1 表示 1 分钟</td>
+                                </tr>
+                            </tbody></table></div>
+                    <p class="- topic/p p">关于历史期货快照数据分钟 K 线的详细计算步骤，可参考本文中<strong class="+ topic/ph hi-d/b ph b"><a class="- topic/xref xref" href="#topic_ttc_5pl_sdc">第一章</a></strong>，具体代码可参考 <code class="+ topic/ph pr-d/codeph ph codeph">FuturesOLHC</code> 模块下的
+                            <code class="+ topic/ph pr-d/codeph ph codeph">batchFrame.dos</code> 文件。</p>
+                </div>
+            </article>
+            <article class="- topic/topic topic nested3" aria-labelledby="ariaid-title26" id="topic_ovt_ksl_sdc">
+                <h4 class="- topic/title title topictitle4" id="ariaid-title26">4.3.4 历史期货快照数据分钟主连行情合成</h4>
+                <div class="- topic/body body">
+                    <p class="- topic/p p">本部分以示例数据为例，展示如何基于历史期货快照数据合成主连行情</p>
+                    <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_ovt_ksl_sdc__codeblock_kzl_tsl_sdc" data-ofbid="topic_ovt_ksl_sdc__codeblock_kzl_tsl_sdc"><code>// 商品期货主连行情
+minDbname = comdtyMinDbname
+minTbname = comdtyMinTbname
+zlDbname = comdtyMinDbname
+zlTbname = comdtyZlTbname
+startDate = 2024.10.10
+endDate = 2024.10.10
+nMin = 1
+comdtyZL = comdtyZlFuturesKMin(minDbname, minTbname, zlDbname, zlTbname, startDate, endDate, nMin)
+
+// 国债期货主连行情
+minDbname = rtMinDbname
+minTbname = rtMinTbname
+zlDbname = rtMinDbname
+zlTbname = rtZlTbname
+startDate = 2024.10.08
+endDate = 2024.10.08
+nMin = 1
+rtZL = rtZlFuturesKMin(minDbname, minTbname, zlDbname, zlTbname, startDate, endDate, nMin)</code></pre>
+                    <p class="- topic/p p">其中，以历史商品期货快照数据主连行情合成函数 <code class="+ topic/ph pr-d/codeph ph codeph">comdtyZlFuturesKMin</code>
+                        为例，需要传入七个参数，分别为：</p>
+                    <div class="table-container"><table class="- topic/table table frame-all" id="topic_ovt_ksl_sdc__table_rdl_1wl_sdc" data-ofbid="topic_ovt_ksl_sdc__table_rdl_1wl_sdc" data-cols="2"><caption></caption><colgroup><col/><col/></colgroup><thead class="- topic/thead thead">
+                                <tr class="- topic/row">
+                                    <th class="- topic/entry entry align-left colsep-1 rowsep-1" id="topic_ovt_ksl_sdc__table_rdl_1wl_sdc__entry__1"><strong class="+ topic/ph hi-d/b ph b">参数名</strong></th>
+                                    <th class="- topic/entry entry align-left colsep-0 rowsep-1" id="topic_ovt_ksl_sdc__table_rdl_1wl_sdc__entry__2"><strong class="+ topic/ph hi-d/b ph b">含义</strong></th>
+                                </tr>
+                            </thead><tbody class="- topic/tbody tbody">
+                                <tr class="- topic/row">
+                                    <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_ovt_ksl_sdc__table_rdl_1wl_sdc__entry__1"><em class="+ topic/ph hi-d/i ph i">minDbname</em></td>
+                                    <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_ovt_ksl_sdc__table_rdl_1wl_sdc__entry__2">存放历史期货快照数据分钟线的数据库名</td>
+                                </tr>
+                                <tr class="- topic/row">
+                                    <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_ovt_ksl_sdc__table_rdl_1wl_sdc__entry__1"><em class="+ topic/ph hi-d/i ph i">minTbname</em></td>
+                                    <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_ovt_ksl_sdc__table_rdl_1wl_sdc__entry__2">存放历史期货快照数据分钟线的数据表名</td>
+                                </tr>
+                                <tr class="- topic/row">
+                                    <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_ovt_ksl_sdc__table_rdl_1wl_sdc__entry__1"><em class="+ topic/ph hi-d/i ph i">zlDbname</em></td>
+                                    <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_ovt_ksl_sdc__table_rdl_1wl_sdc__entry__2">存放期货快照数据主连行情的数据库名</td>
+                                </tr>
+                                <tr class="- topic/row">
+                                    <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_ovt_ksl_sdc__table_rdl_1wl_sdc__entry__1"><em class="+ topic/ph hi-d/i ph i">zlTbname</em></td>
+                                    <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_ovt_ksl_sdc__table_rdl_1wl_sdc__entry__2">存放期货快照数据主连行情的数据表名</td>
+                                </tr>
+                                <tr class="- topic/row">
+                                    <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_ovt_ksl_sdc__table_rdl_1wl_sdc__entry__1"><em class="+ topic/ph hi-d/i ph i">startDate</em></td>
+                                    <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_ovt_ksl_sdc__table_rdl_1wl_sdc__entry__2">计算开始时间</td>
+                                </tr>
+                                <tr class="- topic/row">
+                                    <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_ovt_ksl_sdc__table_rdl_1wl_sdc__entry__1"><em class="+ topic/ph hi-d/i ph i">endDate</em></td>
+                                    <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_ovt_ksl_sdc__table_rdl_1wl_sdc__entry__2">计算结束时间</td>
+                                </tr>
+                                <tr class="- topic/row">
+                                    <td class="- topic/entry entry align-left colsep-1 rowsep-0" headers="topic_ovt_ksl_sdc__table_rdl_1wl_sdc__entry__1"><em class="+ topic/ph hi-d/i ph i">nMin</em></td>
+                                    <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="topic_ovt_ksl_sdc__table_rdl_1wl_sdc__entry__2">需要计算的分钟粒度，如 1 表示 1 分钟</td>
+                                </tr>
+                            </tbody></table></div>
+                    <p class="- topic/p p">关于历史期货快照数据主连行情合成的详细计算步骤，可参考本文中<strong class="+ topic/ph hi-d/b ph b"><a class="- topic/xref xref" href="#topic_xkz_5pl_sdc">第二章</a></strong>，具体代码可参考 <code class="+ topic/ph pr-d/codeph ph codeph">FuturesOLHC</code> 模块下的
+                            <code class="+ topic/ph pr-d/codeph ph codeph">batchFrame.dos </code>文件。</p>
+                </div>
+            </article>
+        </article>
+    </article>
+    <article class="- topic/topic topic nested1" aria-labelledby="ariaid-title27" id="topic_brb_vpl_sdc">
+        <h2 class="- topic/title title topictitle2" id="ariaid-title27">5. 总结</h2>
+        <div class="- topic/body body">
+            <p class="- topic/p p">本教程详细介绍了如何在 DolphinDB 中利用历史和实时快照行情数据，生成期货的分钟 K 线及主连行情。并提供了实现上述功能的
+                    <code class="+ topic/ph pr-d/codeph ph codeph">FuturesOLHC</code> 模块，最后基于该模块详细地演示了实时计算分钟 K 线、计算历史分钟K
+                线以及合成主连行情的步骤。</p>
+            <p class="- topic/p p">需要注意的是，本教程中所介绍的 K
+                线和主连行情的生成规则，可能与用户的实际应用场景有所不同。用户可以参考本教程中的模块源码，根据自身需求进行调整，从而快速完成项目开发。</p>
+        </div>
+    </article>
+    <article class="- topic/topic topic nested1" aria-labelledby="ariaid-title28" id="topic_lyb_vpl_sdc">
+        <h2 class="- topic/title title topictitle2" id="ariaid-title28">附录</h2>
+        <div class="- topic/body body">
+            <ul class="- topic/ul ul" id="topic_lyb_vpl_sdc__ul_ifn_vsl_sdc" data-ofbid="topic_lyb_vpl_sdc__ul_ifn_vsl_sdc">
+                <li class="- topic/li li"><strong class="+ topic/ph hi-d/b ph b">不同期货品种的具体交易时间段</strong>:<div class="- topic/note note note note_note" id="topic_lyb_vpl_sdc__note_fmp_g2s_sdc" data-ofbid="topic_lyb_vpl_sdc__note_fmp_g2s_sdc"><span class="note__title">注：</span> 
+                        <p class="- topic/p p">本教程主要介绍国内期货快照数据的分钟线合成，对于不同交易时间的期货品种，可在模块中 <code class="+ topic/ph pr-d/codeph ph codeph">utils.dos</code> 脚本修改
+                                <code class="+ topic/ph pr-d/codeph ph codeph">getFuturesTradeTime</code> 函数，自定义相应期货品种的交易时间。</p>
+                    </div></li>
+            </ul>
+            <div class="table-container"><table class="- topic/table table frame-all" id="topic_lyb_vpl_sdc__table_ofn_vsl_sdc" data-ofbid="topic_lyb_vpl_sdc__table_ofn_vsl_sdc" data-cols="3"><caption></caption><colgroup><col style="width:34.20195439739414%"/><col style="width:32.57328990228013%"/><col style="width:33.22475570032574%"/></colgroup><thead class="- topic/thead thead">
+                        <tr class="- topic/row">
+                            <th class="- topic/entry entry align-left colsep-1 rowsep-1" id="topic_lyb_vpl_sdc__table_ofn_vsl_sdc__entry__1"><strong class="+ topic/ph hi-d/b ph b">期货品种</strong></th>
+                            <th class="- topic/entry entry align-left colsep-1 rowsep-1" id="topic_lyb_vpl_sdc__table_ofn_vsl_sdc__entry__2"><strong class="+ topic/ph hi-d/b ph b">期货代码</strong></th>
+                            <th class="- topic/entry entry align-left colsep-0 rowsep-1" id="topic_lyb_vpl_sdc__table_ofn_vsl_sdc__entry__3"><strong class="+ topic/ph hi-d/b ph b">交易时间</strong></th>
+                        </tr>
+                    </thead><tbody class="- topic/tbody tbody">
+                        <tr class="- topic/row">
+                            <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_lyb_vpl_sdc__table_ofn_vsl_sdc__entry__1">上证 50 指数、沪深 300 指数、中证 500 指数，中证 1000 指数</td>
+                            <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_lyb_vpl_sdc__table_ofn_vsl_sdc__entry__2">IH, IF, IC, IM</td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_lyb_vpl_sdc__table_ofn_vsl_sdc__entry__3">
+                                <p class="- topic/p p"> 9:30 — 11:30</p>
+                                <p class="- topic/p p">13:00 — 15:00</p>
+                            </td>
+                        </tr>
+                        <tr class="- topic/row">
+                            <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_lyb_vpl_sdc__table_ofn_vsl_sdc__entry__1">黄大豆一号、普麦、布伦特原油、玉米、玉米淀粉、苯乙烯、乙二醇、铁矿石、焦炭、焦煤、聚乙烯
+                                、豆粕、棕榈油、液化石油气、聚丙烯、对二甲苯、粳米、聚氯乙烯、豆油、沥青、燃料油、热轧卷板、螺纹钢、天然橡胶、纸浆、动力煤、棉花、棉纱、玻璃、甲醇、菜籽油、普通硅铁、菜籽粕、硅铁、白砂糖、线材、PTA</td>
+                            <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_lyb_vpl_sdc__table_ofn_vsl_sdc__entry__2">A, B, BR, C, CS, EB, EG, I, J, JM, L, M, P, PG, PP,
+                                PX, RR, V, Y, BU, FU, HC, RB, RU, SP, ZC, CF, CY, FG, MA, OI, PF,
+                                RM, SA, SR, SH, TA</td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_lyb_vpl_sdc__table_ofn_vsl_sdc__entry__3">
+                                <p class="- topic/p p">9:00 — 10:15</p>
+                                <p class="- topic/p p">10:30 — 11:30</p>
+                                <p class="- topic/p p">13:30 — 15:00</p>
+                                <p class="- topic/p p">21:00 — 23:00</p>
+                                <p class="- topic/p p"> </p>
+                            </td>
+                        </tr>
+                        <tr class="- topic/row">
+                            <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_lyb_vpl_sdc__table_ofn_vsl_sdc__entry__1">白银、黄金、原油</td>
+                            <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_lyb_vpl_sdc__table_ofn_vsl_sdc__entry__2">AG, AU, SC</td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_lyb_vpl_sdc__table_ofn_vsl_sdc__entry__3">
+                                <p class="- topic/p p">09:00 — 10:15</p>
+                                <p class="- topic/p p">10:30 — 11:30</p>
+                                <p class="- topic/p p">13:30 — 15:00</p>
+                                <p class="- topic/p p">21:00 — 02:30</p>
+                            </td>
+                        </tr>
+                        <tr class="- topic/row">
+                            <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_lyb_vpl_sdc__table_ofn_vsl_sdc__entry__1">铝、沥青、线材、铜、镍、铅、锡、不锈钢、锌</td>
+                            <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_lyb_vpl_sdc__table_ofn_vsl_sdc__entry__2">AL, AO, BC, LU, NR, CU, NI, PB, SN, SS, ZN</td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_lyb_vpl_sdc__table_ofn_vsl_sdc__entry__3">
+                                <p class="- topic/p p">09:00 — 10:15</p>
+                                <p class="- topic/p p">10:30 — 11:30</p>
+                                <p class="- topic/p p">13:30 — 15:00</p>
+                                <p class="- topic/p p">21:00 — 01:00</p>
+                            </td>
+                        </tr>
+                        <tr class="- topic/row">
+                            <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_lyb_vpl_sdc__table_ofn_vsl_sdc__entry__1">低硫燃料油、20号胶</td>
+                            <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_lyb_vpl_sdc__table_ofn_vsl_sdc__entry__2">LU, NR</td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_lyb_vpl_sdc__table_ofn_vsl_sdc__entry__3">
+                                <p class="- topic/p p">09:00 — 10:15</p>
+                                <p class="- topic/p p">10:30 — 11:30</p>
+                                <p class="- topic/p p">13:30 — 15:00</p>
+                                <p class="- topic/p p">21:00 — 23:00</p>
+                            </td>
+                        </tr>
+                        <tr class="- topic/row">
+                            <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_lyb_vpl_sdc__table_ofn_vsl_sdc__entry__1">苹果、红枣、甲醇、粳稻、晚籼稻、花生、普麦、早籼稻、菜籽、硅铁、锰硅、尿素、胶合板、纤维板、鸡蛋、生猪、线材、强麦、聚丙烯、硅铁</td>
+                            <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_lyb_vpl_sdc__table_ofn_vsl_sdc__entry__2">AP, CJ, EC, JR, LR, PK, PM, RI, RS, SF, SM, UR, BB,
+                                FB, JD, LH, WR, WH, LC, SI</td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_lyb_vpl_sdc__table_ofn_vsl_sdc__entry__3">
+                                <p class="- topic/p p">09:00 — 10:15</p>
+                                <p class="- topic/p p">10:30 — 11:30</p>
+                                <p class="- topic/p p">13:30 — 15:00</p>
+                            </td>
+                        </tr>
+                        <tr class="- topic/row">
+                            <td class="- topic/entry entry align-left colsep-1 rowsep-0" headers="topic_lyb_vpl_sdc__table_ofn_vsl_sdc__entry__1">10 年期国债期货、5 年期国债期货、2 年期国债期货、10 年期国债期货</td>
+                            <td class="- topic/entry entry align-left colsep-1 rowsep-0" headers="topic_lyb_vpl_sdc__table_ofn_vsl_sdc__entry__2">T, TF, TS, TL</td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="topic_lyb_vpl_sdc__table_ofn_vsl_sdc__entry__3">
+                                <p class="- topic/p p">09:30 — 11:30</p>
+                                <p class="- topic/p p">13:00 — 15:15</p>
+                            </td>
+                        </tr>
+                    </tbody></table></div>
+            <ul class="- topic/ul ul" id="topic_lyb_vpl_sdc__ul_sfn_vsl_sdc" data-ofbid="topic_lyb_vpl_sdc__ul_sfn_vsl_sdc">
+                <li class="- topic/li li">期货快照分钟K线计算完整模块 <code class="+ topic/ph pr-d/codeph ph codeph">FuturesOLHC</code>：<a class="- topic/xref xref" href="script/k_line_calculation/FuturesOLHC.zip">FuturesOLHC.zip</a></li>
+                <li class="- topic/li li">期货快照分钟K线计算示例 <code class="+ topic/ph pr-d/codeph ph codeph">demo.dos</code>：<a class="- topic/xref xref" href="script/k_line_calculation/demo.dos">demo.dos</a></li>
+                <li class="- topic/li li">示例数据：<a class="- topic/xref xref" href="script/k_line_calculation/data.zip">data.zip</a></li>
+            </ul>
+        </div>
+    </article>
+</article></main></div>
+                        
+                        
+                        
+                        
+                        
+                        
+                    </div>
+                    
+                        <nav role="navigation" id="wh_topic_toc" aria-label="On this page" class="col-lg-2 d-none d-lg-block navbar d-print-none"> 
+                            <div id="wh_topic_toc_content">
+		                        
+	                            <div class=" wh_topic_toc "><div class="wh_topic_label">在本页上</div><ul><li class="topic-item"><a href="#topic_ttc_5pl_sdc" data-tocid="topic_ttc_5pl_sdc">1. 基于历史快照行情合成分钟 K 线</a><ul><li class="topic-item"><a href="#topic_wr5_zpl_sdc" data-tocid="topic_wr5_zpl_sdc">1.1 期货快照数据特征</a></li><li class="topic-item"><a href="#topic_tc2_1ql_sdc" data-tocid="topic_tc2_1ql_sdc">1.2 快照数据合成的规则</a><ul><li class="topic-item"><a href="#topic_tzn_xql_sdc" data-tocid="topic_tzn_xql_sdc">1.2.1. 最高价和最低价的处理 </a></li><li class="topic-item"><a href="#topic_vnj_zql_sdc" data-tocid="topic_vnj_zql_sdc">1.2.2. 成交量、成交额和成交笔数的处理</a></li><li class="topic-item"><a href="#topic_kt2_2rl_sdc" data-tocid="topic_kt2_2rl_sdc">1.2.3. 开盘以后没有成交 </a></li><li class="topic-item"><a href="#topic_jy3_2rl_sdc" data-tocid="topic_jy3_2rl_sdc">1.2.4. 盘中计算窗口内没有成交 </a></li></ul></li><li class="topic-item"><a href="#topic_pjf_1ql_sdc" data-tocid="topic_pjf_1ql_sdc">1.3 分钟 K 线计算步骤</a><ul><li class="topic-item"><a href="#topic_bwn_mrl_sdc" data-tocid="topic_bwn_mrl_sdc">1.3.1. 根据不同期货品种生成分钟 K 线对齐表</a></li><li class="topic-item"><a href="#topic_xyy_mrl_sdc" data-tocid="topic_xyy_mrl_sdc">1.3.2. 定义计算分钟 K 线的函数</a></li></ul></li></ul></li><li class="topic-item"><a href="#topic_xkz_5pl_sdc" data-tocid="topic_xkz_5pl_sdc">2. 基于历史快照行情合成主连行情</a><ul><li class="topic-item"><a href="#topic_fm3_1ql_sdc" data-tocid="topic_fm3_1ql_sdc">2.1 定义 <code class="+ topic/ph pr-d/codeph ph codeph">adjustFactor</code> 函数，计算复权因子 </a><ul><li class="topic-item"><a href="#topic_z4l_srl_sdc" data-tocid="topic_z4l_srl_sdc">2.1.1 计算后复权因子</a></li><li class="topic-item"><a href="#topic_wqq_srl_sdc" data-tocid="topic_wqq_srl_sdc">2.1.2 计算前复权因子</a></li></ul></li><li class="topic-item"><a href="#topic_zyj_1ql_sdc" data-tocid="topic_zyj_1ql_sdc">2.2 将前后复权因子以及对应 OHLC 价格加入终表</a></li><li class="topic-item"><a href="#topic_frk_1ql_sdc" data-tocid="topic_frk_1ql_sdc">2.3 计算 startDate 到 endDate 的主连行情</a></li></ul></li><li class="topic-item"><a href="#topic_gy1_vpl_sdc" data-tocid="topic_gy1_vpl_sdc">3. 基于实时期货快照数据合成 K 线</a></li><li class="topic-item"><a href="#topic_d3b_vpl_sdc" data-tocid="topic_d3b_vpl_sdc">4. 期货快照数据分钟 K 线计算模块</a><ul><li class="topic-item"><a href="#topic_nfs_1ql_sdc" data-tocid="topic_nfs_1ql_sdc">4.1 模块结构与功能</a></li><li class="topic-item"><a href="#topic_z1t_1ql_sdc" data-tocid="topic_z1t_1ql_sdc">4.2 模块导入</a></li><li class="topic-item"><a href="#topic_pnt_1ql_sdc" data-tocid="topic_pnt_1ql_sdc">4.3 如何使用模块</a><ul><li class="topic-item"><a href="#topic_atc_ksl_sdc" data-tocid="topic_atc_ksl_sdc">4.3.1 创建期货快照数据和分钟 K 线数据持久化表 </a></li><li class="topic-item"><a href="#topic_i4s_ksl_sdc" data-tocid="topic_i4s_ksl_sdc">4.3.2 实时期货快照数据流计算框架搭建 </a></li><li class="topic-item"><a href="#topic_n3t_ksl_sdc" data-tocid="topic_n3t_ksl_sdc">4.3.3 历史期货快照数据分钟 K 线计算</a></li><li class="topic-item"><a href="#topic_ovt_ksl_sdc" data-tocid="topic_ovt_ksl_sdc">4.3.4 历史期货快照数据分钟主连行情合成</a></li></ul></li></ul></li><li class="topic-item"><a href="#topic_brb_vpl_sdc" data-tocid="topic_brb_vpl_sdc">5. 总结</a></li><li class="topic-item"><a href="#topic_lyb_vpl_sdc" data-tocid="topic_lyb_vpl_sdc">附录</a></li></ul></div>
+	                        	
+                        	</div>
+                        </nav>
+                    
+                </div>
+            </div>
+            
+            
+            
+        </div> 
+        <footer class="navbar navbar-default wh_footer">
+  <div class=" footer-container mx-auto ">
+<title>Copyright</title><p><b> ©2025 浙江智臾科技有限公司 浙ICP备18048711号-3</b></p>
+  </div>
+</footer>
+        
+        <div id="go2top" class="d-print-none">
+            <span class="oxy-icon oxy-icon-up"></span>
+        </div>
+        
+        <div id="modal_img_large" class="modal">
+            <span class="close oxy-icon oxy-icon-remove"></span>
+            <div id="modal_img_container"></div>
+            <div id="caption"></div>
+        </div>
+        
+        
+        
+    </body>
+</html>

@@ -1,0 +1,1167 @@
+<!DOCTYPE html><html xmlns="http://www.w3.org/1999/xhtml" xml:lang="zh" lang="zh" data-whc_version="26.0">
+    <head><link rel="shortcut icon" href="../favicon.ico"/><link rel="icon" href="../favicon.ico"/><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><meta name="description" content="融资融券是一种利用杠杆放大投资收益的交易方式，它给投资者提供了更多的资金和交易机会。在量化投资中，融资融券业务被广泛应用于多种策略和操作中。包括杠杆交易、对冲策略、市场中性策略、套利策略和高频交易等等。目前很多量化基金经理在研究和回测这些策略中基本没有考虑融资融券部分，而是直接使用普通股票的策略回测框架进行投研回测分析，然而在实际交易中却引入融资融券操作，导致回测结果与实际交易结果存在较大偏差。 ..."/><meta name="DC.rights.owner" content="(C) 版权 2025"/><meta name="copyright" content="(C) 版权 2025"/><meta name="generator" content="DITA-OT"/><meta name="DC.type" content="topic"/><meta name="DC.coverage" content=""/><meta name="DC.relation" content="../tutorials/about_tutorials.html"/><meta name="prodname" content="DolphinDB"/><meta name="brand" content="DolphinDB"/><meta name="DC.creator" content="DolphinDB"/><meta name="DC.publisher" content="DDB N/A DDB 200"/><meta name="DC.format" content="HTML5"/><meta name="DC.identifier" content="backtest_introduction_usage"/><title>融资融券策略回测使用说明及回测案例</title><!--  Generated with Oxygen version 26.0, build number 2024012323.  --><meta name="wh-path2root" content="../"/><meta name="wh-toc-id" content="backtest_introduction_usage-d9713e104735"/><meta name="wh-source-relpath" content="tutorials/backtest_introduction_usage.dita"/><meta name="wh-out-relpath" content="tutorials/backtest_introduction_usage.html"/>
+
+    <link rel="stylesheet" type="text/css" href="../oxygen-webhelp/app/commons.css?buildId=2024012323"/>
+    <link rel="stylesheet" type="text/css" href="../oxygen-webhelp/app/topic.css?buildId=2024012323"/>
+
+    <script src="../oxygen-webhelp/app/options/properties.js?buildId=20250305183303"></script>
+    <script src="../oxygen-webhelp/app/localization/strings.js?buildId=2024012323"></script>
+    <script src="../oxygen-webhelp/app/search/index/keywords.js?buildId=20250305183303"></script>
+    <script defer="defer" src="../oxygen-webhelp/app/commons.js?buildId=2024012323"></script>
+    <script defer="defer" src="../oxygen-webhelp/app/topic.js?buildId=2024012323"></script>
+<link rel="stylesheet" type="text/css" href="../oxygen-webhelp/template/styles.css?buildId=2024012323"/><script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script><script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script></head>
+
+    <body id="backtest_introduction_usage" class="wh_topic_page frmBody">
+        <a href="#wh_topic_body" class="sr-only sr-only-focusable">
+            跳转到主要内容
+        </a>
+        
+        
+        
+        
+        <header class="navbar navbar-default wh_header">
+    <div class="container-fluid">
+        <div xmlns:whc="http://www.oxygenxml.com/webhelp/components" class="wh_header_flex_container navbar-nav navbar-expand-md navbar-dark">
+            <div class="wh_logo_and_publication_title_container">
+                <div class="wh_logo_and_publication_title">
+                    
+                    <a href="https://docs.dolphindb.cn/zh/index.html" class=" wh_logo d-none d-sm-block "><img src="../logo.png" alt="  DolphinDB 文档中心  "/></a>
+                    <div class=" wh_publication_title "><a href="../index.html"><span class="booktitle">  <span class="ph mainbooktitle">DolphinDB 文档中心</span>  </span></a></div>
+                    
+                </div>
+                
+                
+            </div>
+
+            <div class="wh_top_menu_and_indexterms_link collapse navbar-collapse" id="wh_top_menu_and_indexterms_link">
+                
+                
+                
+                
+            </div>
+        <div class=" wh_search_input navbar-form wh_topic_page_search search " role="form">
+            
+            
+            
+            <form id="searchForm" method="get" role="search" action="../search.html"><div><input type="search" placeholder="搜索 " class="wh_search_textfield" id="textToSearch" name="searchQuery" aria-label="搜索查询" required="required"/><button type="submit" class="wh_search_button" aria-label="搜索"><span class="search_input_text">搜索</span></button></div></form>
+            
+            <script src="/vendors/react/umd/react.production.min.js" defer="defer"></script>
+<script src="/vendors/react-dom/umd/react-dom.production.min.js" defer="defer"></script>
+<script src="/vendors/dayjs/dayjs.min.js" defer="defer"></script>
+<script src="/vendors/antd/dist/antd.min.js" defer="defer"></script>
+<script src="/vendors/@ant-design/icons/dist/index.umd.min.js" defer="defer"></script>
+<script src="/zh/index.js" type="module"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" defer="defer"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML" defer="defer"><!--
+
+
+--></script>
+<script defer="defer"><!--
+
+// 从主页重定向
+const currentUrl = window.location.href;
+
+// 判断当前URL是否包含index.html并且路径最后部分是index.html
+if (currentUrl.endsWith('index.html')) {
+    // 处理根目录下的index.html跳转
+    const baseUrl = currentUrl.split('/index.html')[0]; // 获取index.html之前的部分
+    const redirectUrl = `${baseUrl}/about/ddb_intro.html`; // 构建跳转路径
+    window.location.href = redirectUrl; // 执行跳转
+}
+
+--></script>
+            
+        </div></div>
+    </div>
+</header>
+        
+        
+         
+        
+        
+        
+        <div class="container-fluid" id="wh_topic_container">
+            <div class="row">
+
+                <nav class="wh_tools d-print-none navbar-expand-md" aria-label="Tools">
+                    
+                    <div data-tooltip-position="bottom" class=" wh_breadcrumb "><ol class="d-print-none"><li><span class="home"><a href="../index.html"><span>主页</span></a></span></li><li><div class="topicref" data-id="about_tutorials"><div class="title"><a href="../tutorials/about_tutorials.html"><span class="keyword label">教程</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 产品使用教程</p></div></div></div></li><li><div class="topicref"><div class="title"><a href="../tutorials/OHLC_2.html">金融场景案例</a></div></div></li><li class="active"><div class="topicref" data-id="backtest_introduction_usage"><div class="title"><a href="../tutorials/backtest_introduction_usage.html">融资融券策略回测使用说明及回测案例</a></div></div></li></ol></div>
+                    
+                    
+                    
+                    <div class="wh_right_tools">
+                        <button class="wh_hide_highlight" aria-label="切换搜索突出显示" title="切换搜索突出显示"></button>
+                        <button class="webhelp_expand_collapse_sections" data-next-state="collapsed" aria-label="折叠截面" title="折叠截面"></button>
+                        
+                        
+                        
+                        
+                        <div class=" wh_print_link print d-none d-md-inline-block "><button onClick="window.print()" title="打印此页" aria-label="打印此页"></button></div>
+                        
+                        <button type="button" id="wh_toc_button" class="custom-toggler navbar-toggler collapsed wh_toggle_button navbar-light" aria-expanded="false" aria-label="Toggle publishing table of content" aria-controls="wh_publication_toc">
+                            <span class="navbar-toggler-icon"></span>
+                        </button>
+                    </div>
+                    
+                </nav>
+            </div>
+            
+            
+            
+            
+            <div class="wh_content_area">
+                <div class="row">
+                    
+                        <nav id="wh_publication_toc" class="col-lg-3 col-md-3 col-sm-12 d-md-block d-none d-print-none" aria-label="Table of Contents Container">
+                            <div id="wh_publication_toc_content">
+		                        
+                            	<div class=" wh_publication_toc " data-tooltip-position="right"><span class="expand-button-action-labels"><span id="button-expand-action" role="button" aria-label="Expand"></span><span id="button-collapse-action" role="button" aria-label="Collapse"></span><span id="button-pending-action" role="button" aria-label="Pending"></span></span><ul role="tree" aria-label="Table of Contents"><li role="treeitem"><div data-tocid="ddb_intro-d9713e87" class="topicref" data-id="ddb_intro" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../about/ddb_intro.html" id="ddb_intro-d9713e87-link">关于DolphinDB</a></div></div></li><li role="treeitem"><div data-tocid="chap1_getstarted-d9713e136" class="topicref" data-id="chap1_getstarted" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../getstarted/chap1_getstarted.html" id="chap1_getstarted-d9713e136-link">快速上手</a><div class="wh-tooltip"><p class="shortdesc">如何快速部署 DolphinDB、建库建表、写入和查询数据</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="sectionddb_deployment-d9713e189" class="topicref" data-id="sectionddb_deployment" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action sectionddb_deployment-d9713e189-link" class="wh-expand-btn"></span><div class="title"><a href="../deploy/deploy_intro.html" id="sectionddb_deployment-d9713e189-link"><span class="keyword label">部署</span></a><div class="wh-tooltip"><p class="shortdesc">如何在不同的场景中部署 DolphinDB</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="new_chap_database_manage_new_chap_dbmanage_landing_page-d9713e2259" class="topicref" data-id="new_chap_database_manage_new_chap_dbmanage_landing_page" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action new_chap_database_manage_new_chap_dbmanage_landing_page-d9713e2259-link" class="wh-expand-btn"></span><div class="title"><a href="../db_distr_comp/cfg/db_intro.html" id="new_chap_database_manage_new_chap_dbmanage_landing_page-d9713e2259-link"><span class="keyword label">数据库</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 数据库的基本概念</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="chap7_tutorials_streaming-d9713e3760" class="topicref" data-id="chap7_tutorials_streaming" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action chap7_tutorials_streaming-d9713e3760-link" class="wh-expand-btn"></span><div class="title"><a href="../stream/str_intro.html" id="chap7_tutorials_streaming-d9713e3760-link"><span class="keyword label">流数据</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 流数据引擎及流数据计算的基本概念</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e7513" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e7513-link" class="wh-expand-btn"></span><div class="title"><a href="../db_distr_comp/db_oper/import_data.html" id="tocId-d9713e7513-link">数据迁移</a><div class="wh-tooltip"><p class="shortdesc">如何从不同数据源向 DolphinDB 迁移数据</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="chap7_tutorials_system_management-d9713e7940" class="topicref" data-id="chap7_tutorials_system_management" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action chap7_tutorials_system_management-d9713e7940-link" class="wh-expand-btn"></span><div class="title"><a href="../sys_man/om_intro.html" id="chap7_tutorials_system_management-d9713e7940-link"><span class="keyword label">系统运维</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 的系统运维功能及方法</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="troubleshooting-d9713e8780" class="topicref" data-id="troubleshooting" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action troubleshooting-d9713e8780-link" class="wh-expand-btn"></span><div class="title"><a href="../error_codes/troubleshooting.html" id="troubleshooting-d9713e8780-link">故障排查</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="about_language_resources-d9713e20911" class="topicref" data-id="about_language_resources" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action about_language_resources-d9713e20911-link" class="wh-expand-btn"></span><div class="title"><a href="../progr/progr_intro.html" id="about_language_resources-d9713e20911-link"><span class="keyword label">编程语言</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 编程基本概念与方法、SQL 在 DolphinDB 的应用</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="functions_references-d9713e30925" class="topicref" data-id="functions_references" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action functions_references-d9713e30925-link" class="wh-expand-btn"></span><div class="title"><a href="../funcs/funcs_intro.html" id="functions_references-d9713e30925-link"><span class="keyword label">函数参考</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 函数分类、语法、详解及示例</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="api_protocol-d9713e94064" class="topicref" data-id="api_protocol" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action api_protocol-d9713e94064-link" class="wh-expand-btn"></span><div class="title"><a href="../api/connapi_intro.html" id="api_protocol-d9713e94064-link"><span class="keyword label">连接器 &amp; API</span></a><div class="wh-tooltip"><p class="shortdesc">面向不同编程语言的 DolphinDB API 及连接器，相关协议和用法</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="chap6_plugin-d9713e94210" class="topicref" data-id="chap6_plugin" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action chap6_plugin-d9713e94210-link" class="wh-expand-btn"></span><div class="title"><a href="../plugins/plg_intro.html" id="chap6_plugin-d9713e94210-link"><span class="keyword label">插件</span></a><div class="wh-tooltip"><p class="shortdesc">多个应用场景的插件使用说明和插件开发指导</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="third_party-d9713e97904" class="topicref" data-id="third_party" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action third_party-d9713e97904-link" class="wh-expand-btn"></span><div class="title"><a href="../third_party.html" id="third_party-d9713e97904-link">第三方工具</a></div></div></li><li role="treeitem" aria-expanded="true"><div data-tocid="about_tutorials-d9713e98227" class="topicref" data-id="about_tutorials" data-state="expanded"><span role="button" tabindex="0" aria-labelledby="button-collapse-action about_tutorials-d9713e98227-link" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/about_tutorials.html" id="about_tutorials-d9713e98227-link"><span class="keyword label">教程</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 产品使用教程</p></div></div></div><ul role="group" class="navbar-nav nav-list"><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e98280" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e98280-link" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/new_users_finance.html" id="tocId-d9713e98280-link">新用户入门</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e98327" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e98327-link" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/database.html" id="tocId-d9713e98327-link">数据库</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e99111" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e99111-link" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/std_sql_ddb.html" id="tocId-d9713e99111-link">编程</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e100448" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e100448-link" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/streaming-real-time-correlation-processing_2.html" id="tocId-d9713e100448-link">流数据</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e100955" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e100955-link" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/scheduledJob_2.html" id="tocId-d9713e100955-link">系统运维</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="模块概述-d9713e101923" class="topicref" data-id="模块概述" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action 模块概述-d9713e101923-link" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/tu_modules.html" id="模块概述-d9713e101923-link">模块</a></div></div></li><li role="treeitem" aria-expanded="true"><div data-tocid="tocId-d9713e102568" class="topicref" data-state="expanded"><span role="button" tabindex="0" aria-labelledby="button-collapse-action tocId-d9713e102568-link" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/OHLC_2.html" id="tocId-d9713e102568-link">金融场景案例</a></div></div><ul role="group" class="navbar-nav nav-list"><li role="treeitem"><div data-tocid="k-线计算-d9713e102569" class="topicref" data-id="k-线计算" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/OHLC_2.html" id="k-线计算-d9713e102569-link">K 线计算</a></div></div></li><li role="treeitem"><div data-tocid="使用-klinechart-展示-dolphindb-k-线-d9713e102615" class="topicref" data-id="使用-klinechart-展示-dolphindb-k-线" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/displaying_the_dolphindb_k-line_with_klinechart.html" id="使用-klinechart-展示-dolphindb-k-线-d9713e102615-link">使用 KLineChart 展示 DolphinDB K 线</a></div></div></li><li role="treeitem"><div data-tocid="python--hdf5-因子计算与-dolphindb-一体化因子计算方案对比-d9713e102661" class="topicref" data-id="python--hdf5-因子计算与-dolphindb-一体化因子计算方案对比" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/Python_HDF5_vs_DolphinDB.html" id="python--hdf5-因子计算与-dolphindb-一体化因子计算方案对比-d9713e102661-link">Python + HDF5 因子计算与 DolphinDB 一体化因子计算方案对比</a></div></div></li><li role="treeitem"><div data-tocid="python--文件存储与-dolphindb-因子计算性能比较-d9713e102707" class="topicref" data-id="python--文件存储与-dolphindb-因子计算性能比较" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/DolphinDB_VS_PythonFile_Storage.html" id="python--文件存储与-dolphindb-因子计算性能比较-d9713e102707-link">Python + 文件存储与 DolphinDB 因子计算性能比较</a></div></div></li><li role="treeitem"><div data-tocid="python-parser-在金融量化分析场景的应用入门-d9713e102753" class="topicref" data-id="python-parser-在金融量化分析场景的应用入门" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/py_parser__quant_fin.html" id="python-parser-在金融量化分析场景的应用入门-d9713e102753-link">Python Parser 在金融量化分析场景的应用入门</a></div></div></li><li role="treeitem"><div data-tocid="处理-level-2-行情数据实例-d9713e102799" class="topicref" data-id="处理-level-2-行情数据实例" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/l2_stk_data_proc_2.html" id="处理-level-2-行情数据实例-d9713e102799-link">处理 Level-2 行情数据实例</a></div></div></li><li role="treeitem"><div data-tocid="存储金融数据的分区方案最佳实践-d9713e102845" class="topicref" data-id="存储金融数据的分区方案最佳实践" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/best_practices_for_partitioned_storage.html" id="存储金融数据的分区方案最佳实践-d9713e102845-link">存储金融数据的分区方案最佳实践</a></div></div></li><li role="treeitem"><div data-tocid="公募基金历史数据基础分析教程-d9713e102891" class="topicref" data-id="公募基金历史数据基础分析教程" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/public_fund_basic_analysis.html" id="公募基金历史数据基础分析教程-d9713e102891-link">公募基金历史数据基础分析教程</a></div></div></li><li role="treeitem"><div data-tocid="股票行情回放-d9713e102937" class="topicref" data-id="股票行情回放" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/stock_market_replay_2.html" id="股票行情回放-d9713e102937-link">股票行情回放</a></div></div></li><li role="treeitem"><div data-tocid="搭建行情回放服务的最佳实践-d9713e102983" class="topicref" data-id="搭建行情回放服务的最佳实践" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/appendices_market_replay_bp.html" id="搭建行情回放服务的最佳实践-d9713e102983-link">搭建行情回放服务的最佳实践</a></div></div></li><li role="treeitem"><div data-tocid="国内股票行情数据导入实例-d9713e103029" class="topicref" data-id="国内股票行情数据导入实例" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/stockdata_csv_import_demo.html" id="国内股票行情数据导入实例-d9713e103029-link">国内股票行情数据导入实例</a></div></div></li><li role="treeitem"><div data-tocid="基金份额参考价值-iopv-计算-d9713e103076" class="topicref" data-id="基金份额参考价值-iopv-计算" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/streaming_IOPV_2.html" id="基金份额参考价值-iopv-计算-d9713e103076-link">基金份额参考价值 IOPV 计算</a></div></div></li><li role="treeitem"><div data-tocid="基于快照行情的股票和基金-k-线合成-d9713e103122" class="topicref" data-id="基于快照行情的股票和基金-k-线合成" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/k.html" id="基于快照行情的股票和基金-k-线合成-d9713e103122-link">基于快照行情的股票和基金 K 线合成</a></div></div></li><li role="treeitem"><div data-tocid="计算基金日频因子-d9713e103168" class="topicref" data-id="计算基金日频因子" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/fund_factor_contrasted_by_py.html" id="计算基金日频因子-d9713e103168-link">计算基金日频因子</a></div></div></li><li role="treeitem"><div data-tocid="基于逐笔数据合成高频-orderbookdolphindb-orderbook-引擎-d9713e103214" class="topicref" data-id="基于逐笔数据合成高频-orderbookdolphindb-orderbook-引擎" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/orderBookSnapshotEngine.html" id="基于逐笔数据合成高频-orderbookdolphindb-orderbook-引擎-d9713e103214-link">基于逐笔数据合成高频 Orderbook：DolphinDB Orderbook 引擎</a></div></div></li><li role="treeitem"><div data-tocid="金融-poc-用户历史数据导入指导手册之股票-level-2-逐笔篇-d9713e103260" class="topicref" data-id="金融-poc-用户历史数据导入指导手册之股票-level-2-逐笔篇" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/LoadDataForPoc.html" id="金融-poc-用户历史数据导入指导手册之股票-level-2-逐笔篇-d9713e103260-link">金融 PoC 用户历史数据导入指导手册之股票 Level-2 逐笔篇</a></div></div></li><li role="treeitem"><div data-tocid="金融实时实际波动率预测-d9713e103306" class="topicref" data-id="金融实时实际波动率预测" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/ml_volatility_2.html" id="金融实时实际波动率预测-d9713e103306-link">金融实时实际波动率预测</a></div></div></li><li role="treeitem"><div data-tocid="金融因子流式实现-d9713e103352" class="topicref" data-id="金融因子流式实现" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/str_comp_fin_quant_2.html" id="金融因子流式实现-d9713e103352-link">金融因子流式实现</a></div></div></li><li role="treeitem"><div data-tocid="开发股票波动率预测模型的-676-个输入特征-d9713e103398" class="topicref" data-id="开发股票波动率预测模型的-676-个输入特征" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/metacode_derived_features_2.html" id="开发股票波动率预测模型的-676-个输入特征-d9713e103398-link">开发股票波动率预测模型的 676 个输入特征</a></div></div></li><li role="treeitem"><div data-tocid="快速搭建-level-2-快照数据流批一体因子计算平台最佳实践-d9713e103444" class="topicref" data-id="快速搭建-level-2-快照数据流批一体因子计算平台最佳实践" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/l2_snapshot_factor_calc_2.html" id="快速搭建-level-2-快照数据流批一体因子计算平台最佳实践-d9713e103444-link">快速搭建 Level-2 快照数据流批一体因子计算平台最佳实践</a></div></div></li><li role="treeitem"><div data-tocid="量化金融范例-d9713e103490" class="topicref" data-id="量化金融范例" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/quant_finance_examples.html" id="量化金融范例-d9713e103490-link">量化金融范例</a></div></div></li><li role="treeitem"><div data-tocid="流式计算中证-1000-指数主买主卖交易量-d9713e103536" class="topicref" data-id="流式计算中证-1000-指数主买主卖交易量" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/CSI_1000_2.html" id="流式计算中证-1000-指数主买主卖交易量-d9713e103536-link">流式计算中证 1000 指数主买/主卖交易量</a></div></div></li><li role="treeitem"><div data-tocid="深度不平衡买卖压力指标波动率计算-d9713e103583" class="topicref" data-id="深度不平衡买卖压力指标波动率计算" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/sql_performance_optimization_wap_di_rv.html" id="深度不平衡买卖压力指标波动率计算-d9713e103583-link">深度不平衡、买卖压力指标、波动率计算</a></div></div></li><li role="treeitem"><div data-tocid="实时合成自定义频订单簿快照dolphindb-insight-行情插件与订单簿引擎应用-d9713e103629" class="topicref" data-id="实时合成自定义频订单簿快照dolphindb-insight-行情插件与订单簿引擎应用" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/insight_plugin_orderbook_engine_application.html" id="实时合成自定义频订单簿快照dolphindb-insight-行情插件与订单簿引擎应用-d9713e103629-link">实时合成自定义频订单簿快照：DolphinDB INSIGHT 行情插件与订单簿引擎应用</a></div></div></li><li role="treeitem"><div data-tocid="实时计算分钟资金流-d9713e103675" class="topicref" data-id="实时计算分钟资金流" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/streaming_capital_flow_order_by_order_2.html" id="实时计算分钟资金流-d9713e103675-link">实时计算分钟资金流</a></div></div></li><li role="treeitem"><div data-tocid="实时计算高频因子-d9713e103721" class="topicref" data-id="实时计算高频因子" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/hf_factor_streaming_2.html" id="实时计算高频因子-d9713e103721-link">实时计算高频因子</a></div></div></li><li role="treeitem"><div data-tocid="实时计算日累计逐单资金流-d9713e103767" class="topicref" data-id="实时计算日累计逐单资金流" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/streaming_capital_flow_daily_2.html" id="实时计算日累计逐单资金流-d9713e103767-link">实时计算日累计逐单资金流</a></div></div></li><li role="treeitem"><div data-tocid="实时计算涨幅榜-d9713e103813" class="topicref" data-id="实时计算涨幅榜" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/rt_stk_price_inc_calc_2.html" id="实时计算涨幅榜-d9713e103813-link">实时计算涨幅榜</a></div></div></li><li role="treeitem"><div data-tocid="实时选取外汇行情多价源最优价-d9713e103859" class="topicref" data-id="实时选取外汇行情多价源最优价" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/best_price_selection.html" id="实时选取外汇行情多价源最优价-d9713e103859-link">实时选取外汇行情多价源最优价</a></div></div></li><li role="treeitem"><div data-tocid="外汇掉期估值计算-d9713e103905" class="topicref" data-id="外汇掉期估值计算" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/FxSwapValuation.html" id="外汇掉期估值计算-d9713e103905-link">外汇掉期估值计算</a></div></div></li><li role="treeitem"><div data-tocid="因子计算平台构建-d9713e103951" class="topicref" data-id="因子计算平台构建" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/Python_Celery.html" id="因子计算平台构建-d9713e103951-link">因子计算平台构建</a></div></div></li><li role="treeitem"><div data-tocid="因子计算最佳实践-d9713e103997" class="topicref" data-id="因子计算最佳实践" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/best_practice_for_factor_calculation.html" id="因子计算最佳实践-d9713e103997-link">因子计算最佳实践</a></div></div></li><li role="treeitem"><div data-tocid="mvo_tutorial-d9713e104043" class="topicref" data-id="mvo_tutorial" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/MVO.html" id="mvo_tutorial-d9713e104043-link">优化投资组合：DolphinDB 最优化求解系列函数应用指南</a></div></div></li><li role="treeitem"><div data-tocid="中高频多因子库存储最佳实践-d9713e104090" class="topicref" data-id="中高频多因子库存储最佳实践" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/best_practices_for_multi_factor.html" id="中高频多因子库存储最佳实践-d9713e104090-link">中高频多因子库存储最佳实践</a></div></div></li><li role="treeitem"><div data-tocid="alphalens-在-dolphindb-中的应用因子分析建模实践-d9713e104136" class="topicref" data-id="alphalens-在-dolphindb-中的应用因子分析建模实践" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/Practical_Factor_Analysis_Modeling.html" id="alphalens-在-dolphindb-中的应用因子分析建模实践-d9713e104136-link">Alphalens 在 DolphinDB 中的应用：因子分析建模实践</a></div></div></li><li role="treeitem"><div data-tocid="dolphindb-与-dolphinscheduler-的集成-d9713e104182" class="topicref" data-id="dolphindb-与-dolphinscheduler-的集成" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/dolphinscheduler_integration.html" id="dolphindb-与-dolphinscheduler-的集成-d9713e104182-link">DolphinDB 与 DolphinScheduler 的集成</a></div></div></li><li role="treeitem"><div data-tocid="dolphindb-与-python-airflow-最佳实践-d9713e104228" class="topicref" data-id="dolphindb-与-python-airflow-最佳实践" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/ddb_airflow.html" id="dolphindb-与-python-airflow-最佳实践-d9713e104228-link">DolphinDB 与 Python AirFlow 最佳实践</a></div></div></li><li role="treeitem"><div data-tocid="gplearn-d9713e104274" class="topicref" data-id="gplearn" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/gplearn.html" id="gplearn-d9713e104274-link">Shark GPLearn 快速上手</a></div></div></li><li role="treeitem"><div data-tocid="利用jit加速计算-etf-期权隐含波动率和希腊值-d9713e104320" class="topicref" data-id="利用jit加速计算-etf-期权隐含波动率和希腊值" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/IV_Greeks_Calculation_for_ETF_Options_Using_JIT.html" id="利用jit加速计算-etf-期权隐含波动率和希腊值-d9713e104320-link">利用JIT加速计算 ETF 期权隐含波动率和希腊值</a></div></div></li><li role="treeitem"><div data-tocid="基于-dolphindb-的-brinson-绩效归因模型实践-d9713e104366" class="topicref" data-id="基于-dolphindb-的-brinson-绩效归因模型实践" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/brinson.html" id="基于-dolphindb-的-brinson-绩效归因模型实践-d9713e104366-link">基于 DolphinDB 的 Brinson 绩效归因模型实践</a></div></div></li><li role="treeitem"><div data-tocid="基于-dolphindb-的-campisi-绩效归因模型实践-d9713e104412" class="topicref" data-id="基于-dolphindb-的-campisi-绩效归因模型实践" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/campisi.html" id="基于-dolphindb-的-campisi-绩效归因模型实践-d9713e104412-link">基于 DolphinDB 的 Campisi 绩效归因模型实践</a></div></div></li><li role="treeitem"><div data-tocid="期货分钟频cta策略回测案例-d9713e104458" class="topicref" data-id="期货分钟频cta策略回测案例" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/futures_minute_frequency_cta_strategy_backtest_example.html" id="期货分钟频cta策略回测案例-d9713e104458-link">期货分钟频CTA策略回测案例</a></div></div></li><li role="treeitem"><div data-tocid="exchdata-交易所历史股票数据自动化导入功能模块使用教程-d9713e104504" class="topicref" data-id="exchdata-交易所历史股票数据自动化导入功能模块使用教程" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/exchdata_exchange_historical_stock_data_auto_import_module_tutorial.html" id="exchdata-交易所历史股票数据自动化导入功能模块使用教程-d9713e104504-link">ExchData 交易所历史股票数据自动化导入功能模块使用教程</a></div></div></li><li role="treeitem"><div data-tocid="ficc_func_uasge_and_performance-d9713e104550" class="topicref" data-id="ficc_func_uasge_and_performance" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/ficc_func_uasge_and_performance.html" id="ficc_func_uasge_and_performance-d9713e104550-link">FICC 固收系列函数使用示例及性能</a></div></div></li><li role="treeitem"><div data-tocid="title1-d9713e104597" class="topicref" data-id="title1" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/ficc_funcs_application.html" id="title1-d9713e104597-link">FICC 固收系列函数应用场景</a></div></div></li><li role="treeitem"><div data-tocid="最优化函数_socp_的使用及转化案例-d9713e104643" class="topicref" data-id="最优化函数_socp_的使用及转化案例" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/socp_usage_case.html" id="最优化函数_socp_的使用及转化案例-d9713e104643-link">最优化函数 socp 的使用及转化案例</a></div></div></li><li role="treeitem"><div data-tocid="k_line_calculation-d9713e104689" class="topicref" data-id="k_line_calculation" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/k_line_calculation%20.html" id="k_line_calculation-d9713e104689-link">基于期货快照行情数据计算合约 K 线以及主连行情</a></div></div></li><li role="treeitem" class="active"><div data-tocid="backtest_introduction_usage-d9713e104735" class="topicref" data-id="backtest_introduction_usage" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/backtest_introduction_usage.html" id="backtest_introduction_usage-d9713e104735-link">融资融券策略回测使用说明及回测案例</a></div></div></li><li role="treeitem"><div data-tocid="stock_backtest-d9713e104781" class="topicref" data-id="stock_backtest" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/stock_backtest.html" id="stock_backtest-d9713e104781-link">股票中低频投资组合回测案例实现</a></div></div></li></ul></li><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e104827" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e104827-link" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/streaming_engine_anomaly_alerts_2.html" id="tocId-d9713e104827-link">物联网场景案例</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e105795" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e105795-link" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/dolphindb_tensor_libtorch_tutorial.html" id="tocId-d9713e105795-link">机器学习</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e105842" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e105842-link" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/api_performance.html" id="tocId-d9713e105842-link">测试报告</a></div></div></li></ul></li><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e105982" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e105982-link" class="wh-expand-btn"></span><div class="title"><a href="../rn/server/3_00_2.html" id="tocId-d9713e105982-link">版本说明</a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 版本发布历史</p></div></div></div></li></ul></div>
+		                        
+                            </div>
+                        </nav>
+                    
+                    
+                    <div class="col-lg-7 col-md-9 col-sm-12" id="wh_topic_body">
+                        <button id="wh_close_publication_toc_button" class="close-toc-button d-none" aria-label="Toggle publishing table of content" aria-controls="wh_publication_toc" aria-expanded="true">
+                            <span class="close-toc-icon-container">
+                                <span class="close-toc-icon"></span>     
+                            </span>
+                        </button>
+                        <button id="wh_close_topic_toc_button" class="close-toc-button d-none" aria-label="Toggle topic table of content" aria-controls="wh_topic_toc" aria-expanded="true">
+                            <span class="close-toc-icon-container">
+                                <span class="close-toc-icon"></span>     
+                            </span>
+                        </button>
+                        
+                        <div class=" wh_topic_content body "><main role="main"><article class="- topic/topic topic" role="article" aria-labelledby="ariaid-title1">
+    <h1 class="- topic/title title topictitle1" id="ariaid-title1">融资融券策略回测使用说明及回测案例</h1>
+    <div class="- topic/body body">
+        <p class="- topic/p p">融资融券是一种利用杠杆放大投资收益的交易方式，它给投资者提供了更多的资金和交易机会。在量化投资中，融资融券业务被广泛应用于多种策略和操作中。包括杠杆交易、对冲策略、市场中性策略、套利策略和高频交易等等。目前很多量化基金经理在研究和回测这些策略中基本没有考虑融资融券部分，而是直接使用普通股票的策略回测框架进行投研回测分析，然而在实际交易中却引入融资融券操作，导致回测结果与实际交易结果存在较大偏差。</p>
+        <p class="- topic/p p">股票的融资融券业务和普通交易相比主要涉及以下三个方面的不同：一、融资融券策略回测中除了涉及佣金外，还涉及融资利率和融券费用等交易成本。二、融资融券市场的动态性和变化性较大，相应标的每日的折算率，保证金占用比例，当日是否可融资融券标的的状态也跟市场情绪的变化而变化。三、融资融券的风险管理模块更加严格，包括账户的维保比例、多头集中度和空头集中度限制等。DolphinDB
+            的回测插件现已支持融资融券策略的回测。该回测框架综合考虑了融资融券的交易成本、当日可融资融券标的范围、折算率及风控模块，从而使策略的回测效果更贴近实际操作结果。</p>
+        <p class="- topic/p p">融资融券策略回测在操作方式、风险管理和资金使用上与其他策略回测存在显著差异。因此，DolphinDB
+            的回测引擎在参数配置、行情数据和相关接口上也有所不同。本文将从融资融券业务的介绍、DolphinDB 融资融券回测的使用方法，以及具体回测案例等方面，展示如何利用
+            DolphinDB 回测插件实现融资融券策略的回测。</p>
+        <p class="- topic/p p">注意：本文全部代码需要运行在 3.00.2.1/2.00.14.1 及以上版本的 DolphinDB server 上。</p>
+    </div>
+    <article class="- topic/topic topic nested1" aria-labelledby="ariaid-title2" id="topic_br5_grq_sdc">
+        <h2 class="- topic/title title topictitle2" id="ariaid-title2">1. 融资融券业务介绍</h2>
+        <div class="- topic/body body">
+            <p class="- topic/p p">融资融券业务是一种证券信用交易方式，投资者可通过借贷资金或证券获得杠杆操作机会，以放大收益或对冲风险。融资是指投资者向券商借款购买证券，而融券是指投资者借用券商的证券卖出，计划在未来以较低价格买回同等数量的证券还给券商。融资融券基于预期股票价格变动获取利润。融资融券交易需提供保证金，抵押品可为现金、股票或债券，券商会根据资产质量设定折算率。投资者需支付利息、借券费用及相关交易手续费等成本。需要注意的是，在进行融资融券相关标的买卖时，只有可融资融券标的才可以进行买卖、只有可充抵保证金证券才能进行可以进行担保品买入。由于杠杆效应，该交易模式不仅放大了潜在收益，也增加了亏损风险，同时还面临强制平仓、市场波动和成本累积等挑战。此外，只有满足特定条件的股票才能进行此类交易。</p>
+        </div>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title3" id="topic_ldf_jrq_sdc">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title3">1.1 保证金要求</h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p">在融资融券业务中，保证金制度是维护交易所权益的先决条件。投资者在进行融资融券投资时，需要利用信用账户进行交易，将保证金或可用于冲抵保证金的证券转入信用账户，然后进行融资融券交易。</p>
+                <ul class="- topic/ul ul" id="topic_ldf_jrq_sdc__ul_tdm_qrq_sdc" data-ofbid="topic_ldf_jrq_sdc__ul_tdm_qrq_sdc">
+                    <li class="- topic/li li">对于上交所、深交所、北交所，个人投资者的融券保证金比例应当大于 100%；私募基金投资机构的融券保证金比例应当大于 120%。（<strong class="+ topic/ph hi-d/b ph b">保证金比例 =
+                            保证金总额 / 需要融资或融券的规模 * 100%</strong>）</li>
+                </ul>
+            </div>
+        </article>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title4" id="topic_zjl_jrq_sdc">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title4">1.2 交易模式</h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p">融资融券的交易模式分为两种：融资交易和融券交易。</p>
+                <ul class="- topic/ul ul" id="topic_zjl_jrq_sdc__ul_w3y_qrq_sdc" data-ofbid="topic_zjl_jrq_sdc__ul_w3y_qrq_sdc">
+                    <li class="- topic/li li">融资交易指向信用账户中输入保证金或可折算证券，投资者在交易额度内进行融资投资，利用杠杆放大期望收益和风险；</li>
+                    <li class="- topic/li li">融券交易指向信用账户中输入保证金或可折算证券，投资者在交易额度内进行融券做空，利用杠杆放大期望收益和风险。</li>
+                </ul>
+                <p class="- topic/p p">上述两种交易对应实际交易的两种反向操作：融资交易是一种做多操作，而融券交易是一种等价做空。这两种方式不仅可以用于放大做多和做空头寸，也可用于追平当日头寸以套利或止损。</p>
+            </div>
+        </article>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title5" id="topic_cyl_jrq_sdc">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title5">1.3 杠杆作用</h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p">融资融券业务自带杠杆效应，可以利用少部分资金撬动更大的交易规模。下面给出一个简单的例子计算杠杆比率。投资者在融资交易中用自有资金和借入资金购买股票。假设保证金比例为
+                    100%，那么投资者的资金一半处于信用账户，另一半通过融资获得。因此，在不考虑其他因素的情况下，投资者的杠杆比率为 2 倍（即投入 1 单位自有资金，可以操作
+                    2 单位的资金）。实际杠杆比率更低，因为信用账户的资金一旦发生变更，比如投资证券等，按照折算率冲抵后，可融资余额会下降。按照 70%
+                    的折算率，如果信用账户中的余额全部用于投资，仅能冲抵百分之70的保证金。实际杠杆比率为 170/100 = 1.7 倍。杠杆比率计算公式：<strong class="+ topic/ph hi-d/b ph b">杠杆比率 =
+                        融资融券后所有可用资金余额 / 初始资金余额 * 100%</strong></p>
+            </div>
+        </article>
+    </article>
+    <article class="- topic/topic topic nested1" aria-labelledby="ariaid-title6" id="topic_ctf_hrq_sdc">
+        <h2 class="- topic/title title topictitle2" id="ariaid-title6">2. DolphinDB 融资融券回测解决方案</h2>
+        <div class="- topic/body body">
+            <p class="- topic/p p">DolphinDB 回测插件支持沪深 A
+                股融资融券业务的策略回测，其支持的行情频率包括快照、分钟频以及日频。此外，回测插件支持融资融券业务的融资利息、融券费用和融券权益补偿等计算以及授信额度、可融资融券标的范围、多头集中度和净空头负债集中度风控限制。下面将进行插件参数配置、行情数据、相关接口的介绍。</p>
+        </div>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title7" id="topic_j2r_jrq_sdc">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title7">2.1 参数配置</h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p">融资融券策略回测与股票等其它品种一样，用户可以设置开始日期、结束日期、初始资金、手续费、行情频率类型等基本参数。在有融资买入和融券卖出时，融资融券业务会产生额外融资利息和融券费用，此外有多头或者空头集中度限制、融券权益补偿计算等业务逻辑。在创建回测引擎时，用户可以在配置参数中进行融资和融券利率，多空头集中度，分红除权等设置，同时支持担保品买入，融资买入和融券卖出等相关底仓的设置。</p>
+                <p class="- topic/p p">回测引擎的配置项参数记录在一个字典中。如果将配置项 <strong class="+ topic/ph hi-d/b ph b">strategyGroup </strong>设置为 <strong class="+ topic/ph hi-d/b ph b">securityCreditAccount，
+                    </strong>表示进行融资融券回测。其它可以设置的与融资融券相关的参数包括：授信额度（lineOfCredit）、融资利率
+                    （marginTradingInterestRate）、融券利率
+                    （secuLendingInterestRate）、多头集中度（longConcentration） 和空头集中度（shortConcentration） 等。
+                    具体的配置项说明见表 1。</p>
+                <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">表 1</strong>：融资融券配置项说明表</p>
+                <div class="table-container"><table class="- topic/table table frame-all" id="topic_j2r_jrq_sdc__table_ncv_zrq_sdc" data-ofbid="topic_j2r_jrq_sdc__table_ncv_zrq_sdc" data-cols="3"><caption></caption><colgroup><col/><col/><col/></colgroup><thead class="- topic/thead thead">
+                            <tr class="- topic/row">
+                                <th class="- topic/entry entry align-left colsep-1 rowsep-1" id="topic_j2r_jrq_sdc__table_ncv_zrq_sdc__entry__1"><strong class="+ topic/ph hi-d/b ph b">key</strong></th>
+                                <th class="- topic/entry entry align-left colsep-1 rowsep-1" id="topic_j2r_jrq_sdc__table_ncv_zrq_sdc__entry__2"><strong class="+ topic/ph hi-d/b ph b">说明</strong></th>
+                                <th class="- topic/entry entry align-left colsep-0 rowsep-1" id="topic_j2r_jrq_sdc__table_ncv_zrq_sdc__entry__3"><strong class="+ topic/ph hi-d/b ph b">备注</strong></th>
+                            </tr>
+                        </thead><tbody class="- topic/tbody tbody">
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_j2r_jrq_sdc__table_ncv_zrq_sdc__entry__1">startDate</td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_j2r_jrq_sdc__table_ncv_zrq_sdc__entry__2">开始日期</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_j2r_jrq_sdc__table_ncv_zrq_sdc__entry__3">DATE 类型</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_j2r_jrq_sdc__table_ncv_zrq_sdc__entry__1">endDate</td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_j2r_jrq_sdc__table_ncv_zrq_sdc__entry__2">结束日期</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_j2r_jrq_sdc__table_ncv_zrq_sdc__entry__3">DATE 类型</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_j2r_jrq_sdc__table_ncv_zrq_sdc__entry__1">strategyGroup</td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_j2r_jrq_sdc__table_ncv_zrq_sdc__entry__2">策略类型</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_j2r_jrq_sdc__table_ncv_zrq_sdc__entry__3"><strong class="+ topic/ph hi-d/b ph b">’</strong>securityCreditAccount<strong class="+ topic/ph hi-d/b ph b">‘</strong></td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_j2r_jrq_sdc__table_ncv_zrq_sdc__entry__1">cash</td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_j2r_jrq_sdc__table_ncv_zrq_sdc__entry__2">初始资金</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_j2r_jrq_sdc__table_ncv_zrq_sdc__entry__3">DOUBLE 类型</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_j2r_jrq_sdc__table_ncv_zrq_sdc__entry__1">commission</td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_j2r_jrq_sdc__table_ncv_zrq_sdc__entry__2">手续费率</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_j2r_jrq_sdc__table_ncv_zrq_sdc__entry__3">FLOAT 类型</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_j2r_jrq_sdc__table_ncv_zrq_sdc__entry__1">tax</td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_j2r_jrq_sdc__table_ncv_zrq_sdc__entry__2">印花税率</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_j2r_jrq_sdc__table_ncv_zrq_sdc__entry__3">FLOAT 类型</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_j2r_jrq_sdc__table_ncv_zrq_sdc__entry__1">dataType</td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_j2r_jrq_sdc__table_ncv_zrq_sdc__entry__2">行情类型</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_j2r_jrq_sdc__table_ncv_zrq_sdc__entry__3">
+                                    <p class="- topic/p p">1：快照行情</p>
+                                    <p class="- topic/p p">3：分钟频率</p>
+                                    <p class="- topic/p p">4：日频</p>
+                                </td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_j2r_jrq_sdc__table_ncv_zrq_sdc__entry__1">matchingMode</td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_j2r_jrq_sdc__table_ncv_zrq_sdc__entry__2">订单撮合模式</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_j2r_jrq_sdc__table_ncv_zrq_sdc__entry__3">
+                                    <p class="- topic/p p">INT 类型，根据分钟或者日频，可选值为：</p>
+                                    <p class="- topic/p p">1：</p>
+                                    <ul class="- topic/ul ul" id="topic_j2r_jrq_sdc__ul_rcv_zrq_sdc" data-ofbid="topic_j2r_jrq_sdc__ul_rcv_zrq_sdc">
+                                        <li class="- topic/li li">日频：以收盘价撮合订单</li>
+                                        <li class="- topic/li li">分钟频：行情时间大于订单时间时撮合订单</li>
+                                    </ul>
+                                    <p class="- topic/p p">2：</p>
+                                    <ul class="- topic/ul ul" id="topic_j2r_jrq_sdc__ul_scv_zrq_sdc" data-ofbid="topic_j2r_jrq_sdc__ul_scv_zrq_sdc">
+                                        <li class="- topic/li li">日频：以开盘价撮合订单</li>
+                                        <li class="- topic/li li">分钟频：行情时间等于订单时间时以当前行情的收盘价撮合订单，后续未完成订单撮合订单同 1</li>
+                                    </ul>
+                                    <p class="- topic/p p">3：以委托价格成交</p>
+                                </td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_j2r_jrq_sdc__table_ncv_zrq_sdc__entry__1">lineOfCredit</td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_j2r_jrq_sdc__table_ncv_zrq_sdc__entry__2">授信额度</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_j2r_jrq_sdc__table_ncv_zrq_sdc__entry__3">DOUBLE 类型</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_j2r_jrq_sdc__table_ncv_zrq_sdc__entry__1">marginTradingInterestRate</td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_j2r_jrq_sdc__table_ncv_zrq_sdc__entry__2">融资利率</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_j2r_jrq_sdc__table_ncv_zrq_sdc__entry__3">FLOAT 类型</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_j2r_jrq_sdc__table_ncv_zrq_sdc__entry__1">secuLendingInterestRate</td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_j2r_jrq_sdc__table_ncv_zrq_sdc__entry__2">融券利率</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_j2r_jrq_sdc__table_ncv_zrq_sdc__entry__3">FLOAT 类型</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_j2r_jrq_sdc__table_ncv_zrq_sdc__entry__1">maintainanceMargin</td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_j2r_jrq_sdc__table_ncv_zrq_sdc__entry__2">
+                                    <p class="- topic/p p">维持担保比例。</p>
+                                    <p class="- topic/p p">[警戒线、追保线、最低线]</p>
+                                </td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_j2r_jrq_sdc__table_ncv_zrq_sdc__entry__3">FLOAT 数组类型。维持担保比例低于追保线时回测引擎会直接退出</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_j2r_jrq_sdc__table_ncv_zrq_sdc__entry__1">longConcentration</td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_j2r_jrq_sdc__table_ncv_zrq_sdc__entry__2">
+                                    <p class="- topic/p p">多头集中度</p>
+                                    <p class="- topic/p p"> </p>
+                                </td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_j2r_jrq_sdc__table_ncv_zrq_sdc__entry__3">递减的三元 FLOAT
+                                    数组类型，如[1.,0.85,0.6]。不配置该项时，不进行多头集中度限制。</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_j2r_jrq_sdc__table_ncv_zrq_sdc__entry__1">shortConcentration</td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_j2r_jrq_sdc__table_ncv_zrq_sdc__entry__2">净空头负债集中度</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_j2r_jrq_sdc__table_ncv_zrq_sdc__entry__3">
+                                    <p class="- topic/p p">递减的三元 FLOAT 数组类型，如[1.,0.85,0.6]。</p>
+                                    <p class="- topic/p p">不配置该项时，不进行空头集中度限制。</p>
+                                </td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_j2r_jrq_sdc__table_ncv_zrq_sdc__entry__1">outputOrderInfo</td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_j2r_jrq_sdc__table_ncv_zrq_sdc__entry__2">融资融券是否输出风控日志</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_j2r_jrq_sdc__table_ncv_zrq_sdc__entry__3">BOOL 类型</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_j2r_jrq_sdc__table_ncv_zrq_sdc__entry__1">repayWithoutMarginBuy</td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_j2r_jrq_sdc__table_ncv_zrq_sdc__entry__2">控制是否可以用融资买入的券抵消融券卖出的券</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_j2r_jrq_sdc__table_ncv_zrq_sdc__entry__3">
+                                    <p class="- topic/p p">BOOL 类型</p>
+                                    <p class="- topic/p p">true：可以抵消</p>
+                                    <p class="- topic/p p">false：不允许抵消</p>
+                                </td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_j2r_jrq_sdc__table_ncv_zrq_sdc__entry__1">stockDividend</td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_j2r_jrq_sdc__table_ncv_zrq_sdc__entry__2">分红除权配置表</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_j2r_jrq_sdc__table_ncv_zrq_sdc__entry__3">是一个表，具体字段说明见表 2</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_j2r_jrq_sdc__table_ncv_zrq_sdc__entry__1">setLastDayPosition</td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_j2r_jrq_sdc__table_ncv_zrq_sdc__entry__2">底仓信息表</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_j2r_jrq_sdc__table_ncv_zrq_sdc__entry__3">是一个表，具体字段说明见表 3 </td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-0" headers="topic_j2r_jrq_sdc__table_ncv_zrq_sdc__entry__1">msgAsTable</td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-0" headers="topic_j2r_jrq_sdc__table_ncv_zrq_sdc__entry__2">行情数据格式</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="topic_j2r_jrq_sdc__table_ncv_zrq_sdc__entry__3">
+                                    <p class="- topic/p p">BOOL 类型，默认为 false</p>
+                                    <p class="- topic/p p">true : 表</p>
+                                    <p class="- topic/p p">false ：字典</p>
+                                </td>
+                            </tr>
+                        </tbody></table></div>
+                <p class="- topic/p p">融资融券回测支持对融资或担保品买入持仓的动态分红送股的处理，对融券持仓权益补偿的处理。用户只需把实际的分红除权表设置给配置文件 config 中的参数
+                    stockDividend 即可，分红送股的基本信息表详见表 2。</p>
+                <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">表 2</strong> ：分红送股配置表 </p>
+                <div class="table-container"><table class="- topic/table table frame-all" id="topic_j2r_jrq_sdc__table_tcv_zrq_sdc" data-ofbid="topic_j2r_jrq_sdc__table_tcv_zrq_sdc" data-cols="3"><caption></caption><colgroup><col/><col/><col/></colgroup><thead class="- topic/thead thead">
+                            <tr class="- topic/row">
+                                <th class="- topic/entry entry align-left colsep-1 rowsep-1" id="topic_j2r_jrq_sdc__table_tcv_zrq_sdc__entry__1"><strong class="+ topic/ph hi-d/b ph b">字段</strong></th>
+                                <th class="- topic/entry entry align-left colsep-1 rowsep-1" id="topic_j2r_jrq_sdc__table_tcv_zrq_sdc__entry__2"><strong class="+ topic/ph hi-d/b ph b">字段类型</strong></th>
+                                <th class="- topic/entry entry align-left colsep-0 rowsep-1" id="topic_j2r_jrq_sdc__table_tcv_zrq_sdc__entry__3"><strong class="+ topic/ph hi-d/b ph b">名称</strong></th>
+                            </tr>
+                        </thead><tbody class="- topic/tbody tbody">
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_j2r_jrq_sdc__table_tcv_zrq_sdc__entry__1">symbol</td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_j2r_jrq_sdc__table_tcv_zrq_sdc__entry__2">SYMBOL</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_j2r_jrq_sdc__table_tcv_zrq_sdc__entry__3">股票代码</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_j2r_jrq_sdc__table_tcv_zrq_sdc__entry__1">endDate</td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_j2r_jrq_sdc__table_tcv_zrq_sdc__entry__2">DATE</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_j2r_jrq_sdc__table_tcv_zrq_sdc__entry__3">分红年度</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_j2r_jrq_sdc__table_tcv_zrq_sdc__entry__1">annDate</td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_j2r_jrq_sdc__table_tcv_zrq_sdc__entry__2">DATE</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_j2r_jrq_sdc__table_tcv_zrq_sdc__entry__3">预案公告日</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_j2r_jrq_sdc__table_tcv_zrq_sdc__entry__1">recordDate</td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_j2r_jrq_sdc__table_tcv_zrq_sdc__entry__2">DATE</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_j2r_jrq_sdc__table_tcv_zrq_sdc__entry__3">股权登记日</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_j2r_jrq_sdc__table_tcv_zrq_sdc__entry__1">exDate</td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_j2r_jrq_sdc__table_tcv_zrq_sdc__entry__2">DATE</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_j2r_jrq_sdc__table_tcv_zrq_sdc__entry__3">除权除息日</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_j2r_jrq_sdc__table_tcv_zrq_sdc__entry__1">payDate</td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_j2r_jrq_sdc__table_tcv_zrq_sdc__entry__2">DATE</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_j2r_jrq_sdc__table_tcv_zrq_sdc__entry__3">派息日</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_j2r_jrq_sdc__table_tcv_zrq_sdc__entry__1">divListDate</td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_j2r_jrq_sdc__table_tcv_zrq_sdc__entry__2">DATE</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_j2r_jrq_sdc__table_tcv_zrq_sdc__entry__3">红股上市日</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_j2r_jrq_sdc__table_tcv_zrq_sdc__entry__1">bonusRatio</td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_j2r_jrq_sdc__table_tcv_zrq_sdc__entry__2">DOUBLE</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_j2r_jrq_sdc__table_tcv_zrq_sdc__entry__3">每股送股比例</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_j2r_jrq_sdc__table_tcv_zrq_sdc__entry__1">capitalConversion</td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_j2r_jrq_sdc__table_tcv_zrq_sdc__entry__2">DOUBLE</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_j2r_jrq_sdc__table_tcv_zrq_sdc__entry__3">每股转增比例</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_j2r_jrq_sdc__table_tcv_zrq_sdc__entry__1">afterTaxCashDiv</td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_j2r_jrq_sdc__table_tcv_zrq_sdc__entry__2">DOUBLE</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_j2r_jrq_sdc__table_tcv_zrq_sdc__entry__3">每股分红（税后）</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_j2r_jrq_sdc__table_tcv_zrq_sdc__entry__1">allotPrice</td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_j2r_jrq_sdc__table_tcv_zrq_sdc__entry__2">DOUBLE</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_j2r_jrq_sdc__table_tcv_zrq_sdc__entry__3">配股价格</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-0" headers="topic_j2r_jrq_sdc__table_tcv_zrq_sdc__entry__1">allotRatio</td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-0" headers="topic_j2r_jrq_sdc__table_tcv_zrq_sdc__entry__2">DOUBLE</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="topic_j2r_jrq_sdc__table_tcv_zrq_sdc__entry__3">每股配股比例</td>
+                            </tr>
+                        </tbody></table></div>
+                <p class="- topic/p p">融资融券回测，创建回测引擎时即可设置策略的初始仓位，初始仓位的设置通过配置文件 config 中的参数 setLastDayPosition
+                    设置。这样策略的初始权益为底仓权益和策略的初始资金之和，同时回测结束时也可以通过
+                        <code class="+ topic/ph pr-d/codeph ph codeph">Backtest::getDailyTotalPortfolios</code> 接口的 netValue 和
+                    bottomNetValue 字段获取分别获取策略净值和初始仓位的净值。设置的初始仓位表信息，具体详见表 3 .</p>
+                <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">表 3</strong> ：初始仓位表 </p>
+                <div class="table-container"><table class="- topic/table table frame-all" id="topic_j2r_jrq_sdc__table_mmz_1sq_sdc" data-ofbid="topic_j2r_jrq_sdc__table_mmz_1sq_sdc" data-cols="3"><caption></caption><colgroup><col/><col/><col/></colgroup><thead class="- topic/thead thead">
+                            <tr class="- topic/row">
+                                <th class="- topic/entry entry align-left colsep-1 rowsep-1" id="topic_j2r_jrq_sdc__table_mmz_1sq_sdc__entry__1"><strong class="+ topic/ph hi-d/b ph b">字段名称</strong></th>
+                                <th class="- topic/entry entry align-left colsep-1 rowsep-1" id="topic_j2r_jrq_sdc__table_mmz_1sq_sdc__entry__2"><strong class="+ topic/ph hi-d/b ph b">类型</strong></th>
+                                <th class="- topic/entry entry align-left colsep-0 rowsep-1" id="topic_j2r_jrq_sdc__table_mmz_1sq_sdc__entry__3"><strong class="+ topic/ph hi-d/b ph b">名称</strong></th>
+                            </tr>
+                        </thead><tbody class="- topic/tbody tbody">
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_j2r_jrq_sdc__table_mmz_1sq_sdc__entry__1">symbol</td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_j2r_jrq_sdc__table_mmz_1sq_sdc__entry__2">SYMBOL</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_j2r_jrq_sdc__table_mmz_1sq_sdc__entry__3">标的代码</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_j2r_jrq_sdc__table_mmz_1sq_sdc__entry__1">marginSecuPosition</td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_j2r_jrq_sdc__table_mmz_1sq_sdc__entry__2">LONG</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_j2r_jrq_sdc__table_mmz_1sq_sdc__entry__3">担保品买入持仓量</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_j2r_jrq_sdc__table_mmz_1sq_sdc__entry__1">marginSecuAvgPrice</td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_j2r_jrq_sdc__table_mmz_1sq_sdc__entry__2">DOUBLE</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_j2r_jrq_sdc__table_mmz_1sq_sdc__entry__3">买成交均价</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_j2r_jrq_sdc__table_mmz_1sq_sdc__entry__1">marginPosition</td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_j2r_jrq_sdc__table_mmz_1sq_sdc__entry__2">LONG</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_j2r_jrq_sdc__table_mmz_1sq_sdc__entry__3">融资买入持仓量</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_j2r_jrq_sdc__table_mmz_1sq_sdc__entry__1">marginBuyValue</td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_j2r_jrq_sdc__table_mmz_1sq_sdc__entry__2">DOUBLE</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_j2r_jrq_sdc__table_mmz_1sq_sdc__entry__3">融资买入金额</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_j2r_jrq_sdc__table_mmz_1sq_sdc__entry__1">secuLendingPosition</td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_j2r_jrq_sdc__table_mmz_1sq_sdc__entry__2">LONG</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_j2r_jrq_sdc__table_mmz_1sq_sdc__entry__3">融券卖出持仓量</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_j2r_jrq_sdc__table_mmz_1sq_sdc__entry__1">secuLendingSellValue</td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_j2r_jrq_sdc__table_mmz_1sq_sdc__entry__2">DOUBLE</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_j2r_jrq_sdc__table_mmz_1sq_sdc__entry__3">融券卖出金额</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_j2r_jrq_sdc__table_mmz_1sq_sdc__entry__1">closePrice</td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_j2r_jrq_sdc__table_mmz_1sq_sdc__entry__2">DOUBLE</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_j2r_jrq_sdc__table_mmz_1sq_sdc__entry__3">设置收盘价</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_j2r_jrq_sdc__table_mmz_1sq_sdc__entry__1">conversionRatio</td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_j2r_jrq_sdc__table_mmz_1sq_sdc__entry__2">DOUBLE</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_j2r_jrq_sdc__table_mmz_1sq_sdc__entry__3">保证金折算率</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_j2r_jrq_sdc__table_mmz_1sq_sdc__entry__1">tradingMargin</td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_j2r_jrq_sdc__table_mmz_1sq_sdc__entry__2">DOUBLE</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_j2r_jrq_sdc__table_mmz_1sq_sdc__entry__3">融资保证金比例</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-0" headers="topic_j2r_jrq_sdc__table_mmz_1sq_sdc__entry__1">lendingMargin</td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-0" headers="topic_j2r_jrq_sdc__table_mmz_1sq_sdc__entry__2">DOUBLE</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="topic_j2r_jrq_sdc__table_mmz_1sq_sdc__entry__3">融券保证金比例</td>
+                            </tr>
+                        </tbody></table></div>
+            </div>
+        </article>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title8" id="topic_yxr_jrq_sdc">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title8">2.2 行情数据</h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p">在进行融资融券策略回测时，
+                        行情数据结构与股票保持一致。由于本案例中使用的为日频的行情类型，因此这里只说明分钟和日频时行情的具体格式。快照行情的数据格式详见相应<a class="- topic/xref xref" href="../plugins/backtest/stock.html">股票</a>的行情数据说明文档。</p>
+                <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">表 4：股票分钟和日频行情字段说明</strong></p>
+                <div class="table-container"><table class="- topic/table table frame-all" id="topic_yxr_jrq_sdc__table_kh4_lsq_sdc" data-ofbid="topic_yxr_jrq_sdc__table_kh4_lsq_sdc" data-cols="3"><caption></caption><colgroup><col/><col/><col/></colgroup><thead class="- topic/thead thead">
+                            <tr class="- topic/row">
+                                <th class="- topic/entry entry align-left colsep-1 rowsep-1" id="topic_yxr_jrq_sdc__table_kh4_lsq_sdc__entry__1"><strong class="+ topic/ph hi-d/b ph b">字段</strong></th>
+                                <th class="- topic/entry entry align-left colsep-1 rowsep-1" id="topic_yxr_jrq_sdc__table_kh4_lsq_sdc__entry__2"><strong class="+ topic/ph hi-d/b ph b">字段类型</strong></th>
+                                <th class="- topic/entry entry align-left colsep-0 rowsep-1" id="topic_yxr_jrq_sdc__table_kh4_lsq_sdc__entry__3"><strong class="+ topic/ph hi-d/b ph b">名称</strong></th>
+                            </tr>
+                        </thead><tbody class="- topic/tbody tbody">
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_yxr_jrq_sdc__table_kh4_lsq_sdc__entry__1">symbol</td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_yxr_jrq_sdc__table_kh4_lsq_sdc__entry__2">SYMBOL</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_yxr_jrq_sdc__table_kh4_lsq_sdc__entry__3">标的代码</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_yxr_jrq_sdc__table_kh4_lsq_sdc__entry__1">tradeTime</td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_yxr_jrq_sdc__table_kh4_lsq_sdc__entry__2">TIMESTAMP</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_yxr_jrq_sdc__table_kh4_lsq_sdc__entry__3">交易时间</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_yxr_jrq_sdc__table_kh4_lsq_sdc__entry__1">open</td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_yxr_jrq_sdc__table_kh4_lsq_sdc__entry__2">DOUBLE</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_yxr_jrq_sdc__table_kh4_lsq_sdc__entry__3">开盘价</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_yxr_jrq_sdc__table_kh4_lsq_sdc__entry__1">low</td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_yxr_jrq_sdc__table_kh4_lsq_sdc__entry__2">DOUBLE</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_yxr_jrq_sdc__table_kh4_lsq_sdc__entry__3">最低价</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_yxr_jrq_sdc__table_kh4_lsq_sdc__entry__1">high</td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_yxr_jrq_sdc__table_kh4_lsq_sdc__entry__2">DOUBLE</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_yxr_jrq_sdc__table_kh4_lsq_sdc__entry__3">最高价</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_yxr_jrq_sdc__table_kh4_lsq_sdc__entry__1">close</td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_yxr_jrq_sdc__table_kh4_lsq_sdc__entry__2">DOUBLE</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_yxr_jrq_sdc__table_kh4_lsq_sdc__entry__3">收盘价</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_yxr_jrq_sdc__table_kh4_lsq_sdc__entry__1">volume</td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_yxr_jrq_sdc__table_kh4_lsq_sdc__entry__2">LONG</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_yxr_jrq_sdc__table_kh4_lsq_sdc__entry__3">成交量</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_yxr_jrq_sdc__table_kh4_lsq_sdc__entry__1">amount</td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_yxr_jrq_sdc__table_kh4_lsq_sdc__entry__2">DOUBLE</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_yxr_jrq_sdc__table_kh4_lsq_sdc__entry__3">成交额</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_yxr_jrq_sdc__table_kh4_lsq_sdc__entry__1">upLimitPrice</td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_yxr_jrq_sdc__table_kh4_lsq_sdc__entry__2">DOUBLE</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_yxr_jrq_sdc__table_kh4_lsq_sdc__entry__3">涨停价</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_yxr_jrq_sdc__table_kh4_lsq_sdc__entry__1">downLimitPrice</td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_yxr_jrq_sdc__table_kh4_lsq_sdc__entry__2">DOUBLE</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_yxr_jrq_sdc__table_kh4_lsq_sdc__entry__3">跌停价</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_yxr_jrq_sdc__table_kh4_lsq_sdc__entry__1">prevClosePrice</td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_yxr_jrq_sdc__table_kh4_lsq_sdc__entry__2">DOUBLE</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_yxr_jrq_sdc__table_kh4_lsq_sdc__entry__3">前收盘价</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-0" headers="topic_yxr_jrq_sdc__table_kh4_lsq_sdc__entry__1">signal</td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-0" headers="topic_yxr_jrq_sdc__table_kh4_lsq_sdc__entry__2">DOUBLE[]</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="topic_yxr_jrq_sdc__table_kh4_lsq_sdc__entry__3">其它字段列表</td>
+                            </tr>
+                        </tbody></table></div>
+            </div>
+        </article>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title9" id="topic_k4t_jrq_sdc">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title9">2.3 融资融券相关接口说明</h3>
+            <div class="- topic/body body">
+                <div class="- topic/bodydiv bodydiv">
+                    <p class="- topic/p p">回测引擎提供了相应的接口供用户创建策略引擎、提交订单、获取持仓和可用现金等。下面将进行融资融券的不同部分接口说明，其它相关更具体的接口说明详见 <a class="- topic/xref xref" href="../plugins/backtest.html">Backtest</a> 的接口相关模块。</p>
+                    <p class="- topic/p p">首先，融资融券策略回测引擎目前使用老接口
+                        <code class="+ topic/ph pr-d/codeph ph codeph">Backtest::createBacktestEngine</code>创建引擎，后续的版本中我们将支持使用新接口
+                            <code class="+ topic/ph pr-d/codeph ph codeph">Backtest::createBacktester</code>创建并支持 JIT 优化。
+                        在创建融资融券策略回测引擎时，必须对每日的可充抵保证金证券和可融资融券标的的基本信息通过参数 <em class="+ topic/ph hi-d/i ph i">securityReference </em>
+                        进行设置。该表包括该标的是否为可充抵保证金证券、保证金折算率、融资保证金比例、融券保证金比例、是否为可融资状态和是否是可融券状态等。具体详见表
+                        5。</p>
+                    <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_k4t_jrq_sdc__codeblock_er1_vsq_sdc" data-ofbid="topic_k4t_jrq_sdc__codeblock_er1_vsq_sdc"><code>Backtest::createBacktestEngine(name, config, securityReference , initialize, 
+beforeTrading, onBar, onSnapshot, onOrder, onTrade, afterTrading, finalize)</code></pre>
+                    <div class="- topic/p p">其次，回测引擎提交订单的接口为
+                        <code class="+ topic/ph pr-d/codeph ph codeph">Backtest::submitOrder</code>，该接口参数包括创建的回测引擎，订单信息，以及用户可自定义设置的订单标签。与其它品种买卖标志只有买开，卖开、卖平和买平四种买卖方向不一样，融资融券的买卖方向有
+                        8 种，分别为担保品买入（1），担保品卖出（2），融资买入（3），融券卖出（4），直接还款（5），卖券还款（6），直接还券 （7）和买券还券
+                        （8）。在进行直接还款时，即买卖方向为 5 时，orderMsg 中的第 4 个参数表示还款金额 (股票代码, 下单时间, 订单类型, 还款金额,
+                        订单数量,
+                        5)。<pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_k4t_jrq_sdc__codeblock_hmj_wsq_sdc" data-ofbid="topic_k4t_jrq_sdc__codeblock_hmj_wsq_sdc"><code>Backtest::submitOrder(engine,orderMsg,label)</code></pre></div>
+                    <ul class="- topic/ul ul" id="topic_k4t_jrq_sdc__ul_hzt_rsq_sdc" data-ofbid="topic_k4t_jrq_sdc__ul_hzt_rsq_sdc">
+                        <li class="- topic/li li">orderMsg为订单信息： (股票代码, 下单时间, 订单类型, 订单价格\还款金额, 订单数量, 买卖标志)。</li>
+                    </ul>
+                    <p class="- topic/p p">最后，与其它品种获取持仓直接用 <code class="+ topic/ph pr-d/codeph ph codeph">Backtest::getPosition</code>
+                        接口不同，融资融券获取持仓接口分为获取担保品买入持仓
+                        <code class="+ topic/ph pr-d/codeph ph codeph">Backtest::getMarginSecuPosition</code>、融资买入持仓
+                            <code class="+ topic/ph pr-d/codeph ph codeph">Backtest::getMarginTradingPosition</code> 和融券卖出持仓
+                            <code class="+ topic/ph pr-d/codeph ph codeph">Backtest::getSecuLendingPosition</code>
+                            三个接口。这三个接口分别用于获取相应的持仓量、持仓均价和当日成交量等信息。获取每日盘后持仓明细指标包括融资融券持仓、成交金额、盈亏以及多空集中度等信息详见<code class="+ topic/ph pr-d/codeph ph codeph">Backtest::getDailyPosition</code>接口。获取实时和每日策略权益指标包括融资和融券负债、利息、维保比例、保证金余额、收益率、盈亏、策略多头集中度等统计信息接口分别为
+                            <code class="+ topic/ph pr-d/codeph ph codeph">Backtest::getTotalPortfolios</code> 和
+                            <code class="+ topic/ph pr-d/codeph ph codeph">Backtest::getDailyTotalPortfolios</code>。获取策略收益、底仓收益等指标通过<code class="+ topic/ph pr-d/codeph ph codeph">Backtest::getReturnSummary</code>接口。</p>
+                </div>
+            </div>
+        </article>
+    </article>
+    <article class="- topic/topic topic nested1" aria-labelledby="ariaid-title10" id="topic_sjg_hrq_sdc">
+        <h2 class="- topic/title title topictitle2" id="ariaid-title10">3. 融资融券策略回测注意事项</h2>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title11" id="topic_vzz_jrq_sdc">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title11">3.1 标的范围</h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p">在沪深交易所中，并非所有的证券都在融资融券的范围内。在创建引擎时，用户可通过接口<code class="+ topic/ph pr-d/codeph ph codeph">Backtest::createBacktestEngine</code>的
+                    securityReference
+                    参数将所需的基本信息表传入回测引擎，该信息表包括每个交易日融资融券标的证券和可冲抵保证金证券列表、相应的保证金折算率、融资保证金比例、融券保证金比例等，详细参考表
+                    5。</p>
+                <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">表 5</strong>： 每日融资融券的基本信息表</p>
+                <div class="table-container"><table class="- topic/table table frame-all" id="topic_vzz_jrq_sdc__table_mrf_1tq_sdc" data-ofbid="topic_vzz_jrq_sdc__table_mrf_1tq_sdc" data-cols="3"><caption></caption><colgroup><col/><col/><col/></colgroup><thead class="- topic/thead thead">
+                            <tr class="- topic/row">
+                                <th class="- topic/entry entry align-left colsep-1 rowsep-1" id="topic_vzz_jrq_sdc__table_mrf_1tq_sdc__entry__1"><strong class="+ topic/ph hi-d/b ph b">字段</strong></th>
+                                <th class="- topic/entry entry align-left colsep-1 rowsep-1" id="topic_vzz_jrq_sdc__table_mrf_1tq_sdc__entry__2"><strong class="+ topic/ph hi-d/b ph b">类型</strong></th>
+                                <th class="- topic/entry entry align-left colsep-0 rowsep-1" id="topic_vzz_jrq_sdc__table_mrf_1tq_sdc__entry__3"><strong class="+ topic/ph hi-d/b ph b">备注</strong></th>
+                            </tr>
+                        </thead><tbody class="- topic/tbody tbody">
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_vzz_jrq_sdc__table_mrf_1tq_sdc__entry__1">symbol</td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_vzz_jrq_sdc__table_mrf_1tq_sdc__entry__2">SYMBOL</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_vzz_jrq_sdc__table_mrf_1tq_sdc__entry__3">标的代码</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_vzz_jrq_sdc__table_mrf_1tq_sdc__entry__1">tradeDate</td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_vzz_jrq_sdc__table_mrf_1tq_sdc__entry__2">DATE</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_vzz_jrq_sdc__table_mrf_1tq_sdc__entry__3">交易日</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_vzz_jrq_sdc__table_mrf_1tq_sdc__entry__1">symbolSource</td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_vzz_jrq_sdc__table_mrf_1tq_sdc__entry__2">SYMBOL</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_vzz_jrq_sdc__table_mrf_1tq_sdc__entry__3">交易所</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_vzz_jrq_sdc__table_mrf_1tq_sdc__entry__1">securityRating</td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_vzz_jrq_sdc__table_mrf_1tq_sdc__entry__2">SYMBOL</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_vzz_jrq_sdc__table_mrf_1tq_sdc__entry__3">标的分类</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_vzz_jrq_sdc__table_mrf_1tq_sdc__entry__1">marginable</td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_vzz_jrq_sdc__table_mrf_1tq_sdc__entry__2">BOOL</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_vzz_jrq_sdc__table_mrf_1tq_sdc__entry__3">
+                                    <p class="- topic/p p">是否是可充抵保证金证券</p>
+                                    <p class="- topic/p p">true：可以担保品买入</p>
+                                    <p class="- topic/p p">false：无法担保品买入</p>
+                                </td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_vzz_jrq_sdc__table_mrf_1tq_sdc__entry__1">conversionRatio</td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_vzz_jrq_sdc__table_mrf_1tq_sdc__entry__2">FLOAT</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_vzz_jrq_sdc__table_mrf_1tq_sdc__entry__3">
+                                    <p class="- topic/p p">保证金折算率</p>
+                                    <p class="- topic/p p">（影响可用保证金可用余额）</p>
+                                </td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_vzz_jrq_sdc__table_mrf_1tq_sdc__entry__1">tradingMargin</td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_vzz_jrq_sdc__table_mrf_1tq_sdc__entry__2">FLOAT</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_vzz_jrq_sdc__table_mrf_1tq_sdc__entry__3">
+                                    <p class="- topic/p p">融资保证金比例</p>
+                                    <p class="- topic/p p">（影响可用保证金可用余额）</p>
+                                </td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_vzz_jrq_sdc__table_mrf_1tq_sdc__entry__1">lendingMargin</td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_vzz_jrq_sdc__table_mrf_1tq_sdc__entry__2">FLOAT</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_vzz_jrq_sdc__table_mrf_1tq_sdc__entry__3">
+                                    <p class="- topic/p p">融券保证金比例</p>
+                                    <p class="- topic/p p">（影响可用保证金可用余额）</p>
+                                </td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_vzz_jrq_sdc__table_mrf_1tq_sdc__entry__1">eligibleForMarginTrading</td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_vzz_jrq_sdc__table_mrf_1tq_sdc__entry__2">BOOL</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_vzz_jrq_sdc__table_mrf_1tq_sdc__entry__3">
+                                    <p class="- topic/p p">是否是可融资状态</p>
+                                    <p class="- topic/p p">true：可以融资买入</p>
+                                    <p class="- topic/p p">false：无法融资买入</p>
+                                </td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-0" headers="topic_vzz_jrq_sdc__table_mrf_1tq_sdc__entry__1">eligibleForLending</td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-0" headers="topic_vzz_jrq_sdc__table_mrf_1tq_sdc__entry__2">BOOL</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="topic_vzz_jrq_sdc__table_mrf_1tq_sdc__entry__3">
+                                    <p class="- topic/p p">是否是可融券状态</p>
+                                    <p class="- topic/p p">true：可以融券卖出</p>
+                                    <p class="- topic/p p">false：无法融券卖出</p>
+                                </td>
+                            </tr>
+                        </tbody></table></div>
+            </div>
+        </article>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title12" id="topic_sj1_krq_sdc">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title12">3.2 维持担保比例和集中度</h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p">出于监管要求和资金安全考虑，证券交易所一般会设置融资融券的警戒线，标准为维保比例。维保比例的计算公式为：<strong class="+ topic/ph hi-d/b ph b">维保比例 = 资产(自有 + 负债)/负债
+                        *100%</strong>。在真实交易场景中，当维保比例超过 300% 时，非常安全，可以从信用账户中提取保证金；下降至 140%
+                    时，触发警戒线，不得新增融资融券；下降至 130% 时，需要追加担保物使得维保比例重回 140%，否则可能被强制平仓；下降至 110%
+                    时，用户被强制平仓。</p>
+                <p class="- topic/p p">集中度指融资融券中对于单一标的或前几个标的在总投资中的占比。集中度越高，说明融资融券对于该标的的投入越大，集中风险也越大；集中度降低，说明充分地利用了分散投资，使得集中风险下降。</p>
+                <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">DolphinDB
+                    回测引擎的风控模块会自动控制风险</strong>，对维保比例、多头集中度、空头集中度等风控指标进行实时监测。当一笔交易或价格波动导致用户账户突破风控指标限制时，DolphinDB
+                    会自动判决停止回测或驳回交易。当策略的维持担保比例低于追保线，则停止回测。</p>
+                <p class="- topic/p p">多头集中度和空头集中度限制与策略的实时维持担保比例有关：</p>
+                <div class="table-container"><table class="- topic/table table frame-all" id="topic_sj1_krq_sdc__table_ikv_ctq_sdc" data-ofbid="topic_sj1_krq_sdc__table_ikv_ctq_sdc" data-cols="3"><caption></caption><colgroup><col/><col/><col/></colgroup><thead class="- topic/thead thead">
+                            <tr class="- topic/row">
+                                <th class="- topic/entry entry align-left colsep-1 rowsep-1" id="topic_sj1_krq_sdc__table_ikv_ctq_sdc__entry__1"><strong class="+ topic/ph hi-d/b ph b">策略维持担保比例</strong></th>
+                                <th class="- topic/entry entry align-left colsep-1 rowsep-1" id="topic_sj1_krq_sdc__table_ikv_ctq_sdc__entry__2"><strong class="+ topic/ph hi-d/b ph b">多头集中度限制范围</strong></th>
+                                <th class="- topic/entry entry align-left colsep-0 rowsep-1" id="topic_sj1_krq_sdc__table_ikv_ctq_sdc__entry__3"><strong class="+ topic/ph hi-d/b ph b">空头集中度限制范围</strong></th>
+                            </tr>
+                        </thead><tbody class="- topic/tbody tbody">
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_sj1_krq_sdc__table_ikv_ctq_sdc__entry__1">&lt;180%</td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_sj1_krq_sdc__table_ikv_ctq_sdc__entry__2">≤ config["longConcentration"][2]</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_sj1_krq_sdc__table_ikv_ctq_sdc__entry__3">≤ cocfig["shortConcentration"][2]</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_sj1_krq_sdc__table_ikv_ctq_sdc__entry__1">&lt;=240% and&gt;180%</td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_sj1_krq_sdc__table_ikv_ctq_sdc__entry__2">≤ cocfig["longConcentration"][1]</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_sj1_krq_sdc__table_ikv_ctq_sdc__entry__3">≤ cocfig["shortConcentration"][1]</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-0" headers="topic_sj1_krq_sdc__table_ikv_ctq_sdc__entry__1">&gt;240%</td>
+                                <td class="- topic/entry entry align-left colsep-1 rowsep-0" headers="topic_sj1_krq_sdc__table_ikv_ctq_sdc__entry__2">≤ cocfig["longConcentration"][0]</td>
+                                <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="topic_sj1_krq_sdc__table_ikv_ctq_sdc__entry__3">≤ cocfig["shortConcentration"][0]</td>
+                            </tr>
+                        </tbody></table></div>
+                <p class="- topic/p p">注意，在不配置多头集中度 “longConcentration” 和空头集中度 “shortConcentration“ 时，不会进行相应的限制。</p>
+            </div>
+        </article>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title13" id="topic_fw1_krq_sdc">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title13">3.3 授信额度</h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p">证券交易所根据保证金余额和征信情况对投资者发放授信额度，授信额度可分为融资、融券两部分。可通过转入保证金，提高信用账户内的保证金余额来提高授信额度。实际的融资融券额度以交易所的审批为准，基于授信额度的所有计算结果均建立在最大的假设上，并不完全适用于实际融资融券额度。</p>
+                <p class="- topic/p p">在回测引擎中，用户可通过配置项 lineOfCredit 设置授信额度。需要注意的，在设置时应符合实际情况，以尽量模拟回测的仿真度。</p>
+            </div>
+        </article>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title14" id="topic_ifb_krq_sdc">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title14">3.4 担保品卖出时优先平融资持仓</h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p">在卖出担保品时，只有担保品持仓时，直接平担保品持仓；同时有担保品买入和融资持仓时，优先平融资持仓，剩下的订单数量平担保品持仓。所以担保品卖出时，需要从<code class="+ topic/ph pr-d/codeph ph codeph">Backtest::getMarginTradingPosition</code>
+                    和 <code class="+ topic/ph pr-d/codeph ph codeph">Backtest::getMarginSecuPosition</code>
+                    接口获取相应的融资买入持仓和担保品买入持仓再进行卖出。</p>
+            </div>
+        </article>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title15" id="topic_xpb_krq_sdc">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title15">3.5 其它注意事项说明</h3>
+            <div class="- topic/body body">
+                <ul class="- topic/ul ul" id="topic_xpb_krq_sdc__ul_ng5_3tq_sdc" data-ofbid="topic_xpb_krq_sdc__ul_ng5_3tq_sdc">
+                    <li class="- topic/li li">当日融券卖出的标的不能当日平仓。</li>
+                    <li class="- topic/li li">融券卖出所得现金不允许买股票、债券，但是可以买入债券 ETF、货币 ETF。</li>
+                    <li class="- topic/li li">暂时不支持展期机制。</li>
+                </ul>
+            </div>
+        </article>
+    </article>
+    <article class="- topic/topic topic nested1" aria-labelledby="ariaid-title16" id="topic_mzg_hrq_sdc">
+        <h2 class="- topic/title title topictitle2" id="ariaid-title16">4. 融资融券回测案例</h2>
+        <div class="- topic/body body">
+            <p class="- topic/p p">融资策略作为提升投资效率和扩大投资规模的重要手段，对于投资者而言具有不可忽视的作用。DolphinDB
+                融资融券策略回测模块为投资者提供了一个高效、便捷的工具，支持相关策略的开发与验证。通过该工具，用户能够模拟历史市场数据，测试不同的融资融券策略，从而评估其潜在的收益和风险。这种回测能力不仅提高了策略设计的科学性，还帮助投资者在实际操作前优化决策，降低投资风险。本章通过两个融资策略示例，介绍
+                DolphinDB 融资融券策略回测的使用。</p>
+            <p class="- topic/p p">请注意，本节中的两个示例仅用于介绍相关业务的在 DolphinDB 回测引擎中的实现过程，所提供的案例并不具备真实的投资逻辑，因此不承担任何法律责任。</p>
+        </div>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title17" id="topic_lg3_krq_sdc">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title17">4.1 使用融资业务为投资组合策略增加杠杆</h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p">投资者在进行股票策略投资时，可以利用融资扩大投资规模，或将其作为预备资金逢低补仓摊低持仓成本。本节重点演示组合策略通过融资买入增加杠杆策略在 DolphinDB
+                    回测引擎的实现。</p>
+            </div>
+            <article class="- topic/topic topic nested3" aria-labelledby="ariaid-title18" id="topic_cms_krq_sdc">
+                <h4 class="- topic/title title topictitle4" id="ariaid-title18">4.1.1 策略示例逻辑说明</h4>
+                <div class="- topic/body body">
+                    <p class="- topic/p p">我们基于 DolphinDB 的回测插件实现使用融资业务为投资组合策略增加杠杆的策略回测。本案例基于股票日频行情根据因子选择组合进行策略回测。</p>
+                    <p class="- topic/p p">组合策略的因子选择不是本文的重点，这里假设选股的因子为
+                        signal。这里的选股因子可以是一个单因子也可以是多个因子合成的信号。本节组合策略实现逻辑如下：</p>
+                    <ul class="- topic/ul ul" id="topic_cms_krq_sdc__ul_yzt_ltq_sdc" data-ofbid="topic_cms_krq_sdc__ul_yzt_ltq_sdc">
+                        <li class="- topic/li li">首先以 signal 为指标，在每个交易日收盘时，从沪深300成分股中根据 signal 的值的排名选取靠前的 10 只股票。把当前的总资产按
+                            signal 加权分配给这 10 只股票进行买入。</li>
+                        <li class="- topic/li li">每个交易日开仓时，用当前最新资产的 150% 建立整体仓位，即先用现金买入持仓再通过融资买入建立整体仓位。</li>
+                    </ul>
+                    <p class="- topic/p p">在实现中我们在买入卖出时考虑涨停、跌停和停牌的情况。当涨停和停牌时不能买入，跌停和停牌时不能卖出。这里，我们通过自定义的函数实现涨停和停牌时不能买入，跌停和停牌时不能卖出以及每次买入数量的函数。如下，我们实现的
+                        3 个自定义函数，通过行情数据中带有的涨停价是否与当前的收盘价相等，当日的成交量是否为零等，判断是否可以买入或者卖出股票。买入的股票数量必须为 100
+                        的整数倍，且买入科创板股票的数量必须大于 200 股。</p>
+                    <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_cms_krq_sdc__codeblock_acv_mtq_sdc" data-ofbid="topic_cms_krq_sdc__codeblock_acv_mtq_sdc"><code>def isBuyAble(data){
+	//判断是否可以以收盘价买入
+	if(data.volume &lt;= 0.001 or (data.upLimitPrice == data.close)){
+		return false //买入条件：收盘价不是涨停价，当日没有停牌
+	}
+	return true
+}
+def isSellAble(data){
+	//判断是否可以以收盘价卖出
+	if(data.volume &lt;= 0.001 or (data.downLimitPrice == data.close)){
+		return false //卖出条件：收盘价不是跌停价，当日没有停牌
+	}
+	return true
+}
+def getBuyVolume(istock,mv,close){
+	if(close &lt;= 0. ) {return 0}
+	if(istock.substr(0,2) == "68" and int(mv/close) &gt;= 200){
+		return floor(mv/close)
+	}
+	else if(istock.substr(0,2) == "68"){ return 0}
+	return floor(int(mv/close)/100)*100
+}</code></pre>
+                </div>
+            </article>
+            <article class="- topic/topic topic nested3" aria-labelledby="ariaid-title19" id="topic_rxv_krq_sdc">
+                <h4 class="- topic/title title topictitle4" id="ariaid-title19">4.1.2 策略代码实现</h4>
+                <div class="- topic/body body">
+                    <p class="- topic/p p"> 回测引擎采用事件驱动机制，我们在相应的事件函数中实现相关的策略逻辑。首先在策略初始化回调函数
+                        <code class="+ topic/ph pr-d/codeph ph codeph">initialize</code>中初始化策略全局变量。这里我们设置策略中组合的个数，组合策略杠杆倍数等全局变量。</p>
+                    <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_rxv_krq_sdc__codeblock_vwp_stq_sdc" data-ofbid="topic_rxv_krq_sdc__codeblock_vwp_stq_sdc"><code>def initialize(mutable context, userParam){
+	print("initialize")
+	context["N"] = 10 //策略组合个数
+	//策略整体仓位比例，该比例大于1时，表示组合部分标的通过融资买入建立持仓
+	context["multiplier"] = 1.5
+	context["commission"] = userParam["commission"] //手续费
+	context["Holdings"] = array(STRING,0,context["N"])//持仓		
+}</code></pre>
+                    <p class="- topic/p p">在每日盘前回调交易函数中，可以初始化当日的全局变量。在这里我们获取当日标的是否可以进行融资买入信息。 </p>
+                    <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_rxv_krq_sdc__codeblock_gmh_ttq_sdc" data-ofbid="topic_rxv_krq_sdc__codeblock_gmh_ttq_sdc"><code>def beforeTrading(mutable context,userParam){
+	print ("beforeTrading: "+context["tradeDate"])
+	//获取当日标的是否可以进行融资买入信息
+	context["eligibleForMarginTrading"] = userParam[date(context["tradeDate"])]	
+} </code></pre>
+                    <p class="- topic/p p">在主要的行情回调函数 onBar 中，策略的实现分为 5 个步骤实现，大致如下：</p>
+                    <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_rxv_krq_sdc__codeblock_vms_5tq_sdc" data-ofbid="topic_rxv_krq_sdc__codeblock_vms_5tq_sdc"><code>def onBar(mutable context, msg, indicator){
+	//每个交易日收盘时，用当前最新资产的150%建立整体仓位，即先用现金买入持仓再通过融资买入建立整体仓位
+	//step 1 :获取当日可以进行买入的股票池，获取因子值前context["N"]个股票进行买入，
+	...
+	//step 2: 获取当前持仓，检查是否有不能卖出的股票,获取不能卖出的持仓市值
+	...
+	//step 3：获取策略当前的总资产减去不能卖出的总市值为当前可分配的市值，再计算买入个股实际应该占用的市值
+	...
+	//step 4:先进行卖出操作，卖出实际需要卖出的部分
+	...
+	//step 5:买入操作。买入,先用现金买入当日不可融资买入的标的		
+}</code></pre>
+                    <p class="- topic/p p">下面我们分别展示 <code class="+ topic/ph pr-d/codeph ph codeph">onBar</code> 回调函数中 5 个步骤的详细代码实现：</p>
+                    <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">step 1</strong>，我们获取当日可以进行买入的股票池和相应的权重。根据因子值的大小，获取因子值前 context["N"]
+                        只股票和相应的权重。</p>
+                    <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_rxv_krq_sdc__codeblock_sbm_wtq_sdc" data-ofbid="topic_rxv_krq_sdc__codeblock_sbm_wtq_sdc"><code>//每个交易日收盘时，用当前最新资产的150%建立整体仓位，即先用现金买入持仓再通过融资买入建立整体仓位
+//step 1 :获取当日可以进行买入的股票池，获取因子值前context["N"]个股票进行买入，
+buyList = array(STRING, 0, context["N"])
+buyWeight = array(DOUBLE, 0, context["N"])
+eligibleForMarginTradingLaBel =  array(INT, 0, context["N"])
+//获取当日可以进行买入的股票池，根据前一日因子值，获取因子值前context["N"]个股票进行买入，
+//如果有停牌，涨停的情况，买入数量小于context["N"]
+i = 0
+for( istock in msg.keys()){
+	if(i &gt; context["N"] ){ break }
+	if(msg[istock].signal[0] &lt;0. ){ continue}
+	if(isBuyAble(msg[istock])){//可以进行买入
+		buyList = buyList.append!(istock)
+		buyWeight = buyWeight.append!(msg[istock].signal[0])
+		eligibleForMarginTradingLaBel = eligibleForMarginTradingLaBel.append!(int(context["eligibleForMarginTrading"][istock]))
+	}
+	i = i+1
+}</code></pre>
+                    <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">step 2</strong>，计算当日停牌或者跌停不能进行卖出的股票占用的总市值。</p>
+                    <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_rxv_krq_sdc__codeblock_nfg_xtq_sdc" data-ofbid="topic_rxv_krq_sdc__codeblock_nfg_xtq_sdc"><code>//step 2
+//获取当前持仓，检查是否有不能卖出的股票
+MarginSecuPosition = Backtest::getMarginSecuPosition(context["engine"])
+MarginTradingPosition = Backtest::getMarginTradingPosition(context["engine"])
+posStock =keys( set(MarginSecuPosition.symbol ) | set(MarginTradingPosition.symbol))
+//记录不能卖出的持仓市值
+noSellPosMV = 0.
+for(istock in posStock){
+	if(isSellAble(msg[istock]) == false){//不能卖出
+		//计算不能卖出的股票占用的市值
+		pos = getPos(MarginSecuPosition, istock) + getPos(MarginTradingPosition, istock) 
+		mv = pos*msg[istock].close
+		if(mv &gt; 0.){
+			noSellPosMV = noSellPosMV + mv
+		}	
+	}
+}</code></pre>
+                    <p class="- topic/p p">这里的 <code class="+ topic/ph pr-d/codeph ph codeph">Backtest::getMarginSecuPosition</code> 和
+                            <code class="+ topic/ph pr-d/codeph ph codeph">Backtest::getMarginTradingPosition</code>
+                        分别是获取当前担保品买入持仓和融资买入持仓的接口。详见 <a class="- topic/xref xref" href="#topic_k4t_jrq_sdc">2.3
+                            融资融券相关接口说明</a>。 </p>
+                    <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">step 3</strong>，获取待买入股票池和不能卖出的总市值之后，计算待买入股票相应的市值。</p>
+                    <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_rxv_krq_sdc__codeblock_igd_ytq_sdc" data-ofbid="topic_rxv_krq_sdc__codeblock_igd_ytq_sdc"><code>//step 3
+//权重归因化
+buyWeight = buyWeight\buyWeight.sum()
+//获取策略当前的总资产
+totalEquity = Backtest::getTotalPortfolios(context["engine"]).totalEquity[0]
+//计算个股应该买入的市值（）
+totalMarketValue = (totalEquity - noSellPosMV) *buyWeight*context["multiplier"]</code></pre>
+                    <p class="- topic/p p">这里的
+                        <code class="+ topic/ph pr-d/codeph ph codeph">Backtest::getTotalPortfolios(engine)</code>接口可以实现获取策略最新的可以现金，权益和盈亏等统计指标。详见
+                        2.3 融资融券相关接口说明。 </p>
+                    <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">step
+                        4</strong>，我们对可以卖出的股票进行担保品卖出操作，这样可以释放资金。在卖出时我们没有进行全部的卖出，而是卖出需要卖出的部分市值，这样可以减少手续费扣除。</p>
+                    <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_rxv_krq_sdc__codeblock_sjz_ytq_sdc" data-ofbid="topic_rxv_krq_sdc__codeblock_sjz_ytq_sdc"><code>//step 4
+//根据应该持有的市值进行买入
+//先进行卖出操作，再进行买入
+newStock = (set(buyList) - set(posStock)).keys()
+for(istock in posStock){//进行卖出
+	if(isSellAble(msg[istock])){
+		//查询当前持仓，有可有能是担保品买入持仓，也有可能是融资买入持仓	
+		mv = (getPos(MarginSecuPosition, istock) + getPos(MarginTradingPosition, istock))*msg[istock].close
+		diffmv = mv - totalMarketValue[at(buyList == istock)].nullFill(0)[0]
+		pos = getBuyVolume(istock, diffmv, msg[istock].close)
+		if(diffmv &gt; 0 and pos &gt;0  ){
+			//进行担保品卖出
+			Backtest::submitOrder(context["engine"], (istock,context["tradeTime"], 5, msg[istock].close, pos,2),"担保品卖出")
+		}		
+	}	
+}</code></pre>
+                    <p class="- topic/p p">这里的<code class="+ topic/ph pr-d/codeph ph codeph"> Backtest::submitOrder</code> 是回测引擎提供的下单接口，详见 2.3
+                        融资融券相关接口说明。注意，担保品卖出时优先偿还融资买入的持仓，所以这里我们只需进行担保品卖出操作。</p>
+                    <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">step 5</strong>，在我们通过杠杆交易构建买入组合时，即先使用现金买入不可融资买入的股票，再使用融资买入当日可以进行融资买入的股票。</p>
+                    <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_rxv_krq_sdc__codeblock_fc2_15q_sdc" data-ofbid="topic_rxv_krq_sdc__codeblock_fc2_15q_sdc"><code>//step 5：买入操作
+buyList = buyList[isort(eligibleForMarginTradingLaBel)]
+totalMarketValue = totalMarketValue[isort(eligibleForMarginTradingLaBel)]
+i = 0
+for( istock in buyList){
+	a =  getPos(Backtest::getMarginSecuPosition(context["engine"], [istock]), istock)
+	b =  getPos(Backtest::getMarginTradingPosition(context["engine"], [istock]), istock)
+	mv = (a + b)*msg[istock].close
+	diffmv = totalMarketValue[i].nullFill(0)[0] - mv
+	pos = getBuyVolume(istock, diffmv, msg[istock].close)
+	availableCash = Backtest::getTotalPortfolios(context["engine"]).availableCash
+	if(diffmv &gt; 0 and pos &gt;0  and pos*msg[istock].close*(1+context["commission"]) &lt; availableCash){
+		//进行担保品买入
+		Backtest::submitOrder(context["engine"], (istock,context["tradeTime"], 5, msg[istock].close, pos,1),"担保品买入")
+	}
+	else if( diffmv &gt; 0 and pos &gt;0  and pos*msg[istock].close*(1+context["commission"]) &gt; availableCash ){
+		//进行融资买入
+		Backtest::submitOrder(context["engine"], (istock,context["tradeTime"], 5, msg[istock].close, pos,3),"融资买入")	
+	}
+	i = i+1		
+}</code></pre>
+                </div>
+            </article>
+            <article class="- topic/topic topic nested3" aria-labelledby="ariaid-title20" id="topic_llw_krq_sdc">
+                <h4 class="- topic/title title topictitle4" id="ariaid-title20">4.1.3 设置策略参数，创建引擎并执行回测</h4>
+                <div class="- topic/body body">
+                    <p class="- topic/p p">策略编写完成之后，我们需要配置策略相关的参数、再创建相应的回测引擎、之后获取行情数据进行策略回测就可以获取策略的回测结果。</p>
+                    <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">设置配置项</strong></p>
+                    <p class="- topic/p p">融资融券策略回测，除了需要设置策略回测的开始和结束时间、策略类型和行情类型之外、还必须融资融券授信额度、维保比例、融资利率和融券利率。多头集中度限制和空头集中度限制用户可以根据实际需求进行相应的设置。如下列出了部分配置参数，完整的配置参数列表请参阅
+                            <a class="- topic/xref xref" href="../plugins/backtest.html">回测插件接口说明文档</a>。</p>
+                    <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_llw_krq_sdc__codeblock_vjx_c5q_sdc" data-ofbid="topic_llw_krq_sdc__codeblock_vjx_c5q_sdc"><code>// step 2：策略配置与引擎创建
+config = dict(STRING,ANY)
+config["startDate"] = 2020.05.08
+config["endDate"] = 2020.07.11
+///策略类型,股票信用账户，融资融券回测///
+config["strategyGroup"] = "securityCreditAccount"
+config["lineOfCredit"] = 100000000.//授信额度
+config["marginTradingInterestRate"] = 0.086
+config["secuLendingInterestRate"] = 0.106
+config["maintenanceMargin"] = [1.45,1.30,1.20]//维保比例
+//config["longConcentration"] = [1.45,1.30,1.20]//多头集中度限制
+//config["shortConcentration"] = [1.45,1.30,1.20]//空头集中度限制
+config["cash"] = 5000000.   
+config["commission"] = 0.0///手续费,    
+config["tax"] = 0.0 //印花税,
+config["dataType"] = 4 //日频行情
+config["outputOrderInfo"] = true
+config["matchingMode"] = 1//以收盘价撮合
+config["msgAsTable"] = false</code></pre>
+                    <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">创建回测引擎</strong></p>
+                    <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_llw_krq_sdc__codeblock_rzv_d5q_sdc" data-ofbid="topic_llw_krq_sdc__codeblock_rzv_d5q_sdc"><code>engine = Backtest::createBacktestEngine(strategyName, config, securityReference, 
+            initialize{, config},beforeTrading{,eligibleForMarginTrading},onBar,,
+            onOrder,onTrade,afterTrading,finalize)</code></pre>
+                    <p class="- topic/p p">这里的<code class="+ topic/ph pr-d/codeph ph codeph">Backtest::createBacktestEngine</code> 接口为创建两融回测引擎的接口，详见 <a class="- topic/xref xref" href="#topic_k4t_jrq_sdc">2.3 融资融券相关接口说明</a>。</p>
+                    <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">执行回测引擎</strong></p>
+                    <p class="- topic/p p">通过以下方式执行回测。其中<code class="+ topic/ph pr-d/codeph ph codeph">dayData</code>为行情数据，具体的行情字段说明参考<a class="- topic/xref xref" href="../plugins/backtest/stock.html">股票</a>。</p>
+                    <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_llw_krq_sdc__codeblock_upr_g5q_sdc" data-ofbid="topic_llw_krq_sdc__codeblock_upr_g5q_sdc"><code>//开始执行策略回测
+Backtest::appendQuotationMsg(engine, dayData)</code></pre>
+                    <p class="- topic/p p">这里我们基于因子构建组合策略。我们先将相应的因子数据放入行情数据的 signal 字段中，并在策略中实现获取因子值的前几个股票构成组合。在这里我们把
+                        dayData 也按时间和因子值进行排序处理再回放给回测引擎。</p>
+                    <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">获取回测结果</strong></p>
+                    <p class="- topic/p p">回测运行结束之后，可以通过相应的接口获取每日持仓、每日权益、收益概述、成交明细和策略中用户自定义的逻辑上下文。回测插件提供的完整回测结果接口可以参阅<a class="- topic/xref xref" href="../plugins/backtest.html">回测插件的接口说明文档</a>。</p>
+                    <p class="- topic/p p">通过 <code class="+ topic/ph pr-d/codeph ph codeph">Backtest::getTradeDetails(engine)</code> 接口获取成交明细表如下。其中
+                        orderInfo 不为空时表示拒单，orderInfo 列详细说明了的拒单理由。</p>
+                    <img class="- topic/image image" id="topic_llw_krq_sdc__image_btp_p5q_sdc" src="images/backset_introduction_usage/4_1_3_1.png"/>
+                    <p class="- topic/p p">通过 <code class="+ topic/ph pr-d/codeph ph codeph">Backtest::getDailyTotalPortfolios(engine)</code>
+                        接口可以获取策略每日的净值，权益等统计信息。</p>
+                    <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_llw_krq_sdc__codeblock_g5y_q5q_sdc" data-ofbid="topic_llw_krq_sdc__codeblock_g5y_q5q_sdc"><code>totalPortfolios = Backtest::getDailyTotalPortfolios(long(engine))
+plot(totalPortfolios.netValue,totalPortfolios.tradeDate,"策略净值")</code></pre>
+                    <img class="- topic/image image" id="topic_llw_krq_sdc__image_ej4_r5q_sdc" src="images/backset_introduction_usage/4_1_3_2.png"/>
+                </div>
+            </article>
+        </article>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title21" id="topic_wm3_krq_sdc">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title21">4.2 在有初始仓位的情况下，使用融资融券增强策略收益</h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p">投资者在进行股票策略投资时，在满仓的情况下，可以利用可用保证金余额作为预备资金逢低补仓摊低持仓成本，或者对其它标的进行融资买入、融券卖出操作。</p>
+            </div>
+            <article class="- topic/topic topic nested3" aria-labelledby="ariaid-title22" id="topic_emf_lrq_sdc">
+                <h4 class="- topic/title title topictitle4" id="ariaid-title22">4.2.1 策略执行逻辑</h4>
+                <div class="- topic/body body">
+                    <p class="- topic/p p">本节示例实现逻辑如下：</p>
+                    <ul class="- topic/ul ul" id="topic_emf_lrq_sdc__ul_o1d_t5q_sdc" data-ofbid="topic_emf_lrq_sdc__ul_o1d_t5q_sdc">
+                        <li class="- topic/li li">创建引擎时使用现金的 95% 买入相应的股票。</li>
+                        <li class="- topic/li li">监控相应的标的池，借用 RSI 和布林带指标：<ul class="- topic/ul ul" id="topic_emf_lrq_sdc__ul_p1d_t5q_sdc" data-ofbid="topic_emf_lrq_sdc__ul_p1d_t5q_sdc">
+                                <li class="- topic/li li">当有标的的 RSI 大于70 且布林带正在上移并打破上轨，使用账户的可用保证金余额进行融资买入。</li>
+                                <li class="- topic/li li">当有标的的 RSI 小于 30 且布林带正在下移并打破下轨，使用账户的可用保证金余额进行融券卖出。</li>
+                            </ul></li>
+                        <li class="- topic/li li">止盈止损：<ul class="- topic/ul ul" id="topic_emf_lrq_sdc__ul_q1d_t5q_sdc" data-ofbid="topic_emf_lrq_sdc__ul_q1d_t5q_sdc">
+                                <li class="- topic/li li">当融资买入或者融券卖出的标的盈利 5% 或者亏损 3% 时，进行平仓。</li>
+                            </ul></li>
+                    </ul>
+                </div>
+            </article>
+            <article class="- topic/topic topic nested3" aria-labelledby="ariaid-title23" id="topic_glg_lrq_sdc">
+                <h4 class="- topic/title title topictitle4" id="ariaid-title23">4.2.2 策略代码实现</h4>
+                <div class="- topic/body body">
+                    <p class="- topic/p p">用户在进行真实的策略回测时，可以在 config 的配置项 setLastDayPosition
+                        中对初始仓位标的的持仓量和持仓价格等信息进行设置，初始仓位表详细字段见表 3。在这里的实现逻辑中，我们假设使用策略现金的 95% 用来买入 2
+                        只股票，使得策略的初始现金为剩下的 5%。</p>
+                    <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_glg_lrq_sdc__codeblock_zrs_v5q_sdc" data-ofbid="topic_glg_lrq_sdc__codeblock_zrs_v5q_sdc"><code>//设置初始仓位，使用现金的95%为底仓
+config["cash"] = 5000000.   
+n = 2//底仓标的个数
+mv = config["cash"] *0.95 / n
+setLastDayPosition = select symbol,each(getBuyVolume{, mv, },symbol,open) $ LONG as marginSecuPosition,
+			open as marginSecuAvgPrice, 0$LONG as marginPosition, 0. as marginBuyValue, 0$LONG as secuLendingPosition,
+			0. as secuLendingSellValue, open as closePrice, 0.8 as conversionRatio, 
+			0. as tradingMargin, 0. as lendingMargin  from getLastClosePrice(config["startDate"], codes[:n]) 
+
+config["setLastDayPosition"] = setLastDayPosition
+//设置策略现金
+config["cash"] = config["cash"] -  config["cash"] *0.95*(1 + config["commission"])</code></pre>
+                    <p class="- topic/p p">在策略实现中我们通过<a class="- topic/xref xref" href="../modules/ta/ta.html"> ta 模块</a>的
+                            <code class="+ topic/ph pr-d/codeph ph codeph">rsi </code>和 <code class="+ topic/ph pr-d/codeph ph codeph">bBand</code>函数实现 RSI 和布林带指标。</p>
+                    <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_glg_lrq_sdc__codeblock_k3f_z5q_sdc" data-ofbid="topic_glg_lrq_sdc__codeblock_k3f_z5q_sdc"><code>use ta
+def initialize(mutable context, userParam){
+	print("initialize")
+	d ={rsi : &lt;ta::rsi(close, 11)&gt;, 
+		bhigh : &lt;ta::bBands(close, 20, 2, 2, 0)[0]&gt;, 
+		blow : &lt;ta::bBands(close, 20, 2, 2, 0)[2]&gt;}
+	Backtest::subscribeIndicator(context["engine"], "ohlc", d)
+	context["tp"] = 0.05
+	context["sl"] = 0.03	
+	context["HoldingsPrice"] = dict(STRING,DOUBLE)
+	
+}</code></pre>
+                    <p class="- topic/p p">指标的计算可以使用引擎提供的 <code class="+ topic/ph pr-d/codeph ph codeph">Backtest::subscribeIndicator</code> 接口。订阅指标之后，在
+                            <code class="+ topic/ph pr-d/codeph ph codeph">onBar</code>策略回调函数中通过 msg[istock].rsi
+                        获取相应的指标计算结果。该接口使用示例如下：</p>
+                    <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_glg_lrq_sdc__codeblock_wlf_1vq_sdc" data-ofbid="topic_glg_lrq_sdc__codeblock_wlf_1vq_sdc"><code>Backtest::subscribeIndicator(engine, quote, indicatorDict)</code></pre>
+                    <div class="- topic/p p">
+                        <ul class="- topic/ul ul" id="topic_glg_lrq_sdc__ul_wjt_1vq_sdc" data-ofbid="topic_glg_lrq_sdc__ul_wjt_1vq_sdc">
+                            <li class="- topic/li li"><em class="+ topic/ph hi-d/i ph i">engine </em>该回测引擎实列</li>
+                            <li class="- topic/li li"><em class="+ topic/ph hi-d/i ph i">quote </em>字符串，表示指标计算依赖的行情源。目前支持 "snapshot<em class="+ topic/ph hi-d/i ph i">” </em>快照行情源、
+                                "trade"成交行情源、”ohlc“ 分钟和日频等，具体详见<code class="+ topic/ph pr-d/codeph ph codeph">Backtest::subscribeIndicator
+                                    </code><a class="- topic/xref xref" href="../plugins/backtest.html">回测引擎的接口说明文档</a>中的的接口说明。</li>
+                            <li class="- topic/li li"><em class="+ topic/ph hi-d/i ph i">indicatorDict </em>是字典类型，key 为相应的指标名称，value 为指标元代码表达式。</li>
+                        </ul>
+                    </div>
+                    <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_glg_lrq_sdc__codeblock_ebx_fvq_sdc" data-ofbid="topic_glg_lrq_sdc__codeblock_ebx_fvq_sdc"><code>indicatorDict = {rsi : &lt;ta::rsi(close, 11)&gt;, 
+		bhigh : &lt;ta::bBands(close, 20, 2, 2, 0)[0]&gt;, 
+		blow : &lt;ta::bBands(close, 20, 2, 2, 0)[2]&gt;}</code></pre>
+                    <p class="- topic/p p">在分钟频率行情回调函数中，我们对标的池中的股票，使用布林带突破和 RSI 作为开仓信号进行融资买入、或者融券卖出操作。首先使用
+                            <code class="+ topic/ph pr-d/codeph ph codeph">Backtest::getMarginTradingPosition</code> 和
+                            <code class="+ topic/ph pr-d/codeph ph codeph">Backtest::getSecuLendingPosition</code>
+                        接口查询融资买入和融券卖出的持仓。没有持仓时，当该标的的 RSI 大于 70
+                        且布林带正在上移并打破上轨，使用账户的可用保证金余额进行融资买入，当该标的的 RSI 小于 30
+                        且布林带正在下移并打破下轨，使用账户的可用保证金余额进行融券卖出。有持仓时，以分钟行情实时进行风险监控进行止盈或者止损操作，对融资买入的持仓进行卖券还款，对融资卖出的持仓进行买券还券。具体代码实现如下：</p>
+                    <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_glg_lrq_sdc__codeblock_ild_hvq_sdc" data-ofbid="topic_glg_lrq_sdc__codeblock_ild_hvq_sdc"><code>def onBar(mutable context, msg, indicator){
+	for( istock in msg.keys()){
+		longPosition = Backtest::getMarginTradingPosition(context.engine, [istock]).longPosition[0]
+		shortPosition = Backtest::getSecuLendingPosition(context.engine, [istock]).shortPosition[0]
+		close = msg[istock].close
+		open = msg[istock].open
+		if(msg[istock].rsi &gt; 70. and close &gt; msg[istock].bhigh and close &gt; open and longPosition &lt; 1 and shortPosition &lt; 1 ){
+		     	//进行融资买入
+		     	availableMarginBalance = Backtest::getTotalPortfolios(context.engine).availableMarginBalance[0]
+			qty = getBuyVolume(istock, availableMarginBalance*0.2, close)
+			if( qty &gt; 0){
+				Backtest::submitOrder(context.engine, (istock, context.tradeTime, 5, close, qty, 3), "融资买入")	
+				context["HoldingsPrice"][istock] = close
+			}	
+	    	}
+		if(msg[istock].rsi &lt; 30. and close &lt; msg[istock].blow  and close &lt; open and  longPosition &lt; 1 and shortPosition &lt;1){
+			//有担保品买入持仓时，不进行融券卖出
+			pos = Backtest::getMarginSecuPosition(context.engine, [istock]).longPosition[0]
+			availableMarginBalance = Backtest::getTotalPortfolios(context.engine).availableMarginBalance[0]
+			qty = getBuyVolume(istock, availableMarginBalance*0.2, close)
+			if(pos &lt; 1 and qty &gt; 0){
+			     	 //进行融券卖出
+				Backtest::submitOrder(context.engine, (istock, context.tradeTime, 5, close, qty, 4), "融券卖出")
+				context["HoldingsPrice"][istock] = close
+			}		
+		}
+		if (longPosition &gt; 0  and (close &gt;= context["HoldingsPrice"][istock] * ( 1+ context["tp"]) or 
+					close &lt;= context["HoldingsPrice"][istock] * ( 1 - context["sl"]))){
+			//止损或者止盈
+			Backtest::submitOrder(context.engine, (istock, context.tradeTime, 5, close, longPosition, 6), "卖券还款")					
+		}
+		if (shortPosition &gt; 0  and (close &lt;= context["HoldingsPrice"][istock] * ( 1 - context["tp"]) or 
+					close &gt;= context["HoldingsPrice"][istock] * ( 1 + context["sl"]))){
+			//止损或者止盈
+			Backtest::submitOrder(context.engine, (istock, context.tradeTime, 5, close, shortPosition, 8), "买券还券")					
+		}		
+	}
+}</code></pre>
+                    <p class="- topic/p p">通过如下操作执行策略回测：</p>
+                    <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_glg_lrq_sdc__codeblock_xhx_hvq_sdc" data-ofbid="topic_glg_lrq_sdc__codeblock_xhx_hvq_sdc"><code>timer Backtest::appendQuotationMsg(engine, minData)</code></pre>
+                    <p class="- topic/p p">最后，我们通过 <code class="+ topic/ph pr-d/codeph ph codeph">Backtest::getDailyTotalPortfolios(engine)</code>
+                        接口获取策略的净值以及初始仓位的净值。</p>
+                    <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_glg_lrq_sdc__codeblock_bjt_3vq_sdc" data-ofbid="topic_glg_lrq_sdc__codeblock_bjt_3vq_sdc"><code>totalPortfolios = Backtest::getDailyTotalPortfolios(engine)
+//回测结果综合展示
+netValue = totalPortfolios.netValue
+bottomNetValue = totalPortfolios.bottomNetValue
+plot([netValue,bottomNetValue], totalPortfolios.tradeDate, "策略净值")</code></pre>
+                    <img class="- topic/image image" id="topic_glg_lrq_sdc__image_p1w_lvq_sdc" src="images/backset_introduction_usage/4_2_2_1.png"/>
+                    <p class="- topic/p p">本节案例完整代码见<a class="- topic/xref xref" href="#topic_bf5_4vq_sdc">附件</a>。</p>
+                </div>
+            </article>
+        </article>
+    </article>
+    <article class="- topic/topic topic nested1" aria-labelledby="ariaid-title24" id="topic_zsq_nvq_sdc">
+        <h2 class="- topic/title title topictitle2" id="ariaid-title24">5. 总结</h2>
+        <div class="- topic/body body">
+            <p class="- topic/p p">融资融券模式是属于股票市场的一种交易方式。DolphinDB 回测引擎支持初始仓位、分红除权信息表等的设置，用户将参数输入回测引擎，便可实现融资融券回测和模拟交易。
+                回测引擎不仅可实时计算融资融券模式的交易成本，并且在交易风险控制上内置风控系统，对集中度等指标实时监控。</p>
+            <p class="- topic/p p">在操作上， 尽管融资融券回测在资金的使用、订单提交、投资逻辑上与一般策略不同，但仍然延续了其他回测的一贯做法，将基础参数集成在 config
+                字典中，并输入到回测引擎进行统一管理。用户仅需按照需求填充底仓、配置参数等，无需在策略脚本中实现开发风控系统和设置模拟交易中的各种情况。</p>
+            <p class="- topic/p p">本文通过具体案例向读者展示了融资融券回测的应用场景和使用方法，通过实现两个示例，详尽地说明了融资融券回测。后续我们还会对融资融券回测支持 JIT 优化。</p>
+        </div>
+    </article>
+    <article class="- topic/topic topic nested1" aria-labelledby="ariaid-title25" id="topic_bf5_4vq_sdc">
+        <h2 class="- topic/title title topictitle2" id="ariaid-title25">6. 附件</h2>
+        <div class="- topic/body body">
+            <ul class="- topic/ul ul" id="topic_bf5_4vq_sdc__ul_knr_qvq_sdc" data-ofbid="topic_bf5_4vq_sdc__ul_knr_qvq_sdc">
+                <li class="- topic/li li">4.1节：脚本<a class="- topic/xref xref" href="script/backset_introduction_usage/%E4%BD%BF%E7%94%A8%E8%9E%8D%E8%B5%84%E4%B8%9A%E5%8A%A1%E4%B8%BA%E6%8A%95%E8%B5%84%E7%BB%84%E5%90%88%E7%AD%96%E7%95%A5%E5%A2%9E%E5%8A%A0%E6%9D%A0%E6%9D%86.dos">使用融资业务为投资组合策略增加杠杆.dos</a> ，数据<a class="- topic/xref xref" href="script/backset_introduction_usage/dayData.csv">dayData.csv</a></li>
+                <li class="- topic/li li">4.2节：脚本<a class="- topic/xref xref" href="script/backset_introduction_usage/%E5%9C%A8%E6%9C%89%E5%88%9D%E5%A7%8B%E4%BB%93%E4%BD%8D%E7%9A%84%E6%83%85%E5%86%B5%E4%B8%8B,%E4%BD%BF%E7%94%A8%E8%9E%8D%E8%B5%84%E8%9E%8D%E5%88%B8%E5%A2%9E%E5%BC%BA%E7%AD%96%E7%95%A5%E6%94%B6%E7%9B%8A.dos">在有初始仓位的情况下,使用融资融券增强策略收益.dos</a> ，数据<a class="- topic/xref xref" href="script/backset_introduction_usage/MinuteData.csv">MinuteData.csv</a></li>
+            </ul>
+        </div>
+    </article>
+</article></main></div>
+                        
+                        
+                        
+                        
+                        
+                        
+                    </div>
+                    
+                        <nav role="navigation" id="wh_topic_toc" aria-label="On this page" class="col-lg-2 d-none d-lg-block navbar d-print-none"> 
+                            <div id="wh_topic_toc_content">
+		                        
+	                            <div class=" wh_topic_toc "><div class="wh_topic_label">在本页上</div><ul><li class="topic-item"><a href="#topic_br5_grq_sdc" data-tocid="topic_br5_grq_sdc">1. 融资融券业务介绍</a><ul><li class="topic-item"><a href="#topic_ldf_jrq_sdc" data-tocid="topic_ldf_jrq_sdc">1.1 保证金要求</a></li><li class="topic-item"><a href="#topic_zjl_jrq_sdc" data-tocid="topic_zjl_jrq_sdc">1.2 交易模式</a></li><li class="topic-item"><a href="#topic_cyl_jrq_sdc" data-tocid="topic_cyl_jrq_sdc">1.3 杠杆作用</a></li></ul></li><li class="topic-item"><a href="#topic_ctf_hrq_sdc" data-tocid="topic_ctf_hrq_sdc">2. DolphinDB 融资融券回测解决方案</a><ul><li class="topic-item"><a href="#topic_j2r_jrq_sdc" data-tocid="topic_j2r_jrq_sdc">2.1 参数配置</a></li><li class="topic-item"><a href="#topic_yxr_jrq_sdc" data-tocid="topic_yxr_jrq_sdc">2.2 行情数据</a></li><li class="topic-item"><a href="#topic_k4t_jrq_sdc" data-tocid="topic_k4t_jrq_sdc">2.3 融资融券相关接口说明</a></li></ul></li><li class="topic-item"><a href="#topic_sjg_hrq_sdc" data-tocid="topic_sjg_hrq_sdc">3. 融资融券策略回测注意事项</a><ul><li class="topic-item"><a href="#topic_vzz_jrq_sdc" data-tocid="topic_vzz_jrq_sdc">3.1 标的范围</a></li><li class="topic-item"><a href="#topic_sj1_krq_sdc" data-tocid="topic_sj1_krq_sdc">3.2 维持担保比例和集中度</a></li><li class="topic-item"><a href="#topic_fw1_krq_sdc" data-tocid="topic_fw1_krq_sdc">3.3 授信额度</a></li><li class="topic-item"><a href="#topic_ifb_krq_sdc" data-tocid="topic_ifb_krq_sdc">3.4 担保品卖出时优先平融资持仓</a></li><li class="topic-item"><a href="#topic_xpb_krq_sdc" data-tocid="topic_xpb_krq_sdc">3.5 其它注意事项说明</a></li></ul></li><li class="topic-item"><a href="#topic_mzg_hrq_sdc" data-tocid="topic_mzg_hrq_sdc">4. 融资融券回测案例</a><ul><li class="topic-item"><a href="#topic_lg3_krq_sdc" data-tocid="topic_lg3_krq_sdc">4.1 使用融资业务为投资组合策略增加杠杆</a><ul><li class="topic-item"><a href="#topic_cms_krq_sdc" data-tocid="topic_cms_krq_sdc">4.1.1 策略示例逻辑说明</a></li><li class="topic-item"><a href="#topic_rxv_krq_sdc" data-tocid="topic_rxv_krq_sdc">4.1.2 策略代码实现</a></li><li class="topic-item"><a href="#topic_llw_krq_sdc" data-tocid="topic_llw_krq_sdc">4.1.3 设置策略参数，创建引擎并执行回测</a></li></ul></li><li class="topic-item"><a href="#topic_wm3_krq_sdc" data-tocid="topic_wm3_krq_sdc">4.2 在有初始仓位的情况下，使用融资融券增强策略收益</a><ul><li class="topic-item"><a href="#topic_emf_lrq_sdc" data-tocid="topic_emf_lrq_sdc">4.2.1 策略执行逻辑</a></li><li class="topic-item"><a href="#topic_glg_lrq_sdc" data-tocid="topic_glg_lrq_sdc">4.2.2 策略代码实现</a></li></ul></li></ul></li><li class="topic-item"><a href="#topic_zsq_nvq_sdc" data-tocid="topic_zsq_nvq_sdc">5. 总结</a></li><li class="topic-item"><a href="#topic_bf5_4vq_sdc" data-tocid="topic_bf5_4vq_sdc">6. 附件</a></li></ul></div>
+	                        	
+                        	</div>
+                        </nav>
+                    
+                </div>
+            </div>
+            
+            
+            
+        </div> 
+        <footer class="navbar navbar-default wh_footer">
+  <div class=" footer-container mx-auto ">
+<title>Copyright</title><p><b> ©2025 浙江智臾科技有限公司 浙ICP备18048711号-3</b></p>
+  </div>
+</footer>
+        
+        <div id="go2top" class="d-print-none">
+            <span class="oxy-icon oxy-icon-up"></span>
+        </div>
+        
+        <div id="modal_img_large" class="modal">
+            <span class="close oxy-icon oxy-icon-remove"></span>
+            <div id="modal_img_container"></div>
+            <div id="caption"></div>
+        </div>
+        
+        
+        
+    </body>
+</html>

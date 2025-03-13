@@ -1,0 +1,373 @@
+<!DOCTYPE html><html xmlns="http://www.w3.org/1999/xhtml" xml:lang="zh" lang="zh" data-whc_version="26.0">
+    <head><link rel="shortcut icon" href="../../favicon.ico"/><link rel="icon" href="../../favicon.ico"/><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><meta name="description" content="tmkurtosis(T, X, window, [biased=true]) 部分通用参数说明和窗口计算规则请参考： tmFunctions biased 是一个布尔值，表示是否是有偏估计。默认值为 true，表示有偏估计。 在给定长度（以时间 T 衡量）的滑动窗口内计算 X 的峰度。 T = 1 1 1 2 5 6 X = 1 4 NULL -1 NULL 4 m = table(T as ..."/><meta name="DC.rights.owner" content="(C) 版权 2025"/><meta name="copyright" content="(C) 版权 2025"/><meta name="generator" content="DITA-OT"/><meta name="DC.type" content="topic"/><meta name="DC.coverage" content=""/><meta name="DC.relation" content="../../funcs/funcs_intro.html"/><meta name="prodname" content="DolphinDB"/><meta name="brand" content="DolphinDB"/><meta name="DC.creator" content="DolphinDB"/><meta name="DC.publisher" content="DDB N/A DDB 200"/><meta name="DC.format" content="HTML5"/><meta name="DC.identifier" content="tmkurtosis"/><title>tmkurtosis</title><!--  Generated with Oxygen version 26.0, build number 2024012323.  --><meta name="wh-path2root" content="../../"/><meta name="wh-toc-id" content="tmkurtosis-d9713e86685"/><meta name="wh-source-relpath" content="funcs/t/tmkurtosis.dita"/><meta name="wh-out-relpath" content="funcs/t/tmkurtosis.html"/>
+
+    <link rel="stylesheet" type="text/css" href="../../oxygen-webhelp/app/commons.css?buildId=2024012323"/>
+    <link rel="stylesheet" type="text/css" href="../../oxygen-webhelp/app/topic.css?buildId=2024012323"/>
+
+    <script src="../../oxygen-webhelp/app/options/properties.js?buildId=20250305183303"></script>
+    <script src="../../oxygen-webhelp/app/localization/strings.js?buildId=2024012323"></script>
+    <script src="../../oxygen-webhelp/app/search/index/keywords.js?buildId=20250305183303"></script>
+    <script defer="defer" src="../../oxygen-webhelp/app/commons.js?buildId=2024012323"></script>
+    <script defer="defer" src="../../oxygen-webhelp/app/topic.js?buildId=2024012323"></script>
+<link rel="stylesheet" type="text/css" href="../../oxygen-webhelp/template/styles.css?buildId=2024012323"/><script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script><script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script></head>
+
+    <body id="tmkurtosis" class="wh_topic_page frmBody">
+        <a href="#wh_topic_body" class="sr-only sr-only-focusable">
+            跳转到主要内容
+        </a>
+        
+        
+        
+        
+        <header class="navbar navbar-default wh_header">
+    <div class="container-fluid">
+        <div xmlns:whc="http://www.oxygenxml.com/webhelp/components" class="wh_header_flex_container navbar-nav navbar-expand-md navbar-dark">
+            <div class="wh_logo_and_publication_title_container">
+                <div class="wh_logo_and_publication_title">
+                    
+                    <a href="https://docs.dolphindb.cn/zh/index.html" class=" wh_logo d-none d-sm-block "><img src="../../logo.png" alt="  DolphinDB 文档中心  "/></a>
+                    <div class=" wh_publication_title "><a href="../../index.html"><span class="booktitle">  <span class="ph mainbooktitle">DolphinDB 文档中心</span>  </span></a></div>
+                    
+                </div>
+                
+                
+            </div>
+
+            <div class="wh_top_menu_and_indexterms_link collapse navbar-collapse" id="wh_top_menu_and_indexterms_link">
+                
+                
+                
+                
+            </div>
+        <div class=" wh_search_input navbar-form wh_topic_page_search search " role="form">
+            
+            
+            
+            <form id="searchForm" method="get" role="search" action="../../search.html"><div><input type="search" placeholder="搜索 " class="wh_search_textfield" id="textToSearch" name="searchQuery" aria-label="搜索查询" required="required"/><button type="submit" class="wh_search_button" aria-label="搜索"><span class="search_input_text">搜索</span></button></div></form>
+            
+            <script src="/vendors/react/umd/react.production.min.js" defer="defer"></script>
+<script src="/vendors/react-dom/umd/react-dom.production.min.js" defer="defer"></script>
+<script src="/vendors/dayjs/dayjs.min.js" defer="defer"></script>
+<script src="/vendors/antd/dist/antd.min.js" defer="defer"></script>
+<script src="/vendors/@ant-design/icons/dist/index.umd.min.js" defer="defer"></script>
+<script src="/zh/index.js" type="module"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" defer="defer"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML" defer="defer"><!--
+
+
+--></script>
+<script defer="defer"><!--
+
+// 从主页重定向
+const currentUrl = window.location.href;
+
+// 判断当前URL是否包含index.html并且路径最后部分是index.html
+if (currentUrl.endsWith('index.html')) {
+    // 处理根目录下的index.html跳转
+    const baseUrl = currentUrl.split('/index.html')[0]; // 获取index.html之前的部分
+    const redirectUrl = `${baseUrl}/about/ddb_intro.html`; // 构建跳转路径
+    window.location.href = redirectUrl; // 执行跳转
+}
+
+--></script>
+            
+        </div></div>
+    </div>
+</header>
+        
+        
+         
+        
+        
+        
+        <div class="container-fluid" id="wh_topic_container">
+            <div class="row">
+
+                <nav class="wh_tools d-print-none navbar-expand-md" aria-label="Tools">
+                    
+                    <div data-tooltip-position="bottom" class=" wh_breadcrumb "><ol class="d-print-none"><li><span class="home"><a href="../../index.html"><span>主页</span></a></span></li><li><div class="topicref" data-id="functions_references"><div class="title"><a href="../../funcs/funcs_intro.html"><span class="keyword label">函数参考</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 函数分类、语法、详解及示例</p></div></div></div></li><li><div class="topicref"><div class="title"><a href="../../funcs/a/abs.html">函数一览</a></div></div></li><li><div class="topicref"><div class="title"><a href="../../funcs/t/t3.html">T</a></div></div></li><li class="active"><div class="topicref" data-id="tmkurtosis"><div class="title"><a href="../../funcs/t/tmkurtosis.html">tmkurtosis</a></div></div></li></ol></div>
+                    
+                    
+                    
+                    <div class="wh_right_tools">
+                        <button class="wh_hide_highlight" aria-label="切换搜索突出显示" title="切换搜索突出显示"></button>
+                        <button class="webhelp_expand_collapse_sections" data-next-state="collapsed" aria-label="折叠截面" title="折叠截面"></button>
+                        
+                        
+                        
+                        
+                        <div class=" wh_print_link print d-none d-md-inline-block "><button onClick="window.print()" title="打印此页" aria-label="打印此页"></button></div>
+                        
+                        <button type="button" id="wh_toc_button" class="custom-toggler navbar-toggler collapsed wh_toggle_button navbar-light" aria-expanded="false" aria-label="Toggle publishing table of content" aria-controls="wh_publication_toc">
+                            <span class="navbar-toggler-icon"></span>
+                        </button>
+                    </div>
+                    
+                </nav>
+            </div>
+            
+            
+            
+            
+            <div class="wh_content_area">
+                <div class="row">
+                    
+                        <nav id="wh_publication_toc" class="col-lg-3 col-md-3 col-sm-12 d-md-block d-none d-print-none" aria-label="Table of Contents Container">
+                            <div id="wh_publication_toc_content">
+		                        
+                            	<div class=" wh_publication_toc " data-tooltip-position="right"><span class="expand-button-action-labels"><span id="button-expand-action" role="button" aria-label="Expand"></span><span id="button-collapse-action" role="button" aria-label="Collapse"></span><span id="button-pending-action" role="button" aria-label="Pending"></span></span><ul role="tree" aria-label="Table of Contents"><li role="treeitem"><div data-tocid="ddb_intro-d9713e87" class="topicref" data-id="ddb_intro" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../about/ddb_intro.html" id="ddb_intro-d9713e87-link">关于DolphinDB</a></div></div></li><li role="treeitem"><div data-tocid="chap1_getstarted-d9713e136" class="topicref" data-id="chap1_getstarted" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../getstarted/chap1_getstarted.html" id="chap1_getstarted-d9713e136-link">快速上手</a><div class="wh-tooltip"><p class="shortdesc">如何快速部署 DolphinDB、建库建表、写入和查询数据</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="sectionddb_deployment-d9713e189" class="topicref" data-id="sectionddb_deployment" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action sectionddb_deployment-d9713e189-link" class="wh-expand-btn"></span><div class="title"><a href="../../deploy/deploy_intro.html" id="sectionddb_deployment-d9713e189-link"><span class="keyword label">部署</span></a><div class="wh-tooltip"><p class="shortdesc">如何在不同的场景中部署 DolphinDB</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="new_chap_database_manage_new_chap_dbmanage_landing_page-d9713e2259" class="topicref" data-id="new_chap_database_manage_new_chap_dbmanage_landing_page" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action new_chap_database_manage_new_chap_dbmanage_landing_page-d9713e2259-link" class="wh-expand-btn"></span><div class="title"><a href="../../db_distr_comp/cfg/db_intro.html" id="new_chap_database_manage_new_chap_dbmanage_landing_page-d9713e2259-link"><span class="keyword label">数据库</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 数据库的基本概念</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="chap7_tutorials_streaming-d9713e3760" class="topicref" data-id="chap7_tutorials_streaming" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action chap7_tutorials_streaming-d9713e3760-link" class="wh-expand-btn"></span><div class="title"><a href="../../stream/str_intro.html" id="chap7_tutorials_streaming-d9713e3760-link"><span class="keyword label">流数据</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 流数据引擎及流数据计算的基本概念</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e7513" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e7513-link" class="wh-expand-btn"></span><div class="title"><a href="../../db_distr_comp/db_oper/import_data.html" id="tocId-d9713e7513-link">数据迁移</a><div class="wh-tooltip"><p class="shortdesc">如何从不同数据源向 DolphinDB 迁移数据</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="chap7_tutorials_system_management-d9713e7940" class="topicref" data-id="chap7_tutorials_system_management" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action chap7_tutorials_system_management-d9713e7940-link" class="wh-expand-btn"></span><div class="title"><a href="../../sys_man/om_intro.html" id="chap7_tutorials_system_management-d9713e7940-link"><span class="keyword label">系统运维</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 的系统运维功能及方法</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="troubleshooting-d9713e8780" class="topicref" data-id="troubleshooting" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action troubleshooting-d9713e8780-link" class="wh-expand-btn"></span><div class="title"><a href="../../error_codes/troubleshooting.html" id="troubleshooting-d9713e8780-link">故障排查</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="about_language_resources-d9713e20911" class="topicref" data-id="about_language_resources" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action about_language_resources-d9713e20911-link" class="wh-expand-btn"></span><div class="title"><a href="../../progr/progr_intro.html" id="about_language_resources-d9713e20911-link"><span class="keyword label">编程语言</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 编程基本概念与方法、SQL 在 DolphinDB 的应用</p></div></div></div></li><li role="treeitem" aria-expanded="true"><div data-tocid="functions_references-d9713e30925" class="topicref" data-id="functions_references" data-state="expanded"><span role="button" tabindex="0" aria-labelledby="button-collapse-action functions_references-d9713e30925-link" class="wh-expand-btn"></span><div class="title"><a href="../../funcs/funcs_intro.html" id="functions_references-d9713e30925-link"><span class="keyword label">函数参考</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 函数分类、语法、详解及示例</p></div></div></div><ul role="group" class="navbar-nav nav-list"><li role="treeitem"><div data-tocid="funcs_by_topics-d9713e30978" class="topicref" data-id="funcs_by_topics" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../funcs/funcs_by_topics.html" id="funcs_by_topics-d9713e30978-link"><span class="keyword label">函数分类</span></a></div></div></li><li role="treeitem" aria-expanded="true"><div data-tocid="tocId-d9713e31025" class="topicref" data-state="expanded"><span role="button" tabindex="0" aria-labelledby="button-collapse-action tocId-d9713e31025-link" class="wh-expand-btn"></span><div class="title"><a href="../../funcs/a/abs.html" id="tocId-d9713e31025-link">函数一览</a></div></div><ul role="group" class="navbar-nav nav-list"><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e31026" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e31026-link" class="wh-expand-btn"></span><div class="title"><a href="../../funcs/a/abs.html" id="tocId-d9713e31026-link">A</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e33195" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e33195-link" class="wh-expand-btn"></span><div class="title"><a href="../../funcs/b/backup.html" id="tocId-d9713e33195-link">B</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e34901" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e34901-link" class="wh-expand-btn"></span><div class="title"><a href="../../funcs/c/cacheDS_.html" id="tocId-d9713e34901-link">C</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e42935" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e42935-link" class="wh-expand-btn"></span><div class="title"><a href="../../funcs/d/dailyAlignedBar.html" id="tocId-d9713e42935-link">D</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e46269" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e46269-link" class="wh-expand-btn"></span><div class="title"><a href="../../funcs/e/eig.html" id="tocId-d9713e46269-link">E</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e48251" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e48251-link" class="wh-expand-btn"></span><div class="title"><a href="../../funcs/f/ffill_.html" id="tocId-d9713e48251-link">F</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e49726" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e49726-link" class="wh-expand-btn"></span><div class="title"><a href="../../funcs/g/garch.html" id="tocId-d9713e49726-link">G</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e56509" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e56509-link" class="wh-expand-btn"></span><div class="title"><a href="../../funcs/h/hashBucket.html" id="tocId-d9713e56509-link">H</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e57016" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e57016-link" class="wh-expand-btn"></span><div class="title"><a href="../../funcs/i/ifirstHit.html" id="tocId-d9713e57016-link">I</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e60655" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e60655-link" class="wh-expand-btn"></span><div class="title"><a href="../../funcs/j/join.html" id="tocId-d9713e60655-link">J</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e60794" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e60794-link" class="wh-expand-btn"></span><div class="title"><a href="../../funcs/k/kama.html" id="tocId-d9713e60794-link">K</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e61302" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e61302-link" class="wh-expand-btn"></span><div class="title"><a href="../../funcs/l/lasso.html" id="tocId-d9713e61302-link">L</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e63888" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e63888-link" class="wh-expand-btn"></span><div class="title"><a href="../../funcs/m/ma.html" id="tocId-d9713e63888-link">M</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e69053" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e69053-link" class="wh-expand-btn"></span><div class="title"><a href="../../funcs/n/nanInfFill.html" id="tocId-d9713e69053-link">N</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e69930" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e69930-link" class="wh-expand-btn"></span><div class="title"><a href="../../funcs/o/oauthlogin.html" id="tocId-d9713e69930-link">O</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e70345" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e70345-link" class="wh-expand-btn"></span><div class="title"><a href="../../funcs/p/pack.html" id="tocId-d9713e70345-link">P</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e72097" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e72097-link" class="wh-expand-btn"></span><div class="title"><a href="../../funcs/q/qclp.html" id="tocId-d9713e72097-link">Q</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e72466" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e72466-link" class="wh-expand-btn"></span><div class="title"><a href="../../funcs/r/rad2deg.html" id="tocId-d9713e72466-link">R</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e78646" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e78646-link" class="wh-expand-btn"></span><div class="title"><a href="../../funcs/s/saveAsNpy.html" id="tocId-d9713e78646-link">S</a></div></div></li><li role="treeitem" aria-expanded="true"><div data-tocid="tocId-d9713e85253" class="topicref" data-state="expanded"><span role="button" tabindex="0" aria-labelledby="button-collapse-action tocId-d9713e85253-link" class="wh-expand-btn"></span><div class="title"><a href="../../funcs/t/t3.html" id="tocId-d9713e85253-link">T</a></div></div><ul role="group" class="navbar-nav nav-list"><li role="treeitem"><div data-tocid="t3-d9713e85254" class="topicref" data-id="t3" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../funcs/t/t3.html" id="t3-d9713e85254-link">t3</a></div></div></li><li role="treeitem"><div data-tocid="table-d9713e85300" class="topicref" data-id="table" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../funcs/t/table.html" id="table-d9713e85300-link"><span class="keyword">table</span></a></div></div></li><li role="treeitem"><div data-tocid="tableinsert-d9713e85347" class="topicref" data-id="tableinsert" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../funcs/t/tableInsert.html" id="tableinsert-d9713e85347-link"><span class="keyword">tableInsert</span></a></div></div></li><li role="treeitem"><div data-tocid="tableUpsert-d9713e85394" class="topicref" data-id="tableUpsert" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../funcs/t/tableUpsert.html" id="tableUpsert-d9713e85394-link">tableUpsert</a></div></div></li><li role="treeitem"><div data-tocid="tail-d9713e85440" class="topicref" data-id="tail" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../funcs/t/tail.html" id="tail-d9713e85440-link">tail</a></div></div></li><li role="treeitem"><div data-tocid="take-d9713e85486" class="topicref" data-id="take" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../funcs/t/take.html" id="take-d9713e85486-link">take</a></div></div></li><li role="treeitem"><div data-tocid="talibnull-d9713e85532" class="topicref" data-id="talibnull" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../funcs/t/talibNull.html" id="talibnull-d9713e85532-link">talibNull</a></div></div></li><li role="treeitem"><div data-tocid="tan-d9713e85578" class="topicref" data-id="tan" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../funcs/t/tan.html" id="tan-d9713e85578-link">tan</a></div></div></li><li role="treeitem"><div data-tocid="tanh-d9713e85624" class="topicref" data-id="tanh" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../funcs/t/tanh.html" id="tanh-d9713e85624-link">tanh</a></div></div></li><li role="treeitem"><div data-tocid="tanimoto-d9713e85670" class="topicref" data-id="tanimoto" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../funcs/t/tanimoto.html" id="tanimoto-d9713e85670-link">tanimoto</a></div></div></li><li role="treeitem"><div data-tocid="tema-d9713e85716" class="topicref" data-id="tema" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../funcs/t/tema.html" id="tema-d9713e85716-link">tema</a></div></div></li><li role="treeitem"><div data-tocid="temporaladd-d9713e85763" class="topicref" data-id="temporaladd" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../funcs/t/temporalAdd.html" id="temporaladd-d9713e85763-link"><span class="keyword">temporalAdd</span></a></div></div></li><li role="treeitem"><div data-tocid="temporalformat-d9713e85810" class="topicref" data-id="temporalformat" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../funcs/t/temporalFormat.html" id="temporalformat-d9713e85810-link">temporalFormat</a></div></div></li><li role="treeitem"><div data-tocid="temporalparse-d9713e85856" class="topicref" data-id="temporalparse" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../funcs/t/temporalParse.html" id="temporalparse-d9713e85856-link">temporalParse</a></div></div></li><li role="treeitem"><div data-tocid="temporalseq-d9713e85902" class="topicref" data-id="temporalseq" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../funcs/t/temporalSeq.html" id="temporalseq-d9713e85902-link">temporalSeq</a></div></div></li><li role="treeitem"><div data-tocid="tensor-d9713e85948" class="topicref" data-id="tensor" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../funcs/t/tensor.html" id="tensor-d9713e85948-link">tensor</a></div></div></li><li role="treeitem"><div data-tocid="test-d9713e85994" class="topicref" data-id="test" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../funcs/t/test.html" id="test-d9713e85994-link">test</a></div></div></li><li role="treeitem"><div data-tocid="textchunkds-d9713e86040" class="topicref" data-id="textchunkds" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../funcs/t/textChunkDS.html" id="textchunkds-d9713e86040-link">textChunkDS</a></div></div></li><li role="treeitem"><div data-tocid="til-d9713e86086" class="topicref" data-id="til" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../funcs/t/til.html" id="til-d9713e86086-link">til</a></div></div></li><li role="treeitem"><div data-tocid="time-d9713e86132" class="topicref" data-id="time" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../funcs/t/time.html" id="time-d9713e86132-link">time</a></div></div></li><li role="treeitem"><div data-tocid="timestamp-d9713e86178" class="topicref" data-id="timestamp" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../funcs/t/timestamp.html" id="timestamp-d9713e86178-link">timestamp</a></div></div></li><li role="treeitem"><div data-tocid="tmavg-d9713e86224" class="topicref" data-id="tmavg" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../funcs/t/tmavg.html" id="tmavg-d9713e86224-link">tmavg</a></div></div></li><li role="treeitem"><div data-tocid="tmavgtopn-d9713e86271" class="topicref" data-id="tmavgtopn" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../funcs/t/tmavgTopN.html" id="tmavgtopn-d9713e86271-link">tmavgTopN</a></div></div></li><li role="treeitem"><div data-tocid="tmbeta-d9713e86317" class="topicref" data-id="tmbeta" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../funcs/t/tmbeta.html" id="tmbeta-d9713e86317-link">tmbeta</a></div></div></li><li role="treeitem"><div data-tocid="tmbetatopn-d9713e86363" class="topicref" data-id="tmbetatopn" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../funcs/t/tmbetaTopN.html" id="tmbetatopn-d9713e86363-link">tmbetaTopN</a></div></div></li><li role="treeitem"><div data-tocid="tmcorr-d9713e86409" class="topicref" data-id="tmcorr" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../funcs/t/tmcorr.html" id="tmcorr-d9713e86409-link">tmcorr</a></div></div></li><li role="treeitem"><div data-tocid="tmcorrtopn-d9713e86455" class="topicref" data-id="tmcorrtopn" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../funcs/t/tmcorrTopN.html" id="tmcorrtopn-d9713e86455-link">tmcorrTopN</a></div></div></li><li role="treeitem"><div data-tocid="tmcount-d9713e86501" class="topicref" data-id="tmcount" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../funcs/t/tmcount.html" id="tmcount-d9713e86501-link">tmcount</a></div></div></li><li role="treeitem"><div data-tocid="tmcovar-d9713e86547" class="topicref" data-id="tmcovar" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../funcs/t/tmcovar.html" id="tmcovar-d9713e86547-link">tmcovar</a></div></div></li><li role="treeitem"><div data-tocid="tmcovartopn-d9713e86593" class="topicref" data-id="tmcovartopn" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../funcs/t/tmcovarTopN.html" id="tmcovartopn-d9713e86593-link">tmcovarTopN</a></div></div></li><li role="treeitem"><div data-tocid="tmfirst-d9713e86639" class="topicref" data-id="tmfirst" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../funcs/t/tmfirst.html" id="tmfirst-d9713e86639-link">tmfirst</a></div></div></li><li role="treeitem" class="active"><div data-tocid="tmkurtosis-d9713e86685" class="topicref" data-id="tmkurtosis" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../funcs/t/tmkurtosis.html" id="tmkurtosis-d9713e86685-link">tmkurtosis</a></div></div></li><li role="treeitem"><div data-tocid="tmkurtosistopn-d9713e86731" class="topicref" data-id="tmkurtosistopn" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../funcs/t/tmkurtosisTopN.html" id="tmkurtosistopn-d9713e86731-link">tmkurtosisTopN</a></div></div></li><li role="treeitem"><div data-tocid="tmlast-d9713e86778" class="topicref" data-id="tmlast" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../funcs/t/tmlast.html" id="tmlast-d9713e86778-link">tmlast</a></div></div></li><li role="treeitem"><div data-tocid="tmlowrange-d9713e86824" class="topicref" data-id="tmlowrange" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../funcs/t/tmlowrange.html" id="tmlowrange-d9713e86824-link">tmLowRange</a></div></div></li><li role="treeitem"><div data-tocid="tmmax-d9713e86870" class="topicref" data-id="tmmax" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../funcs/t/tmmax.html" id="tmmax-d9713e86870-link">tmmax</a></div></div></li><li role="treeitem"><div data-tocid="tmmed-d9713e86916" class="topicref" data-id="tmmed" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../funcs/t/tmmed.html" id="tmmed-d9713e86916-link">tmmed</a></div></div></li><li role="treeitem"><div data-tocid="tmmin-d9713e86962" class="topicref" data-id="tmmin" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../funcs/t/tmmin.html" id="tmmin-d9713e86962-link">tmmin</a></div></div></li><li role="treeitem"><div data-tocid="tmove-d9713e87008" class="topicref" data-id="tmove" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../funcs/t/tmove.html" id="tmove-d9713e87008-link"><span class="keyword">tmove</span></a></div></div></li><li role="treeitem"><div data-tocid="tmovingwindowdata-d9713e87055" class="topicref" data-id="tmovingwindowdata" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../funcs/t/tmovingWindowData.html" id="tmovingwindowdata-d9713e87055-link">tmovingWindowData</a></div></div></li><li role="treeitem"><div data-tocid="tmpercentile-d9713e87101" class="topicref" data-id="tmpercentile" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../funcs/t/tmpercentile.html" id="tmpercentile-d9713e87101-link">tmpercentile</a></div></div></li><li role="treeitem"><div data-tocid="tmprod-d9713e87147" class="topicref" data-id="tmprod" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../funcs/t/tmprod.html" id="tmprod-d9713e87147-link">tmprod</a></div></div></li><li role="treeitem"><div data-tocid="tmrank-d9713e87193" class="topicref" data-id="tmrank" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../funcs/t/tmrank.html" id="tmrank-d9713e87193-link">tmrank</a></div></div></li><li role="treeitem"><div data-tocid="tmskew-d9713e87239" class="topicref" data-id="tmskew" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../funcs/t/tmskew.html" id="tmskew-d9713e87239-link">tmskew</a></div></div></li><li role="treeitem"><div data-tocid="tmskewtopn-d9713e87286" class="topicref" data-id="tmskewtopn" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../funcs/t/tmskewTopN.html" id="tmskewtopn-d9713e87286-link">tmskewTopN</a></div></div></li><li role="treeitem"><div data-tocid="tmstd-d9713e87332" class="topicref" data-id="tmstd" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../funcs/t/tmstd.html" id="tmstd-d9713e87332-link">tmstd</a></div></div></li><li role="treeitem"><div data-tocid="tmstdp-d9713e87378" class="topicref" data-id="tmstdp" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../funcs/t/tmstdp.html" id="tmstdp-d9713e87378-link">tmstdp</a></div></div></li><li role="treeitem"><div data-tocid="tmstdptopn-d9713e87424" class="topicref" data-id="tmstdptopn" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../funcs/t/tmstdpTopN.html" id="tmstdptopn-d9713e87424-link">tmstdpTopN</a></div></div></li><li role="treeitem"><div data-tocid="tmstdtopn-d9713e87470" class="topicref" data-id="tmstdtopn" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../funcs/t/tmstdTopN.html" id="tmstdtopn-d9713e87470-link">tmstdTopN</a></div></div></li><li role="treeitem"><div data-tocid="tmsum-d9713e87516" class="topicref" data-id="tmsum" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../funcs/t/tmsum.html" id="tmsum-d9713e87516-link">tmsum</a></div></div></li><li role="treeitem"><div data-tocid="tmsum2-d9713e87562" class="topicref" data-id="tmsum2" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../funcs/t/tmsum2.html" id="tmsum2-d9713e87562-link">tmsum2</a></div></div></li><li role="treeitem"><div data-tocid="tmsumtopn-d9713e87608" class="topicref" data-id="tmsumtopn" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../funcs/t/tmsumTopN.html" id="tmsumtopn-d9713e87608-link">tmsumTopN</a></div></div></li><li role="treeitem"><div data-tocid="tmtoprange-d9713e87654" class="topicref" data-id="tmtoprange" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../funcs/t/tmtoprange.html" id="tmtoprange-d9713e87654-link">tmTopRange</a></div></div></li><li role="treeitem"><div data-tocid="tmvar-d9713e87700" class="topicref" data-id="tmvar" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../funcs/t/tmvar.html" id="tmvar-d9713e87700-link">tmvar</a></div></div></li><li role="treeitem"><div data-tocid="tmvarp-d9713e87746" class="topicref" data-id="tmvarp" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../funcs/t/tmvarp.html" id="tmvarp-d9713e87746-link">tmvarp</a></div></div></li><li role="treeitem"><div data-tocid="tmvarptopn-d9713e87793" class="topicref" data-id="tmvarptopn" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../funcs/t/tmvarpTopN.html" id="tmvarptopn-d9713e87793-link">tmvarpTopN</a></div></div></li><li role="treeitem"><div data-tocid="tmvartopn-d9713e87839" class="topicref" data-id="tmvartopn" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../funcs/t/tmvarTopN.html" id="tmvartopn-d9713e87839-link">tmvarTopN</a></div></div></li><li role="treeitem"><div data-tocid="tmwavg-d9713e87885" class="topicref" data-id="tmwavg" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../funcs/t/tmwavg.html" id="tmwavg-d9713e87885-link">tmwavg</a></div></div></li><li role="treeitem"><div data-tocid="tmwsum-d9713e87931" class="topicref" data-id="tmwsum" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../funcs/t/tmwsum.html" id="tmwsum-d9713e87931-link">tmwsum</a></div></div></li><li role="treeitem"><div data-tocid="tmwsumtopn-d9713e87977" class="topicref" data-id="tmwsumtopn" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../funcs/t/tmwsumTopN.html" id="tmwsumtopn-d9713e87977-link">tmwsumTopN</a></div></div></li><li role="treeitem"><div data-tocid="tochararray-d9713e88023" class="topicref" data-id="tochararray" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../funcs/t/toCharArray.html" id="tochararray-d9713e88023-link">toCharArray</a></div></div></li><li role="treeitem"><div data-tocid="today-d9713e88069" class="topicref" data-id="today" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../funcs/t/today.html" id="today-d9713e88069-link">today</a></div></div></li><li role="treeitem"><div data-tocid="tojson-d9713e88115" class="topicref" data-id="tojson" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../funcs/t/toJson.html" id="tojson-d9713e88115-link">toJson</a></div></div></li><li role="treeitem"><div data-tocid="tokenize-d9713e88161" class="topicref" data-id="tokenize" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../funcs/t/tokenize.html" id="tokenize-d9713e88161-link">tokenize</a></div></div></li><li role="treeitem"><div data-tocid="toprange-d9713e88207" class="topicref" data-id="toprange" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../funcs/t/topRange.html" id="toprange-d9713e88207-link">topRange</a></div></div></li><li role="treeitem"><div data-tocid="tostdjson-d9713e88253" class="topicref" data-id="tostdjson" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../funcs/t/toStdJson.html" id="tostdjson-d9713e88253-link">toStdJson</a></div></div></li><li role="treeitem"><div data-tocid="toutf8-d9713e88300" class="topicref" data-id="toutf8" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../funcs/t/toUTF8.html" id="toutf8-d9713e88300-link">toUTF8</a></div></div></li><li role="treeitem"><div data-tocid="transds-d9713e88346" class="topicref" data-id="transds" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../funcs/t/transDS_.html" id="transds-d9713e88346-link">transDS!</a></div></div></li><li role="treeitem"><div data-tocid="transfreq-d9713e88392" class="topicref" data-id="transfreq" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../funcs/t/transFreq.html" id="transfreq-d9713e88392-link"><span class="keyword">transFreq</span></a></div></div></li><li role="treeitem"><div data-tocid="transpose-d9713e88439" class="topicref" data-id="transpose" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../funcs/t/transpose.html" id="transpose-d9713e88439-link"><span class="keyword">transpose</span></a></div></div></li><li role="treeitem"><div data-tocid="treasuryconversionfactor-d9713e88486" class="topicref" data-id="treasuryconversionfactor" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../funcs/t/treasuryconversionfactor.html" id="treasuryconversionfactor-d9713e88486-link">treasuryConversionFactor</a></div></div></li><li role="treeitem"><div data-tocid="triggercheckpointforimoltp-d9713e88532" class="topicref" data-id="triggercheckpointforimoltp" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../funcs/t/triggercheckpointforimoltp.html" id="triggercheckpointforimoltp-d9713e88532-link">triggerCheckpointForIMOLTP</a></div></div></li><li role="treeitem"><div data-tocid="triggernodereport-d9713e88578" class="topicref" data-id="triggernodereport" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../funcs/t/triggerNodeReport.html" id="triggernodereport-d9713e88578-link">triggerNodeReport</a></div></div></li><li role="treeitem"><div data-tocid="triggerPKEYCompaction-d9713e88624" class="topicref" data-id="triggerPKEYCompaction" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../funcs/t/triggerPKEYCompaction.html" id="triggerPKEYCompaction-d9713e88624-link">triggerPKEYCompaction</a></div></div></li><li role="treeitem"><div data-tocid="triggertsdbcompaction-d9713e88670" class="topicref" data-id="triggertsdbcompaction" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../funcs/t/triggerTSDBCompaction.html" id="triggertsdbcompaction-d9713e88670-link">triggerTSDBCompaction</a></div></div></li><li role="treeitem"><div data-tocid="tril-d9713e88716" class="topicref" data-id="tril" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../funcs/t/tril.html" id="tril-d9713e88716-link">tril</a></div></div></li><li role="treeitem"><div data-tocid="trim-d9713e88762" class="topicref" data-id="trim" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../funcs/t/trim.html" id="trim-d9713e88762-link">trim</a></div></div></li><li role="treeitem"><div data-tocid="trima-d9713e88809" class="topicref" data-id="trima" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../funcs/t/trima.html" id="trima-d9713e88809-link">trima</a></div></div></li><li role="treeitem"><div data-tocid="triu-d9713e88855" class="topicref" data-id="triu" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../funcs/t/triu.html" id="triu-d9713e88855-link">triu</a></div></div></li><li role="treeitem"><div data-tocid="truerange-d9713e88901" class="topicref" data-id="truerange" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../funcs/t/trueRange.html" id="truerange-d9713e88901-link">trueRange</a></div></div></li><li role="treeitem"><div data-tocid="truncate-d9713e88947" class="topicref" data-id="truncate" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../funcs/t/truncate.html" id="truncate-d9713e88947-link">truncate</a></div></div></li><li role="treeitem"><div data-tocid="ttest-d9713e88993" class="topicref" data-id="ttest" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../funcs/t/tTest.html" id="ttest-d9713e88993-link">tTest</a></div></div></li><li role="treeitem"><div data-tocid="tuplesum-d9713e89039" class="topicref" data-id="tuplesum" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../funcs/t/tupleSum.html" id="tuplesum-d9713e89039-link">tupleSum</a></div></div></li><li role="treeitem"><div data-tocid="type-d9713e89085" class="topicref" data-id="type" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../funcs/t/type.html" id="type-d9713e89085-link">type</a></div></div></li><li role="treeitem"><div data-tocid="typestr-d9713e89131" class="topicref" data-id="typestr" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../funcs/t/typestr.html" id="typestr-d9713e89131-link">typestr</a></div></div></li></ul></li><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e89177" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e89177-link" class="wh-expand-btn"></span><div class="title"><a href="../../funcs/u/undef.html" id="tocId-d9713e89177-link">U</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e90009" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e90009-link" class="wh-expand-btn"></span><div class="title"><a href="../../funcs/v/valueChanged.html" id="tocId-d9713e90009-link">V</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e90517" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e90517-link" class="wh-expand-btn"></span><div class="title"><a href="../../funcs/w/warmupStreamEngine.html" id="tocId-d9713e90517-link">W</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e91670" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e91670-link" class="wh-expand-btn"></span><div class="title"><a href="../../funcs/x/xdb.html" id="tocId-d9713e91670-link">X</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e91763" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e91763-link" class="wh-expand-btn"></span><div class="title"><a href="../../funcs/y/year.html" id="tocId-d9713e91763-link">Y</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e91903" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e91903-link" class="wh-expand-btn"></span><div class="title"><a href="../../funcs/z/zigzag.html" id="tocId-d9713e91903-link">Z</a></div></div></li><li role="treeitem"><div data-tocid="types_formats-d9713e92042" class="topicref" data-id="types_formats" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../funcs/appendix.html" id="types_formats-d9713e92042-link">附录</a></div></div></li></ul></li><li role="treeitem" aria-expanded="false"><div data-tocid="chap8_sect_series_o_funcs-d9713e92088" class="topicref" data-id="chap8_sect_series_o_funcs" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action chap8_sect_series_o_funcs-d9713e92088-link" class="wh-expand-btn"></span><div class="title"><a href="../../funcs/themes/themes.html" id="chap8_sect_series_o_funcs-d9713e92088-link">系列函数</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e92510" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e92510-link" class="wh-expand-btn"></span><div class="title"><a href="../../funcs/ho_funcs/accumulate.html" id="tocId-d9713e92510-link">高阶函数</a></div></div></li></ul></li><li role="treeitem" aria-expanded="false"><div data-tocid="api_protocol-d9713e94064" class="topicref" data-id="api_protocol" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action api_protocol-d9713e94064-link" class="wh-expand-btn"></span><div class="title"><a href="../../api/connapi_intro.html" id="api_protocol-d9713e94064-link"><span class="keyword label">连接器 &amp; API</span></a><div class="wh-tooltip"><p class="shortdesc">面向不同编程语言的 DolphinDB API 及连接器，相关协议和用法</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="chap6_plugin-d9713e94210" class="topicref" data-id="chap6_plugin" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action chap6_plugin-d9713e94210-link" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/plg_intro.html" id="chap6_plugin-d9713e94210-link"><span class="keyword label">插件</span></a><div class="wh-tooltip"><p class="shortdesc">多个应用场景的插件使用说明和插件开发指导</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="third_party-d9713e97904" class="topicref" data-id="third_party" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action third_party-d9713e97904-link" class="wh-expand-btn"></span><div class="title"><a href="../../third_party.html" id="third_party-d9713e97904-link">第三方工具</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="about_tutorials-d9713e98227" class="topicref" data-id="about_tutorials" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action about_tutorials-d9713e98227-link" class="wh-expand-btn"></span><div class="title"><a href="../../tutorials/about_tutorials.html" id="about_tutorials-d9713e98227-link"><span class="keyword label">教程</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 产品使用教程</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e105982" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e105982-link" class="wh-expand-btn"></span><div class="title"><a href="../../rn/server/3_00_2.html" id="tocId-d9713e105982-link">版本说明</a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 版本发布历史</p></div></div></div></li></ul></div>
+		                        
+                            </div>
+                        </nav>
+                    
+                    
+                    <div class="col-lg-7 col-md-9 col-sm-12" id="wh_topic_body">
+                        <button id="wh_close_publication_toc_button" class="close-toc-button d-none" aria-label="Toggle publishing table of content" aria-controls="wh_publication_toc" aria-expanded="true">
+                            <span class="close-toc-icon-container">
+                                <span class="close-toc-icon"></span>     
+                            </span>
+                        </button>
+                        <button id="wh_close_topic_toc_button" class="close-toc-button d-none" aria-label="Toggle topic table of content" aria-controls="wh_topic_toc" aria-expanded="true">
+                            <span class="close-toc-icon-container">
+                                <span class="close-toc-icon"></span>     
+                            </span>
+                        </button>
+                        
+                        <div class=" wh_topic_content body "><main role="main"><article class="- topic/topic topic" role="article" aria-labelledby="ariaid-title1">
+    <h1 class="- topic/title title topictitle1" id="ariaid-title1">tmkurtosis</h1>
+    
+    <article class="- topic/topic topic nested1" aria-labelledby="ariaid-title2" id="语法">
+        <h2 class="- topic/title title topictitle2" id="ariaid-title2">语法</h2>
+        <div class="- topic/body body">
+            <p class="- topic/p p" id="语法__p_p2q_5hn_ryb" data-ofbid="语法__p_p2q_5hn_ryb">
+                <code class="+ topic/ph pr-d/codeph ph codeph">tmkurtosis(T, X, window, [biased=true])</code>
+            </p>
+            <p class="- topic/p p" id="语法__p_q2q_5hn_ryb" data-ofbid="语法__p_q2q_5hn_ryb">部分通用参数说明和窗口计算规则请参考：<a class="- topic/xref xref" href="../themes/tmFunctions.html">tmFunctions</a></p>
+        </div>
+    </article>
+    <article class="- topic/topic topic nested1" aria-labelledby="ariaid-title3" id="参数">
+        <h2 class="- topic/title title topictitle2" id="ariaid-title3">参数</h2>
+        <div class="- topic/body body">
+            <p class="- topic/p p" id="参数__p_r2q_5hn_ryb" data-ofbid="参数__p_r2q_5hn_ryb"><strong class="+ topic/ph hi-d/b ph b">biased</strong> 是一个布尔值，表示是否是有偏估计。默认值为 true，表示有偏估计。</p>
+        </div>
+    </article>
+    <article class="- topic/topic topic nested1" aria-labelledby="ariaid-title4" id="详情">
+        <h2 class="- topic/title title topictitle2" id="ariaid-title4">详情</h2>
+        <div class="- topic/body body">
+            <p class="- topic/p p" id="详情__p_s2q_5hn_ryb" data-ofbid="详情__p_s2q_5hn_ryb">在给定长度（以时间 <em class="+ topic/ph hi-d/i ph i">T</em> 衡量）的滑动窗口内计算 <em class="+ topic/ph hi-d/i ph i">X</em> 的峰度。</p>
+        </div>
+    </article>
+    <article class="- topic/topic topic nested1" aria-labelledby="ariaid-title5" id="例子">
+        <h2 class="- topic/title title topictitle2" id="ariaid-title5">例子</h2>
+        <div class="- topic/body body">
+            <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="例子__codeblock_t2q_5hn_ryb" data-ofbid="例子__codeblock_t2q_5hn_ryb"><code>T = 1 1 1 2 5 6
+X = 1 4 NULL -1 NULL 4
+m = table(T as t, X as x)
+select *, tmkurtosis(t, x, 3) from m</code></pre>
+            <div class="table-container"><table class="- topic/table table" id="例子__table_u2q_5hn_ryb" data-ofbid="例子__table_u2q_5hn_ryb" data-cols="3"><caption></caption><colgroup><col/><col/><col/></colgroup><thead class="- topic/thead thead">
+                        <tr class="- topic/row">
+                            <th class="- topic/entry entry align-left colsep-0 rowsep-0" id="例子__table_u2q_5hn_ryb__entry__1">t</th>
+                            <th class="- topic/entry entry align-left colsep-0 rowsep-0" id="例子__table_u2q_5hn_ryb__entry__2">x</th>
+                            <th class="- topic/entry entry align-left colsep-0 rowsep-0" id="例子__table_u2q_5hn_ryb__entry__3">tmkurtosis_t</th>
+                        </tr>
+                    </thead><tbody class="- topic/tbody tbody">
+                        <tr class="- topic/row">
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="例子__table_u2q_5hn_ryb__entry__1">1</td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="例子__table_u2q_5hn_ryb__entry__2">1</td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="例子__table_u2q_5hn_ryb__entry__3"> </td>
+                        </tr>
+                        <tr class="- topic/row">
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="例子__table_u2q_5hn_ryb__entry__1">1</td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="例子__table_u2q_5hn_ryb__entry__2">4</td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="例子__table_u2q_5hn_ryb__entry__3"> </td>
+                        </tr>
+                        <tr class="- topic/row">
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="例子__table_u2q_5hn_ryb__entry__1">1</td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="例子__table_u2q_5hn_ryb__entry__2"> </td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="例子__table_u2q_5hn_ryb__entry__3"> </td>
+                        </tr>
+                        <tr class="- topic/row">
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="例子__table_u2q_5hn_ryb__entry__1">2</td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="例子__table_u2q_5hn_ryb__entry__2">-1</td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="例子__table_u2q_5hn_ryb__entry__3">1.5</td>
+                        </tr>
+                        <tr class="- topic/row">
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="例子__table_u2q_5hn_ryb__entry__1">5</td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="例子__table_u2q_5hn_ryb__entry__2"> </td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="例子__table_u2q_5hn_ryb__entry__3"> </td>
+                        </tr>
+                        <tr class="- topic/row">
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="例子__table_u2q_5hn_ryb__entry__1">6</td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="例子__table_u2q_5hn_ryb__entry__2">4</td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="例子__table_u2q_5hn_ryb__entry__3"> </td>
+                        </tr>
+                    </tbody></table></div>
+            <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="例子__codeblock_v2q_5hn_ryb" data-ofbid="例子__codeblock_v2q_5hn_ryb"><code>T = take(datehour(2019.06.13 13:30:10),4) join (datehour(2019.06.13 13:30:10)+1..6)
+X = 1 NULL 3 4 5 NULL 3 NULL 5 3
+m = table(T as t,X as x)
+select *, tmkurtosis(t, x, 3d) from m</code></pre>
+            <div class="table-container"><table class="- topic/table table" id="例子__table_w2q_5hn_ryb" data-ofbid="例子__table_w2q_5hn_ryb" data-cols="3"><caption></caption><colgroup><col/><col/><col/></colgroup><thead class="- topic/thead thead">
+                        <tr class="- topic/row">
+                            <th class="- topic/entry entry align-left colsep-0 rowsep-0" id="例子__table_w2q_5hn_ryb__entry__1">t</th>
+                            <th class="- topic/entry entry align-left colsep-0 rowsep-0" id="例子__table_w2q_5hn_ryb__entry__2">x</th>
+                            <th class="- topic/entry entry align-left colsep-0 rowsep-0" id="例子__table_w2q_5hn_ryb__entry__3">tmkurtosis_t</th>
+                        </tr>
+                    </thead><tbody class="- topic/tbody tbody">
+                        <tr class="- topic/row">
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="例子__table_w2q_5hn_ryb__entry__1">2019.06.13T13</td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="例子__table_w2q_5hn_ryb__entry__2">1</td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="例子__table_w2q_5hn_ryb__entry__3"> </td>
+                        </tr>
+                        <tr class="- topic/row">
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="例子__table_w2q_5hn_ryb__entry__1">2019.06.13T13</td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="例子__table_w2q_5hn_ryb__entry__2"> </td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="例子__table_w2q_5hn_ryb__entry__3"> </td>
+                        </tr>
+                        <tr class="- topic/row">
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="例子__table_w2q_5hn_ryb__entry__1">2019.06.13T13</td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="例子__table_w2q_5hn_ryb__entry__2">3</td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="例子__table_w2q_5hn_ryb__entry__3"> </td>
+                        </tr>
+                        <tr class="- topic/row">
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="例子__table_w2q_5hn_ryb__entry__1">2019.06.13T13</td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="例子__table_w2q_5hn_ryb__entry__2">4</td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="例子__table_w2q_5hn_ryb__entry__3">1.5</td>
+                        </tr>
+                        <tr class="- topic/row">
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="例子__table_w2q_5hn_ryb__entry__1">2019.06.13T14</td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="例子__table_w2q_5hn_ryb__entry__2">5</td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="例子__table_w2q_5hn_ryb__entry__3">1.8457</td>
+                        </tr>
+                        <tr class="- topic/row">
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="例子__table_w2q_5hn_ryb__entry__1">2019.06.13T15</td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="例子__table_w2q_5hn_ryb__entry__2"> </td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="例子__table_w2q_5hn_ryb__entry__3">1.8457</td>
+                        </tr>
+                        <tr class="- topic/row">
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="例子__table_w2q_5hn_ryb__entry__1">2019.06.13T16</td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="例子__table_w2q_5hn_ryb__entry__2">3</td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="例子__table_w2q_5hn_ryb__entry__3">2.2169</td>
+                        </tr>
+                        <tr class="- topic/row">
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="例子__table_w2q_5hn_ryb__entry__1">2019.06.13T17</td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="例子__table_w2q_5hn_ryb__entry__2"> </td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="例子__table_w2q_5hn_ryb__entry__3">2.2169</td>
+                        </tr>
+                        <tr class="- topic/row">
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="例子__table_w2q_5hn_ryb__entry__1">2019.06.13T18</td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="例子__table_w2q_5hn_ryb__entry__2">5</td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="例子__table_w2q_5hn_ryb__entry__3">2.2401</td>
+                        </tr>
+                        <tr class="- topic/row">
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="例子__table_w2q_5hn_ryb__entry__1">2019.06.13T19</td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="例子__table_w2q_5hn_ryb__entry__2">3</td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="例子__table_w2q_5hn_ryb__entry__3">2.4072</td>
+                        </tr>
+                    </tbody></table></div>
+            <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="例子__codeblock_x2q_5hn_ryb" data-ofbid="例子__codeblock_x2q_5hn_ryb"><code>select *, tmkurtosis(t, x, 1w) from m</code></pre>
+            <div class="table-container"><table class="- topic/table table" id="例子__table_y2q_5hn_ryb" data-ofbid="例子__table_y2q_5hn_ryb" data-cols="3"><caption></caption><colgroup><col/><col/><col/></colgroup><thead class="- topic/thead thead">
+                        <tr class="- topic/row">
+                            <th class="- topic/entry entry align-left colsep-0 rowsep-0" id="例子__table_y2q_5hn_ryb__entry__1">t</th>
+                            <th class="- topic/entry entry align-left colsep-0 rowsep-0" id="例子__table_y2q_5hn_ryb__entry__2">x</th>
+                            <th class="- topic/entry entry align-left colsep-0 rowsep-0" id="例子__table_y2q_5hn_ryb__entry__3">tmkurtosis_t</th>
+                        </tr>
+                    </thead><tbody class="- topic/tbody tbody">
+                        <tr class="- topic/row">
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="例子__table_y2q_5hn_ryb__entry__1">2019.06.13T13</td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="例子__table_y2q_5hn_ryb__entry__2">1</td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="例子__table_y2q_5hn_ryb__entry__3"> </td>
+                        </tr>
+                        <tr class="- topic/row">
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="例子__table_y2q_5hn_ryb__entry__1">2019.06.13T13</td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="例子__table_y2q_5hn_ryb__entry__2"> </td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="例子__table_y2q_5hn_ryb__entry__3"> </td>
+                        </tr>
+                        <tr class="- topic/row">
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="例子__table_y2q_5hn_ryb__entry__1">2019.06.13T13</td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="例子__table_y2q_5hn_ryb__entry__2">3</td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="例子__table_y2q_5hn_ryb__entry__3"> </td>
+                        </tr>
+                        <tr class="- topic/row">
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="例子__table_y2q_5hn_ryb__entry__1">2019.06.13T13</td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="例子__table_y2q_5hn_ryb__entry__2">4</td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="例子__table_y2q_5hn_ryb__entry__3">1.5</td>
+                        </tr>
+                        <tr class="- topic/row">
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="例子__table_y2q_5hn_ryb__entry__1">2019.06.13T14</td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="例子__table_y2q_5hn_ryb__entry__2">5</td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="例子__table_y2q_5hn_ryb__entry__3">1.8457</td>
+                        </tr>
+                        <tr class="- topic/row">
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="例子__table_y2q_5hn_ryb__entry__1">2019.06.13T15</td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="例子__table_y2q_5hn_ryb__entry__2"> </td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="例子__table_y2q_5hn_ryb__entry__3">1.8457</td>
+                        </tr>
+                        <tr class="- topic/row">
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="例子__table_y2q_5hn_ryb__entry__1">2019.06.13T16</td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="例子__table_y2q_5hn_ryb__entry__2">3</td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="例子__table_y2q_5hn_ryb__entry__3">2.2169</td>
+                        </tr>
+                        <tr class="- topic/row">
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="例子__table_y2q_5hn_ryb__entry__1">2019.06.13T17</td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="例子__table_y2q_5hn_ryb__entry__2"> </td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="例子__table_y2q_5hn_ryb__entry__3">2.2169</td>
+                        </tr>
+                        <tr class="- topic/row">
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="例子__table_y2q_5hn_ryb__entry__1">2019.06.13T18</td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="例子__table_y2q_5hn_ryb__entry__2">5</td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="例子__table_y2q_5hn_ryb__entry__3">2.2401</td>
+                        </tr>
+                        <tr class="- topic/row">
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="例子__table_y2q_5hn_ryb__entry__1">2019.06.13T19</td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="例子__table_y2q_5hn_ryb__entry__2">3</td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="例子__table_y2q_5hn_ryb__entry__3">2.4072</td>
+                        </tr>
+                    </tbody></table></div>
+            <p class="- topic/p p" id="例子__p_z2q_5hn_ryb" data-ofbid="例子__p_z2q_5hn_ryb">相关函数：<a class="- topic/xref xref" href="../m/mkurtosis.html">mkurtosis</a>, <a class="- topic/xref xref" href="../k/kurtosis.html">kurtosis</a></p>
+        </div>
+    </article>
+</article></main></div>
+                        
+                        
+                        
+                        
+                        
+                        
+                    </div>
+                    
+                        <nav role="navigation" id="wh_topic_toc" aria-label="On this page" class="col-lg-2 d-none d-lg-block navbar d-print-none"> 
+                            <div id="wh_topic_toc_content">
+		                        
+	                            <div class=" wh_topic_toc "><div class="wh_topic_label">在本页上</div><ul><li class="topic-item"><a href="#%E8%AF%AD%E6%B3%95" data-tocid="语法">语法</a></li><li class="topic-item"><a href="#%E5%8F%82%E6%95%B0" data-tocid="参数">参数</a></li><li class="topic-item"><a href="#%E8%AF%A6%E6%83%85" data-tocid="详情">详情</a></li><li class="topic-item"><a href="#%E4%BE%8B%E5%AD%90" data-tocid="例子">例子</a></li></ul></div>
+	                        	
+                        	</div>
+                        </nav>
+                    
+                </div>
+            </div>
+            
+            
+            
+        </div> 
+        <footer class="navbar navbar-default wh_footer">
+  <div class=" footer-container mx-auto ">
+<title>Copyright</title><p><b> ©2025 浙江智臾科技有限公司 浙ICP备18048711号-3</b></p>
+  </div>
+</footer>
+        
+        <div id="go2top" class="d-print-none">
+            <span class="oxy-icon oxy-icon-up"></span>
+        </div>
+        
+        <div id="modal_img_large" class="modal">
+            <span class="close oxy-icon oxy-icon-remove"></span>
+            <div id="modal_img_container"></div>
+            <div id="caption"></div>
+        </div>
+        
+        
+        
+    </body>
+</html>

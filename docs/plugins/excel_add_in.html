@@ -1,0 +1,382 @@
+<!DOCTYPE html><html xmlns="http://www.w3.org/1999/xhtml" xml:lang="zh" lang="zh" data-whc_version="26.0">
+    <head><link rel="shortcut icon" href="../favicon.ico"/><link rel="icon" href="../favicon.ico"/><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><meta name="description" content="Excel 是一款功能强大的电子表格软件，它支持数据的录入、存储、计算与分析。用户可以利用其内置的丰富函数进行数据处理，并通过图表直观展示数据趋势。此外，Excel 还具备数据排序、筛选、透视表等高级功能，可以帮助用户高效分析数据。 然而在应对庞大数据量及深度数据挖掘时，Excel的管理能力与诸多性能却稍显不足。针对此类情况，DolphinDB 以专属 Excel Add-In ..."/><meta name="DC.rights.owner" content="(C) 版权 2025"/><meta name="copyright" content="(C) 版权 2025"/><meta name="generator" content="DITA-OT"/><meta name="DC.type" content="topic"/><meta name="DC.coverage" content=""/><meta name="DC.relation" content="../plugins/plg_intro.html"/><meta name="prodname" content="DolphinDB"/><meta name="brand" content="DolphinDB"/><meta name="DC.creator" content="DolphinDB"/><meta name="DC.publisher" content="DDB N/A DDB 200"/><meta name="DC.format" content="HTML5"/><meta name="DC.identifier" content="excel_add_in"/><title>Excel Add-In</title><!--  Generated with Oxygen version 26.0, build number 2024012323.  --><meta name="wh-path2root" content="../"/><meta name="wh-toc-id" content="excel_add_in-d9713e95368"/><meta name="wh-source-relpath" content="plugins/excel_add_in.dita"/><meta name="wh-out-relpath" content="plugins/excel_add_in.html"/>
+
+    <link rel="stylesheet" type="text/css" href="../oxygen-webhelp/app/commons.css?buildId=2024012323"/>
+    <link rel="stylesheet" type="text/css" href="../oxygen-webhelp/app/topic.css?buildId=2024012323"/>
+
+    <script src="../oxygen-webhelp/app/options/properties.js?buildId=20250305183303"></script>
+    <script src="../oxygen-webhelp/app/localization/strings.js?buildId=2024012323"></script>
+    <script src="../oxygen-webhelp/app/search/index/keywords.js?buildId=20250305183303"></script>
+    <script defer="defer" src="../oxygen-webhelp/app/commons.js?buildId=2024012323"></script>
+    <script defer="defer" src="../oxygen-webhelp/app/topic.js?buildId=2024012323"></script>
+<link rel="stylesheet" type="text/css" href="../oxygen-webhelp/template/styles.css?buildId=2024012323"/><script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script><script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script></head>
+
+    <body id="excel_add_in" class="wh_topic_page frmBody">
+        <a href="#wh_topic_body" class="sr-only sr-only-focusable">
+            跳转到主要内容
+        </a>
+        
+        
+        
+        
+        <header class="navbar navbar-default wh_header">
+    <div class="container-fluid">
+        <div xmlns:whc="http://www.oxygenxml.com/webhelp/components" class="wh_header_flex_container navbar-nav navbar-expand-md navbar-dark">
+            <div class="wh_logo_and_publication_title_container">
+                <div class="wh_logo_and_publication_title">
+                    
+                    <a href="https://docs.dolphindb.cn/zh/index.html" class=" wh_logo d-none d-sm-block "><img src="../logo.png" alt="  DolphinDB 文档中心  "/></a>
+                    <div class=" wh_publication_title "><a href="../index.html"><span class="booktitle">  <span class="ph mainbooktitle">DolphinDB 文档中心</span>  </span></a></div>
+                    
+                </div>
+                
+                
+            </div>
+
+            <div class="wh_top_menu_and_indexterms_link collapse navbar-collapse" id="wh_top_menu_and_indexterms_link">
+                
+                
+                
+                
+            </div>
+        <div class=" wh_search_input navbar-form wh_topic_page_search search " role="form">
+            
+            
+            
+            <form id="searchForm" method="get" role="search" action="../search.html"><div><input type="search" placeholder="搜索 " class="wh_search_textfield" id="textToSearch" name="searchQuery" aria-label="搜索查询" required="required"/><button type="submit" class="wh_search_button" aria-label="搜索"><span class="search_input_text">搜索</span></button></div></form>
+            
+            <script src="/vendors/react/umd/react.production.min.js" defer="defer"></script>
+<script src="/vendors/react-dom/umd/react-dom.production.min.js" defer="defer"></script>
+<script src="/vendors/dayjs/dayjs.min.js" defer="defer"></script>
+<script src="/vendors/antd/dist/antd.min.js" defer="defer"></script>
+<script src="/vendors/@ant-design/icons/dist/index.umd.min.js" defer="defer"></script>
+<script src="/zh/index.js" type="module"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" defer="defer"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML" defer="defer"><!--
+
+
+--></script>
+<script defer="defer"><!--
+
+// 从主页重定向
+const currentUrl = window.location.href;
+
+// 判断当前URL是否包含index.html并且路径最后部分是index.html
+if (currentUrl.endsWith('index.html')) {
+    // 处理根目录下的index.html跳转
+    const baseUrl = currentUrl.split('/index.html')[0]; // 获取index.html之前的部分
+    const redirectUrl = `${baseUrl}/about/ddb_intro.html`; // 构建跳转路径
+    window.location.href = redirectUrl; // 执行跳转
+}
+
+--></script>
+            
+        </div></div>
+    </div>
+</header>
+        
+        
+         
+        
+        
+        
+        <div class="container-fluid" id="wh_topic_container">
+            <div class="row">
+
+                <nav class="wh_tools d-print-none navbar-expand-md" aria-label="Tools">
+                    
+                    <div data-tooltip-position="bottom" class=" wh_breadcrumb "><ol class="d-print-none"><li><span class="home"><a href="../index.html"><span>主页</span></a></span></li><li><div class="topicref" data-id="chap6_plugin"><div class="title"><a href="../plugins/plg_intro.html"><span class="keyword label">插件</span></a><div class="wh-tooltip"><p class="shortdesc">多个应用场景的插件使用说明和插件开发指导</p></div></div></div></li><li class="active"><div class="topicref" data-id="excel_add_in"><div class="title"><a href="../plugins/excel_add_in.html">Excel Add-In</a></div></div></li></ol></div>
+                    
+                    
+                    
+                    <div class="wh_right_tools">
+                        <button class="wh_hide_highlight" aria-label="切换搜索突出显示" title="切换搜索突出显示"></button>
+                        <button class="webhelp_expand_collapse_sections" data-next-state="collapsed" aria-label="折叠截面" title="折叠截面"></button>
+                        
+                        
+                        
+                        
+                        <div class=" wh_print_link print d-none d-md-inline-block "><button onClick="window.print()" title="打印此页" aria-label="打印此页"></button></div>
+                        
+                        <button type="button" id="wh_toc_button" class="custom-toggler navbar-toggler collapsed wh_toggle_button navbar-light" aria-expanded="false" aria-label="Toggle publishing table of content" aria-controls="wh_publication_toc">
+                            <span class="navbar-toggler-icon"></span>
+                        </button>
+                    </div>
+                    
+                </nav>
+            </div>
+            
+            
+            
+            
+            <div class="wh_content_area">
+                <div class="row">
+                    
+                        <nav id="wh_publication_toc" class="col-lg-3 col-md-3 col-sm-12 d-md-block d-none d-print-none" aria-label="Table of Contents Container">
+                            <div id="wh_publication_toc_content">
+		                        
+                            	<div class=" wh_publication_toc " data-tooltip-position="right"><span class="expand-button-action-labels"><span id="button-expand-action" role="button" aria-label="Expand"></span><span id="button-collapse-action" role="button" aria-label="Collapse"></span><span id="button-pending-action" role="button" aria-label="Pending"></span></span><ul role="tree" aria-label="Table of Contents"><li role="treeitem"><div data-tocid="ddb_intro-d9713e87" class="topicref" data-id="ddb_intro" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../about/ddb_intro.html" id="ddb_intro-d9713e87-link">关于DolphinDB</a></div></div></li><li role="treeitem"><div data-tocid="chap1_getstarted-d9713e136" class="topicref" data-id="chap1_getstarted" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../getstarted/chap1_getstarted.html" id="chap1_getstarted-d9713e136-link">快速上手</a><div class="wh-tooltip"><p class="shortdesc">如何快速部署 DolphinDB、建库建表、写入和查询数据</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="sectionddb_deployment-d9713e189" class="topicref" data-id="sectionddb_deployment" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action sectionddb_deployment-d9713e189-link" class="wh-expand-btn"></span><div class="title"><a href="../deploy/deploy_intro.html" id="sectionddb_deployment-d9713e189-link"><span class="keyword label">部署</span></a><div class="wh-tooltip"><p class="shortdesc">如何在不同的场景中部署 DolphinDB</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="new_chap_database_manage_new_chap_dbmanage_landing_page-d9713e2259" class="topicref" data-id="new_chap_database_manage_new_chap_dbmanage_landing_page" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action new_chap_database_manage_new_chap_dbmanage_landing_page-d9713e2259-link" class="wh-expand-btn"></span><div class="title"><a href="../db_distr_comp/cfg/db_intro.html" id="new_chap_database_manage_new_chap_dbmanage_landing_page-d9713e2259-link"><span class="keyword label">数据库</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 数据库的基本概念</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="chap7_tutorials_streaming-d9713e3760" class="topicref" data-id="chap7_tutorials_streaming" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action chap7_tutorials_streaming-d9713e3760-link" class="wh-expand-btn"></span><div class="title"><a href="../stream/str_intro.html" id="chap7_tutorials_streaming-d9713e3760-link"><span class="keyword label">流数据</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 流数据引擎及流数据计算的基本概念</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e7513" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e7513-link" class="wh-expand-btn"></span><div class="title"><a href="../db_distr_comp/db_oper/import_data.html" id="tocId-d9713e7513-link">数据迁移</a><div class="wh-tooltip"><p class="shortdesc">如何从不同数据源向 DolphinDB 迁移数据</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="chap7_tutorials_system_management-d9713e7940" class="topicref" data-id="chap7_tutorials_system_management" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action chap7_tutorials_system_management-d9713e7940-link" class="wh-expand-btn"></span><div class="title"><a href="../sys_man/om_intro.html" id="chap7_tutorials_system_management-d9713e7940-link"><span class="keyword label">系统运维</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 的系统运维功能及方法</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="troubleshooting-d9713e8780" class="topicref" data-id="troubleshooting" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action troubleshooting-d9713e8780-link" class="wh-expand-btn"></span><div class="title"><a href="../error_codes/troubleshooting.html" id="troubleshooting-d9713e8780-link">故障排查</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="about_language_resources-d9713e20911" class="topicref" data-id="about_language_resources" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action about_language_resources-d9713e20911-link" class="wh-expand-btn"></span><div class="title"><a href="../progr/progr_intro.html" id="about_language_resources-d9713e20911-link"><span class="keyword label">编程语言</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 编程基本概念与方法、SQL 在 DolphinDB 的应用</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="functions_references-d9713e30925" class="topicref" data-id="functions_references" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action functions_references-d9713e30925-link" class="wh-expand-btn"></span><div class="title"><a href="../funcs/funcs_intro.html" id="functions_references-d9713e30925-link"><span class="keyword label">函数参考</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 函数分类、语法、详解及示例</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="api_protocol-d9713e94064" class="topicref" data-id="api_protocol" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action api_protocol-d9713e94064-link" class="wh-expand-btn"></span><div class="title"><a href="../api/connapi_intro.html" id="api_protocol-d9713e94064-link"><span class="keyword label">连接器 &amp; API</span></a><div class="wh-tooltip"><p class="shortdesc">面向不同编程语言的 DolphinDB API 及连接器，相关协议和用法</p></div></div></div></li><li role="treeitem" aria-expanded="true"><div data-tocid="chap6_plugin-d9713e94210" class="topicref" data-id="chap6_plugin" data-state="expanded"><span role="button" tabindex="0" aria-labelledby="button-collapse-action chap6_plugin-d9713e94210-link" class="wh-expand-btn"></span><div class="title"><a href="../plugins/plg_intro.html" id="chap6_plugin-d9713e94210-link"><span class="keyword label">插件</span></a><div class="wh-tooltip"><p class="shortdesc">多个应用场景的插件使用说明和插件开发指导</p></div></div></div><ul role="group" class="navbar-nav nav-list"><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e94263" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e94263-link" class="wh-expand-btn"></span><div class="title"><a href="../plugins/plg_howtos.html" id="tocId-d9713e94263-link">插件使用与开发</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="amdquote-d9713e94448" class="topicref" data-id="amdquote" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action amdquote-d9713e94448-link" class="wh-expand-btn"></span><div class="title"><a href="../plugins/amdquote/amdquote_2.html" id="amdquote-d9713e94448-link">amdQuote</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="arrow-d9713e94540" class="topicref" data-id="arrow" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action arrow-d9713e94540-link" class="wh-expand-btn"></span><div class="title"><a href="../plugins/Arrow/arrow.html" id="arrow-d9713e94540-link">Arrow</a></div></div></li><li role="treeitem"><div data-tocid="awss3-d9713e94632" class="topicref" data-id="awss3" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../plugins/aws/aws.html" id="awss3-d9713e94632-link">AWSS3</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="backtest-d9713e94678" class="topicref" data-id="backtest" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action backtest-d9713e94678-link" class="wh-expand-btn"></span><div class="title"><a href="../plugins/backtest.html" id="backtest-d9713e94678-link">Backtest</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="ctp-d9713e95138" class="topicref" data-id="ctp" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action ctp-d9713e95138-link" class="wh-expand-btn"></span><div class="title"><a href="../plugins/ctp_2.html" id="ctp-d9713e95138-link">CTP</a></div></div></li><li role="treeitem"><div data-tocid="datafeed-d9713e95230" class="topicref" data-id="datafeed" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../plugins/datafeed.html" id="datafeed-d9713e95230-link">DataFeed</a></div></div></li><li role="treeitem"><div data-tocid="efh-d9713e95276" class="topicref" data-id="efh" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../plugins/efh.html" id="efh-d9713e95276-link">EFH</a></div></div></li><li role="treeitem"><div data-tocid="encoderdecoder-d9713e95322" class="topicref" data-id="encoderdecoder" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../plugins/EncoderDecoder.html" id="encoderdecoder-d9713e95322-link">EncoderDecoder</a></div></div></li><li role="treeitem" class="active"><div data-tocid="excel_add_in-d9713e95368" class="topicref" data-id="excel_add_in" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../plugins/excel_add_in.html" id="excel_add_in-d9713e95368-link">Excel Add-In</a></div></div></li><li role="treeitem"><div data-tocid="feather-d9713e95415" class="topicref" data-id="feather" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../plugins/feather/feather.html" id="feather-d9713e95415-link">Feather</a></div></div></li><li role="treeitem"><div data-tocid="gp-d9713e95461" class="topicref" data-id="gp" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../plugins/gp/gp.html" id="gp-d9713e95461-link">GP</a></div></div></li><li role="treeitem"><div data-tocid="gurobi-d9713e95507" class="topicref" data-id="gurobi" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../plugins/gurobi.html" id="gurobi-d9713e95507-link">gurobi</a></div></div></li><li role="treeitem"><div data-tocid="hbase-d9713e95553" class="topicref" data-id="hbase" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../plugins/hbase/hbase.html" id="hbase-d9713e95553-link">HBase</a></div></div></li><li role="treeitem"><div data-tocid="hdf5-d9713e95599" class="topicref" data-id="hdf5" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../plugins/hdf5/hdf5.html" id="hdf5-d9713e95599-link">HDF5</a></div></div></li><li role="treeitem"><div data-tocid="hdfs-d9713e95645" class="topicref" data-id="hdfs" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../plugins/hdfs/hdfs.html" id="hdfs-d9713e95645-link">HDFS</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="httpclient-d9713e95691" class="topicref" data-id="httpclient" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action httpclient-d9713e95691-link" class="wh-expand-btn"></span><div class="title"><a href="../plugins/httpClient/httpclient.html" id="httpclient-d9713e95691-link">HttpClient</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="insight-d9713e95783" class="topicref" data-id="insight" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action insight-d9713e95783-link" class="wh-expand-btn"></span><div class="title"><a href="../plugins/insight/insight_2.html" id="insight-d9713e95783-link">INSIGHT</a></div></div></li><li role="treeitem"><div data-tocid="kafka-d9713e95875" class="topicref" data-id="kafka" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../plugins/kafka/kafka.html" id="kafka-d9713e95875-link">Kafka</a></div></div></li><li role="treeitem"><div data-tocid="kdb-d9713e95921" class="topicref" data-id="kdb" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../plugins/kdb/kdb.html" id="kdb-d9713e95921-link">Kdb+</a></div></div></li><li role="treeitem"><div data-tocid="ldap-d9713e95967" class="topicref" data-id="ldap" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../plugins/LDAP.html" id="ldap-d9713e95967-link">LDAP</a></div></div></li><li role="treeitem"><div data-tocid="lgmb-d9713e96014" class="topicref" data-id="lgmb" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../plugins/lgbm.html" id="lgmb-d9713e96014-link">lgbm</a></div></div></li><li role="treeitem"><div data-tocid="libtorch-d9713e96060" class="topicref" data-id="libtorch" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../plugins/libtorch/libtorch.html" id="libtorch-d9713e96060-link">LibTorch</a></div></div></li><li role="treeitem"><div data-tocid="mat-d9713e96106" class="topicref" data-id="mat" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../plugins/mat/mat.html" id="mat-d9713e96106-link">mat</a></div></div></li><li role="treeitem"><div data-tocid="matchingengine-d9713e96152" class="topicref" data-id="matchingengine" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../plugins/MatchingEngine/me.html" id="matchingengine-d9713e96152-link">MatchingEngine</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="mes-d9713e96198" class="topicref" data-id="mes" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action mes-d9713e96198-link" class="wh-expand-btn"></span><div class="title"><a href="../plugins/matchingEngineSimulator/mes.html" id="mes-d9713e96198-link">MatchingEngineSimulator</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="mdl-d9713e96336" class="topicref" data-id="mdl" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action mdl-d9713e96336-link" class="wh-expand-btn"></span><div class="title"><a href="../plugins/MDL.html" id="mdl-d9713e96336-link">MDL</a></div></div></li><li role="treeitem"><div data-tocid="mongodb-d9713e96428" class="topicref" data-id="mongodb" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../plugins/mongodb/mongodb.html" id="mongodb-d9713e96428-link">MongoDB</a></div></div></li><li role="treeitem"><div data-tocid="mqtt-d9713e96474" class="topicref" data-id="mqtt" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../plugins/mqtt/mqtt.html" id="mqtt-d9713e96474-link">mqtt</a></div></div></li><li role="treeitem"><div data-tocid="mseed-d9713e96520" class="topicref" data-id="mseed" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../plugins/mseed/mseed.html" id="mseed-d9713e96520-link">mseed</a></div></div></li><li role="treeitem"><div data-tocid="mysql-d9713e96566" class="topicref" data-id="mysql" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../plugins/mysql/mysql.html" id="mysql-d9713e96566-link">MySQL</a></div></div></li><li role="treeitem"><div data-tocid="nsq-d9713e96612" class="topicref" data-id="nsq" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../plugins/nsq/nsq_2.html" id="nsq-d9713e96612-link">NSQ</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="odbc-d9713e96659" class="topicref" data-id="odbc" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action odbc-d9713e96659-link" class="wh-expand-btn"></span><div class="title"><a href="../plugins/odbc/odbc.html" id="odbc-d9713e96659-link">ODBC</a></div></div></li><li role="treeitem"><div data-tocid="opcua-d9713e96751" class="topicref" data-id="opcua" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../plugins/opcua/opcua.html" id="opcua-d9713e96751-link">OPCUA</a></div></div></li><li role="treeitem"><div data-tocid="opc-d9713e96797" class="topicref" data-id="opc" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../plugins/opc/opc.html" id="opc-d9713e96797-link">OPC</a></div></div></li><li role="treeitem"><div data-tocid="orc-d9713e96843" class="topicref" data-id="orc" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../plugins/orc.html" id="orc-d9713e96843-link">ORC</a></div></div></li><li role="treeitem"><div data-tocid="parquet-d9713e96889" class="topicref" data-id="parquet" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../plugins/parquet/parquet.html" id="parquet-d9713e96889-link">Parquet</a></div></div></li><li role="treeitem"><div data-tocid="py-d9713e96935" class="topicref" data-id="py" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../plugins/py/py.html" id="py-d9713e96935-link">Py</a></div></div></li><li role="treeitem"><div data-tocid="rabbitmq-d9713e96981" class="topicref" data-id="rabbitmq" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../plugins/rabbitMQ.html" id="rabbitmq-d9713e96981-link">RabbitMQ</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="redis-d9713e97027" class="topicref" data-id="redis" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action redis-d9713e97027-link" class="wh-expand-btn"></span><div class="title"><a href="../plugins/redis.html" id="redis-d9713e97027-link">Redis</a></div></div></li><li role="treeitem"><div data-tocid="quantlib-d9713e97119" class="topicref" data-id="quantlib" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../plugins/quantlib/quantlib.html" id="quantlib-d9713e97119-link">QuantLib</a></div></div></li><li role="treeitem"><div data-tocid="rocketmq-d9713e97165" class="topicref" data-id="rocketmq" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../plugins/rocketMQ.html" id="rocketmq-d9713e97165-link">RocketMQ</a></div></div></li><li role="treeitem"><div data-tocid="sevenzip-d9713e97211" class="topicref" data-id="sevenzip" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../plugins/sevenzip.html" id="sevenzip-d9713e97211-link">SevenZip</a></div></div></li><li role="treeitem"><div data-tocid="schemalesswriter-d9713e97258" class="topicref" data-id="schemalesswriter" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../plugins/slwriter.html" id="schemalesswriter-d9713e97258-link">SchemalessWriter</a></div></div></li><li role="treeitem"><div data-tocid="signal-d9713e97304" class="topicref" data-id="signal" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../plugins/signal/signal.html" id="signal-d9713e97304-link">signal</a></div></div></li><li role="treeitem"><div data-tocid="ssequotationfile-d9713e97350" class="topicref" data-id="ssequotationfile" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../plugins/SSEQuotationFile.html" id="ssequotationfile-d9713e97350-link">SSEQuotationFile</a></div></div></li><li role="treeitem"><div data-tocid="svm-d9713e97396" class="topicref" data-id="svm" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../plugins/svm/svm.html" id="svm-d9713e97396-link">SVM</a></div></div></li><li role="treeitem"><div data-tocid="tcpsocket-d9713e97442" class="topicref" data-id="tcpsocket" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../plugins/tcpsocket.html" id="tcpsocket-d9713e97442-link">TCPSocket</a></div></div></li><li role="treeitem"><div data-tocid="websocket-d9713e97488" class="topicref" data-id="websocket" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../plugins/websocket.html" id="websocket-d9713e97488-link">WebSocket</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="windtdf-d9713e97534" class="topicref" data-id="windtdf" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action windtdf-d9713e97534-link" class="wh-expand-btn"></span><div class="title"><a href="../plugins/windtdf.html" id="windtdf-d9713e97534-link">WindTDF</a></div></div></li><li role="treeitem"><div data-tocid="xgboost-d9713e97626" class="topicref" data-id="xgboost" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../plugins/xgboost/xgboost.html" id="xgboost-d9713e97626-link">xgboost</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="xtp-d9713e97672" class="topicref" data-id="xtp" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action xtp-d9713e97672-link" class="wh-expand-btn"></span><div class="title"><a href="../plugins/xtp.html" id="xtp-d9713e97672-link">XTP</a></div></div></li><li role="treeitem"><div data-tocid="zip-d9713e97764" class="topicref" data-id="zip" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../plugins/zip/zip.html" id="zip-d9713e97764-link">zip</a></div></div></li><li role="treeitem"><div data-tocid="zlib-d9713e97810" class="topicref" data-id="zlib" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../plugins/zlib/zlib.html" id="zlib-d9713e97810-link">Zlib</a></div></div></li><li role="treeitem"><div data-tocid="zmq-d9713e97857" class="topicref" data-id="zmq" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../plugins/zmq/zmq.html" id="zmq-d9713e97857-link">zmq</a></div></div></li></ul></li><li role="treeitem" aria-expanded="false"><div data-tocid="third_party-d9713e97904" class="topicref" data-id="third_party" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action third_party-d9713e97904-link" class="wh-expand-btn"></span><div class="title"><a href="../third_party.html" id="third_party-d9713e97904-link">第三方工具</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="about_tutorials-d9713e98227" class="topicref" data-id="about_tutorials" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action about_tutorials-d9713e98227-link" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/about_tutorials.html" id="about_tutorials-d9713e98227-link"><span class="keyword label">教程</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 产品使用教程</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e105982" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e105982-link" class="wh-expand-btn"></span><div class="title"><a href="../rn/server/3_00_2.html" id="tocId-d9713e105982-link">版本说明</a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 版本发布历史</p></div></div></div></li></ul></div>
+		                        
+                            </div>
+                        </nav>
+                    
+                    
+                    <div class="col-lg-7 col-md-9 col-sm-12" id="wh_topic_body">
+                        <button id="wh_close_publication_toc_button" class="close-toc-button d-none" aria-label="Toggle publishing table of content" aria-controls="wh_publication_toc" aria-expanded="true">
+                            <span class="close-toc-icon-container">
+                                <span class="close-toc-icon"></span>     
+                            </span>
+                        </button>
+                        <button id="wh_close_topic_toc_button" class="close-toc-button d-none" aria-label="Toggle topic table of content" aria-controls="wh_topic_toc" aria-expanded="true">
+                            <span class="close-toc-icon-container">
+                                <span class="close-toc-icon"></span>     
+                            </span>
+                        </button>
+                        
+                        <div class=" wh_topic_content body "><main role="main"><article class="- topic/topic topic" role="article" aria-labelledby="ariaid-title1">
+    <h1 class="- topic/title title topictitle1" id="ariaid-title1">Excel Add-In</h1>
+    <div class="- topic/body body">
+        <p class="- topic/p p">Excel 是一款功能强大的电子表格软件，它支持数据的录入、存储、计算与分析。用户可以利用其内置的丰富函数进行数据处理，并通过图表直观展示数据趋势。此外，Excel
+            还具备数据排序、筛选、透视表等高级功能，可以帮助用户高效分析数据。</p>
+        <p class="- topic/p p">然而在应对庞大数据量及深度数据挖掘时，Excel的管理能力与诸多性能却稍显不足。针对此类情况，DolphinDB 以专属 Excel Add-In
+            为桥梁，为用户提供了“Excel + DolphinDB”的强大集成方案。凭借该方案，用户能够在熟悉的 Excel 环境中，便捷地运用 DolphinDB
+            的强大计算与分析能力，结合 Excel 本身的诸多功能，更灵活、更高效地实现数据的复杂处理、深度分析与直观可视化，从而应对复杂多变的海量数据挑战。</p>
+        <p class="- topic/p p">下图展示了 DolphinDB Excel Add-In 的使用界面。从左到右的图标分别表示连接配置、连接节点选择、SQL 查询面板、插件功能配置。</p>
+        <img class="- topic/image image" id="excel_add_in__image_wxf_ptp_ydc" src="images/excel_add_in/readme_cn.png"/>
+    </div>
+    <article class="- topic/topic topic nested1" aria-labelledby="ariaid-title2" id="topic_lth_3sp_ydc">
+        <h2 class="- topic/title title topictitle2" id="ariaid-title2">安装说明</h2>
+        <div class="- topic/body body">
+            <p class="- topic/p p">用户可以在微软 Excel 的 Add-In 加载项中添加该插件。具体安装步骤如下：</p>
+            <p class="- topic/p p">（1）根据当前使用的 Excel 版本，下载安装包（地址：<a class="- topic/xref xref" href="https://github.com/dolphindb/excel-add-in/releases" target="_blank" rel="external noopener">https://github.com/dolphindb/excel-add-in/releases</a>），安装包内包含 DolphinDBExcel-AddIn-packed.xll（Windows 32位）或者
+                DolphinDBExcel-AddIn64-packed.xll（Window 64位）。</p>
+            <img class="- topic/image image" id="topic_lth_3sp_ydc__image_yvv_qtp_ydc" src="images/excel_add_in/readme_cn_1-1.png"/>
+            <p class="- topic/p p">注意：Excel 的 32/64 位版本信息可以在 Excel 的“文件”-&gt;“账户”-&gt;“关于Excel”里找到。</p>
+            <img class="- topic/image image" id="topic_lth_3sp_ydc__image_rfh_rtp_ydc" src="images/excel_add_in/readme_cn_1-2.png"/>
+            <p class="- topic/p p">（2）在 Excel 中依次单击“文件”-&gt;”选项“-&gt;”加载项”。</p>
+            <img class="- topic/image image" id="topic_lth_3sp_ydc__image_r15_vtp_ydc" src="images/excel_add_in/readme_cn_1-3.png"/>
+            <p class="- topic/p p">（3）在”管理”栏中选择“Excel 加载项”，然后单击“转到”。</p>
+            <img class="- topic/image image" id="topic_lth_3sp_ydc__image_tvc_wtp_ydc" src="images/excel_add_in/readme_cn_1-4.png"/>
+            <p class="- topic/p p">（4）单击”浏览”。在安装路径中找到 <em class="+ topic/ph hi-d/i ph i">DolphinDBExcel-AddIn64-packed.xll</em> 文件（32 位的 Office
+                    需要选择<em class="+ topic/ph hi-d/i ph i">DolphinDBExcel-AddIn-packed.xll</em> 文件）。</p>
+            <img class="- topic/image image" id="topic_lth_3sp_ydc__image_r4l_wtp_ydc" src="images/excel_add_in/readme_cn_1-5.png"/>
+            <img class="- topic/image image" id="topic_lth_3sp_ydc__image_wdv_wtp_ydc" src="images/excel_add_in/readme_cn_1-6.png"/>
+            <p class="- topic/p p">（5）系统自动返回加载项界面，选中刚刚导入的“DolphinDBExcel Add-In”。</p>
+            <img class="- topic/image image" id="topic_lth_3sp_ydc__image_r2g_xtp_ydc" src="images/excel_add_in/readme_cn_1-7.png"/>
+            <p class="- topic/p p">（6）成功安装后，会在 Excel 的主菜单栏看到 “DolphinDB” 菜单栏。</p>
+            <img class="- topic/image image" id="topic_lth_3sp_ydc__image_qrp_xtp_ydc" src="images/excel_add_in/readme_cn_1-8.png"/>
+            <p class="- topic/p p">（7）更新插件时，在 Excel 中依次单击“文件”-&gt;”选项“-&gt;”加载项”-&gt;”转到”，取消勾选原加载项，点击确定，并关闭选项框。</p>
+            <img class="- topic/image image" id="topic_lth_3sp_ydc__image_n1y_xtp_ydc" src="images/excel_add_in/readme_cn_1-9.png"/>
+            <p class="- topic/p p">再次打开该选项框，按安装步骤，选择新的加载项。</p>
+        </div>
+    </article>
+    <article class="- topic/topic topic nested1" aria-labelledby="ariaid-title3" id="topic_cyj_ksp_ydc">
+        <h2 class="- topic/title title topictitle2" id="ariaid-title3">配置说明</h2>
+        <div class="- topic/body body">
+            <p class="- topic/p p">本节讲解如何配置 DolphinDB server 连接和其他事项。</p>
+        </div>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title4" id="topic_xb2_nsp_ydc">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title4">配置连接</h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p">单击“Server”，可以添加新的连接节点、或者修改已配置节点的连接信息。</p>
+                <img class="- topic/image image" id="topic_xb2_nsp_ydc__image_hx5_ztp_ydc" src="images/excel_add_in/readme_cn_2-1.png"/>
+            </div>
+            <article class="- topic/topic topic nested3" aria-labelledby="ariaid-title5" id="topic_axr_4sp_ydc">
+                <h4 class="- topic/title title topictitle4" id="ariaid-title5">添加新节点</h4>
+                <div class="- topic/body body">
+                    <p class="- topic/p p">单击“Add Server”以添加新节点。</p>
+                    <img class="- topic/image image" id="topic_axr_4sp_ydc__image_pdq_b5p_ydc" src="images/excel_add_in/readme_cn_2-2.png"/>
+                    <p class="- topic/p p">在页面中需要输入 Name（标识名）、Host（节点信息）、Port（端口信息）、User Name（用户名）和 Password（密码）。</p>
+                    <img class="- topic/image image" id="topic_axr_4sp_ydc__image_jcz_b5p_ydc" src="images/excel_add_in/readme_cn_2-3.png"/>
+                    <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">参数说明：</strong></p>
+                    <ul class="- topic/ul ul" id="topic_axr_4sp_ydc__ul_prk_c5p_ydc" data-ofbid="topic_axr_4sp_ydc__ul_prk_c5p_ydc">
+                        <li class="- topic/li li"><strong class="+ topic/ph hi-d/b ph b">Name</strong> 字符串，表示标识名，必填参数。</li>
+                        <li class="- topic/li li"><strong class="+ topic/ph hi-d/b ph b">Host</strong> 字符串，表示节点信息，必填参数。</li>
+                        <li class="- topic/li li"><strong class="+ topic/ph hi-d/b ph b">Port</strong> 整型，表示端口信息，必填参数。</li>
+                        <li class="- topic/li li"><strong class="+ topic/ph hi-d/b ph b">User Name</strong> 字符串，表示账号用户名。</li>
+                        <li class="- topic/li li"><strong class="+ topic/ph hi-d/b ph b">Password</strong> 字符串，表示账号密码。</li>
+                    </ul>
+                    <img class="- topic/image image" id="topic_axr_4sp_ydc__image_awx_d5p_ydc" src="images/excel_add_in/readme_cn_2-4.png"/>
+                    <p class="- topic/p p">确认上述信息无误后，点击“Add”确认添加。此外，也可先点击“Test”以测试是否与目标节点连接成功。</p>
+                    <p class="- topic/p p">完成添加后，新节点会自动出现在切换节点的下拉菜单中。</p>
+                    <img class="- topic/image image" id="topic_axr_4sp_ydc__image_kj5_25p_ydc" src="images/excel_add_in/readme_cn_2-5.png"/>
+                </div>
+            </article>
+            <article class="- topic/topic topic nested3" aria-labelledby="ariaid-title6" id="topic_prx_4sp_ydc">
+                <h4 class="- topic/title title topictitle4" id="ariaid-title6">修改节点信息</h4>
+                <div class="- topic/body body">
+                    <p class="- topic/p p">单击“Edit Server”以修改已配置的节点信息。</p>
+                    <img class="- topic/image image" id="topic_prx_4sp_ydc__image_b2w_g5p_ydc" src="images/excel_add_in/readme_cn_2-6.png"/>
+                    <img class="- topic/image image" id="topic_prx_4sp_ydc__image_gtd_h5p_ydc" src="images/excel_add_in/readme_cn_2-7.png"/>
+                    <p class="- topic/p p">单击想要修改的信息，进行对应修改。修改后单击右下角的“OK”以保存。若要取消修改，则单击右下角的“Cancle”。</p>
+                    <img class="- topic/image image" id="topic_prx_4sp_ydc__image_vry_h5p_ydc" src="images/excel_add_in/readme_cn_2-8.png"/>
+                    <p class="- topic/p p">单击想要删除节点所在行的第一列，可以看到该行被选中，单击“Delete”键，将会看到该行节点信息被删除。点击“OK”已保存修改。</p>
+                    <img class="- topic/image image" id="topic_prx_4sp_ydc__image_mnd_35p_ydc" src="images/excel_add_in/readme_cn_2-9.png"/>
+                </div>
+            </article>
+        </article>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title7" id="topic_bzf_nsp_ydc">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title7">配置面板</h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p">单击“Settings”以打开配置面板。</p>
+                <img class="- topic/image image" id="topic_bzf_nsp_ydc__image_wkr_j5p_ydc" src="images/excel_add_in/readme_cn_2-10.png"/>
+                <p class="- topic/p p">在该面板中，可以设置 SQL 查询面板的字体类型、字体大小，以及导出数据的最大行数限制。</p>
+                <p class="- topic/p p">同时可以看到，该面板中会显示当前 DolphinDB Excel Add-In 的版本信息。图 2-11 中显示信息为“Version: V1.0.0
+                    2024.07.19”。</p>
+                <img class="- topic/image image" id="topic_bzf_nsp_ydc__image_l1z_j5p_ydc" src="images/excel_add_in/readme_cn_2-11.png"/>
+                <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">配置项说明：</strong></p>
+                <p class="- topic/p p">Editor Font：</p>
+                <ul class="- topic/ul ul" id="topic_bzf_nsp_ydc__ul_s13_k5p_ydc" data-ofbid="topic_bzf_nsp_ydc__ul_s13_k5p_ydc">
+                    <li class="- topic/li li"><strong class="+ topic/ph hi-d/b ph b">Font</strong> 表示 SQL 面板中的字体类型。选择下拉框中的类型。</li>
+                    <li class="- topic/li li"><strong class="+ topic/ph hi-d/b ph b">Size</strong> 正整数，表示 SQL 面板中的字体大小。</li>
+                </ul>
+                <p class="- topic/p p">Import Options:</p>
+                <ul class="- topic/ul ul" id="topic_bzf_nsp_ydc__ul_t13_k5p_ydc" data-ofbid="topic_bzf_nsp_ydc__ul_t13_k5p_ydc">
+                    <li class="- topic/li li"><strong class="+ topic/ph hi-d/b ph b">The maximum number of rows imported</strong> 如果勾选了该功能，则会限定每次导入 Excel
+                        数据的行数。并且可在末尾的框中输入具体的行数上限。</li>
+                </ul>
+                <p class="- topic/p p">确认修改后，点击“OK”以确认。</p>
+                <p class="- topic/p p">若要取消修改，可点击“Cancel”。</p>
+                <p class="- topic/p p">若要恢复默认配置，请点击“Reset”。</p>
+            </div>
+        </article>
+    </article>
+    <article class="- topic/topic topic nested1" aria-labelledby="ariaid-title8" id="topic_h5k_ksp_ydc">
+        <h2 class="- topic/title title topictitle2" id="ariaid-title8">使用说明</h2>
+        <div class="- topic/body body">
+            <p class="- topic/p p">用户可在 Excel 中进行切换节点、数据查询、数据订阅和调用 DolphinDB 函数等操作。</p>
+        </div>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title9" id="topic_k3x_qsp_ydc">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title9">切换节点</h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p">单击节点下拉框以切换节点。</p>
+                <img class="- topic/image image" id="topic_k3x_qsp_ydc__image_ky5_m5p_ydc" src="images/excel_add_in/readme_cn_3-1.png"/>
+            </div>
+        </article>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title10" id="topic_olc_rsp_ydc">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title10">数据查询</h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p">有 2 种将数据导入到 Excel 表格的方法。操作如下，先单击“Query”，进入查询面板。</p>
+                <img class="- topic/image image" id="topic_olc_rsp_ydc__image_i3s_r5p_ydc" src="images/excel_add_in/readme_cn_3-2.png"/>
+                <p class="- topic/p p">查询面板主要由菜单栏、项目导航栏、脚本编辑器和日志浏览器组成。其中菜单栏以图标的形式展示，鼠标放置时会弹出文本解释，从左到右依次为“Refresh”“Expand/Collapse”“Excute”“Excute
+                    &amp; Import”。</p>
+                <img class="- topic/image image" id="topic_olc_rsp_ydc__image_tbx_r5p_ydc" src="images/excel_add_in/readme_cn_3-3.png"/>
+                <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">方法一：直接导入</strong></p>
+                <p class="- topic/p p">如果需要把某一个表的数据直接导入到 Excel 中，可进行如下操作。</p>
+                <p class="- topic/p p">（1）在 Excel 表格中选定需要导入数据的位置。</p>
+                <img class="- topic/image image" id="topic_olc_rsp_ydc__image_jfl_w5p_ydc" src="images/excel_add_in/readme_cn_3-4.png"/>
+                <p class="- topic/p p">（2）在变量列中右键单击对应的变量。</p>
+                <img class="- topic/image image" id="topic_olc_rsp_ydc__image_ult_w5p_ydc" src="images/excel_add_in/readme_cn_3-5.png"/>
+                <p class="- topic/p p">（3）选择“Import”。</p>
+                <img class="- topic/image image" id="topic_olc_rsp_ydc__image_qh2_x5p_ydc" src="images/excel_add_in/readme_cn_3-6.png"/>
+                <p class="- topic/p p">（4）成功导入数据。</p>
+                <img class="- topic/image image" id="topic_olc_rsp_ydc__image_n5n_x5p_ydc" src="images/excel_add_in/readme_cn_3-7.png"/>
+                <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">方法二：使用 SQL 语句导入</strong></p>
+                <p class="- topic/p p">支持将一个查询语句的返回值直接导入到 Excel 表格中。操作示例如下：</p>
+                <p class="- topic/p p">（1）在 Excel 表格中选定需要导入数据的位置。</p>
+                <p class="- topic/p p">（2）编写需要运行的脚本。</p>
+                <img class="- topic/image image" id="topic_olc_rsp_ydc__image_kd1_y5p_ydc" src="images/excel_add_in/readme_cn_3-8.png"/>
+                <p class="- topic/p p">（3）点击“Execute &amp; Import”。</p>
+                <img class="- topic/image image" id="topic_olc_rsp_ydc__image_zx3_y5p_ydc" src="images/excel_add_in/readme_cn_3-9.png"/>
+                <p class="- topic/p p">（4）成功导入数据。</p>
+                <img class="- topic/image image" id="topic_olc_rsp_ydc__image_mfw_y5p_ydc" src="images/excel_add_in/readme_cn_3-10.png"/>
+            </div>
+        </article>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title11" id="topic_awc_rsp_ydc">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title11">数据订阅</h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p">支持订阅 DolphinDB 中流表的数据。操作示例如下：</p>
+                <p class="- topic/p p">（1）在 Excel 表格中选定需要导入数据的位置。</p>
+                <img class="- topic/image image" id="topic_awc_rsp_ydc__image_bs5_cvp_ydc" src="images/excel_add_in/readme_cn_3-11.png"/>
+                <p class="- topic/p p">（2）在变量列中右键单击对应的变量。</p>
+                <p class="- topic/p p">（3）选择“Subscribe”。</p>
+                <img class="- topic/image image" id="topic_awc_rsp_ydc__image_k41_dvp_ydc" src="images/excel_add_in/readme_cn_3-12.png"/>
+                <p class="- topic/p p">（4）指定刷新主键。每当有新的数据进来时，主键相同的数据则会刷新，主键不存在时则会添加一行数据。此处输入“id”。</p>
+                <img class="- topic/image image" id="topic_awc_rsp_ydc__image_qsg_dvp_ydc" src="images/excel_add_in/readme_cn_3-13.png"/>
+                <p class="- topic/p p">（5）如果所连 server 的版本小于或等于 200.8，则需要填入客户端的流订阅端口。</p>
+                <img class="- topic/image image" id="topic_awc_rsp_ydc__image_fg4_dvp_ydc" src="images/excel_add_in/readme_cn_3-14.png"/>
+                <p class="- topic/p p">（6）订阅成功后会显示表结构。</p>
+                <img class="- topic/image image" id="topic_awc_rsp_ydc__image_svw_dvp_ydc" src="images/excel_add_in/readme_cn_3-15.png"/>
+                <p class="- topic/p p">（7）当订阅的流表有新增数据时，会在表格里刷新数据。</p>
+                <img class="- topic/image image" id="topic_awc_rsp_ydc__image_l32_2vp_ydc" src="images/excel_add_in/readme_cn_3-16.png" height="325" width="675"/>
+                <p class="- topic/p p">（8）点击“Unsubscribe”以关闭数据订阅。</p>
+                <img class="- topic/image image" id="topic_awc_rsp_ydc__image_o3r_2vp_ydc" src="images/excel_add_in/readme_cn_3-17.png"/>
+            </div>
+        </article>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title12" id="topic_ohd_rsp_ydc">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title12">函数调用 </h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p">支持在 Excel 中调用 DolphinDB 的函数。主要通过 <code class="+ topic/ph pr-d/codeph ph codeph">RUNFUNCTION(values1,
+                        values2,...)</code> 实现。该函数能够在 Excel 表格中远程执行 DolphinDB
+                    上的函数或函数视图，并且可以填入参数，执行结果会返回到 Excel 指定的表格中。</p>
+                <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">参数介绍：</strong></p>
+                <p class="- topic/p p">在 Excel 中，<code class="+ topic/ph pr-d/codeph ph codeph">RUNFUNCTION</code> 的参数为 <em class="+ topic/ph hi-d/i ph i">values1, values2,……</em> 其中，</p>
+                <ul class="- topic/ul ul" id="topic_ohd_rsp_ydc__ul_opg_gvp_ydc" data-ofbid="topic_ohd_rsp_ydc__ul_opg_gvp_ydc">
+                    <li class="- topic/li li"><strong class="+ topic/ph hi-d/b ph b">values1</strong> 必填参数，表示 functionName，即 DolphinDB server 中的函数。函数可参考 <a class="- topic/xref xref" href="../funcs/funcs_intro.html">DolphinDB 函数文档说明</a>。</li>
+                    <li class="- topic/li li"><strong class="+ topic/ph hi-d/b ph b">values2,……</strong> 表示被调用函数对应的参数。其数量没有限制，可以是 0。</li>
+                </ul>
+                <div class="- topic/note note note note_note" id="topic_ohd_rsp_ydc__note_ykw_jvp_ydc" data-ofbid="topic_ohd_rsp_ydc__note_ykw_jvp_ydc"><span class="note__title">注：</span> Excel 中 INT 的数据底层使用 DOUBLE 类型数据来存储。故填入 INT 类型的参数会转换成
+                    DOUBLE 类型的数据，如 <code class="+ topic/ph pr-d/codeph ph codeph">=RUNFUNCTION("funcTest", 2)</code>，这时会在 DolphinDB 中执行
+                        <code class="+ topic/ph pr-d/codeph ph codeph">funcTest(2.0$DOUBLE)</code>。</div>
+                <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">使用示例：</strong></p>
+                <p class="- topic/p p">在 DolphinDB 数据库中有 <code class="+ topic/ph pr-d/codeph ph codeph">getTableData</code> 这一函数视图。</p>
+                <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_ohd_rsp_ydc__codeblock_e3c_lvp_ydc" data-ofbid="topic_ohd_rsp_ydc__codeblock_e3c_lvp_ydc"><code>def getTableData(dataType){
+	if(dataType == "type1"){
+		return table(1..10 as id, 1..10 as value)
+	}else{
+		return table(1..10 as id, 11..20 as value)
+	}
+}
+
+addFunctionView(getTableData)</code></pre>
+                <p class="- topic/p p">在 Excel 中选择一块表格区域，然后调用函数 <code class="+ topic/ph pr-d/codeph ph codeph">=RUNFUNCTION("getTableData",
+                    "type1")</code>，最后按下回车键以执行函数。如下为示例截图。</p>
+                <img class="- topic/image image" id="topic_ohd_rsp_ydc__image_bxv_mvp_ydc" src="images/excel_add_in/readme_cn_3-18.png"/>
+            </div>
+        </article>
+    </article>
+</article></main></div>
+                        
+                        
+                        
+                        
+                        
+                        
+                    </div>
+                    
+                        <nav role="navigation" id="wh_topic_toc" aria-label="On this page" class="col-lg-2 d-none d-lg-block navbar d-print-none"> 
+                            <div id="wh_topic_toc_content">
+		                        
+	                            <div class=" wh_topic_toc "><div class="wh_topic_label">在本页上</div><ul><li class="topic-item"><a href="#topic_lth_3sp_ydc" data-tocid="topic_lth_3sp_ydc">安装说明</a></li><li class="topic-item"><a href="#topic_cyj_ksp_ydc" data-tocid="topic_cyj_ksp_ydc">配置说明</a><ul><li class="topic-item"><a href="#topic_xb2_nsp_ydc" data-tocid="topic_xb2_nsp_ydc">配置连接</a><ul><li class="topic-item"><a href="#topic_axr_4sp_ydc" data-tocid="topic_axr_4sp_ydc">添加新节点</a></li><li class="topic-item"><a href="#topic_prx_4sp_ydc" data-tocid="topic_prx_4sp_ydc">修改节点信息</a></li></ul></li><li class="topic-item"><a href="#topic_bzf_nsp_ydc" data-tocid="topic_bzf_nsp_ydc">配置面板</a></li></ul></li><li class="topic-item"><a href="#topic_h5k_ksp_ydc" data-tocid="topic_h5k_ksp_ydc">使用说明</a><ul><li class="topic-item"><a href="#topic_k3x_qsp_ydc" data-tocid="topic_k3x_qsp_ydc">切换节点</a></li><li class="topic-item"><a href="#topic_olc_rsp_ydc" data-tocid="topic_olc_rsp_ydc">数据查询</a></li><li class="topic-item"><a href="#topic_awc_rsp_ydc" data-tocid="topic_awc_rsp_ydc">数据订阅</a></li><li class="topic-item"><a href="#topic_ohd_rsp_ydc" data-tocid="topic_ohd_rsp_ydc">函数调用 </a></li></ul></li></ul></div>
+	                        	
+                        	</div>
+                        </nav>
+                    
+                </div>
+            </div>
+            
+            
+            
+        </div> 
+        <footer class="navbar navbar-default wh_footer">
+  <div class=" footer-container mx-auto ">
+<title>Copyright</title><p><b> ©2025 浙江智臾科技有限公司 浙ICP备18048711号-3</b></p>
+  </div>
+</footer>
+        
+        <div id="go2top" class="d-print-none">
+            <span class="oxy-icon oxy-icon-up"></span>
+        </div>
+        
+        <div id="modal_img_large" class="modal">
+            <span class="close oxy-icon oxy-icon-remove"></span>
+            <div id="modal_img_container"></div>
+            <div id="caption"></div>
+        </div>
+        
+        
+        
+    </body>
+</html>

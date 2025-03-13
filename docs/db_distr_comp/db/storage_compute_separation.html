@@ -1,0 +1,573 @@
+<!DOCTYPE html><html xmlns="http://www.w3.org/1999/xhtml" xml:lang="zh" lang="zh" data-whc_version="26.0">
+    <head><link rel="shortcut icon" href="../../favicon.ico"/><link rel="icon" href="../../favicon.ico"/><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><meta name="description" content="在 3.00.2 版本之前，DolphinDB 通过引入计算节点实现了存算分离架构的初始架构。计算节点可以分担数据节点的部分计算任务（merge 和 reduce 阶段任务），但由于不缓存数据，每次查询仍需从数据节点拉取数据，带来了额外的网络开销。为进一步完善存算分离架构，自 3.00.2 版本起，DolphinDB ..."/><meta name="DC.rights.owner" content="(C) 版权 2025"/><meta name="copyright" content="(C) 版权 2025"/><meta name="generator" content="DITA-OT"/><meta name="DC.type" content="topic"/><meta name="DC.coverage" content=""/><meta name="DC.relation" content="../../db_distr_comp/db/db_architecture.html"/><meta name="prodname" content="DolphinDB"/><meta name="brand" content="DolphinDB"/><meta name="DC.creator" content="DolphinDB"/><meta name="DC.publisher" content="DDB N/A DDB 200"/><meta name="DC.format" content="HTML5"/><meta name="DC.identifier" content="storage_compute_separation"/><title>存算分离</title><!--  Generated with Oxygen version 26.0, build number 2024012323.  --><meta name="wh-path2root" content="../../"/><meta name="wh-toc-id" content="storage_compute_separation-d9713e3019"/><meta name="wh-source-relpath" content="db_distr_comp/db/storage_compute_separation.dita"/><meta name="wh-out-relpath" content="db_distr_comp/db/storage_compute_separation.html"/>
+
+    <link rel="stylesheet" type="text/css" href="../../oxygen-webhelp/app/commons.css?buildId=2024012323"/>
+    <link rel="stylesheet" type="text/css" href="../../oxygen-webhelp/app/topic.css?buildId=2024012323"/>
+
+    <script src="../../oxygen-webhelp/app/options/properties.js?buildId=20250305183303"></script>
+    <script src="../../oxygen-webhelp/app/localization/strings.js?buildId=2024012323"></script>
+    <script src="../../oxygen-webhelp/app/search/index/keywords.js?buildId=20250305183303"></script>
+    <script defer="defer" src="../../oxygen-webhelp/app/commons.js?buildId=2024012323"></script>
+    <script defer="defer" src="../../oxygen-webhelp/app/topic.js?buildId=2024012323"></script>
+<link rel="stylesheet" type="text/css" href="../../oxygen-webhelp/template/styles.css?buildId=2024012323"/><script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script><script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script></head>
+
+    <body id="storage_compute_separation" class="wh_topic_page frmBody">
+        <a href="#wh_topic_body" class="sr-only sr-only-focusable">
+            跳转到主要内容
+        </a>
+        
+        
+        
+        
+        <header class="navbar navbar-default wh_header">
+    <div class="container-fluid">
+        <div xmlns:whc="http://www.oxygenxml.com/webhelp/components" class="wh_header_flex_container navbar-nav navbar-expand-md navbar-dark">
+            <div class="wh_logo_and_publication_title_container">
+                <div class="wh_logo_and_publication_title">
+                    
+                    <a href="https://docs.dolphindb.cn/zh/index.html" class=" wh_logo d-none d-sm-block "><img src="../../logo.png" alt="  DolphinDB 文档中心  "/></a>
+                    <div class=" wh_publication_title "><a href="../../index.html"><span class="booktitle">  <span class="ph mainbooktitle">DolphinDB 文档中心</span>  </span></a></div>
+                    
+                </div>
+                
+                
+            </div>
+
+            <div class="wh_top_menu_and_indexterms_link collapse navbar-collapse" id="wh_top_menu_and_indexterms_link">
+                
+                
+                
+                
+            </div>
+        <div class=" wh_search_input navbar-form wh_topic_page_search search " role="form">
+            
+            
+            
+            <form id="searchForm" method="get" role="search" action="../../search.html"><div><input type="search" placeholder="搜索 " class="wh_search_textfield" id="textToSearch" name="searchQuery" aria-label="搜索查询" required="required"/><button type="submit" class="wh_search_button" aria-label="搜索"><span class="search_input_text">搜索</span></button></div></form>
+            
+            <script src="/vendors/react/umd/react.production.min.js" defer="defer"></script>
+<script src="/vendors/react-dom/umd/react-dom.production.min.js" defer="defer"></script>
+<script src="/vendors/dayjs/dayjs.min.js" defer="defer"></script>
+<script src="/vendors/antd/dist/antd.min.js" defer="defer"></script>
+<script src="/vendors/@ant-design/icons/dist/index.umd.min.js" defer="defer"></script>
+<script src="/zh/index.js" type="module"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" defer="defer"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML" defer="defer"><!--
+
+
+--></script>
+<script defer="defer"><!--
+
+// 从主页重定向
+const currentUrl = window.location.href;
+
+// 判断当前URL是否包含index.html并且路径最后部分是index.html
+if (currentUrl.endsWith('index.html')) {
+    // 处理根目录下的index.html跳转
+    const baseUrl = currentUrl.split('/index.html')[0]; // 获取index.html之前的部分
+    const redirectUrl = `${baseUrl}/about/ddb_intro.html`; // 构建跳转路径
+    window.location.href = redirectUrl; // 执行跳转
+}
+
+--></script>
+            
+        </div></div>
+    </div>
+</header>
+        
+        
+         
+        
+        
+        
+        <div class="container-fluid" id="wh_topic_container">
+            <div class="row">
+
+                <nav class="wh_tools d-print-none navbar-expand-md" aria-label="Tools">
+                    
+                    <div data-tooltip-position="bottom" class=" wh_breadcrumb "><ol class="d-print-none"><li><span class="home"><a href="../../index.html"><span>主页</span></a></span></li><li><div class="topicref" data-id="new_chap_database_manage_new_chap_dbmanage_landing_page"><div class="title"><a href="../../db_distr_comp/cfg/db_intro.html"><span class="keyword label">数据库</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 数据库的基本概念</p></div></div></div></li><li><div class="topicref" data-id="topic_pg3_22w_ryb"><div class="title"><a href="../../db_distr_comp/db/db_architecture.html"><span class="keyword label">分布式架构</span></a></div></div></li><li class="active"><div class="topicref" data-id="storage_compute_separation"><div class="title"><a href="../../db_distr_comp/db/storage_compute_separation.html">存算分离</a></div></div></li></ol></div>
+                    
+                    
+                    
+                    <div class="wh_right_tools">
+                        <button class="wh_hide_highlight" aria-label="切换搜索突出显示" title="切换搜索突出显示"></button>
+                        <button class="webhelp_expand_collapse_sections" data-next-state="collapsed" aria-label="折叠截面" title="折叠截面"></button>
+                        
+                        
+                        
+                        
+                        <div class=" wh_print_link print d-none d-md-inline-block "><button onClick="window.print()" title="打印此页" aria-label="打印此页"></button></div>
+                        
+                        <button type="button" id="wh_toc_button" class="custom-toggler navbar-toggler collapsed wh_toggle_button navbar-light" aria-expanded="false" aria-label="Toggle publishing table of content" aria-controls="wh_publication_toc">
+                            <span class="navbar-toggler-icon"></span>
+                        </button>
+                    </div>
+                    
+                </nav>
+            </div>
+            
+            
+            
+            
+            <div class="wh_content_area">
+                <div class="row">
+                    
+                        <nav id="wh_publication_toc" class="col-lg-3 col-md-3 col-sm-12 d-md-block d-none d-print-none" aria-label="Table of Contents Container">
+                            <div id="wh_publication_toc_content">
+		                        
+                            	<div class=" wh_publication_toc " data-tooltip-position="right"><span class="expand-button-action-labels"><span id="button-expand-action" role="button" aria-label="Expand"></span><span id="button-collapse-action" role="button" aria-label="Collapse"></span><span id="button-pending-action" role="button" aria-label="Pending"></span></span><ul role="tree" aria-label="Table of Contents"><li role="treeitem"><div data-tocid="ddb_intro-d9713e87" class="topicref" data-id="ddb_intro" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../about/ddb_intro.html" id="ddb_intro-d9713e87-link">关于DolphinDB</a></div></div></li><li role="treeitem"><div data-tocid="chap1_getstarted-d9713e136" class="topicref" data-id="chap1_getstarted" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../getstarted/chap1_getstarted.html" id="chap1_getstarted-d9713e136-link">快速上手</a><div class="wh-tooltip"><p class="shortdesc">如何快速部署 DolphinDB、建库建表、写入和查询数据</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="sectionddb_deployment-d9713e189" class="topicref" data-id="sectionddb_deployment" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action sectionddb_deployment-d9713e189-link" class="wh-expand-btn"></span><div class="title"><a href="../../deploy/deploy_intro.html" id="sectionddb_deployment-d9713e189-link"><span class="keyword label">部署</span></a><div class="wh-tooltip"><p class="shortdesc">如何在不同的场景中部署 DolphinDB</p></div></div></div></li><li role="treeitem" aria-expanded="true"><div data-tocid="new_chap_database_manage_new_chap_dbmanage_landing_page-d9713e2259" class="topicref" data-id="new_chap_database_manage_new_chap_dbmanage_landing_page" data-state="expanded"><span role="button" tabindex="0" aria-labelledby="button-collapse-action new_chap_database_manage_new_chap_dbmanage_landing_page-d9713e2259-link" class="wh-expand-btn"></span><div class="title"><a href="../../db_distr_comp/cfg/db_intro.html" id="new_chap_database_manage_new_chap_dbmanage_landing_page-d9713e2259-link"><span class="keyword label">数据库</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 数据库的基本概念</p></div></div></div><ul role="group" class="navbar-nav nav-list"><li role="treeitem" aria-expanded="false"><div data-tocid="chap3_sect_database_distributed_computing-d9713e2312" class="topicref" data-id="chap3_sect_database_distributed_computing" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action chap3_sect_database_distributed_computing-d9713e2312-link" class="wh-expand-btn"></span><div class="title"><a href="../../db_distr_comp/db_distr_comp.html" id="chap3_sect_database_distributed_computing-d9713e2312-link"><span class="keyword label">数据库操作</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 数据库的基本操作，例如创建数据库、表，增加列、分区，数据查询，表连接等。</p></div></div></div></li><li role="treeitem" aria-expanded="true"><div data-tocid="topic_pg3_22w_ryb-d9713e2880" class="topicref" data-id="topic_pg3_22w_ryb" data-state="expanded"><span role="button" tabindex="0" aria-labelledby="button-collapse-action topic_pg3_22w_ryb-d9713e2880-link" class="wh-expand-btn"></span><div class="title"><a href="../../db_distr_comp/db/db_architecture.html" id="topic_pg3_22w_ryb-d9713e2880-link"><span class="keyword label">分布式架构</span></a></div></div><ul role="group" class="navbar-nav nav-list"><li role="treeitem"><div data-tocid="事务-d9713e2927" class="topicref" data-id="事务" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../db_distr_comp/db/transaction.html" id="事务-d9713e2927-link">分布式事务</a></div></div></li><li role="treeitem"><div data-tocid="数据库分区-d9713e2973" class="topicref" data-id="数据库分区" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../db_distr_comp/db/db_partitioning.html" id="数据库分区-d9713e2973-link">数据分区</a></div></div></li><li role="treeitem" class="active"><div data-tocid="storage_compute_separation-d9713e3019" class="topicref" data-id="storage_compute_separation" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../db_distr_comp/db/storage_compute_separation.html" id="storage_compute_separation-d9713e3019-link">存算分离</a></div></div></li><li role="treeitem"><div data-tocid="topic_u1t_cqd_gcc-d9713e3065" class="topicref" data-id="topic_u1t_cqd_gcc" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../db_distr_comp/db/recovery.html" id="topic_u1t_cqd_gcc-d9713e3065-link">在线恢复</a></div></div></li><li role="treeitem"><div data-tocid="rebalance-d9713e3111" class="topicref" data-id="rebalance" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../db_distr_comp/db/rebalance.html" id="rebalance-d9713e3111-link">数据平衡</a></div></div></li><li role="treeitem"><div data-tocid="ha-d9713e3157" class="topicref" data-id="ha" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../db_distr_comp/db/ha.html" id="ha-d9713e3157-link">高可用</a></div></div></li><li role="treeitem"><div data-tocid="分级存储-d9713e3203" class="topicref" data-id="分级存储" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../db_distr_comp/db/tiered_storage.html" id="分级存储-d9713e3203-link">分级存储</a></div></div></li><li role="treeitem"><div data-tocid="集群间异步复制-d9713e3249" class="topicref" data-id="集群间异步复制" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../sys_man/cluster_async_replc.html" id="集群间异步复制-d9713e3249-link">异步复制</a></div></div></li><li role="treeitem"><div data-tocid="multimodal_storage-d9713e3295" class="topicref" data-id="multimodal_storage" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../db_distr_comp/db/multimodal_storage.html" id="multimodal_storage-d9713e3295-link">多模态存储</a></div></div></li><li role="treeitem"><div data-tocid="rdma-d9713e3341" class="topicref" data-id="rdma" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../db_distr_comp/db/rdma.html" id="rdma-d9713e3341-link">节点间传输协议</a></div></div></li></ul></li><li role="treeitem"><div data-tocid="tsdb-d9713e3387" class="topicref" data-id="tsdb" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../db_distr_comp/db/tsdb.html" id="tsdb-d9713e3387-link"><span class="keyword label">TSDB 存储引擎</span></a></div></div></li><li role="treeitem"><div data-tocid="olap-d9713e3434" class="topicref" data-id="olap" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../db_distr_comp/db/olap.html" id="olap-d9713e3434-link"><span class="keyword label">OLAP 存储引擎</span></a></div></div></li><li role="treeitem"><div data-tocid="pkey_engine-d9713e3481" class="topicref" data-id="pkey_engine" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../db_distr_comp/db/pkey_engine.html" id="pkey_engine-d9713e3481-link"><span class="keyword">主键存储引擎</span>  </a></div></div></li><li role="treeitem"><div data-tocid="imoltp-d9713e3529" class="topicref" data-id="imoltp" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../db_distr_comp/db/imoltp.html" id="imoltp-d9713e3529-link">内存在线事务处理引擎</a></div></div></li><li role="treeitem"><div data-tocid="vectordb-d9713e3575" class="topicref" data-id="vectordb" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../db_distr_comp/db/vectordb.html" id="vectordb-d9713e3575-link">向量存储引擎</a></div></div></li><li role="treeitem"><div data-tocid="textdb-d9713e3621" class="topicref" data-id="textdb" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../db_distr_comp/db/textdb.html" id="textdb-d9713e3621-link">文本存储引擎</a></div></div></li><li role="treeitem"><div data-tocid="catalog-d9713e3667" class="topicref" data-id="catalog" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../db_distr_comp/db/catalog.html" id="catalog-d9713e3667-link">数据目录</a></div></div></li><li role="treeitem"><div data-tocid="iotdb-d9713e3713" class="topicref" data-id="iotdb" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../db_distr_comp/db/iotdb.html" id="iotdb-d9713e3713-link">物联网点位管理引擎</a></div></div></li></ul></li><li role="treeitem" aria-expanded="false"><div data-tocid="chap7_tutorials_streaming-d9713e3760" class="topicref" data-id="chap7_tutorials_streaming" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action chap7_tutorials_streaming-d9713e3760-link" class="wh-expand-btn"></span><div class="title"><a href="../../stream/str_intro.html" id="chap7_tutorials_streaming-d9713e3760-link"><span class="keyword label">流数据</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 流数据引擎及流数据计算的基本概念</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e7513" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e7513-link" class="wh-expand-btn"></span><div class="title"><a href="../../db_distr_comp/db_oper/import_data.html" id="tocId-d9713e7513-link">数据迁移</a><div class="wh-tooltip"><p class="shortdesc">如何从不同数据源向 DolphinDB 迁移数据</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="chap7_tutorials_system_management-d9713e7940" class="topicref" data-id="chap7_tutorials_system_management" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action chap7_tutorials_system_management-d9713e7940-link" class="wh-expand-btn"></span><div class="title"><a href="../../sys_man/om_intro.html" id="chap7_tutorials_system_management-d9713e7940-link"><span class="keyword label">系统运维</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 的系统运维功能及方法</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="troubleshooting-d9713e8780" class="topicref" data-id="troubleshooting" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action troubleshooting-d9713e8780-link" class="wh-expand-btn"></span><div class="title"><a href="../../error_codes/troubleshooting.html" id="troubleshooting-d9713e8780-link">故障排查</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="about_language_resources-d9713e20911" class="topicref" data-id="about_language_resources" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action about_language_resources-d9713e20911-link" class="wh-expand-btn"></span><div class="title"><a href="../../progr/progr_intro.html" id="about_language_resources-d9713e20911-link"><span class="keyword label">编程语言</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 编程基本概念与方法、SQL 在 DolphinDB 的应用</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="functions_references-d9713e30925" class="topicref" data-id="functions_references" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action functions_references-d9713e30925-link" class="wh-expand-btn"></span><div class="title"><a href="../../funcs/funcs_intro.html" id="functions_references-d9713e30925-link"><span class="keyword label">函数参考</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 函数分类、语法、详解及示例</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="api_protocol-d9713e94064" class="topicref" data-id="api_protocol" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action api_protocol-d9713e94064-link" class="wh-expand-btn"></span><div class="title"><a href="../../api/connapi_intro.html" id="api_protocol-d9713e94064-link"><span class="keyword label">连接器 &amp; API</span></a><div class="wh-tooltip"><p class="shortdesc">面向不同编程语言的 DolphinDB API 及连接器，相关协议和用法</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="chap6_plugin-d9713e94210" class="topicref" data-id="chap6_plugin" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action chap6_plugin-d9713e94210-link" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/plg_intro.html" id="chap6_plugin-d9713e94210-link"><span class="keyword label">插件</span></a><div class="wh-tooltip"><p class="shortdesc">多个应用场景的插件使用说明和插件开发指导</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="third_party-d9713e97904" class="topicref" data-id="third_party" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action third_party-d9713e97904-link" class="wh-expand-btn"></span><div class="title"><a href="../../third_party.html" id="third_party-d9713e97904-link">第三方工具</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="about_tutorials-d9713e98227" class="topicref" data-id="about_tutorials" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action about_tutorials-d9713e98227-link" class="wh-expand-btn"></span><div class="title"><a href="../../tutorials/about_tutorials.html" id="about_tutorials-d9713e98227-link"><span class="keyword label">教程</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 产品使用教程</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e105982" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e105982-link" class="wh-expand-btn"></span><div class="title"><a href="../../rn/server/3_00_2.html" id="tocId-d9713e105982-link">版本说明</a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 版本发布历史</p></div></div></div></li></ul></div>
+		                        
+                            </div>
+                        </nav>
+                    
+                    
+                    <div class="col-lg-7 col-md-9 col-sm-12" id="wh_topic_body">
+                        <button id="wh_close_publication_toc_button" class="close-toc-button d-none" aria-label="Toggle publishing table of content" aria-controls="wh_publication_toc" aria-expanded="true">
+                            <span class="close-toc-icon-container">
+                                <span class="close-toc-icon"></span>     
+                            </span>
+                        </button>
+                        <button id="wh_close_topic_toc_button" class="close-toc-button d-none" aria-label="Toggle topic table of content" aria-controls="wh_topic_toc" aria-expanded="true">
+                            <span class="close-toc-icon-container">
+                                <span class="close-toc-icon"></span>     
+                            </span>
+                        </button>
+                        
+                        <div class=" wh_topic_content body "><main role="main"><article class="- topic/topic topic" role="article" aria-labelledby="ariaid-title1">
+    <h1 class="- topic/title title topictitle1" id="ariaid-title1">存算分离</h1>
+    <div class="- topic/body body">
+        <p class="- topic/p p">在 3.00.2 版本之前，DolphinDB 通过引入计算节点实现了存算分离架构的初始架构。计算节点可以分担数据节点的部分计算任务（merge 和 reduce
+            阶段任务），但由于不缓存数据，每次查询仍需从数据节点拉取数据，带来了额外的网络开销。为进一步完善存算分离架构，自 3.00.2 版本起，DolphinDB
+            引入了计算组的概念，通过为计算节点设置计算组，对查询的数据进行缓存，从而实现真正意义上的存算分离。</p>
+        <p class="- topic/p p">DolphinDB 存算分离具备如下特性：</p>
+        <ul class="- topic/ul ul" id="storage_compute_separation__ul_hgg_cbl_cdc" data-ofbid="storage_compute_separation__ul_hgg_cbl_cdc">
+            <li class="- topic/li li">
+                <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">资源隔离：</strong>计算组能够独立运行复杂的计算任务，如 SQL
+                    聚合、过滤、表连接和流计算，而不会对存储节点造成影响。同时，按计算组分配计算资源，不同计算组之间的计算资源相互隔离。</p>
+            </li>
+            <li class="- topic/li li">
+                <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">故障隔离：</strong>计算任务异常不会影响存储层，从而缩小故障的影响范围；除此之外，不同计算组之间的故障也不会互相影响。</p>
+            </li>
+            <li class="- topic/li li">
+                <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">混合查询能力</strong>：对不同类型的查询采用不同的数据调度策略，即将对写入频繁的分区查询调度到存储节点（数据节点）执行，而将对写入不频繁的分区查询调度到计算组。计算组通过缓存这些数据来加速查询。</p>
+            </li>
+            <li class="- topic/li li">
+                <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">弹性扩缩：</strong>在业务高峰或低谷时期，计算节点可以快速增减，且存储节点对此过程无感知。</p>
+            </li>
+        </ul>
+    </div>
+    <article class="- topic/topic topic nested1" aria-labelledby="ariaid-title2" id="topic_ryh_zbl_cdc">
+        <h2 class="- topic/title title topictitle2" id="ariaid-title2">1 架构设计</h2>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title3" id="topic_uf1_npj_ldc">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title3">1.1 存算分离架构 </h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p">在 DolphinDB
+                    存算分离架构中，集群包含的节点类型与存算一体架构相同。不同之处在于，前者需要配置计算组，并为每个计算组指定相应的计算节点。存算分离结构集群构成图如下所示：</p>
+                <figure class="- topic/fig fig fignone" id="topic_uf1_npj_ldc__fig_hdm_jcl_cdc" data-ofbid="topic_uf1_npj_ldc__fig_hdm_jcl_cdc"><figcaption data-caption-side="top" class="- topic/title title figcap"><span class="figtitleprefix fig--title-label">图<span class="fig--title-label-number"> 1</span><span class="fig--title-label-punctuation">. </span></span><span class="fig--title">图 1 存算分离架构</span></figcaption>
+                    
+                    <img class="- topic/image image" id="topic_uf1_npj_ldc__image_vsq_4cl_cdc" src="../../images/db_distr_comp/storage_compute_separation_arch.png"/>
+                </figure>
+                <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">计算组</strong>：计算组是 DolphinDB
+                        存算分离架构中新引入的概念，由多个计算节点组成，是资源和故障隔离的基本单位。每个计算组命名唯一，可以负责不同的计算任务。计算组中计算节点的数量和资源由用户配置（<em class="+ topic/ph hi-d/i ph i">maxMemSize</em>
+                    和 <em class="+ topic/ph hi-d/i ph i">workerNum</em>），这直接影响了计算组的计算能力。计算组中的计算节点具有以下特点：</p>
+                <ul class="- topic/ul ul" id="topic_uf1_npj_ldc__ul_gtp_rcl_cdc" data-ofbid="topic_uf1_npj_ldc__ul_gtp_rcl_cdc">
+                    <li class="- topic/li li">
+                        <p class="- topic/p p">每个计算节点只属于一个计算组。</p>
+                    </li>
+                    <li class="- topic/li li">
+                        <p class="- topic/p p">能够处理分布式 SQL 查询，且分布式查询仅在同一个组内的所有计算节点上进行。</p>
+                    </li>
+                    <li class="- topic/li li">
+                        <p class="- topic/p p">不负责存储数据，而是在执行 SQL 查询时通过网络访问存储节点获取数据。</p>
+                    </li>
+                    <li class="- topic/li li">
+                        <p class="- topic/p p">可以配置一定量的缓存（包括内存和磁盘），用于缓存来自存储节点的数据，以加速查询过程。</p>
+                    </li>
+                </ul>
+                <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">存储节点</strong>：存储节点负责存储数据和本地查询任务。</p>
+                <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">控制节点</strong>：控制节点由一个或多个 controller（高可用配置）组成，所有节点共享此控制节点，负责管理系统的整体协调与调度。</p>
+            </div>
+        </article>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title4" id="topic_crx_5pj_ldc">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title4">1.2 代理存储引擎</h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p">DolphinDB 支持<a class="- topic/xref xref" href="multimodal_storage.html">多模态存储引擎</a>，以适应不同的业务场景。然而，如果在计算节点上实现通用的缓存层，可能无法充分利用不同存储引擎的特性。为此，DolphinDB
+                    提出了代理存储引擎的概念，确保不同存储引擎的数据由对应的代理存储引擎进行管理。目前，DolphinDB 支持对 OLAP、TSDB 和 PKEY
+                    存储引擎的缓存数据进行管理。图 2 展示了代理存储引擎的架构。</p>
+                <figure class="- topic/fig fig fignone" id="topic_crx_5pj_ldc__fig_u52_xcl_cdc" data-ofbid="topic_crx_5pj_ldc__fig_u52_xcl_cdc"><figcaption data-caption-side="top" class="- topic/title title figcap"><span class="figtitleprefix fig--title-label">图<span class="fig--title-label-number"> 2</span><span class="fig--title-label-punctuation">. </span></span><span class="fig--title">图 2 代理存储引擎</span></figcaption>
+                    
+                    <img class="- topic/image image" id="topic_crx_5pj_ldc__image_ql3_ycl_cdc" height="500" src="../../images/db_distr_comp/proxy_caching_engine.png"/>
+                </figure>
+            </div>
+        </article>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title5" id="topic_bxt_gqj_ldc">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title5">1.3 分布式计算过程</h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p">在存算分离架构下，计算组中的计算节点通常负责提交分布式查询任务，任务执行遵循 map → merge → reduce
+                    的流程。由于计算节点具备缓存数据的能力，因此它们可以参与 map
+                    阶段的任务。在执行任务之前，计算节点从控制节点处获取和本次查询相关的所有分区信息，并根据这些信息拆分出子任务。具体任务执行流程如下：</p>
+                <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">map
+                    阶段：</strong>将子任务路由到对应的计算节点。若子任务可以命中计算节点缓存，则直接从缓存中查询数据；如果无法命中缓存，则根据配置情况决定是从数据节点拉取数据进行缓存，还是将子任务下推到数据节点执行。</p>
+                <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">merge 阶段：</strong></p>
+                <p class="- topic/p p">将上一步 map 阶段各个子任务的执行结果发送至提交任务的计算节点上，由该节点进行数据汇总。</p>
+                <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">reduce 阶段（可选）：</strong></p>
+                <p class="- topic/p p">若在 merge 阶段后需要对结果进行进一步处理，则进入 reduce 流程，由提交任务的计算阶段继续处理。</p>
+            </div>
+        </article>
+    </article>
+    <article class="- topic/topic topic nested1" aria-labelledby="ariaid-title6" id="topic_tzr_bdl_cdc">
+        <h2 class="- topic/title title topictitle2" id="ariaid-title6">2 多级缓存机制</h2>
+        <div class="- topic/body body">
+            <p class="- topic/p p">由上文介绍可知，计算节点数据缓存是实现存算分离架构的关键。缓存不仅可以加速数据读取，还能有效降低对存储节点的访问频率，从而减少延迟。</p>
+            <p class="- topic/p p">当计算节点开始执行计算任务时，首先会访问控制节点以获取数据存储的位置。如果数据被路由到存储节点，系统将从存储节点拉取数据并缓存在相应的代理存储引擎；如果数据被路由到计算节点，则表示命中缓存，系统会直接从缓存中读取数据。</p>
+            <p class="- topic/p p">计算节点采用多级缓存策略。缓存的数据首先存储在计算节点的内存中，内存缓存采用时钟置换算法（ Clock
+                ）进行管理。当内存缓存满时，旧数据将被清理并存储到磁盘中，而磁盘缓存则采用先进先出算法（FIFO）进行管理。当磁盘缓存也满时，最旧的数据将被删除。</p>
+            <p class="- topic/p p">不同的代理存储引擎可能具有不同的缓存格式和粒度，例如 OLAP 和 PKEY 引擎在内存和磁盘上的最小缓存粒度均为列；而 TSDB
+                内存缓存粒度是列的一部分，磁盘缓存粒度是列。然而，多级缓存的总体设计和驱逐算法在不同代理存储引擎之间大致相同。</p>
+        </div>
+    </article>
+    <article class="- topic/topic topic nested1" aria-labelledby="ariaid-title7" id="topic_xbw_sdl_cdc">
+        <h2 class="- topic/title title topictitle2" id="ariaid-title7">3 查询优化策略</h2>
+        <div class="- topic/body body">
+            <p class="- topic/p p">在时序数据场景下，针对热点写入分区，热点查询分区和首次查询分区，可以采用不同的缓存策略，以优化查询性能。为此，DolphinDB
+                设计了多种配置参数，帮助用户调整缓存管理方案，以确保在存算分离架构下的性能接近存算一体架构。</p>
+            <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">热点写入分区缓存策略</strong></p>
+            <p class="- topic/p p">在时序场景中，数据通常以时间作为分区维度，且写入主要集中在最新的少部分分区上。频繁的写入操作使得最新分区的数据不断变化，因此即使有缓存，缓存中的数据也很快变得无效。这种情况会导致大量无效的缓存加载和
+                I/O 操作。</p>
+            <p class="- topic/p p">为了解决这一问题，DolphinDB 引入计算组和数据节点混合查询的能力：</p>
+            <ul class="- topic/ul ul" id="topic_xbw_sdl_cdc__ul_sdn_lqj_ldc" data-ofbid="topic_xbw_sdl_cdc__ul_sdn_lqj_ldc">
+                <li class="- topic/li li">
+                    <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">不缓存热点写入的分区：</strong>对这些分区的查询将下推到数据节点上执行，这样可以避免不必要的数据传输。</p>
+                </li>
+                <li class="- topic/li li">
+                    <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">缓存非热点写入的分区</strong>：通过缓存来加速对它们的查询。</p>
+                </li>
+            </ul>
+            <p class="- topic/p p">DolphinDB 还引入了一个配置参数
+                <em class="+ topic/ph hi-d/i ph i">computeNodeCachingDelay</em>单位是秒），控制一个分区最后一次更新后多久能够被缓存到计算节点上：</p>
+            <ul class="- topic/ul ul" id="topic_xbw_sdl_cdc__ul_zsm_5dl_cdc" data-ofbid="topic_xbw_sdl_cdc__ul_zsm_5dl_cdc">
+                <li class="- topic/li li">
+                    <p class="- topic/p p">取值为 0 表示允许分区更新后立即被缓存。</p>
+                </li>
+                <li class="- topic/li li">
+                    <p class="- topic/p p">若取值不为 0，分区更新后经过指定的延迟时间后才允许被缓存；在此延迟时间内，针对该分区的查询将被直接发送给数据节点处理。</p>
+                </li>
+            </ul>
+            <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">热点查询分区缓存策略</strong></p>
+            <p class="- topic/p p">在扫描型查询中，通常会对分区数据进行一次性查询并进行简单过滤，因此这些分区往往没有热点，导致缓存命中率较低。这种情况不仅使得缓存的价值降低，还会占用计算节点的缓存空间，从而影响其他查询。为了解决这一问题，DolphinDB
+                利用其架构优势，通过将查询下推至存储节点的能力，实现选择性的存算分离：只有当某个分区被访问频繁时，才会将其缓存到计算组，否则查询将直接在存储节点上执行。</p>
+            <p class="- topic/p p">可以通过配置参数 <em class="+ topic/ph hi-d/i ph i">computeNodeCachingQueryThreshold </em>来控制一个分区被访问多少次后才能被缓存到计算节点：</p>
+            <ul class="- topic/ul ul" id="topic_xbw_sdl_cdc__ul_atm_5dl_cdc" data-ofbid="topic_xbw_sdl_cdc__ul_atm_5dl_cdc">
+                <li class="- topic/li li">
+                    <p class="- topic/p p">取值为 0 则表示首次访问立刻被缓存。</p>
+                </li>
+                <li class="- topic/li li">
+                    <p class="- topic/p p">取值为 N，则表示一个计算组需要对某个分区执行超过 N 次访问，才会将其缓存到计算节点。推荐 N 的取值范围为1到5。</p>
+                </li>
+            </ul>
+            <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">计算节点预热缓存</strong></p>
+            <p class="- topic/p p">在几乎所有依赖对象存储的存算分离系统（如 Snowflake, Starrocks,
+                Redshift）中，一个共通问题是第一次查询有较高的延迟。由于第一次查询时缓存为空，这些系统在计算节点执行查询之前需要首先访问高延迟的 S3
+                和远端存储来填充缓存。然而，DolphinDB 的存算分离架构基于存算一体实现，允许向存储节点下推任意查询，同时通过配置参数
+                    <em class="+ topic/ph hi-d/i ph i">enableComputeNodePrefetchData</em> 开启计算节点的数据预取功能，异步的缓存数据。具体实现为：</p>
+            <p class="- topic/p p">下推分区查询到存储节点，同时异步预热计算节点缓存。如果计算组中某个分区的缓存未命中，我们将对该分区的查询下推到存储节点上执行，同时异步地在计算组中执行一份相同的查询，从而缓存分区数据。这种方式规避了因缓存未命中导致的网络传输代价，使用户无感知首次查询时缓存未命中的延迟。同时，在下次访问该分区时，它很可能已经在缓存中了。需要注意的是，这种方法牺牲了一定的隔离性，因为部分查询仍然在存储节点上执行。</p>
+            <p class="- topic/p p">相比于 Snowflake, Starrocks, Redshift，DolphinDB
+                这种查询下推及计算节点数据预取的功能能够大幅降低缓存未命中场景下的延迟，保证存算分离架构下的查询性能接近存算一体架构。</p>
+            <p class="- topic/p p">下图展示了在启用上述几种优化后，系统在何时将计算子任务下推到数据节点，何时在计算组内部执行计算。</p>
+            <figure class="- topic/fig fig fignone" id="topic_xbw_sdl_cdc__fig_h3n_h2l_cdc" data-ofbid="topic_xbw_sdl_cdc__fig_h3n_h2l_cdc"><figcaption data-caption-side="top" class="- topic/title title figcap"><span class="figtitleprefix fig--title-label">图<span class="fig--title-label-number"> 3</span><span class="fig--title-label-punctuation">. </span></span><span class="fig--title">图 3 优化流程</span></figcaption>
+                
+                <img class="- topic/image image" id="topic_xbw_sdl_cdc__image_n1n_32l_cdc" src="../../images/db_distr_comp/query_optimization.png"/>
+                <p class="- topic/p p">图中注释：</p>
+                <ul class="- topic/ul ul" id="topic_xbw_sdl_cdc__ul_c3r_zqj_ldc" data-ofbid="topic_xbw_sdl_cdc__ul_c3r_zqj_ldc">
+                    <li class="- topic/li li">
+                        <p class="- topic/p p">参数 1 为 <em class="+ topic/ph hi-d/i ph i">computeNodeCachingDelay</em></p>
+                    </li>
+                    <li class="- topic/li li">
+                        <p class="- topic/p p">参数 2 为 <em class="+ topic/ph hi-d/i ph i">computeNodeCachingQueryThreshold</em></p>
+                    </li>
+                    <li class="- topic/li li">
+                        <p class="- topic/p p">参数 3 为 <em class="+ topic/ph hi-d/i ph i">enableComputeNodePrefetchData</em></p>
+                    </li>
+                </ul>
+            </figure>
+        </div>
+    </article>
+    <article class="- topic/topic topic nested1" aria-labelledby="ariaid-title8" id="topic_lzq_m2l_cdc">
+        <h2 class="- topic/title title topictitle2" id="ariaid-title8">4 配置与管理计算组</h2>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title9" id="topic_sq5_n2l_cdc">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title9">4.1 配置计算组</h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p">通过配置文件添加计算组。在集群配置文件（ cluster.nodes ）中，新增一列
+                    computeGroup，用以表示计算组名称。该列只能在计算节点后添加。以下示例配置了两个计算组： orca 和 nova，其中 orca
+                    包含三个计算节点（orca1, orca2, orca3）；nova 包含两个计算节点（ nova1 和 nova2）。</p>
+                <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_sq5_n2l_cdc__codeblock_x21_p2l_cdc" data-ofbid="topic_sq5_n2l_cdc__codeblock_x21_p2l_cdc"><code>localSite,mode,computeGroup
+192.168.1.243:23692:node0,datanode,
+192.168.1.243:23693:node1,datanode,
+192.168.1.243:23694:node2,datanode,
+192.168.1.243:23695:node3,datanode,
+192.168.1.243:23793:orca1,computenode,orca
+192.168.1.243:23794:orca2,computenode,orca
+192.168.1.243:23795:orca3,computenode,orca
+192.168.1.243:23797:nova1,computenode,nova
+192.168.1.243:23796:nova2,computenode,nova
+192.168.1.243:23691:agent,agent,</code></pre>
+                <div class="- topic/note note note note_note" id="topic_sq5_n2l_cdc__note_bft_kk4_fdc" data-ofbid="topic_sq5_n2l_cdc__note_bft_kk4_fdc"><span class="note__title">注：</span> 若为计算节点配置了计算组，则该节点的别名必须以计算组名为前缀，且不可使用 "." 作为分隔符。</div>
+            </div>
+        </article>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title10" id="topic_g4f_q2l_cdc">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title10">4.2 扩缩容计算组</h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p">除了上述静态配置外，用户还可以根据需要动态调整计算组的规模，包括增加或减少计算节点。在业务高峰或低谷期，用户可能需要灵活地扩展或缩减计算节点以满足业务需求。通过
+                    addNode 和 removeNode 函数，用户可以方便地增加或删除计算节点。</p>
+                <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">增加计算节点</strong></p>
+                <p class="- topic/p p">通过 addNode 函数在线增加一个计算节点，并为其指定计算组。关于 addNode 的详细信息，请参考函数页面，这里仅介绍与计算组相关的参数
+                        <em class="+ topic/ph hi-d/i ph i">computeGroup</em>，该参数用于为计算节点指定所属的计算组名称。</p>
+                <p class="- topic/p p">注意：使用 addNode 增加节点后，新节点默认为关闭状态，需要通过 Web或命令行启动。</p>
+                <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">删除计算节点</strong></p>
+                <p class="- topic/p p">目前不支持通过从计算组中移除计算节点进行缩容。如果需要缩容，只能删除计算节点。可以通过 removeNode 函数在线删除指定的计算节点。</p>
+            </div>
+        </article>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title11" id="topic_nfc_x2l_cdc">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title11">4.3 分区缓存信息查询与管理</h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">计算组分区缓存及路由查询</strong></p>
+                <p class="- topic/p p">在执行分布式查询任务时，查询会根据分区划分为多个子任务，并由控制节点将这些子查询调度到不同的计算节点。用户可以使用
+                        <code class="+ topic/ph pr-d/codeph ph codeph">getComputeGroupChunksStatus</code> 函数查询路由信息。该函数接受一个参数
+                        <em class="+ topic/ph hi-d/i ph i">computeGroup</em>，用于返回指定计算组的缓存和路由信息。如果未提供参数，则默认返回所有计算组的缓存和路由信息。其返回值与
+                        <code class="+ topic/ph pr-d/codeph ph codeph">getClusterChunksStatus</code> 函数类似，但新增了以下特有的列：</p>
+                <ul class="- topic/ul ul" id="topic_nfc_x2l_cdc__ul_a3f_drj_ldc" data-ofbid="topic_nfc_x2l_cdc__ul_a3f_drj_ldc">
+                    <li class="- topic/li li">
+                        <p class="- topic/p p">routedTo：计算节点别名，表示控制节点将对该分区的查询调度到该节点。</p>
+                    </li>
+                    <li class="- topic/li li">
+                        <p class="- topic/p p">cachedOn：计算节点别名和分区版本号，显示了计算节点所缓存的分区数据的版本号。例如：orca2:[29] 表示 orca2
+                            的计算节点缓存了分区版本号为 29 的数据。</p>
+                    </li>
+                    <li class="- topic/li li">
+                        <p class="- topic/p p">computeGroup：分区缓存的计算组名字。请注意，一个分区可以被多个计算组缓存。</p>
+                    </li>
+                </ul>
+                <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">计算节点缓存信息查询与管理</strong></p>
+                <p class="- topic/p p">可以在计算节点上调用 <code class="+ topic/ph pr-d/codeph ph codeph">getComputeNodeCacheStat</code>
+                    函数查询具体的缓存信息。此函数仅返回当前计算节点的缓存统计信息。要获取整个计算组的信息，需要累加组内所有计算节点的使用量和容量。</p>
+                <p class="- topic/p p">可以在计算节点上调用以下函数来管理缓存：</p>
+                <p class="- topic/p p">
+                    <code class="+ topic/ph pr-d/codeph ph codeph">flushComputeNodeMemCache</code>：清理当前节点的内存缓存。执行后，内存中的数据将转移到磁盘缓存中。在需要重启计算节点时，可以使用此函数将内存缓存写入磁盘，以避免重启后从远程数据节点重新获取已缓存的数据，从而提升性能。</p>
+                <p class="- topic/p p"><code class="+ topic/ph pr-d/codeph ph codeph">clearComputeNodeDiskCache</code>：尝试清理当前节点的磁盘缓存。请注意，执行后并不保证所有缓存内容都被清空。</p>
+                <p class="- topic/p p"><code class="+ topic/ph pr-d/codeph ph codeph">clearComputeNodeCache</code>：尝试清理当前节点的所有缓存，包括内存和磁盘。与
+                        <code class="+ topic/ph pr-d/codeph ph codeph">clearComputeNodeDiskCache</code> 类似，执行后不保证所有缓存内容都被清空。</p>
+            </div>
+        </article>
+    </article>
+    <article class="- topic/topic topic nested1" aria-labelledby="ariaid-title12" id="topic_ckl_cfl_cdc">
+        <h2 class="- topic/title title topictitle2" id="ariaid-title12">5 兼容性说明</h2>
+        <div class="- topic/body body">
+            <p class="- topic/p p">3.00.2 及之后的版本，计算节点有两种身份：普通计算节点和计算组中的计算节点。其中，前者产生的分布式查询拆分出的子任务会转发给对应的数据节点（map
+                阶段），由数据节点完成下推到本地的查询或计算任务，然后由计算节点对各个子任务的结果进行汇总和计算（merge 和 reduce
+                阶段）。而后者需要加入到一个计算组中，且可以缓存数据，因此能够在计算组中完成分布式查询。用户可以同时选择使用以上两种模式。</p>
+            <p class="- topic/p p">需要注意的是，没加入计算组的计算节点不支持数据缓存，因此以下配置项和函数对其无效：<em class="+ topic/ph hi-d/i ph i">computeNodeCacheDir, computeNodeMemCache,
+                    computeNodeDiskCache, computeNodeClearCache</em> 和
+                <em class="+ topic/ph hi-d/i ph i">computeNodeCacheStats</em>。</p>
+            <p class="- topic/p p">此外，存算分离的引入还导致某些旧版函数行为的变化：</p>
+            <ul class="- topic/ul ul" id="topic_ckl_cfl_cdc__ul_yjf_2fl_cdc" data-ofbid="topic_ckl_cfl_cdc__ul_yjf_2fl_cdc">
+                <li class="- topic/li li">
+                    <p class="- topic/p p">pnodeRun：当指定了 <em class="+ topic/ph hi-d/i ph i">nodes</em> 参数时，函数行为与旧版本一致；当未指定 <em class="+ topic/ph hi-d/i ph i">nodes</em> 参数时：</p>
+                    <ul class="- topic/ul ul" id="topic_ckl_cfl_cdc__ul_zjf_2fl_cdc" data-ofbid="topic_ckl_cfl_cdc__ul_zjf_2fl_cdc">
+                        <li class="- topic/li li">
+                            <p class="- topic/p p">如果在非计算组中的节点上执行该函数，则行为与旧版本一致；</p>
+                        </li>
+                        <li class="- topic/li li">
+                            <p class="- topic/p p">如果在指定了计算组的计算节点上执行该函数，则会到同组的所有计算节点上调用本地函数。</p>
+                        </li>
+                    </ul>
+                </li>
+                <li class="- topic/li li">
+                    <p class="- topic/p p">repartitionDS：当 <em class="+ topic/ph hi-d/i ph i">local</em> 设置为 true 时，函数行为与旧版本一致。当 <em class="+ topic/ph hi-d/i ph i">local</em> 设置为 false
+                        时：</p>
+                    <ul class="- topic/ul ul" id="topic_ckl_cfl_cdc__ul_akf_2fl_cdc" data-ofbid="topic_ckl_cfl_cdc__ul_akf_2fl_cdc">
+                        <li class="- topic/li li">
+                            <p class="- topic/p p">如果在非计算组中的节点上执行该函数，则行为与旧版本一致；</p>
+                        </li>
+                        <li class="- topic/li li">
+                            <p class="- topic/p p">如果在计算组中的计算节点上执行该函数，仅将数据源获取到同组内的所有计算节点上。</p>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </article>
+    <article class="- topic/topic topic nested1" aria-labelledby="ariaid-title13" id="topic_vwr_ffl_cdc">
+        <h2 class="- topic/title title topictitle2" id="ariaid-title13">6 权限管理</h2>
+        <div class="- topic/body body">
+            <p class="- topic/p p">通过权限管理来控制用户对计算组的访问。例如，研发部门的普通用户只能使用本部门的计算组，而无法访问其他部门的计算组。</p>
+            <p class="- topic/p p">用户可以设置权限
+                COMPUTE_GROUP_EXEC，以允许（grant）或拒绝（deny）特定用户或用户组对某个计算组的使用权限。当用户建立新连接时，系统将进行权限校验，以确认用户是否具备连接该计算组的权限。如果没有权限，将抛出异常。此外，如果某个计算组已不存在，相应的访问权限将被撤销（revoke）。</p>
+        </div>
+    </article>
+    <article class="- topic/topic topic nested1" aria-labelledby="ariaid-title14" id="topic_qcx_4fl_cdc">
+        <h2 class="- topic/title title topictitle2" id="ariaid-title14">7 性能测试</h2>
+        <div class="- topic/body body">
+            <p class="- topic/p p">本节对比了 DolphinDB 存算分离架构与存算一体架构的性能。在 3 台服务器上进行测试，配置如下：</p>
+            <ul class="- topic/ul ul" id="topic_qcx_4fl_cdc__ul_vfl_yfl_cdc" data-ofbid="topic_qcx_4fl_cdc__ul_vfl_yfl_cdc">
+                <li class="- topic/li li">
+                    <p class="- topic/p p">操作系统：CentOS Linux</p>
+                </li>
+                <li class="- topic/li li">
+                    <p class="- topic/p p">CPU 型号：Intel(R) Xeon(R) Silver 4216 CPU @ 2.10GHz </p>
+                </li>
+                <li class="- topic/li li">
+                    <p class="- topic/p p">内存：512G(16*32 DDR4 3200 MT/s)。</p>
+                </li>
+            </ul>
+            <p class="- topic/p p">本次测试分别在 3 台服务器搭建了 1 个高可用集群，数据采用双副本。每台服务器配置 1 个控制节点，1 个数据节点，2 个计算节点（分为两个计算组）。</p>
+            <p class="- topic/p p">创建 OLAP，TSDB，PKEY 分布式表，按日期值分区、SYMBOL hash 分区的组合分区方式 ，写入 2012.01.01 到 2012.03.10
+                的数据。每个分区 1000000 条随机生成的数据。分别测试了不同存储引擎查询指定日期数据的性能。测试结果如下表所示（单位：毫秒）：</p>
+            <div class="table-container"><table class="- topic/table table frame-all" id="topic_qcx_4fl_cdc__table_wfl_yfl_cdc" data-ofbid="topic_qcx_4fl_cdc__table_wfl_yfl_cdc" data-cols="4"><caption></caption><colgroup><col/><col/><col/><col/></colgroup><thead class="- topic/thead thead">
+                        <tr class="- topic/row">
+                            <th class="- topic/entry entry align-left colsep-1 rowsep-1" id="topic_qcx_4fl_cdc__table_wfl_yfl_cdc__entry__1"></th>
+                            <th class="- topic/entry entry align-left colsep-1 rowsep-1" id="topic_qcx_4fl_cdc__table_wfl_yfl_cdc__entry__2">OLAP</th>
+                            <th class="- topic/entry entry align-left colsep-1 rowsep-1" id="topic_qcx_4fl_cdc__table_wfl_yfl_cdc__entry__3">TSDB</th>
+                            <th class="- topic/entry entry align-left colsep-0 rowsep-1" id="topic_qcx_4fl_cdc__table_wfl_yfl_cdc__entry__4">PKEY</th>
+                        </tr>
+                    </thead><tbody class="- topic/tbody tbody">
+                        <tr class="- topic/row">
+                            <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_qcx_4fl_cdc__table_wfl_yfl_cdc__entry__1">数据节点</td>
+                            <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_qcx_4fl_cdc__table_wfl_yfl_cdc__entry__2">449.023</td>
+                            <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_qcx_4fl_cdc__table_wfl_yfl_cdc__entry__3">429.9393752</td>
+                            <td class="- topic/entry entry colsep-0 rowsep-1" headers="topic_qcx_4fl_cdc__table_wfl_yfl_cdc__entry__4">479.943</td>
+                        </tr>
+                        <tr class="- topic/row">
+                            <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_qcx_4fl_cdc__table_wfl_yfl_cdc__entry__1">计算节点（缓存未命中）</td>
+                            <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_qcx_4fl_cdc__table_wfl_yfl_cdc__entry__2">11370.401</td>
+                            <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_qcx_4fl_cdc__table_wfl_yfl_cdc__entry__3">35215.104</td>
+                            <td class="- topic/entry entry colsep-0 rowsep-1" headers="topic_qcx_4fl_cdc__table_wfl_yfl_cdc__entry__4">9087.79</td>
+                        </tr>
+                        <tr class="- topic/row">
+                            <td class="- topic/entry entry colsep-1 rowsep-0" headers="topic_qcx_4fl_cdc__table_wfl_yfl_cdc__entry__1">计算节点（缓存命中）</td>
+                            <td class="- topic/entry entry colsep-1 rowsep-0" headers="topic_qcx_4fl_cdc__table_wfl_yfl_cdc__entry__2">436.844</td>
+                            <td class="- topic/entry entry colsep-1 rowsep-0" headers="topic_qcx_4fl_cdc__table_wfl_yfl_cdc__entry__3">405.1120167</td>
+                            <td class="- topic/entry entry colsep-0 rowsep-0" headers="topic_qcx_4fl_cdc__table_wfl_yfl_cdc__entry__4">462.049</td>
+                        </tr>
+                    </tbody></table></div>
+            <p class="- topic/p p">可以看到，在未命中缓存的情况下，计算节点的耗时平均是数据节点的 42
+                倍。这是因为在未命中缓存时，计算节点需要从数据节点获取数据，增加了网络开销；而当命中缓存时，计算节点的查询性能与数据节点相当，甚至更优。这得益于计算节点的缓存机制，其为不同存储引擎的数据都提供了匹配引擎特性的代理存储引擎，从而充分发挥存储引擎在查询数据时的优势。</p>
+        </div>
+    </article>
+    <article class="- topic/topic topic nested1" aria-labelledby="ariaid-title15" id="topic_kms_kgl_cdc">
+        <h2 class="- topic/title title topictitle2" id="ariaid-title15">8 配置项与函数参考</h2>
+        <div class="- topic/body body">
+            <p class="- topic/p p">本节将列出与存算分离相关的配置项和函数，帮助用户快速了解它们的作用。用户还可以通过点击链接跳转至相应的配置项或函数页面，获取更多详细信息。</p>
+            <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b"><a class="- topic/xref xref" href="../cfg/function_configuration.html#topic_storage_compute_separation">配置项</a></strong></p>
+            <ul class="- topic/ul ul" id="topic_kms_kgl_cdc__ul_uvp_lgl_cdc" data-ofbid="topic_kms_kgl_cdc__ul_uvp_lgl_cdc">
+                <li class="- topic/li li">
+                    <p class="- topic/p p"><em class="+ topic/ph hi-d/i ph i">computeNodeCacheDir</em>：计算节点的缓存存储位置。</p>
+                </li>
+                <li class="- topic/li li">
+                    <p class="- topic/p p"><em class="+ topic/ph hi-d/i ph i">computeNodeCacheMeta</em>：计算节点缓存元数据的地址。</p>
+                </li>
+                <li class="- topic/li li">
+                    <p class="- topic/p p"><em class="+ topic/ph hi-d/i ph i">computeNodeMemCacheSize</em>：计算节点的内存缓存容量上限。</p>
+                </li>
+                <li class="- topic/li li">
+                    <p class="- topic/p p"><em class="+ topic/ph hi-d/i ph i">computeNodeDiskCacheSize</em>：计算节点的磁盘缓存容量上限。</p>
+                </li>
+                <li class="- topic/li li">
+                    <p class="- topic/p p"><em class="+ topic/ph hi-d/i ph i">enableComputeNodeCacheEvictionFromQueryThread</em>：是否从计算节点的缓存中逐出不再使用的数据。</p>
+                </li>
+                <li class="- topic/li li">
+                    <p class="- topic/p p"><em class="+ topic/ph hi-d/i ph i">computeNodeCachingDelay</em>：规定了一个分区在最后一次更新后，需经过设定的时间间隔，才能被缓存到计算节点。</p>
+                </li>
+                <li class="- topic/li li">
+                    <p class="- topic/p p"><em class="+ topic/ph hi-d/i ph i">computeNodeCachingQueryThreshold</em>：当一个分区的访问次数超过设定的阈值后，才允许将该分区缓存到计算节点。</p>
+                </li>
+                <li class="- topic/li li">
+                    <p class="- topic/p p"><em class="+ topic/ph hi-d/i ph i">enableComputeNodePrefetchData</em>：若设置为
+                        true，当查询的数据不在计算节点的缓存中时，系统将查询路由到数据节点，并在计算节点上异步执行相同的查询以预热缓存；若设置为
+                        false，则不会将查询路由到数据节点，计算节点将直接从数据节点拉取数据进行查询</p>
+                    <p class="- topic/p p">。</p>
+                </li>
+            </ul>
+            <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">函数</strong></p>
+            <ul class="- topic/ul ul" id="topic_kms_kgl_cdc__ul_vvp_lgl_cdc" data-ofbid="topic_kms_kgl_cdc__ul_vvp_lgl_cdc">
+                <li class="- topic/li li">
+                    <p class="- topic/p p"><a class="- topic/xref xref" href="../../funcs/a/addNode.html">addNode</a>：在线增加计算组中的计算节点。</p>
+                </li>
+                <li class="- topic/li li">
+                    <p class="- topic/p p"><a class="- topic/xref xref" href="../../funcs/g/getcomputegroupchunksstatus.html">getComputeGroupChunksStatus</a>：获取计算组中缓存的所有 chunk 的元数据信息。</p>
+                </li>
+                <li class="- topic/li li">
+                    <p class="- topic/p p"><a class="- topic/xref xref" href="../../funcs/g/getcomputenodecachestat.html">getComputeNodeCacheStat</a>：获取计算节点的多级缓存信息。</p>
+                </li>
+                <li class="- topic/li li">
+                    <p class="- topic/p p"><a class="- topic/xref xref" href="../../funcs/f/flushcomputenodememcache.html">flushComputeNodeMemCache</a>：将计算节点的内存缓存的内容写入磁盘缓存。</p>
+                </li>
+                <li class="- topic/li li">
+                    <p class="- topic/p p"><a class="- topic/xref xref" href="../../funcs/c/clearcomputenodediskcache.html">clearComputeNodeDiskCache</a>：清空计算节点的磁盘缓存。</p>
+                </li>
+                <li class="- topic/li li">
+                    <p class="- topic/p p"><a class="- topic/xref xref" href="../../funcs/c/clearcomputenodecache.html">clearComputeNodeCache</a>：清空计算节点的内存缓存和磁盘缓存。</p>
+                </li>
+                <li class="- topic/li li">
+                    <p class="- topic/p p"><a class="- topic/xref xref" href="../../funcs/s/setcomputenodecachingdelay.html">setComputeNodeCachingDelay</a>：在线设置当前节点下配置项
+                            <em class="+ topic/ph hi-d/i ph i">computeNodeCachingDelay</em> 的生效值。</p>
+                </li>
+                <li class="- topic/li li">
+                    <p class="- topic/p p"><a class="- topic/xref xref" href="../../funcs/g/getcomputenodecachingdelay.html">getComputeNodeCachingDelay</a>：查看当前节点下配置项
+                            <em class="+ topic/ph hi-d/i ph i">computeNodeCachingDelay</em> 的生效值</p>
+                </li>
+                <li class="- topic/li li">
+                    <p class="- topic/p p"><a class="- topic/xref xref" href="../../funcs/s/setprefetchcomputenodedata.html">setPrefetchComputeNodeData</a>：在线设置当前节点下配置项
+                            <em class="+ topic/ph hi-d/i ph i">enableComputeNodePrefetchData</em> 的生效值。</p>
+                </li>
+                <li class="- topic/li li">
+                    <p class="- topic/p p"><a class="- topic/xref xref" href="../../funcs/g/getprefetchcomputenodedata.html">getPrefetchComputeNodeData</a>：当前节点下配置项
+                            <em class="+ topic/ph hi-d/i ph i">enableComputeNodePrefetchData</em> 的生效值。</p>
+                </li>
+            </ul>
+        </div>
+    </article>
+</article></main></div>
+                        
+                        
+                        
+                        
+                        
+                        
+                    </div>
+                    
+                        <nav role="navigation" id="wh_topic_toc" aria-label="On this page" class="col-lg-2 d-none d-lg-block navbar d-print-none"> 
+                            <div id="wh_topic_toc_content">
+		                        
+	                            <div class=" wh_topic_toc "><div class="wh_topic_label">在本页上</div><ul><li class="topic-item"><a href="#topic_ryh_zbl_cdc" data-tocid="topic_ryh_zbl_cdc">1 架构设计</a><ul><li class="topic-item"><a href="#topic_uf1_npj_ldc" data-tocid="topic_uf1_npj_ldc">1.1 存算分离架构 </a></li><li class="topic-item"><a href="#topic_crx_5pj_ldc" data-tocid="topic_crx_5pj_ldc">1.2 代理存储引擎</a></li><li class="topic-item"><a href="#topic_bxt_gqj_ldc" data-tocid="topic_bxt_gqj_ldc">1.3 分布式计算过程</a></li></ul></li><li class="topic-item"><a href="#topic_tzr_bdl_cdc" data-tocid="topic_tzr_bdl_cdc">2 多级缓存机制</a></li><li class="topic-item"><a href="#topic_xbw_sdl_cdc" data-tocid="topic_xbw_sdl_cdc">3 查询优化策略</a></li><li class="topic-item"><a href="#topic_lzq_m2l_cdc" data-tocid="topic_lzq_m2l_cdc">4 配置与管理计算组</a><ul><li class="topic-item"><a href="#topic_sq5_n2l_cdc" data-tocid="topic_sq5_n2l_cdc">4.1 配置计算组</a></li><li class="topic-item"><a href="#topic_g4f_q2l_cdc" data-tocid="topic_g4f_q2l_cdc">4.2 扩缩容计算组</a></li><li class="topic-item"><a href="#topic_nfc_x2l_cdc" data-tocid="topic_nfc_x2l_cdc">4.3 分区缓存信息查询与管理</a></li></ul></li><li class="topic-item"><a href="#topic_ckl_cfl_cdc" data-tocid="topic_ckl_cfl_cdc">5 兼容性说明</a></li><li class="topic-item"><a href="#topic_vwr_ffl_cdc" data-tocid="topic_vwr_ffl_cdc">6 权限管理</a></li><li class="topic-item"><a href="#topic_qcx_4fl_cdc" data-tocid="topic_qcx_4fl_cdc">7 性能测试</a></li><li class="topic-item"><a href="#topic_kms_kgl_cdc" data-tocid="topic_kms_kgl_cdc">8 配置项与函数参考</a></li></ul></div>
+	                        	
+                        	</div>
+                        </nav>
+                    
+                </div>
+            </div>
+            
+            
+            
+        </div> 
+        <footer class="navbar navbar-default wh_footer">
+  <div class=" footer-container mx-auto ">
+<title>Copyright</title><p><b> ©2025 浙江智臾科技有限公司 浙ICP备18048711号-3</b></p>
+  </div>
+</footer>
+        
+        <div id="go2top" class="d-print-none">
+            <span class="oxy-icon oxy-icon-up"></span>
+        </div>
+        
+        <div id="modal_img_large" class="modal">
+            <span class="close oxy-icon oxy-icon-remove"></span>
+            <div id="modal_img_container"></div>
+            <div id="caption"></div>
+        </div>
+        
+        
+        
+    </body>
+</html>

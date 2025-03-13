@@ -1,0 +1,1397 @@
+<!DOCTYPE html><html xmlns="http://www.w3.org/1999/xhtml" xml:lang="zh" lang="zh" data-whc_version="26.0">
+    <head><link rel="shortcut icon" href="../../favicon.ico"/><link rel="icon" href="../../favicon.ico"/><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><meta name="description" content="回测平台支持的期货资产行情数据类型包括：快照，分钟频率，日频。 接口 createBacktester 的参数 config 和接口 createBacktestEngine 的参数 userConfig 的配置可参考下表： key 说明 备注 &#34;startDate&#34; 开始日期 必须配置，DATE 类型 例如 “2020.01.01” &#34;endDate&#34; 结束日期 必须配置，DATE 类型 例如 ..."/><meta name="DC.rights.owner" content="(C) 版权 2025"/><meta name="copyright" content="(C) 版权 2025"/><meta name="generator" content="DITA-OT"/><meta name="DC.type" content="topic"/><meta name="DC.coverage" content=""/><meta name="DC.relation" content="../../plugins/backtest.html"/><meta name="prodname" content="DolphinDB"/><meta name="brand" content="DolphinDB"/><meta name="DC.creator" content="DolphinDB"/><meta name="DC.publisher" content="DDB N/A DDB 200"/><meta name="DC.format" content="HTML5"/><meta name="DC.identifier" content="期权"/><title>期权</title><!--  Generated with Oxygen version 26.0, build number 2024012323.  --><meta name="wh-path2root" content="../../"/><meta name="wh-toc-id" content="期权-d9713e94816"/><meta name="wh-source-relpath" content="plugins/backtest/option.dita"/><meta name="wh-out-relpath" content="plugins/backtest/option.html"/>
+
+    <link rel="stylesheet" type="text/css" href="../../oxygen-webhelp/app/commons.css?buildId=2024012323"/>
+    <link rel="stylesheet" type="text/css" href="../../oxygen-webhelp/app/topic.css?buildId=2024012323"/>
+
+    <script src="../../oxygen-webhelp/app/options/properties.js?buildId=20250305183303"></script>
+    <script src="../../oxygen-webhelp/app/localization/strings.js?buildId=2024012323"></script>
+    <script src="../../oxygen-webhelp/app/search/index/keywords.js?buildId=20250305183303"></script>
+    <script defer="defer" src="../../oxygen-webhelp/app/commons.js?buildId=2024012323"></script>
+    <script defer="defer" src="../../oxygen-webhelp/app/topic.js?buildId=2024012323"></script>
+<link rel="stylesheet" type="text/css" href="../../oxygen-webhelp/template/styles.css?buildId=2024012323"/><script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script><script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script></head>
+
+    <body id="期权" class="wh_topic_page frmBody">
+        <a href="#wh_topic_body" class="sr-only sr-only-focusable">
+            跳转到主要内容
+        </a>
+        
+        
+        
+        
+        <header class="navbar navbar-default wh_header">
+    <div class="container-fluid">
+        <div xmlns:whc="http://www.oxygenxml.com/webhelp/components" class="wh_header_flex_container navbar-nav navbar-expand-md navbar-dark">
+            <div class="wh_logo_and_publication_title_container">
+                <div class="wh_logo_and_publication_title">
+                    
+                    <a href="https://docs.dolphindb.cn/zh/index.html" class=" wh_logo d-none d-sm-block "><img src="../../logo.png" alt="  DolphinDB 文档中心  "/></a>
+                    <div class=" wh_publication_title "><a href="../../index.html"><span class="booktitle">  <span class="ph mainbooktitle">DolphinDB 文档中心</span>  </span></a></div>
+                    
+                </div>
+                
+                
+            </div>
+
+            <div class="wh_top_menu_and_indexterms_link collapse navbar-collapse" id="wh_top_menu_and_indexterms_link">
+                
+                
+                
+                
+            </div>
+        <div class=" wh_search_input navbar-form wh_topic_page_search search " role="form">
+            
+            
+            
+            <form id="searchForm" method="get" role="search" action="../../search.html"><div><input type="search" placeholder="搜索 " class="wh_search_textfield" id="textToSearch" name="searchQuery" aria-label="搜索查询" required="required"/><button type="submit" class="wh_search_button" aria-label="搜索"><span class="search_input_text">搜索</span></button></div></form>
+            
+            <script src="/vendors/react/umd/react.production.min.js" defer="defer"></script>
+<script src="/vendors/react-dom/umd/react-dom.production.min.js" defer="defer"></script>
+<script src="/vendors/dayjs/dayjs.min.js" defer="defer"></script>
+<script src="/vendors/antd/dist/antd.min.js" defer="defer"></script>
+<script src="/vendors/@ant-design/icons/dist/index.umd.min.js" defer="defer"></script>
+<script src="/zh/index.js" type="module"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" defer="defer"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML" defer="defer"><!--
+
+
+--></script>
+<script defer="defer"><!--
+
+// 从主页重定向
+const currentUrl = window.location.href;
+
+// 判断当前URL是否包含index.html并且路径最后部分是index.html
+if (currentUrl.endsWith('index.html')) {
+    // 处理根目录下的index.html跳转
+    const baseUrl = currentUrl.split('/index.html')[0]; // 获取index.html之前的部分
+    const redirectUrl = `${baseUrl}/about/ddb_intro.html`; // 构建跳转路径
+    window.location.href = redirectUrl; // 执行跳转
+}
+
+--></script>
+            
+        </div></div>
+    </div>
+</header>
+        
+        
+         
+        
+        
+        
+        <div class="container-fluid" id="wh_topic_container">
+            <div class="row">
+
+                <nav class="wh_tools d-print-none navbar-expand-md" aria-label="Tools">
+                    
+                    <div data-tooltip-position="bottom" class=" wh_breadcrumb "><ol class="d-print-none"><li><span class="home"><a href="../../index.html"><span>主页</span></a></span></li><li><div class="topicref" data-id="chap6_plugin"><div class="title"><a href="../../plugins/plg_intro.html"><span class="keyword label">插件</span></a><div class="wh-tooltip"><p class="shortdesc">多个应用场景的插件使用说明和插件开发指导</p></div></div></div></li><li><div class="topicref" data-id="backtest"><div class="title"><a href="../../plugins/backtest.html">Backtest</a></div></div></li><li class="active"><div class="topicref" data-id="期权"><div class="title"><a href="../../plugins/backtest/option.html">期权</a></div></div></li></ol></div>
+                    
+                    
+                    
+                    <div class="wh_right_tools">
+                        <button class="wh_hide_highlight" aria-label="切换搜索突出显示" title="切换搜索突出显示"></button>
+                        <button class="webhelp_expand_collapse_sections" data-next-state="collapsed" aria-label="折叠截面" title="折叠截面"></button>
+                        
+                        
+                        
+                        
+                        <div class=" wh_print_link print d-none d-md-inline-block "><button onClick="window.print()" title="打印此页" aria-label="打印此页"></button></div>
+                        
+                        <button type="button" id="wh_toc_button" class="custom-toggler navbar-toggler collapsed wh_toggle_button navbar-light" aria-expanded="false" aria-label="Toggle publishing table of content" aria-controls="wh_publication_toc">
+                            <span class="navbar-toggler-icon"></span>
+                        </button>
+                    </div>
+                    
+                </nav>
+            </div>
+            
+            
+            
+            
+            <div class="wh_content_area">
+                <div class="row">
+                    
+                        <nav id="wh_publication_toc" class="col-lg-3 col-md-3 col-sm-12 d-md-block d-none d-print-none" aria-label="Table of Contents Container">
+                            <div id="wh_publication_toc_content">
+		                        
+                            	<div class=" wh_publication_toc " data-tooltip-position="right"><span class="expand-button-action-labels"><span id="button-expand-action" role="button" aria-label="Expand"></span><span id="button-collapse-action" role="button" aria-label="Collapse"></span><span id="button-pending-action" role="button" aria-label="Pending"></span></span><ul role="tree" aria-label="Table of Contents"><li role="treeitem"><div data-tocid="ddb_intro-d9713e87" class="topicref" data-id="ddb_intro" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../about/ddb_intro.html" id="ddb_intro-d9713e87-link">关于DolphinDB</a></div></div></li><li role="treeitem"><div data-tocid="chap1_getstarted-d9713e136" class="topicref" data-id="chap1_getstarted" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../getstarted/chap1_getstarted.html" id="chap1_getstarted-d9713e136-link">快速上手</a><div class="wh-tooltip"><p class="shortdesc">如何快速部署 DolphinDB、建库建表、写入和查询数据</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="sectionddb_deployment-d9713e189" class="topicref" data-id="sectionddb_deployment" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action sectionddb_deployment-d9713e189-link" class="wh-expand-btn"></span><div class="title"><a href="../../deploy/deploy_intro.html" id="sectionddb_deployment-d9713e189-link"><span class="keyword label">部署</span></a><div class="wh-tooltip"><p class="shortdesc">如何在不同的场景中部署 DolphinDB</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="new_chap_database_manage_new_chap_dbmanage_landing_page-d9713e2259" class="topicref" data-id="new_chap_database_manage_new_chap_dbmanage_landing_page" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action new_chap_database_manage_new_chap_dbmanage_landing_page-d9713e2259-link" class="wh-expand-btn"></span><div class="title"><a href="../../db_distr_comp/cfg/db_intro.html" id="new_chap_database_manage_new_chap_dbmanage_landing_page-d9713e2259-link"><span class="keyword label">数据库</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 数据库的基本概念</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="chap7_tutorials_streaming-d9713e3760" class="topicref" data-id="chap7_tutorials_streaming" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action chap7_tutorials_streaming-d9713e3760-link" class="wh-expand-btn"></span><div class="title"><a href="../../stream/str_intro.html" id="chap7_tutorials_streaming-d9713e3760-link"><span class="keyword label">流数据</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 流数据引擎及流数据计算的基本概念</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e7513" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e7513-link" class="wh-expand-btn"></span><div class="title"><a href="../../db_distr_comp/db_oper/import_data.html" id="tocId-d9713e7513-link">数据迁移</a><div class="wh-tooltip"><p class="shortdesc">如何从不同数据源向 DolphinDB 迁移数据</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="chap7_tutorials_system_management-d9713e7940" class="topicref" data-id="chap7_tutorials_system_management" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action chap7_tutorials_system_management-d9713e7940-link" class="wh-expand-btn"></span><div class="title"><a href="../../sys_man/om_intro.html" id="chap7_tutorials_system_management-d9713e7940-link"><span class="keyword label">系统运维</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 的系统运维功能及方法</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="troubleshooting-d9713e8780" class="topicref" data-id="troubleshooting" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action troubleshooting-d9713e8780-link" class="wh-expand-btn"></span><div class="title"><a href="../../error_codes/troubleshooting.html" id="troubleshooting-d9713e8780-link">故障排查</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="about_language_resources-d9713e20911" class="topicref" data-id="about_language_resources" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action about_language_resources-d9713e20911-link" class="wh-expand-btn"></span><div class="title"><a href="../../progr/progr_intro.html" id="about_language_resources-d9713e20911-link"><span class="keyword label">编程语言</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 编程基本概念与方法、SQL 在 DolphinDB 的应用</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="functions_references-d9713e30925" class="topicref" data-id="functions_references" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action functions_references-d9713e30925-link" class="wh-expand-btn"></span><div class="title"><a href="../../funcs/funcs_intro.html" id="functions_references-d9713e30925-link"><span class="keyword label">函数参考</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 函数分类、语法、详解及示例</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="api_protocol-d9713e94064" class="topicref" data-id="api_protocol" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action api_protocol-d9713e94064-link" class="wh-expand-btn"></span><div class="title"><a href="../../api/connapi_intro.html" id="api_protocol-d9713e94064-link"><span class="keyword label">连接器 &amp; API</span></a><div class="wh-tooltip"><p class="shortdesc">面向不同编程语言的 DolphinDB API 及连接器，相关协议和用法</p></div></div></div></li><li role="treeitem" aria-expanded="true"><div data-tocid="chap6_plugin-d9713e94210" class="topicref" data-id="chap6_plugin" data-state="expanded"><span role="button" tabindex="0" aria-labelledby="button-collapse-action chap6_plugin-d9713e94210-link" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/plg_intro.html" id="chap6_plugin-d9713e94210-link"><span class="keyword label">插件</span></a><div class="wh-tooltip"><p class="shortdesc">多个应用场景的插件使用说明和插件开发指导</p></div></div></div><ul role="group" class="navbar-nav nav-list"><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e94263" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e94263-link" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/plg_howtos.html" id="tocId-d9713e94263-link">插件使用与开发</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="amdquote-d9713e94448" class="topicref" data-id="amdquote" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action amdquote-d9713e94448-link" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/amdquote/amdquote_2.html" id="amdquote-d9713e94448-link">amdQuote</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="arrow-d9713e94540" class="topicref" data-id="arrow" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action arrow-d9713e94540-link" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/Arrow/arrow.html" id="arrow-d9713e94540-link">Arrow</a></div></div></li><li role="treeitem"><div data-tocid="awss3-d9713e94632" class="topicref" data-id="awss3" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/aws/aws.html" id="awss3-d9713e94632-link">AWSS3</a></div></div></li><li role="treeitem" aria-expanded="true"><div data-tocid="backtest-d9713e94678" class="topicref" data-id="backtest" data-state="expanded"><span role="button" tabindex="0" aria-labelledby="button-collapse-action backtest-d9713e94678-link" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/backtest.html" id="backtest-d9713e94678-link">Backtest</a></div></div><ul role="group" class="navbar-nav nav-list"><li role="treeitem"><div data-tocid="interface_description-d9713e94724" class="topicref" data-id="interface_description" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/backtest/interface_description.html" id="interface_description-d9713e94724-link">接口说明</a></div></div></li><li role="treeitem"><div data-tocid="股票-d9713e94770" class="topicref" data-id="股票" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/backtest/stock.html" id="股票-d9713e94770-link">股票</a></div></div></li><li role="treeitem" class="active"><div data-tocid="期权-d9713e94816" class="topicref" data-id="期权" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/backtest/option.html" id="期权-d9713e94816-link">期权</a></div></div></li><li role="treeitem"><div data-tocid="期货-d9713e94862" class="topicref" data-id="期货" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/backtest/futures.html" id="期货-d9713e94862-link">期货</a></div></div></li><li role="treeitem"><div data-tocid="银行间债券-d9713e94908" class="topicref" data-id="银行间债券" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/backtest/interbank_bonds.html" id="银行间债券-d9713e94908-link">银行间债券</a></div></div></li><li role="treeitem"><div data-tocid="数字货币-d9713e94954" class="topicref" data-id="数字货币" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/backtest/digital_currency.html" id="数字货币-d9713e94954-link">数字货币</a></div></div></li><li role="treeitem"><div data-tocid="performance_comparison-d9713e95000" class="topicref" data-id="performance_comparison" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/performance_comparison.html" id="performance_comparison-d9713e95000-link">DolphinDB 回测平台与其它回测产品的对比分析</a></div></div></li><li role="treeitem"><div data-tocid="dolphindb_回测平台使用和性能优化攻略-d9713e95046" class="topicref" data-id="dolphindb_回测平台使用和性能优化攻略" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/backtest/performance_tuning.html" id="dolphindb_回测平台使用和性能优化攻略-d9713e95046-link">DolphinDB 回测平台使用和性能优化攻略</a></div></div></li><li role="treeitem"><div data-tocid="release_notes-d9713e95092" class="topicref" data-id="release_notes" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/release_notes.html" id="release_notes-d9713e95092-link">版本说明</a></div></div></li></ul></li><li role="treeitem" aria-expanded="false"><div data-tocid="ctp-d9713e95138" class="topicref" data-id="ctp" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action ctp-d9713e95138-link" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/ctp_2.html" id="ctp-d9713e95138-link">CTP</a></div></div></li><li role="treeitem"><div data-tocid="datafeed-d9713e95230" class="topicref" data-id="datafeed" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/datafeed.html" id="datafeed-d9713e95230-link">DataFeed</a></div></div></li><li role="treeitem"><div data-tocid="efh-d9713e95276" class="topicref" data-id="efh" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/efh.html" id="efh-d9713e95276-link">EFH</a></div></div></li><li role="treeitem"><div data-tocid="encoderdecoder-d9713e95322" class="topicref" data-id="encoderdecoder" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/EncoderDecoder.html" id="encoderdecoder-d9713e95322-link">EncoderDecoder</a></div></div></li><li role="treeitem"><div data-tocid="excel_add_in-d9713e95368" class="topicref" data-id="excel_add_in" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/excel_add_in.html" id="excel_add_in-d9713e95368-link">Excel Add-In</a></div></div></li><li role="treeitem"><div data-tocid="feather-d9713e95415" class="topicref" data-id="feather" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/feather/feather.html" id="feather-d9713e95415-link">Feather</a></div></div></li><li role="treeitem"><div data-tocid="gp-d9713e95461" class="topicref" data-id="gp" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/gp/gp.html" id="gp-d9713e95461-link">GP</a></div></div></li><li role="treeitem"><div data-tocid="gurobi-d9713e95507" class="topicref" data-id="gurobi" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/gurobi.html" id="gurobi-d9713e95507-link">gurobi</a></div></div></li><li role="treeitem"><div data-tocid="hbase-d9713e95553" class="topicref" data-id="hbase" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/hbase/hbase.html" id="hbase-d9713e95553-link">HBase</a></div></div></li><li role="treeitem"><div data-tocid="hdf5-d9713e95599" class="topicref" data-id="hdf5" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/hdf5/hdf5.html" id="hdf5-d9713e95599-link">HDF5</a></div></div></li><li role="treeitem"><div data-tocid="hdfs-d9713e95645" class="topicref" data-id="hdfs" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/hdfs/hdfs.html" id="hdfs-d9713e95645-link">HDFS</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="httpclient-d9713e95691" class="topicref" data-id="httpclient" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action httpclient-d9713e95691-link" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/httpClient/httpclient.html" id="httpclient-d9713e95691-link">HttpClient</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="insight-d9713e95783" class="topicref" data-id="insight" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action insight-d9713e95783-link" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/insight/insight_2.html" id="insight-d9713e95783-link">INSIGHT</a></div></div></li><li role="treeitem"><div data-tocid="kafka-d9713e95875" class="topicref" data-id="kafka" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/kafka/kafka.html" id="kafka-d9713e95875-link">Kafka</a></div></div></li><li role="treeitem"><div data-tocid="kdb-d9713e95921" class="topicref" data-id="kdb" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/kdb/kdb.html" id="kdb-d9713e95921-link">Kdb+</a></div></div></li><li role="treeitem"><div data-tocid="ldap-d9713e95967" class="topicref" data-id="ldap" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/LDAP.html" id="ldap-d9713e95967-link">LDAP</a></div></div></li><li role="treeitem"><div data-tocid="lgmb-d9713e96014" class="topicref" data-id="lgmb" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/lgbm.html" id="lgmb-d9713e96014-link">lgbm</a></div></div></li><li role="treeitem"><div data-tocid="libtorch-d9713e96060" class="topicref" data-id="libtorch" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/libtorch/libtorch.html" id="libtorch-d9713e96060-link">LibTorch</a></div></div></li><li role="treeitem"><div data-tocid="mat-d9713e96106" class="topicref" data-id="mat" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/mat/mat.html" id="mat-d9713e96106-link">mat</a></div></div></li><li role="treeitem"><div data-tocid="matchingengine-d9713e96152" class="topicref" data-id="matchingengine" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/MatchingEngine/me.html" id="matchingengine-d9713e96152-link">MatchingEngine</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="mes-d9713e96198" class="topicref" data-id="mes" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action mes-d9713e96198-link" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/matchingEngineSimulator/mes.html" id="mes-d9713e96198-link">MatchingEngineSimulator</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="mdl-d9713e96336" class="topicref" data-id="mdl" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action mdl-d9713e96336-link" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/MDL.html" id="mdl-d9713e96336-link">MDL</a></div></div></li><li role="treeitem"><div data-tocid="mongodb-d9713e96428" class="topicref" data-id="mongodb" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/mongodb/mongodb.html" id="mongodb-d9713e96428-link">MongoDB</a></div></div></li><li role="treeitem"><div data-tocid="mqtt-d9713e96474" class="topicref" data-id="mqtt" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/mqtt/mqtt.html" id="mqtt-d9713e96474-link">mqtt</a></div></div></li><li role="treeitem"><div data-tocid="mseed-d9713e96520" class="topicref" data-id="mseed" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/mseed/mseed.html" id="mseed-d9713e96520-link">mseed</a></div></div></li><li role="treeitem"><div data-tocid="mysql-d9713e96566" class="topicref" data-id="mysql" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/mysql/mysql.html" id="mysql-d9713e96566-link">MySQL</a></div></div></li><li role="treeitem"><div data-tocid="nsq-d9713e96612" class="topicref" data-id="nsq" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/nsq/nsq_2.html" id="nsq-d9713e96612-link">NSQ</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="odbc-d9713e96659" class="topicref" data-id="odbc" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action odbc-d9713e96659-link" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/odbc/odbc.html" id="odbc-d9713e96659-link">ODBC</a></div></div></li><li role="treeitem"><div data-tocid="opcua-d9713e96751" class="topicref" data-id="opcua" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/opcua/opcua.html" id="opcua-d9713e96751-link">OPCUA</a></div></div></li><li role="treeitem"><div data-tocid="opc-d9713e96797" class="topicref" data-id="opc" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/opc/opc.html" id="opc-d9713e96797-link">OPC</a></div></div></li><li role="treeitem"><div data-tocid="orc-d9713e96843" class="topicref" data-id="orc" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/orc.html" id="orc-d9713e96843-link">ORC</a></div></div></li><li role="treeitem"><div data-tocid="parquet-d9713e96889" class="topicref" data-id="parquet" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/parquet/parquet.html" id="parquet-d9713e96889-link">Parquet</a></div></div></li><li role="treeitem"><div data-tocid="py-d9713e96935" class="topicref" data-id="py" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/py/py.html" id="py-d9713e96935-link">Py</a></div></div></li><li role="treeitem"><div data-tocid="rabbitmq-d9713e96981" class="topicref" data-id="rabbitmq" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/rabbitMQ.html" id="rabbitmq-d9713e96981-link">RabbitMQ</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="redis-d9713e97027" class="topicref" data-id="redis" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action redis-d9713e97027-link" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/redis.html" id="redis-d9713e97027-link">Redis</a></div></div></li><li role="treeitem"><div data-tocid="quantlib-d9713e97119" class="topicref" data-id="quantlib" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/quantlib/quantlib.html" id="quantlib-d9713e97119-link">QuantLib</a></div></div></li><li role="treeitem"><div data-tocid="rocketmq-d9713e97165" class="topicref" data-id="rocketmq" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/rocketMQ.html" id="rocketmq-d9713e97165-link">RocketMQ</a></div></div></li><li role="treeitem"><div data-tocid="sevenzip-d9713e97211" class="topicref" data-id="sevenzip" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/sevenzip.html" id="sevenzip-d9713e97211-link">SevenZip</a></div></div></li><li role="treeitem"><div data-tocid="schemalesswriter-d9713e97258" class="topicref" data-id="schemalesswriter" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/slwriter.html" id="schemalesswriter-d9713e97258-link">SchemalessWriter</a></div></div></li><li role="treeitem"><div data-tocid="signal-d9713e97304" class="topicref" data-id="signal" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/signal/signal.html" id="signal-d9713e97304-link">signal</a></div></div></li><li role="treeitem"><div data-tocid="ssequotationfile-d9713e97350" class="topicref" data-id="ssequotationfile" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/SSEQuotationFile.html" id="ssequotationfile-d9713e97350-link">SSEQuotationFile</a></div></div></li><li role="treeitem"><div data-tocid="svm-d9713e97396" class="topicref" data-id="svm" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/svm/svm.html" id="svm-d9713e97396-link">SVM</a></div></div></li><li role="treeitem"><div data-tocid="tcpsocket-d9713e97442" class="topicref" data-id="tcpsocket" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/tcpsocket.html" id="tcpsocket-d9713e97442-link">TCPSocket</a></div></div></li><li role="treeitem"><div data-tocid="websocket-d9713e97488" class="topicref" data-id="websocket" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/websocket.html" id="websocket-d9713e97488-link">WebSocket</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="windtdf-d9713e97534" class="topicref" data-id="windtdf" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action windtdf-d9713e97534-link" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/windtdf.html" id="windtdf-d9713e97534-link">WindTDF</a></div></div></li><li role="treeitem"><div data-tocid="xgboost-d9713e97626" class="topicref" data-id="xgboost" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/xgboost/xgboost.html" id="xgboost-d9713e97626-link">xgboost</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="xtp-d9713e97672" class="topicref" data-id="xtp" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action xtp-d9713e97672-link" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/xtp.html" id="xtp-d9713e97672-link">XTP</a></div></div></li><li role="treeitem"><div data-tocid="zip-d9713e97764" class="topicref" data-id="zip" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/zip/zip.html" id="zip-d9713e97764-link">zip</a></div></div></li><li role="treeitem"><div data-tocid="zlib-d9713e97810" class="topicref" data-id="zlib" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/zlib/zlib.html" id="zlib-d9713e97810-link">Zlib</a></div></div></li><li role="treeitem"><div data-tocid="zmq-d9713e97857" class="topicref" data-id="zmq" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/zmq/zmq.html" id="zmq-d9713e97857-link">zmq</a></div></div></li></ul></li><li role="treeitem" aria-expanded="false"><div data-tocid="third_party-d9713e97904" class="topicref" data-id="third_party" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action third_party-d9713e97904-link" class="wh-expand-btn"></span><div class="title"><a href="../../third_party.html" id="third_party-d9713e97904-link">第三方工具</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="about_tutorials-d9713e98227" class="topicref" data-id="about_tutorials" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action about_tutorials-d9713e98227-link" class="wh-expand-btn"></span><div class="title"><a href="../../tutorials/about_tutorials.html" id="about_tutorials-d9713e98227-link"><span class="keyword label">教程</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 产品使用教程</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e105982" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e105982-link" class="wh-expand-btn"></span><div class="title"><a href="../../rn/server/3_00_2.html" id="tocId-d9713e105982-link">版本说明</a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 版本发布历史</p></div></div></div></li></ul></div>
+		                        
+                            </div>
+                        </nav>
+                    
+                    
+                    <div class="col-lg-7 col-md-9 col-sm-12" id="wh_topic_body">
+                        <button id="wh_close_publication_toc_button" class="close-toc-button d-none" aria-label="Toggle publishing table of content" aria-controls="wh_publication_toc" aria-expanded="true">
+                            <span class="close-toc-icon-container">
+                                <span class="close-toc-icon"></span>     
+                            </span>
+                        </button>
+                        <button id="wh_close_topic_toc_button" class="close-toc-button d-none" aria-label="Toggle topic table of content" aria-controls="wh_topic_toc" aria-expanded="true">
+                            <span class="close-toc-icon-container">
+                                <span class="close-toc-icon"></span>     
+                            </span>
+                        </button>
+                        
+                        <div class=" wh_topic_content body "><main role="main"><article class="- topic/topic topic" role="article" aria-labelledby="ariaid-title1">
+    <h1 class="- topic/title title topictitle1" id="ariaid-title1">期权</h1>
+    <div class="- topic/body body">
+        <p class="- topic/p p"> 回测平台支持的期货资产行情数据类型包括：快照，分钟频率，日频。</p>
+    </div>
+    <article class="- topic/topic topic nested1" aria-labelledby="ariaid-title2" id="id-期权-引擎配置说明">
+        <h2 class="- topic/title title topictitle2" id="ariaid-title2">引擎配置说明</h2>
+        <div class="- topic/body body">
+            <p class="- topic/p p">接口 <code class="+ topic/ph pr-d/codeph ph codeph">createBacktester</code> 的参数 <em class="+ topic/ph hi-d/i ph i">config</em> 和接口
+                    <code class="+ topic/ph pr-d/codeph ph codeph">createBacktestEngine</code> 的参数 <em class="+ topic/ph hi-d/i ph i">userConfig</em> 的配置可参考下表：</p>
+            <div class="table-container"><table class="- topic/table table frame-all" data-cols="3"><caption></caption><colgroup><col/><col/><col/></colgroup><thead class="- topic/thead thead">
+                        <tr class="- topic/row">
+                            <th class="- topic/entry entry colsep-1 rowsep-1" id="id-期权-引擎配置说明__entry__1">
+                                <strong class="+ topic/ph hi-d/b ph b">key</strong>
+                            </th>
+                            <th class="- topic/entry entry colsep-1 rowsep-1" id="id-期权-引擎配置说明__entry__2">
+                                <strong class="+ topic/ph hi-d/b ph b">说明</strong>
+                            </th>
+                            <th class="- topic/entry entry colsep-0 rowsep-1" id="id-期权-引擎配置说明__entry__3">
+                                <strong class="+ topic/ph hi-d/b ph b">备注</strong>
+                            </th>
+                        </tr>
+                    </thead><tbody class="- topic/tbody tbody">
+                        <tr class="- topic/row">
+                            <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-引擎配置说明__entry__1">"startDate"</td>
+                            <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-引擎配置说明__entry__2">开始日期</td>
+                            <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-引擎配置说明__entry__3">必须配置，DATE 类型<p class="- topic/p p">例如 “2020.01.01”</p></td>
+                        </tr>
+                        <tr class="- topic/row">
+                            <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-引擎配置说明__entry__1">"endDate"</td>
+                            <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-引擎配置说明__entry__2">结束日期</td>
+                            <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-引擎配置说明__entry__3">必须配置，DATE 类型<p class="- topic/p p">例如 “2020.01.01”</p></td>
+                        </tr>
+                        <tr class="- topic/row">
+                            <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-引擎配置说明__entry__1">"strategyGroup"</td>
+                            <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-引擎配置说明__entry__2">策略类型</td>
+                            <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-引擎配置说明__entry__3">必须配置，“option”</td>
+                        </tr>
+                        <tr class="- topic/row">
+                            <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-引擎配置说明__entry__1">"cash"</td>
+                            <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-引擎配置说明__entry__2">初始资金</td>
+                            <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-引擎配置说明__entry__3">必须配置，DOUBLE 类型</td>
+                        </tr>
+                        <tr class="- topic/row">
+                            <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-引擎配置说明__entry__1">"commission"</td>
+                            <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-引擎配置说明__entry__2">手续费</td>
+                            <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-引擎配置说明__entry__3">必须配置，DOUBLE 类型</td>
+                        </tr>
+                        <tr class="- topic/row">
+                            <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-引擎配置说明__entry__1">"dataType"</td>
+                            <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-引擎配置说明__entry__2">行情类型</td>
+                            <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-引擎配置说明__entry__3">必须配置，INT 类型，可选值为：<p class="- topic/p p">1：快照</p><p class="- topic/p p">3：分钟频</p><p class="- topic/p p">4：日频</p></td>
+                        </tr>
+                        <tr class="- topic/row">
+                            <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-引擎配置说明__entry__1">“frequency”</td>
+                            <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-引擎配置说明__entry__2"> 快照数据以指定频率合成 bar</td>
+                            <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-引擎配置说明__entry__3">dataType = 1 仅有。<p class="- topic/p p">INT 类型， 默认为 0</p><ul class="- topic/ul ul">
+                                    <li class="- topic/li li">
+                                        <p class="- topic/p p">当 frequency = 0 时，该参数无效。</p>
+                                    </li>
+                                    <li class="- topic/li li">
+                                        <p class="- topic/p p">当 dataType=1 且 frequency &gt; 0 时，引擎内部合成 frequency 频率的
+                                            bar 行情触发 <code class="+ topic/ph pr-d/codeph ph codeph">onBar</code> 回调函数</p>
+                                    </li>
+                                </ul></td>
+                        </tr>
+                        <tr class="- topic/row">
+                            <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-引擎配置说明__entry__1">"msgAsTable"</td>
+                            <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-引擎配置说明__entry__2">行情的数据格式</td>
+                            <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-引擎配置说明__entry__3">BOOL 类型，默认为 false<p class="- topic/p p">false：字典</p><p class="- topic/p p">
+                                    true：表（只能通过接口createBacktestEngine 创建引擎）</p></td>
+                        </tr>
+                        <tr class="- topic/row">
+                            <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-引擎配置说明__entry__1">“matchingMode“</td>
+                            <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-引擎配置说明__entry__2">订单撮合模式</td>
+                            <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-引擎配置说明__entry__3">INT 类型，根据行情类型模式不同，可选值为：<p class="- topic/p p">1：</p><ul class="- topic/ul ul">
+                                    <li class="- topic/li li">
+                                        <p class="- topic/p p"> 日频：以收盘价撮合订单</p>
+                                    </li>
+                                    <li class="- topic/li li">
+                                        <p class="- topic/p p"> 分钟频：行情时间大于订单时间时撮合订单</p>
+                                    </li>
+                                </ul><p class="- topic/p p">2：</p><ul class="- topic/ul ul">
+                                    <li class="- topic/li li">
+                                        <p class="- topic/p p"> 日频：以开盘价撮合订单</p>
+                                    </li>
+                                    <li class="- topic/li li">
+                                        <p class="- topic/p p"> 分钟频：行情时间等于订单时间时以当前行情的收盘价撮合订单，后续未完成订单撮合订单同 1</p>
+                                    </li>
+                                </ul><p class="- topic/p p"> 3：以委托价格成交</p><p class="- topic/p p">当 dataType=1 时，该参数设置为 1 或 2
+                                    时无效，默认按模拟撮合引擎撮合订单</p></td>
+                        </tr>
+                        <tr class="- topic/row">
+                            <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-引擎配置说明__entry__1">“benchmark”</td>
+                            <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-引擎配置说明__entry__2"> 基准标的</td>
+                            <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-引擎配置说明__entry__3">STRING 或 SYMBOL 类型<p class="- topic/p p">例如 ”A2305“
+                                        ，在接口<code class="+ topic/ph pr-d/codeph ph codeph">getReturnSummary</code> 中使用</p></td>
+                        </tr>
+                        <tr class="- topic/row">
+                            <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-引擎配置说明__entry__1">"latency"</td>
+                            <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-引擎配置说明__entry__2">订单延时</td>
+                            <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-引擎配置说明__entry__3">INT 类型，单位为毫秒，用来模拟用户订单从发出到被处理的时延。</td>
+                        </tr>
+                        <tr class="- topic/row">
+                            <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-引擎配置说明__entry__1">“maintenanceMargin”</td>
+                            <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-引擎配置说明__entry__2">维保比例</td>
+                            <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-引擎配置说明__entry__3">DOUBLE 类型，默认 1.0，取值0~1.0 之间</td>
+                        </tr>
+                        <tr class="- topic/row">
+                            <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-引擎配置说明__entry__1">“enableIndicatorOptimize”</td>
+                            <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-引擎配置说明__entry__2">是否开启指标优化</td>
+                            <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-引擎配置说明__entry__3">BOOL 类型，默认为 false<p class="- topic/p p">true：开启</p><p class="- topic/p p">false：不开启</p></td>
+                        </tr>
+                        <tr class="- topic/row">
+                            <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-引擎配置说明__entry__1">“isBacktestMode“</td>
+                            <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-引擎配置说明__entry__2">是否为回测模式</td>
+                            <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-引擎配置说明__entry__3">BOOL 类型，默认为 true<p class="- topic/p p">true：回测模式</p><p class="- topic/p p">false：模拟交易模式</p></td>
+                        </tr>
+                        <tr class="- topic/row">
+                            <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-引擎配置说明__entry__1">”dataRetentionWindow“</td>
+                            <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-引擎配置说明__entry__2">开始指标优化时数据保留的窗口</td>
+                            <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-引擎配置说明__entry__3">STRING 类型或 INT 类型。 当 enableIndicatorOptimize = true 时，该参数生效。<ul class="- topic/ul ul">
+                                    <li class="- topic/li li">
+                                        <p class="- topic/p p">isBacktestMode = true 时，默认 “ALL ，可设置为：</p>
+                                        <ul class="- topic/ul ul">
+                                            <li class="- topic/li li">
+                                                <p class="- topic/p p">“ALL“：全部数据保留</p>
+                                            </li>
+                                            <li class="- topic/li li">
+                                                <p class="- topic/p p">“20d”：支持按天保留数据，即交易日天数，如 “20d” 代表 20 个交易日</p>
+                                            </li>
+                                            <li class="- topic/li li">
+                                                <p class="- topic/p p">“None”：不保留数据</p>
+                                            </li>
+                                            <li class="- topic/li li">
+                                                <p class="- topic/p p">20：支持按条数保留数据，如 20 代表每个 symbol 保留最新的 20 条</p>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    <li class="- topic/li li">
+                                        <p class="- topic/p p">isBacktestMode = false 时，无需设置</p>
+                                    </li>
+                                </ul></td>
+                        </tr>
+                        <tr class="- topic/row">
+                            <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-引擎配置说明__entry__1">”addTimeColumnInIndicator“</td>
+                            <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-引擎配置说明__entry__2">指标订阅时是否给指标数表增加时间列</td>
+                            <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-引擎配置说明__entry__3">BOOL 类型，默认 false<p class="- topic/p p">true：增加</p><p class="- topic/p p">false：不增加</p></td>
+                        </tr>
+                        <tr class="- topic/row">
+                            <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-引擎配置说明__entry__1">"context"</td>
+                            <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-引擎配置说明__entry__2">策略逻辑上下文类结构</td>
+                            <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-引擎配置说明__entry__3">DICT 类型，策略全局变量构成的字典，如：<pre class="- topic/pre pre">context=dict(STRING,ANY)
+context["buySignalRSI"]=70.
+context["buySignalRSI"]=30. 
+userConfig["context"]=context</pre></td>
+                        </tr>
+                        <tr class="- topic/row">
+                            <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-引擎配置说明__entry__1">”callbackForSnapshot “</td>
+                            <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-引擎配置说明__entry__2"> 快照行情触发回调模式</td>
+                            <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-引擎配置说明__entry__3">dataType = 1 仅有。<p class="- topic/p p">INT 类型，可选值为：</p><p class="- topic/p p">0：表示只触发
+                                        <code class="+ topic/ph pr-d/codeph ph codeph">onSnapshot</code></p><p class="- topic/p p">1 ：表示既触发
+                                        <code class="+ topic/ph pr-d/codeph ph codeph">onSnpshot</code> 又触发
+                                    <code class="+ topic/ph pr-d/codeph ph codeph">onBar</code></p><p class="- topic/p p">2 ：表示只触发
+                                    <code class="+ topic/ph pr-d/codeph ph codeph">onBar</code></p><p class="- topic/p p">默认为 0，当 frequency &gt; 0 时，必须触发
+                                        <code class="+ topic/ph pr-d/codeph ph codeph">onBar</code> 回调函数，即 callbackForSnapshot = 1 或者
+                                    2</p></td>
+                        </tr>
+                        <tr class="- topic/row">
+                            <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-引擎配置说明__entry__1">“orderBookMatchingRatio”</td>
+                            <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-引擎配置说明__entry__2"> 与行情订单薄的成交百分比</td>
+                            <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-引擎配置说明__entry__3">dataType = 1 仅有。<p class="- topic/p p">DOUBLE 类型，默认 1.0，取值 0~1.0 之间</p></td>
+                        </tr>
+                        <tr class="- topic/row">
+                            <td class="- topic/entry entry colsep-1 rowsep-0" headers="id-期权-引擎配置说明__entry__1">“matchingRatio”</td>
+                            <td class="- topic/entry entry colsep-1 rowsep-0" headers="id-期权-引擎配置说明__entry__2">区间撮合比例</td>
+                            <td class="- topic/entry entry colsep-0 rowsep-0" headers="id-期权-引擎配置说明__entry__3">dataType = 1 仅有。<p class="- topic/p p">DOUBLE 类型，默认 1.0，取值0~1.0 之间。默认和成交百分比
+                                    orderBookMatchingRatio 相等</p></td>
+                        </tr>
+                    </tbody></table></div>
+            <div class="- topic/note note note note_note" id="id-期权-引擎配置说明__note_x13_jcd_ndc" data-ofbid="id-期权-引擎配置说明__note_x13_jcd_ndc"><span class="note__title">注：</span> 
+                <p class="- topic/p p">不同的期权行情类型（dataType）的引擎配置参数有所差异。</p>
+                <p class="- topic/p p"> 快照行情触发回调模式“callbackForSnapshot” 、与行情订单薄的成交百分比 “orderBookMatchingRatio” 以及区间撮合比例
+                    “matchingRatio” 只有在快照的行情类型中可以设置，即 dataType = 1。</p>
+            </div>
+        </div>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title3" id="topic_jrj_dcd_ndc">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title3">基本信息表说明</h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p">接口 <code class="+ topic/ph pr-d/codeph ph codeph">createBacktester</code> 的参数 <code class="+ topic/ph pr-d/codeph ph codeph">securityReference</code> 和接口
+                        <code class="+ topic/ph pr-d/codeph ph codeph">createBacktestEngine</code> 的参数 <code class="+ topic/ph pr-d/codeph ph codeph">securityReference</code>
+                    的基本信息表字段可参考下表：</p>
+                <div class="table-container"><table class="- topic/table table frame-all" id="topic_jrj_dcd_ndc__table_klj_smb_pdc" data-ofbid="topic_jrj_dcd_ndc__table_klj_smb_pdc" data-cols="3"><caption></caption><colgroup><col/><col/><col/></colgroup><thead class="- topic/thead thead">
+                            <tr class="- topic/row">
+                                <th class="- topic/entry entry colsep-1 rowsep-1" id="topic_jrj_dcd_ndc__table_klj_smb_pdc__entry__1">
+                                    <strong class="+ topic/ph hi-d/b ph b">字段</strong>
+                                </th>
+                                <th class="- topic/entry entry colsep-1 rowsep-1" id="topic_jrj_dcd_ndc__table_klj_smb_pdc__entry__2">
+                                    <strong class="+ topic/ph hi-d/b ph b">类型</strong>
+                                </th>
+                                <th class="- topic/entry entry colsep-0 rowsep-1" id="topic_jrj_dcd_ndc__table_klj_smb_pdc__entry__3">
+                                    <strong class="+ topic/ph hi-d/b ph b">备注</strong>
+                                </th>
+                            </tr>
+                        </thead><tbody class="- topic/tbody tbody">
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_jrj_dcd_ndc__table_klj_smb_pdc__entry__1">symbol</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_jrj_dcd_ndc__table_klj_smb_pdc__entry__2">SYMBOL 或 STRING</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="topic_jrj_dcd_ndc__table_klj_smb_pdc__entry__3">合约代码</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_jrj_dcd_ndc__table_klj_smb_pdc__entry__1">underlyingAssetType</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_jrj_dcd_ndc__table_klj_smb_pdc__entry__2">INT</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="topic_jrj_dcd_ndc__table_klj_smb_pdc__entry__3">期权品种:<p class="- topic/p p">1：商品期权</p><p class="- topic/p p">2：股指期权</p><p class="- topic/p p">3：etf期权</p></td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_jrj_dcd_ndc__table_klj_smb_pdc__entry__1">multiplier</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_jrj_dcd_ndc__table_klj_smb_pdc__entry__2">DOUBLE</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="topic_jrj_dcd_ndc__table_klj_smb_pdc__entry__3">合约乘数</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_jrj_dcd_ndc__table_klj_smb_pdc__entry__1">type</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_jrj_dcd_ndc__table_klj_smb_pdc__entry__2">INT</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="topic_jrj_dcd_ndc__table_klj_smb_pdc__entry__3">期权类型<p class="- topic/p p">1：看涨（call）</p><p class="- topic/p p">2：看跌（put）</p></td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_jrj_dcd_ndc__table_klj_smb_pdc__entry__1">strikePrice</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_jrj_dcd_ndc__table_klj_smb_pdc__entry__2">DOUBLE</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="topic_jrj_dcd_ndc__table_klj_smb_pdc__entry__3">行权价</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_jrj_dcd_ndc__table_klj_smb_pdc__entry__1">marginRatio</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_jrj_dcd_ndc__table_klj_smb_pdc__entry__2">DOUBLE</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="topic_jrj_dcd_ndc__table_klj_smb_pdc__entry__3">保证金比率</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_jrj_dcd_ndc__table_klj_smb_pdc__entry__1">tradeUnit</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_jrj_dcd_ndc__table_klj_smb_pdc__entry__2">DOUBLE</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="topic_jrj_dcd_ndc__table_klj_smb_pdc__entry__3">合约单位</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_jrj_dcd_ndc__table_klj_smb_pdc__entry__1">priceUnit</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_jrj_dcd_ndc__table_klj_smb_pdc__entry__2">DOUBLE</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="topic_jrj_dcd_ndc__table_klj_smb_pdc__entry__3">报价单位</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_jrj_dcd_ndc__table_klj_smb_pdc__entry__1">priceTick</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_jrj_dcd_ndc__table_klj_smb_pdc__entry__2">DOUBLE</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="topic_jrj_dcd_ndc__table_klj_smb_pdc__entry__3"> 价格最小变动单位</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_jrj_dcd_ndc__table_klj_smb_pdc__entry__1">commission</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_jrj_dcd_ndc__table_klj_smb_pdc__entry__2">DOUBLE</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="topic_jrj_dcd_ndc__table_klj_smb_pdc__entry__3">手续费</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_jrj_dcd_ndc__table_klj_smb_pdc__entry__1">deliveryCommissionMode</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_jrj_dcd_ndc__table_klj_smb_pdc__entry__2">INT</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="topic_jrj_dcd_ndc__table_klj_smb_pdc__entry__3">1：commission / 手<p class="- topic/p p">2：成交额 * commission</p></td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_jrj_dcd_ndc__table_klj_smb_pdc__entry__1">lastTradingDay</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_jrj_dcd_ndc__table_klj_smb_pdc__entry__2">DATE</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="topic_jrj_dcd_ndc__table_klj_smb_pdc__entry__3">合约最后交易日</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_jrj_dcd_ndc__table_klj_smb_pdc__entry__1">exerciseDate</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_jrj_dcd_ndc__table_klj_smb_pdc__entry__2">DATE</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="topic_jrj_dcd_ndc__table_klj_smb_pdc__entry__3">期权行权日</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-0" headers="topic_jrj_dcd_ndc__table_klj_smb_pdc__entry__1">exerciseSettlementDate</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-0" headers="topic_jrj_dcd_ndc__table_klj_smb_pdc__entry__2">DATE</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-0" headers="topic_jrj_dcd_ndc__table_klj_smb_pdc__entry__3">行权交收日</td>
+                            </tr>
+                        </tbody></table></div>
+            </div>
+        </article>
+    </article>
+    <article class="- topic/topic topic nested1" aria-labelledby="ariaid-title4" id="id-期权-快照">
+        <h2 class="- topic/title title topictitle2" id="ariaid-title4">快照</h2>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title5" id="id-期权-行情数据结构说明">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title5">行情数据结构说明</h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p">通过接口 <code class="+ topic/ph pr-d/codeph ph codeph">appendQuotationMsg</code> 向引擎中插入数据时，<em class="+ topic/ph hi-d/i ph i">msg</em> 结构：</p>
+                <p class="- topic/p p">执行回测时输入表 messageTable 结构:
+                        <code class="+ topic/ph pr-d/codeph ph codeph">Backtest::appendQuotationMsg(engine,messamessageTable)</code></p>
+                <p class="- topic/p p">快照行情（frequency = 0，callbackForSnapshot = 0）时的表结构：</p>
+                <pre class="- topic/pre pre">colName = ["symbol", "symbolSource", "timestamp", "tradingDay", "lastPrice", "upLimitPrice",
+        "downLimitPrice", "totalBidQty", "totalOfferQty", "bidPrice", "bidQty", "offerPrice",
+        "offerQty", "highPrice", "lowPrice", "signal", "prevClosePrice", "settlementPrice",
+        "prevSettlementPrice", "underlyingPrice", "Theta", "Vega", "Gamma", "Delta", "IV"]
+colType = ["STRING", "STRING", "TIMESTAMP", "DATE", "DOUBLE", "DOUBLE", "DOUBLE", "LONG", "LONG",
+        "DOUBLE[]", "LONG[]", "DOUBLE[]", "LONG[]", "DOUBLE", "DOUBLE", "DOUBLE[]", "DOUBLE",
+        "DOUBLE", "DOUBLE", "DOUBLE", "DOUBLE", "DOUBLE", "DOUBLE", "DOUBLE", "DOUBLE"]
+messageTable = table(10000000:0, colName, colType)</pre>
+                <div class="- topic/note note note note_note" id="id-期权-行情数据结构说明__note_pcl_lcd_ndc" data-ofbid="id-期权-行情数据结构说明__note_pcl_lcd_ndc"><span class="note__title">注：</span> 
+                    <p class="- topic/p p">上述为快照行情（callbackForSnapshot = 0），即非快照合成 bar 行情的输入表结构。</p>
+                </div>
+                <p class="- topic/p p"> 快照行情数据表结构：</p>
+                <div class="table-container"><table class="- topic/table table frame-all" data-cols="3"><caption></caption><colgroup><col/><col/><col/></colgroup><thead class="- topic/thead thead">
+                            <tr class="- topic/row">
+                                <th class="- topic/entry entry colsep-1 rowsep-1" id="id-期权-行情数据结构说明__entry__1">
+                                    <strong class="+ topic/ph hi-d/b ph b">字段</strong>
+                                </th>
+                                <th class="- topic/entry entry colsep-1 rowsep-1" id="id-期权-行情数据结构说明__entry__2">
+                                    <strong class="+ topic/ph hi-d/b ph b">类型</strong>
+                                </th>
+                                <th class="- topic/entry entry colsep-0 rowsep-1" id="id-期权-行情数据结构说明__entry__3">
+                                    <strong class="+ topic/ph hi-d/b ph b">备注</strong>
+                                </th>
+                            </tr>
+                        </thead><tbody class="- topic/tbody tbody">
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明__entry__1">symbol</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明__entry__2">SYMBOL</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-行情数据结构说明__entry__3">期权代码</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明__entry__1">symbolSource</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明__entry__2">STRING</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-行情数据结构说明__entry__3">交易所</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明__entry__1">timestamp</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明__entry__2">TIMESTAMP</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-行情数据结构说明__entry__3">时间戳</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明__entry__1">tradingDay</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明__entry__2">DATE</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-行情数据结构说明__entry__3">交易日/结算日期</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明__entry__1">lastPrice</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明__entry__2">DOUBLE</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-行情数据结构说明__entry__3">最新成交价</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明__entry__1">upLimitPrice</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明__entry__2">DOUBLE</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-行情数据结构说明__entry__3">涨停价</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明__entry__1">downLimitPrice</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明__entry__2">DOUBLE</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-行情数据结构说明__entry__3">跌停价</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明__entry__1">totalBidQty</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明__entry__2">LONG</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-行情数据结构说明__entry__3">区间成交买数量</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明__entry__1">totalOfferQty</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明__entry__2">LONG</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-行情数据结构说明__entry__3">区间成交卖数量</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明__entry__1">bidPrice</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明__entry__2">DOUBLE[]</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-行情数据结构说明__entry__3">委托买价</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明__entry__1">bidQty</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明__entry__2">LONG[]</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-行情数据结构说明__entry__3">委托买量</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明__entry__1">offerPrice</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明__entry__2">DOUBLE[]</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-行情数据结构说明__entry__3">委托卖价</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明__entry__1">offerQty</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明__entry__2">LONG[]</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-行情数据结构说明__entry__3">委托卖价</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明__entry__1">highPrice</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明__entry__2">DOUBLE</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-行情数据结构说明__entry__3">最高价</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明__entry__1">lowPrice</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明__entry__2">DOUBLE</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-行情数据结构说明__entry__3">最低价</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明__entry__1">signal</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明__entry__2">DOUBLE[]</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-行情数据结构说明__entry__3">其他字段列表</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明__entry__1">prevClosePrice</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明__entry__2">DOUBLE</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-行情数据结构说明__entry__3">前收盘价</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明__entry__1">settlementPrice</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明__entry__2">DOUBLE</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-行情数据结构说明__entry__3">结算价</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明__entry__1">prevSettlementPrice</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明__entry__2">DOUBLE</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-行情数据结构说明__entry__3">前结算价</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明__entry__1">underlyingPrice</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明__entry__2">DOUBLE</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-行情数据结构说明__entry__3">标的价格</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明__entry__1">Theta</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明__entry__2">DOUBLE</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-行情数据结构说明__entry__3"> /</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明__entry__1">Vega</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明__entry__2">DOUBLE</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-行情数据结构说明__entry__3"> /</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明__entry__1">Gamma</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明__entry__2">DOUBLE</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-行情数据结构说明__entry__3"> /</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明__entry__1">Delta</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明__entry__2">DOUBLE</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-行情数据结构说明__entry__3"> /</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-0" headers="id-期权-行情数据结构说明__entry__1">IV</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-0" headers="id-期权-行情数据结构说明__entry__2">DOUBLE</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-0" headers="id-期权-行情数据结构说明__entry__3"> /</td>
+                            </tr>
+                        </tbody></table></div>
+                <p class="- topic/p p">快照行情（frequency &gt; 0，callbackForSnapshot = 1 或者 2）时的表结构：</p>
+                <pre class="- topic/pre pre">colName = ["symbol", "symbolSource", "timestamp", "tradingDay", "lastPrice", "upLimitPrice",
+        "downLimitPrice", "totalBidQty", "totalOfferQty", "bidPrice", "bidQty", "offerPrice",
+        "offerQty", "highPrice", "lowPrice", "signal", "prevClosePrice", "settlementPrice",
+        "prevSettlementPrice", "underlyingPrice", "Theta", "Vega", "Gamma", "Delta", "IV", "open", "close", "low", "high", "volume"]
+colType = ["STRING", "STRING", "TIMESTAMP", "DATE", "DOUBLE", "DOUBLE", "DOUBLE", "LONG", "LONG",
+        "DOUBLE[]", "LONG[]", "DOUBLE[]", "LONG[]", "DOUBLE", "DOUBLE", "DOUBLE[]", "DOUBLE",
+        "DOUBLE", "DOUBLE", "DOUBLE", "DOUBLE", "DOUBLE", "DOUBLE", "DOUBLE", "DOUBLE", "DOUBLE", "DOUBLE", "DOUBLE", "DOUBLE", "LONG"]
+messageTable = table(10000000:0, colName, colType)</pre>
+                <div class="- topic/note note note note_note" id="id-期权-行情数据结构说明__note_wyl_mcd_ndc" data-ofbid="id-期权-行情数据结构说明__note_wyl_mcd_ndc"><span class="note__title">注：</span> 
+                    <p class="- topic/p p">快照合成 bar 行情时（frequency &gt; 0且 callbackForSnapshot = 1 或者 2 ）,
+                        还需要增加五个字段："open", "close","low","high","volume"。</p>
+                </div>
+                <p class="- topic/p p"> 快照行情数据表结构（使用快照合成 bar 行情）：</p>
+                <div class="table-container"><table class="- topic/table table frame-all" data-cols="3"><caption></caption><colgroup><col/><col/><col/></colgroup><thead class="- topic/thead thead">
+                            <tr class="- topic/row">
+                                <th class="- topic/entry entry colsep-1 rowsep-1" id="id-期权-行情数据结构说明__entry__79">
+                                    <strong class="+ topic/ph hi-d/b ph b">字段</strong>
+                                </th>
+                                <th class="- topic/entry entry colsep-1 rowsep-1" id="id-期权-行情数据结构说明__entry__80">
+                                    <strong class="+ topic/ph hi-d/b ph b">类型</strong>
+                                </th>
+                                <th class="- topic/entry entry colsep-0 rowsep-1" id="id-期权-行情数据结构说明__entry__81">
+                                    <strong class="+ topic/ph hi-d/b ph b">备注</strong>
+                                </th>
+                            </tr>
+                        </thead><tbody class="- topic/tbody tbody">
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明__entry__79">symbol</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明__entry__80">SYMBOL</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-行情数据结构说明__entry__81">期权代码</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明__entry__79">symbolSource</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明__entry__80">STRING</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-行情数据结构说明__entry__81">交易所</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明__entry__79">timestamp</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明__entry__80">TIMESTAMP</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-行情数据结构说明__entry__81">时间戳</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明__entry__79">tradingDay</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明__entry__80">DATE</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-行情数据结构说明__entry__81">交易日/结算日期</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明__entry__79">lastPrice</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明__entry__80">DOUBLE</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-行情数据结构说明__entry__81">最新成交价</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明__entry__79">upLimitPrice</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明__entry__80">DOUBLE</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-行情数据结构说明__entry__81">涨停价</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明__entry__79">downLimitPrice</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明__entry__80">DOUBLE</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-行情数据结构说明__entry__81">跌停价</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明__entry__79">totalBidQty</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明__entry__80">LONG</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-行情数据结构说明__entry__81">区间成交买数量</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明__entry__79">totalOfferQty</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明__entry__80">LONG</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-行情数据结构说明__entry__81">区间成交卖数量</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明__entry__79">bidPrice</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明__entry__80">DOUBLE[]</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-行情数据结构说明__entry__81">委托买价</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明__entry__79">bidQty</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明__entry__80">LONG[]</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-行情数据结构说明__entry__81">委托买量</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明__entry__79">offerPrice</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明__entry__80">DOUBLE[]</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-行情数据结构说明__entry__81">委托卖价</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明__entry__79">offerQty</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明__entry__80">LONG[]</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-行情数据结构说明__entry__81">委托卖价</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明__entry__79">highPrice</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明__entry__80">DOUBLE</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-行情数据结构说明__entry__81">最高价</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明__entry__79">lowPrice</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明__entry__80">DOUBLE</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-行情数据结构说明__entry__81">最低价</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明__entry__79">signal</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明__entry__80">DOUBLE[]</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-行情数据结构说明__entry__81">其他字段列表</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明__entry__79">prevClosePrice</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明__entry__80">DOUBLE</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-行情数据结构说明__entry__81">前收盘价</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明__entry__79">settlementPrice</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明__entry__80">DOUBLE</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-行情数据结构说明__entry__81">结算价</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明__entry__79">prevSettlementPrice</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明__entry__80">DOUBLE</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-行情数据结构说明__entry__81">前结算价</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明__entry__79">underlyingPrice</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明__entry__80">DOUBLE</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-行情数据结构说明__entry__81">标的价格</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明__entry__79">Theta</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明__entry__80">DOUBLE</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-行情数据结构说明__entry__81"> /</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明__entry__79">Vega</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明__entry__80">DOUBLE</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-行情数据结构说明__entry__81"> /</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明__entry__79">Gamma</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明__entry__80">DOUBLE</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-行情数据结构说明__entry__81"> /</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明__entry__79">Delta</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明__entry__80">DOUBLE</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-行情数据结构说明__entry__81"> /</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明__entry__79">IV</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明__entry__80">DOUBLE</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-行情数据结构说明__entry__81"> /</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明__entry__79">open</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明__entry__80">DOUBLE</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-行情数据结构说明__entry__81">合成 bar 行情的开盘价</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明__entry__79">close</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明__entry__80">DOUBLE</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-行情数据结构说明__entry__81">合成 bar 行情的收盘价</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明__entry__79">low</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明__entry__80">DOUBLE</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-行情数据结构说明__entry__81">合成 bar 行情的最低价</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明__entry__79">high</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明__entry__80">DOUBLE</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-行情数据结构说明__entry__81">合成 bar 行情的最高价</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-0" headers="id-期权-行情数据结构说明__entry__79">volume</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-0" headers="id-期权-行情数据结构说明__entry__80">LONG</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-0" headers="id-期权-行情数据结构说明__entry__81">合成 bar 行情的成交量</td>
+                            </tr>
+                        </tbody></table></div>
+                <p class="- topic/p p"> 回测行情回放结束时，发送一条 symbol 为 “END” 的消息:</p>
+                <pre class="- topic/pre pre">//signal字段生成demo 
+//update tb set signal =fixedLengthArrayVector([close]) //或者在 select中通过 fixedLengthArrayVector([close])生成 
+messageTable=select top 1* from messageTable where timestamp=max(timestamp) 
+update messageTable set symbol="END" 
+Backtest::appendQuotationMsg(engine,messageTable)</pre>
+            </div>
+        </article>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title6" id="id-期权-策略回调函数说明">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title6">策略回调函数说明</h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p">快照行情回调函数 <code class="+ topic/ph pr-d/codeph ph codeph">onSnapshot</code>：输入参数 msg</p>
+                <p class="- topic/p p">msg 为字典时，是以 symbol为 key 的 snapShot 数据字典。每个 snapShot 对象包含字段如下：</p>
+                <div class="table-container"><table class="- topic/table table frame-all" data-cols="3"><caption></caption><colgroup><col/><col/><col/></colgroup><thead class="- topic/thead thead">
+                            <tr class="- topic/row">
+                                <th class="- topic/entry entry colsep-1 rowsep-1" id="id-期权-策略回调函数说明__entry__1">
+                                    <strong class="+ topic/ph hi-d/b ph b">字段</strong>
+                                </th>
+                                <th class="- topic/entry entry colsep-1 rowsep-1" id="id-期权-策略回调函数说明__entry__2">
+                                    <strong class="+ topic/ph hi-d/b ph b">类型</strong>
+                                </th>
+                                <th class="- topic/entry entry colsep-0 rowsep-1" id="id-期权-策略回调函数说明__entry__3">
+                                    <strong class="+ topic/ph hi-d/b ph b">备注</strong>
+                                </th>
+                            </tr>
+                        </thead><tbody class="- topic/tbody tbody">
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明__entry__1">symbol</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明__entry__2">SYMBOL</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-策略回调函数说明__entry__3">期权代码</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明__entry__1">symbolSource</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明__entry__2">STRING</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-策略回调函数说明__entry__3">交易所</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明__entry__1">timestamp</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明__entry__2">TIMESTAMP</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-策略回调函数说明__entry__3">时间戳</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明__entry__1">tradingDay</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明__entry__2">DATE</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-策略回调函数说明__entry__3">交易日/结算日期</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明__entry__1">lastPrice</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明__entry__2">DOUBLE</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-策略回调函数说明__entry__3">最新成交价</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明__entry__1">upLimitPrice</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明__entry__2">DOUBLE</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-策略回调函数说明__entry__3">涨停价</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明__entry__1">downLimitPrice</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明__entry__2">DOUBLE</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-策略回调函数说明__entry__3">跌停价</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明__entry__1">totalBidQty</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明__entry__2">LONG</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-策略回调函数说明__entry__3">区间成交买数量</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明__entry__1">totalOfferQty</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明__entry__2">LONG</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-策略回调函数说明__entry__3">区间成交卖数量</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明__entry__1">bidPrice</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明__entry__2">DOUBLE[]</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-策略回调函数说明__entry__3">委托买价</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明__entry__1">bidQty</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明__entry__2">LONG[]</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-策略回调函数说明__entry__3">委托买量</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明__entry__1">offerPrice</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明__entry__2">DOUBLE[]</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-策略回调函数说明__entry__3">委托卖价</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明__entry__1">offerQty</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明__entry__2">LONG[]</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-策略回调函数说明__entry__3">委托卖价</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明__entry__1">highPrice</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明__entry__2">DOUBLE</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-策略回调函数说明__entry__3">最高价</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明__entry__1">lowPrice</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明__entry__2">DOUBLE</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-策略回调函数说明__entry__3">最低价</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明__entry__1">signal</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明__entry__2">DOUBLE[]</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-策略回调函数说明__entry__3">其他字段列表</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明__entry__1">prevClosePrice</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明__entry__2">DOUBLE</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-策略回调函数说明__entry__3">前收盘价</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明__entry__1">settlementPrice</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明__entry__2">DOUBLE</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-策略回调函数说明__entry__3">结算价</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明__entry__1">prevSettlementPrice</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明__entry__2">DOUBLE</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-策略回调函数说明__entry__3">前结算价</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明__entry__1">underlyingPrice</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明__entry__2">DOUBLE</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-策略回调函数说明__entry__3">标的价格</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明__entry__1">Theta</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明__entry__2">DOUBLE</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-策略回调函数说明__entry__3"> /</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明__entry__1">Vega</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明__entry__2">DOUBLE</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-策略回调函数说明__entry__3">/</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明__entry__1">Gamma</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明__entry__2">DOUBLE</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-策略回调函数说明__entry__3"> /</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明__entry__1">Delta</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明__entry__2">DOUBLE</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-策略回调函数说明__entry__3"> /</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明__entry__1">IV</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明__entry__2">DOUBLE</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-策略回调函数说明__entry__3"> /</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明__entry__1">open</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明__entry__2">DOUBLE</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-策略回调函数说明__entry__3">合成 bar 行情的开盘价<p class="- topic/p p">（dataType = 1 或者 2，callbackForSnapshot = 1 或者
+                                        2 时才有）</p></td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明__entry__1">close</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明__entry__2">DOUBLE</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-策略回调函数说明__entry__3">合成 bar 行情的收盘价<p class="- topic/p p">（dataType = 1 或者 2，callbackForSnapshot = 1 或者
+                                        2 时才有）</p></td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明__entry__1">low</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明__entry__2">DOUBLE</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-策略回调函数说明__entry__3">合成 bar 行情的最低价<p class="- topic/p p">（dataType = 1 或者 2，callbackForSnapshot = 1 或者
+                                        2 时才有）</p></td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明__entry__1">high</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明__entry__2">DOUBLE</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-策略回调函数说明__entry__3">合成 bar 行情的最高价<p class="- topic/p p">（dataType = 1 或者 2 ，callbackForSnapshot = 1
+                                        或者 2 时才有）</p></td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-0" headers="id-期权-策略回调函数说明__entry__1">volume</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-0" headers="id-期权-策略回调函数说明__entry__2">LONG</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-0" headers="id-期权-策略回调函数说明__entry__3">合成 bar 行情的成交量<p class="- topic/p p">（dataType = 1 或者 2 ，callbackForSnapshot = 1
+                                        或者 2 时才有）</p></td>
+                            </tr>
+                        </tbody></table></div>
+                <div class="- topic/note note note note_note" id="id-期权-策略回调函数说明__note_crq_ncd_ndc" data-ofbid="id-期权-策略回调函数说明__note_crq_ncd_ndc"><span class="note__title">注：</span> 
+                    <ul class="- topic/ul ul" id="id-期权-策略回调函数说明__ul_t5x_ncd_ndc" data-ofbid="id-期权-策略回调函数说明__ul_t5x_ncd_ndc">
+                        <li class="- topic/li li">
+                            <p class="- topic/p p">快照合成 bar 行情时（frequency &gt; 0 且 callbackForSnapshot = 1 或者 2）, 输入参数
+                                msg 还需要增加五个字段："open", "close","low","high","volume"。</p>
+                        </li>
+                        <li class="- topic/li li">
+                            <p class="- topic/p p">当 callbackForSnapshot = 1 或 2 时，还需回调 onBar 函数，输入参数 msg 的数据结构如下。</p>
+                        </li>
+                    </ul>
+                </div>
+                <p class="- topic/p p">k 线行情回调函数 <code class="+ topic/ph pr-d/codeph ph codeph">onBar</code>：输入参数 msg</p>
+                <p class="- topic/p p">msg 为字典时，是以 symbol 为 key 的 分钟频率的 bar 数据字典。每个 K 线包含字段如下：</p>
+                <div class="table-container"><table class="- topic/table table frame-all" data-cols="3"><caption></caption><colgroup><col/><col/><col/></colgroup><thead class="- topic/thead thead">
+                            <tr class="- topic/row">
+                                <th class="- topic/entry entry colsep-1 rowsep-1" id="id-期权-策略回调函数说明__entry__94">
+                                    <strong class="+ topic/ph hi-d/b ph b">字段</strong>
+                                </th>
+                                <th class="- topic/entry entry colsep-1 rowsep-1" id="id-期权-策略回调函数说明__entry__95">
+                                    <strong class="+ topic/ph hi-d/b ph b">类型</strong>
+                                </th>
+                                <th class="- topic/entry entry colsep-0 rowsep-1" id="id-期权-策略回调函数说明__entry__96">
+                                    <strong class="+ topic/ph hi-d/b ph b">备注</strong>
+                                </th>
+                            </tr>
+                        </thead><tbody class="- topic/tbody tbody">
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明__entry__94">symbol</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明__entry__95">SYMBOL</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-策略回调函数说明__entry__96">期权代码</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明__entry__94">symbolSource</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明__entry__95">STRING</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-策略回调函数说明__entry__96">交易所</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明__entry__94">tradeTime</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明__entry__95">TIMESTAMP</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-策略回调函数说明__entry__96">时间戳</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明__entry__94">tradingDay</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明__entry__95">DATE</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-策略回调函数说明__entry__96">交易日/结算日期</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明__entry__94">open</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明__entry__95">DOUBLE</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-策略回调函数说明__entry__96">开盘价</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明__entry__94">low</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明__entry__95">DOUBLE</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-策略回调函数说明__entry__96">最低价</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明__entry__94">high</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明__entry__95">DOUBLE</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-策略回调函数说明__entry__96">最高价</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明__entry__94">close</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明__entry__95">DOUBLE</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-策略回调函数说明__entry__96">收盘价</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明__entry__94">volume</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明__entry__95">LONG</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-策略回调函数说明__entry__96">成交量</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明__entry__94">amount</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明__entry__95">DOUBLE</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-策略回调函数说明__entry__96">成交金额</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明__entry__94">upLimitPrice</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明__entry__95">DOUBLE</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-策略回调函数说明__entry__96">涨停价</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明__entry__94">downLimitPrice</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明__entry__95">DOUBLE</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-策略回调函数说明__entry__96">跌停价</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明__entry__94">signal</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明__entry__95">DOUBLE[]</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-策略回调函数说明__entry__96">其他字段列表</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明__entry__94">prevClosePrice</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明__entry__95">DOUBLE</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-策略回调函数说明__entry__96">前收盘价</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明__entry__94">settlementPrice</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明__entry__95">DOUBLE</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-策略回调函数说明__entry__96">结算价</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明__entry__94">prevSettlementPrice</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明__entry__95">DOUBLE</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-策略回调函数说明__entry__96">前结算价</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明__entry__94">underlyingPrice</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明__entry__95">DOUBLE</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-策略回调函数说明__entry__96">标的价格</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明__entry__94">Theta</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明__entry__95">DOUBLE</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-策略回调函数说明__entry__96"> /</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明__entry__94">Vega</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明__entry__95">DOUBLE</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-策略回调函数说明__entry__96"> /</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明__entry__94">Gamma</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明__entry__95">DOUBLE</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-策略回调函数说明__entry__96"> /</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明__entry__94">Delta</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明__entry__95">DOUBLE</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-策略回调函数说明__entry__96"> /</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-0" headers="id-期权-策略回调函数说明__entry__94">IV</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-0" headers="id-期权-策略回调函数说明__entry__95">DOUBLE</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-0" headers="id-期权-策略回调函数说明__entry__96"> /</td>
+                            </tr>
+                        </tbody></table></div>
+            </div>
+        </article>
+    </article>
+    <article class="- topic/topic topic nested1" aria-labelledby="ariaid-title7" id="id-期权-分钟频率或日频">
+        <h2 class="- topic/title title topictitle2" id="ariaid-title7">分钟频率或日频</h2>
+        <div class="- topic/body body"></div>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title8" id="id-期权-行情数据结构说明.1">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title8">行情数据结构说明</h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p">通过接口 <code class="+ topic/ph pr-d/codeph ph codeph">appendQuotationMsg</code> 向引擎中插入数据时，<em class="+ topic/ph hi-d/i ph i">msg</em> 结构：</p>
+                <p class="- topic/p p">执行回测时输入表 messageTable 结构:
+                        <code class="+ topic/ph pr-d/codeph ph codeph">Backtest::appendQuotationMsg(engine,messamessageTable)</code></p>
+                <pre class="- topic/pre pre">colName=`symbol`symbolSource`tradeTime`tradingDay`open`low`high`close`volume`amount`upLimitPrice`downLimitPrice`signal`prevClosePrice`settlementPrice`prevSettlementPrice`underlyingPrice`Theta`Vega`Gamma`Delta`IV
+colType=[SYMBOL,SYMBOL,TIMESTAMP,DATE,DOUBLE,DOUBLE,DOUBLE,DOUBLE,LONG,DOUBLE,DOUBLE,DOUBLE,
+        DOUBLE[],DOUBLE,DOUBLE,DOUBLE,DOUBLE,DOUBLE,DOUBLE,DOUBLE,DOUBLE,DOUBLE]
+messageTable=table(10000000:0, colName, colType)</pre>
+                <p class="- topic/p p"> 分钟频行情数据表结构：</p>
+                <div class="table-container"><table class="- topic/table table frame-all" data-cols="3"><caption></caption><colgroup><col/><col/><col/></colgroup><thead class="- topic/thead thead">
+                            <tr class="- topic/row">
+                                <th class="- topic/entry entry colsep-1 rowsep-1" id="id-期权-行情数据结构说明.1__entry__1">
+                                    <strong class="+ topic/ph hi-d/b ph b">字段</strong>
+                                </th>
+                                <th class="- topic/entry entry colsep-1 rowsep-1" id="id-期权-行情数据结构说明.1__entry__2">
+                                    <strong class="+ topic/ph hi-d/b ph b">类型</strong>
+                                </th>
+                                <th class="- topic/entry entry colsep-0 rowsep-1" id="id-期权-行情数据结构说明.1__entry__3">
+                                    <strong class="+ topic/ph hi-d/b ph b">备注</strong>
+                                </th>
+                            </tr>
+                        </thead><tbody class="- topic/tbody tbody">
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明.1__entry__1">symbol</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明.1__entry__2">SYMBOL</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-行情数据结构说明.1__entry__3">期权代码</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明.1__entry__1">symbolSource</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明.1__entry__2">STRING</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-行情数据结构说明.1__entry__3">交易所</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明.1__entry__1">tradeTime</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明.1__entry__2">TIMESTAMP</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-行情数据结构说明.1__entry__3">时间戳</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明.1__entry__1">tradingDay</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明.1__entry__2">DATE</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-行情数据结构说明.1__entry__3">交易日/结算日期</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明.1__entry__1">open</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明.1__entry__2">DOUBLE</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-行情数据结构说明.1__entry__3">开盘价</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明.1__entry__1">low</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明.1__entry__2">DOUBLE</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-行情数据结构说明.1__entry__3">最低价</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明.1__entry__1">high</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明.1__entry__2">DOUBLE</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-行情数据结构说明.1__entry__3">最高价</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明.1__entry__1">close</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明.1__entry__2">DOUBLE</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-行情数据结构说明.1__entry__3">收盘价</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明.1__entry__1">volume</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明.1__entry__2">LONG</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-行情数据结构说明.1__entry__3">成交量</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明.1__entry__1">amount</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明.1__entry__2">DOUBLE</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-行情数据结构说明.1__entry__3">成交金额</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明.1__entry__1">upLimitPrice</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明.1__entry__2">DOUBLE</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-行情数据结构说明.1__entry__3">涨停价</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明.1__entry__1">downLimitPrice</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明.1__entry__2">DOUBLE</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-行情数据结构说明.1__entry__3">跌停价</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明.1__entry__1">signal</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明.1__entry__2">DOUBLE[]</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-行情数据结构说明.1__entry__3">其他字段列表</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明.1__entry__1">prevClosePrice</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明.1__entry__2">DOUBLE</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-行情数据结构说明.1__entry__3">前收盘价</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明.1__entry__1">settlementPrice</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明.1__entry__2">DOUBLE</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-行情数据结构说明.1__entry__3">结算价</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明.1__entry__1">prevSettlementPrice</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明.1__entry__2">DOUBLE</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-行情数据结构说明.1__entry__3">前结算价</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明.1__entry__1">underlyingPrice</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明.1__entry__2">DOUBLE</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-行情数据结构说明.1__entry__3">标的价格</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明.1__entry__1">Theta</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明.1__entry__2">DOUBLE</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-行情数据结构说明.1__entry__3"> /</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明.1__entry__1">Vega</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明.1__entry__2">DOUBLE</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-行情数据结构说明.1__entry__3"> /</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明.1__entry__1">Gamma</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明.1__entry__2">DOUBLE</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-行情数据结构说明.1__entry__3"> /</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明.1__entry__1">Delta</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-行情数据结构说明.1__entry__2">DOUBLE</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-行情数据结构说明.1__entry__3"> /</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-0" headers="id-期权-行情数据结构说明.1__entry__1">IV</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-0" headers="id-期权-行情数据结构说明.1__entry__2">DOUBLE</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-0" headers="id-期权-行情数据结构说明.1__entry__3"> /</td>
+                            </tr>
+                        </tbody></table></div>
+                <p class="- topic/p p"> 回测行情回放结束时，发送一条 symbol 为 “END” 的消息:</p>
+                <pre class="- topic/pre pre">//signal字段生成demo 
+//update tb set signal =fixedLengthArrayVector([close]) 
+messageTable=select top 1* from messageTable where timestamp=max(timestamp) 
+update messageTable set symbol="END" 
+Backtest::appendQuotationMsg(engine,messageTable)</pre>
+            </div>
+        </article>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title9" id="id-期权-策略回调函数说明.1">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title9">策略回调函数说明</h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p">k 线行情回调函数 <code class="+ topic/ph pr-d/codeph ph codeph">onBar</code>：输入参数 msg</p>
+                <p class="- topic/p p">msg 为字典时，是以 symbol 为 key 的 分钟频率的 snapShot 数据字典。每个 K 线包含字段如下：</p>
+                <div class="table-container"><table class="- topic/table table frame-all" data-cols="3"><caption></caption><colgroup><col/><col/><col/></colgroup><thead class="- topic/thead thead">
+                            <tr class="- topic/row">
+                                <th class="- topic/entry entry colsep-1 rowsep-1" id="id-期权-策略回调函数说明.1__entry__1">
+                                    <strong class="+ topic/ph hi-d/b ph b">字段</strong>
+                                </th>
+                                <th class="- topic/entry entry colsep-1 rowsep-1" id="id-期权-策略回调函数说明.1__entry__2">
+                                    <strong class="+ topic/ph hi-d/b ph b">类型</strong>
+                                </th>
+                                <th class="- topic/entry entry colsep-0 rowsep-1" id="id-期权-策略回调函数说明.1__entry__3">
+                                    <strong class="+ topic/ph hi-d/b ph b">备注</strong>
+                                </th>
+                            </tr>
+                        </thead><tbody class="- topic/tbody tbody">
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明.1__entry__1">symbol</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明.1__entry__2">SYMBOL</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-策略回调函数说明.1__entry__3">期权代码</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明.1__entry__1">symbolSource</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明.1__entry__2">STRING</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-策略回调函数说明.1__entry__3">交易所</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明.1__entry__1">tradeTime</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明.1__entry__2">TIMESTAMP</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-策略回调函数说明.1__entry__3">时间戳</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明.1__entry__1">tradingDay</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明.1__entry__2">DATE</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-策略回调函数说明.1__entry__3">交易日/结算日期</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明.1__entry__1">open</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明.1__entry__2">DOUBLE</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-策略回调函数说明.1__entry__3">开盘价</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明.1__entry__1">low</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明.1__entry__2">DOUBLE</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-策略回调函数说明.1__entry__3">最低价</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明.1__entry__1">high</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明.1__entry__2">DOUBLE</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-策略回调函数说明.1__entry__3">最高价</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明.1__entry__1">close</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明.1__entry__2">DOUBLE</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-策略回调函数说明.1__entry__3">收盘价</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明.1__entry__1">volume</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明.1__entry__2">LONG</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-策略回调函数说明.1__entry__3">成交量</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明.1__entry__1">amount</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明.1__entry__2">DOUBLE</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-策略回调函数说明.1__entry__3">成交金额</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明.1__entry__1">upLimitPrice</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明.1__entry__2">DOUBLE</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-策略回调函数说明.1__entry__3">涨停价</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明.1__entry__1">downLimitPrice</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明.1__entry__2">DOUBLE</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-策略回调函数说明.1__entry__3">跌停价</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明.1__entry__1">signal</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明.1__entry__2">DOUBLE[]</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-策略回调函数说明.1__entry__3">其他字段列表</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明.1__entry__1">prevClosePrice</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明.1__entry__2">DOUBLE</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-策略回调函数说明.1__entry__3">前收盘价</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明.1__entry__1">settlementPrice</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明.1__entry__2">DOUBLE</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-策略回调函数说明.1__entry__3">结算价</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明.1__entry__1">prevSettlementPrice</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明.1__entry__2">DOUBLE</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-策略回调函数说明.1__entry__3">前结算价</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明.1__entry__1">underlyingPrice</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明.1__entry__2">DOUBLE</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-策略回调函数说明.1__entry__3">标的价格</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明.1__entry__1">Theta</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明.1__entry__2">DOUBLE</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-策略回调函数说明.1__entry__3"> /</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明.1__entry__1">Vega</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明.1__entry__2">DOUBLE</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-策略回调函数说明.1__entry__3"> /</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明.1__entry__1">Gamma</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明.1__entry__2">DOUBLE</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-策略回调函数说明.1__entry__3"> /</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明.1__entry__1">Delta</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="id-期权-策略回调函数说明.1__entry__2">DOUBLE</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="id-期权-策略回调函数说明.1__entry__3"> /</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-0" headers="id-期权-策略回调函数说明.1__entry__1">IV</td>
+                                <td class="- topic/entry entry colsep-1 rowsep-0" headers="id-期权-策略回调函数说明.1__entry__2">DOUBLE</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-0" headers="id-期权-策略回调函数说明.1__entry__3"> /</td>
+                            </tr>
+                        </tbody></table></div>
+            </div>
+        </article>
+    </article>
+</article></main></div>
+                        
+                        
+                        
+                        
+                        
+                        
+                    </div>
+                    
+                        <nav role="navigation" id="wh_topic_toc" aria-label="On this page" class="col-lg-2 d-none d-lg-block navbar d-print-none"> 
+                            <div id="wh_topic_toc_content">
+		                        
+	                            <div class=" wh_topic_toc "><div class="wh_topic_label">在本页上</div><ul><li class="topic-item"><a href="#id-%E6%9C%9F%E6%9D%83-%E5%BC%95%E6%93%8E%E9%85%8D%E7%BD%AE%E8%AF%B4%E6%98%8E" data-tocid="id-期权-引擎配置说明">引擎配置说明</a><ul><li class="topic-item"><a href="#topic_jrj_dcd_ndc" data-tocid="topic_jrj_dcd_ndc">基本信息表说明</a></li></ul></li><li class="topic-item"><a href="#id-%E6%9C%9F%E6%9D%83-%E5%BF%AB%E7%85%A7" data-tocid="id-期权-快照">快照</a><ul><li class="topic-item"><a href="#id-%E6%9C%9F%E6%9D%83-%E8%A1%8C%E6%83%85%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E8%AF%B4%E6%98%8E" data-tocid="id-期权-行情数据结构说明">行情数据结构说明</a></li><li class="topic-item"><a href="#id-%E6%9C%9F%E6%9D%83-%E7%AD%96%E7%95%A5%E5%9B%9E%E8%B0%83%E5%87%BD%E6%95%B0%E8%AF%B4%E6%98%8E" data-tocid="id-期权-策略回调函数说明">策略回调函数说明</a></li></ul></li><li class="topic-item"><a href="#id-%E6%9C%9F%E6%9D%83-%E5%88%86%E9%92%9F%E9%A2%91%E7%8E%87%E6%88%96%E6%97%A5%E9%A2%91" data-tocid="id-期权-分钟频率或日频">分钟频率或日频</a><ul><li class="topic-item"><a href="#id-%E6%9C%9F%E6%9D%83-%E8%A1%8C%E6%83%85%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E8%AF%B4%E6%98%8E.1" data-tocid="id-期权-行情数据结构说明.1">行情数据结构说明</a></li><li class="topic-item"><a href="#id-%E6%9C%9F%E6%9D%83-%E7%AD%96%E7%95%A5%E5%9B%9E%E8%B0%83%E5%87%BD%E6%95%B0%E8%AF%B4%E6%98%8E.1" data-tocid="id-期权-策略回调函数说明.1">策略回调函数说明</a></li></ul></li></ul></div>
+	                        	
+                        	</div>
+                        </nav>
+                    
+                </div>
+            </div>
+            
+            
+            
+        </div> 
+        <footer class="navbar navbar-default wh_footer">
+  <div class=" footer-container mx-auto ">
+<title>Copyright</title><p><b> ©2025 浙江智臾科技有限公司 浙ICP备18048711号-3</b></p>
+  </div>
+</footer>
+        
+        <div id="go2top" class="d-print-none">
+            <span class="oxy-icon oxy-icon-up"></span>
+        </div>
+        
+        <div id="modal_img_large" class="modal">
+            <span class="close oxy-icon oxy-icon-remove"></span>
+            <div id="modal_img_container"></div>
+            <div id="caption"></div>
+        </div>
+        
+        
+        
+    </body>
+</html>

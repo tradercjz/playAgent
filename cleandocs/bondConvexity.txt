@@ -1,0 +1,44 @@
+
+
+### bondConvexity
+
+#### 语法  
+```DolphinDB
+bondConvexity(settlement, maturity, coupon, yield, [frequency], [basis=1], [bondType=0])
+```
+**别名**：`fiConvexity`
+
+#### 详情  
+返回定期付息的面值为 100 的有价证券的债券凸性。凸性指债券价格与利率间非线性关系的一种量度，表示为债券价格对利率的二阶导数。  
+**返回值**：`DOUBLE` 类型的标量或向量。
+
+---
+
+#### 参数  
+| 参数        | 类型               | 说明                                                                 |
+|-------------|--------------------|----------------------------------------------------------------------|
+| settlement  | DATE 类型标量/向量 | 结算日（购买日期）                                                   |
+| maturity    | DATE 类型标量/向量 | 到期日（有效期截止日期）                                             |
+| coupon      | 数值型标量/向量    | 年息票利率                                                           |
+| yield       | 数值型标量/向量    | 年收益率                                                             |
+| frequency   | 整型/DURATION      | 年付息频率（当 `bondType=0` 时必填）<br>可选值：`1/1y`, `2/6M`, `4/3M`, `12/1M` |
+| basis       | 整型/STRING        | 日计数基准类型（默认 `1`）：<br>`0/"Thirty360US"`, `1/"ActualActual"`, `2/"Actual360"`, `3/"Actual365"`, `4/"Thirty360EU"` |
+| bondType    | 整型/STRING        | 债券类型（默认 `0`）：<br>`0/"FixedRate"`, `1/"Discount"`, `2/"ZeroCoupon"` |
+
+**注意**：若参数为向量，长度必须一致。
+
+---
+
+#### 示例  
+计算 2023-01-01 购买、2030-12-31 到期债券的凸性（年息票利率 5%，收益率 6%，按年付息，日计数基准为实际/实际）：
+```DolphinDB
+bondConvexity(
+    settlement=2023.01.01, 
+    maturity=2030.12.31, 
+    coupon=0.05, 
+    yield=0.06, 
+    frequency=1, 
+    basis=1
+)
+// 输出：50.78238914091385
+```

@@ -1,0 +1,74 @@
+
+
+# bondCashflow
+
+## 语法
+
+```DolphinDB
+bondCashflow(settlement, maturity, coupon, [frequency], [basis=1], [bondType=0])
+```
+
+## 详情
+
+计算面值为 100 元的债券的现金流，支持固息债券、零息债券和贴现债券。返回 DOUBLE 类型的 vector 或 array vector。
+
+## 参数
+
+### settlement
+- 类型：DATE 标量或向量
+- 描述：证券的结算日（购买日期）
+
+### maturity 
+- 类型：DATE 标量或向量
+- 描述：证券的到期日
+
+### coupon
+- 类型：数值型标量或向量（非负数）
+- 描述：年息票利率
+
+### frequency（可选）
+- 类型：整型或 DURATION
+- 描述：年付息频率（固息债券必填）
+- 可选值：
+  - 1 / 1y：按年支付
+  - 2 / 6M：半年支付
+  - 4 / 3M：按季支付
+  - 12 / 1M：按月支付
+
+### basis（默认1）
+- 类型：整型或 STRING
+- 描述：日计数基准
+- 可选值：
+  | Basis | 日计数基准         |
+  |-------|------------------|
+  | 0     | Thirty360US      |
+  | 1     | ActualActual     | 
+  | 2     | Actual360        |
+  | 3     | Actual365        |
+  | 4     | Thirty360EU      |
+
+### bondType（默认0）
+- 类型：整型或 STRING
+- 描述：债券类型
+- 可选值：
+  - 0 / "FixedRate"：固息债券
+  - 1 / "Discount"：贴现债券
+  - 2 / "ZeroCoupon"：零息债券
+
+## 示例
+
+计算2022.09.28购买的两个固息债券现金流：
+```DolphinDB
+settlement = 2022.09.28
+maturity = [2023.09.28, 2024.09.28]
+coupon = 0.025
+frequency = 4
+basis = 1
+
+bondCashflow(settlement, maturity, coupon, frequency, basis);
+
+/* 输出结果
+[[0.625,0.625,0.625,100.625],
+ [0.625,0.625,0.625,0.625,0.625,0.625,0.625,100.625]]
+*/
+```

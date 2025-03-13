@@ -1,0 +1,1 @@
+oxy_webhelp_navlinks = {"tocId-d9713e91670":{"topics":[{"title":"xdb","href":"funcs\/x\/xdb.html","attributes":{"data-id":"xdb"},"menu":{"hasChildren":false},"tocID":"xdb-d9713e91671","topics":[]},{"title":"xor","href":"funcs\/x\/xor.html","attributes":{"data-id":"xor"},"menu":{"hasChildren":false},"tocID":"xor-d9713e91717","topics":[]}]}};

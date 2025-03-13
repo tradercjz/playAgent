@@ -1,0 +1,88 @@
+
+
+# irs
+
+## 语法
+
+```DolphinDB
+irs(settlement, resetInterval, start, maturity, notional, fixedRate, spread, curve, frequency, calendar, [convention='ModifiedFollowing'], [basis=1], [rateType=0])
+```
+
+## 描述
+
+返回对于浮动利率支付方的利率互换估值（DOUBLE 类型标量或向量）。利率互换交易双方同意交换未来一段时间内的利率支付流，一方支付固定利率，另一方支付浮动利率（如 SHIBOR），持续多个周期直至合约结束。
+
+## 参数
+
+| **参数**         | **类型**                | **说明**                                                                 |
+|------------------|-------------------------|-------------------------------------------------------------------------|
+| settlement       | DATE                   | 估值日                                                                   |
+| resetInterval    | DURATION               | 利率重置间隔（如7天重置设为7d）                                            |
+| start            | DATE                   | 首次利率互换日期                                                          |
+| maturity         | DATE                   | 末次利率互换日期                                                          |
+| notional         | 数值型                  | 本金金额                                                                 |
+| fixedRate        | 数值型                  | 固定利率支付方的固定利率                                                   |
+| spread           | 数值型                  | 浮动利率的利差                                                            |
+| curve            | 字典                    | 拟合后的利率曲线                                                          |
+| frequency        | 整型/DURATION          | 利率互换频率（1=年付1次，3M=季付等）                                       |
+| calendar         | STRING                 | 交易日历类型（参见[交易日历](../../modules/MarketHoliday/mkt_calendar.html)） |
+| convention       | STRING（可选）          | 非工作日调整方法（默认'ModifiedFollowing'）                               |
+| basis            | 整型/STRING（可选）     | 日计数基准（默认1，即实际/实际）                                           |
+| rateType         | 整型/STRING（可选）     | 复利类型（默认0，即连续复利）                                              |
+
+**frequency可选值对照表：**
+| 输入值          | 付息频率                |
+|-----------------|-------------------------|
+| 1 或 1y         | 年付1次                 |
+| 2 或 6M         | 半年付1次               |
+| 4 或 3M         | 季付                    |
+| 12 或 1M        | 月付                    |
+
+**basis可选值：**
+| 值   | 日计数基准              |
+|------|-------------------------|
+| 0    | US (NASD) 30/360        |
+| 1    | 实际/实际（默认）        |
+| 2    | 实际/360                |
+| 3    | 实际/365                |
+
+## 示例
+
+为2023年7月10日交易的利率互换估值，本金100万，周频重置利率，使用上交所日历：
+
+```DolphinDB
+settlement = 2023.07.10
+calendar = `SSE
+day0 = temporalAdd(settlement, 0, calendar)
+
+// 构建利率曲线
+curveRateTime = [10y, 14d, 1d, 1M, 1y, 2y, 3M, 3y, 4y, 5y, 6M, 7d, 7y, 9M]
+curveRateValue = [2.7013, 1.8, 1.27, 1.9425, 2.0263, 2.1265, 1.9725, 2.2438, 2.3575, 2.4538, 1.9938, 1.86, 2.5863, 2.0088] * 0.01
+
+// 生成日期序列
+dates = []
+for (dur in curveRateTime) {
+    dates.append!(temporalAdd(settlement, dur))
+}
+X = (dates - day0)$INT
+
+// 线性插值拟合曲线
+curve = linearInterpolateFit(X, curveRateValue)
+
+// 参数设置
+resetIntv = 7d
+startDay = 2023.01.10
+endDay = 2028.01.10
+par = 100.0
+fixRate = 0.02765
+spread = 0.0
+freq = 3M
+basis = 0
+
+// 执行估值计算
+irs(settlement, resetIntv, startDay, endDay, par, fixRate, spread, curve, freq, calendar, basis=basis)
+// 返回结果：-1.5451083233900798
+```
+
+**说明：**  
+示例中构建了包含不同期限利率值的曲线，使用线性插值拟合后，计算了2023-01-10至2028-01-10期间，按季付息、30/360日计数基准的利率互换估值。

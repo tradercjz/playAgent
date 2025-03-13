@@ -1,0 +1,611 @@
+<!DOCTYPE html><html xmlns="http://www.w3.org/1999/xhtml" xml:lang="zh" lang="zh" data-whc_version="26.0">
+    <head><link rel="shortcut icon" href="../favicon.ico"/><link rel="icon" href="../favicon.ico"/><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><meta name="description" content="横截面引擎适用于对截面数据（如每只股票代码最新时间戳下的数据）进行实时计算。如：金融场景下，使用某个指数的所有成分股的最新价格计算该指数的内在价值；工业物联网场景下，对某批设备最新温度求最值等等。 横截面引擎包含两个部分： 横截面数据表（键值表）：保存所有分组的最新记录 计算引擎：包含一组聚合计算表达式以及触发器，系统会根据指定规则触发对横截面数据表的计算，计算结果将保存到指定的数据表中。 ..."/><meta name="DC.rights.owner" content="(C) 版权 2025"/><meta name="copyright" content="(C) 版权 2025"/><meta name="generator" content="DITA-OT"/><meta name="DC.type" content="topic"/><meta name="DC.coverage" content=""/><meta name="DC.relation" content="../funcs/themes/streamingEngine.html"/><meta name="prodname" content="DolphinDB"/><meta name="brand" content="DolphinDB"/><meta name="DC.creator" content="DolphinDB"/><meta name="DC.publisher" content="DDB N/A DDB 200"/><meta name="DC.format" content="HTML5"/><meta name="DC.identifier" content="cross_sectional_engine"/><title>横截面引擎</title><!--  Generated with Oxygen version 26.0, build number 2024012323.  --><meta name="wh-path2root" content="../"/><meta name="wh-toc-id" content="cross_sectional_engine-d9713e4322"/><meta name="wh-source-relpath" content="stream/cross_sectional_engine.dita"/><meta name="wh-out-relpath" content="stream/cross_sectional_engine.html"/>
+
+    <link rel="stylesheet" type="text/css" href="../oxygen-webhelp/app/commons.css?buildId=2024012323"/>
+    <link rel="stylesheet" type="text/css" href="../oxygen-webhelp/app/topic.css?buildId=2024012323"/>
+
+    <script src="../oxygen-webhelp/app/options/properties.js?buildId=20250305183303"></script>
+    <script src="../oxygen-webhelp/app/localization/strings.js?buildId=2024012323"></script>
+    <script src="../oxygen-webhelp/app/search/index/keywords.js?buildId=20250305183303"></script>
+    <script defer="defer" src="../oxygen-webhelp/app/commons.js?buildId=2024012323"></script>
+    <script defer="defer" src="../oxygen-webhelp/app/topic.js?buildId=2024012323"></script>
+<link rel="stylesheet" type="text/css" href="../oxygen-webhelp/template/styles.css?buildId=2024012323"/><script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script><script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script></head>
+
+    <body id="cross_sectional_engine" class="wh_topic_page frmBody">
+        <a href="#wh_topic_body" class="sr-only sr-only-focusable">
+            跳转到主要内容
+        </a>
+        
+        
+        
+        
+        <header class="navbar navbar-default wh_header">
+    <div class="container-fluid">
+        <div xmlns:whc="http://www.oxygenxml.com/webhelp/components" class="wh_header_flex_container navbar-nav navbar-expand-md navbar-dark">
+            <div class="wh_logo_and_publication_title_container">
+                <div class="wh_logo_and_publication_title">
+                    
+                    <a href="https://docs.dolphindb.cn/zh/index.html" class=" wh_logo d-none d-sm-block "><img src="../logo.png" alt="  DolphinDB 文档中心  "/></a>
+                    <div class=" wh_publication_title "><a href="../index.html"><span class="booktitle">  <span class="ph mainbooktitle">DolphinDB 文档中心</span>  </span></a></div>
+                    
+                </div>
+                
+                
+            </div>
+
+            <div class="wh_top_menu_and_indexterms_link collapse navbar-collapse" id="wh_top_menu_and_indexterms_link">
+                
+                
+                
+                
+            </div>
+        <div class=" wh_search_input navbar-form wh_topic_page_search search " role="form">
+            
+            
+            
+            <form id="searchForm" method="get" role="search" action="../search.html"><div><input type="search" placeholder="搜索 " class="wh_search_textfield" id="textToSearch" name="searchQuery" aria-label="搜索查询" required="required"/><button type="submit" class="wh_search_button" aria-label="搜索"><span class="search_input_text">搜索</span></button></div></form>
+            
+            <script src="/vendors/react/umd/react.production.min.js" defer="defer"></script>
+<script src="/vendors/react-dom/umd/react-dom.production.min.js" defer="defer"></script>
+<script src="/vendors/dayjs/dayjs.min.js" defer="defer"></script>
+<script src="/vendors/antd/dist/antd.min.js" defer="defer"></script>
+<script src="/vendors/@ant-design/icons/dist/index.umd.min.js" defer="defer"></script>
+<script src="/zh/index.js" type="module"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" defer="defer"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML" defer="defer"><!--
+
+
+--></script>
+<script defer="defer"><!--
+
+// 从主页重定向
+const currentUrl = window.location.href;
+
+// 判断当前URL是否包含index.html并且路径最后部分是index.html
+if (currentUrl.endsWith('index.html')) {
+    // 处理根目录下的index.html跳转
+    const baseUrl = currentUrl.split('/index.html')[0]; // 获取index.html之前的部分
+    const redirectUrl = `${baseUrl}/about/ddb_intro.html`; // 构建跳转路径
+    window.location.href = redirectUrl; // 执行跳转
+}
+
+--></script>
+            
+        </div></div>
+    </div>
+</header>
+        
+        
+         
+        
+        
+        
+        <div class="container-fluid" id="wh_topic_container">
+            <div class="row">
+
+                <nav class="wh_tools d-print-none navbar-expand-md" aria-label="Tools">
+                    
+                    <div data-tooltip-position="bottom" class=" wh_breadcrumb "><ol class="d-print-none"><li><span class="home"><a href="../index.html"><span>主页</span></a></span></li><li><div class="topicref" data-id="chap7_tutorials_streaming"><div class="title"><a href="../stream/str_intro.html"><span class="keyword label">流数据</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 流数据引擎及流数据计算的基本概念</p></div></div></div></li><li><div class="topicref" data-id="streamingEngineTopic"><div class="title"><a href="../funcs/themes/streamingEngine.html"><span class="keyword label">流计算引擎</span></a></div></div></li><li class="active"><div class="topicref" data-id="cross_sectional_engine"><div class="title"><a href="../stream/cross_sectional_engine.html">横截面引擎</a></div></div></li></ol></div>
+                    
+                    
+                    
+                    <div class="wh_right_tools">
+                        <button class="wh_hide_highlight" aria-label="切换搜索突出显示" title="切换搜索突出显示"></button>
+                        <button class="webhelp_expand_collapse_sections" data-next-state="collapsed" aria-label="折叠截面" title="折叠截面"></button>
+                        
+                        
+                        
+                        
+                        <div class=" wh_print_link print d-none d-md-inline-block "><button onClick="window.print()" title="打印此页" aria-label="打印此页"></button></div>
+                        
+                        <button type="button" id="wh_toc_button" class="custom-toggler navbar-toggler collapsed wh_toggle_button navbar-light" aria-expanded="false" aria-label="Toggle publishing table of content" aria-controls="wh_publication_toc">
+                            <span class="navbar-toggler-icon"></span>
+                        </button>
+                    </div>
+                    
+                </nav>
+            </div>
+            
+            
+            
+            
+            <div class="wh_content_area">
+                <div class="row">
+                    
+                        <nav id="wh_publication_toc" class="col-lg-3 col-md-3 col-sm-12 d-md-block d-none d-print-none" aria-label="Table of Contents Container">
+                            <div id="wh_publication_toc_content">
+		                        
+                            	<div class=" wh_publication_toc " data-tooltip-position="right"><span class="expand-button-action-labels"><span id="button-expand-action" role="button" aria-label="Expand"></span><span id="button-collapse-action" role="button" aria-label="Collapse"></span><span id="button-pending-action" role="button" aria-label="Pending"></span></span><ul role="tree" aria-label="Table of Contents"><li role="treeitem"><div data-tocid="ddb_intro-d9713e87" class="topicref" data-id="ddb_intro" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../about/ddb_intro.html" id="ddb_intro-d9713e87-link">关于DolphinDB</a></div></div></li><li role="treeitem"><div data-tocid="chap1_getstarted-d9713e136" class="topicref" data-id="chap1_getstarted" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../getstarted/chap1_getstarted.html" id="chap1_getstarted-d9713e136-link">快速上手</a><div class="wh-tooltip"><p class="shortdesc">如何快速部署 DolphinDB、建库建表、写入和查询数据</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="sectionddb_deployment-d9713e189" class="topicref" data-id="sectionddb_deployment" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action sectionddb_deployment-d9713e189-link" class="wh-expand-btn"></span><div class="title"><a href="../deploy/deploy_intro.html" id="sectionddb_deployment-d9713e189-link"><span class="keyword label">部署</span></a><div class="wh-tooltip"><p class="shortdesc">如何在不同的场景中部署 DolphinDB</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="new_chap_database_manage_new_chap_dbmanage_landing_page-d9713e2259" class="topicref" data-id="new_chap_database_manage_new_chap_dbmanage_landing_page" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action new_chap_database_manage_new_chap_dbmanage_landing_page-d9713e2259-link" class="wh-expand-btn"></span><div class="title"><a href="../db_distr_comp/cfg/db_intro.html" id="new_chap_database_manage_new_chap_dbmanage_landing_page-d9713e2259-link"><span class="keyword label">数据库</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 数据库的基本概念</p></div></div></div></li><li role="treeitem" aria-expanded="true"><div data-tocid="chap7_tutorials_streaming-d9713e3760" class="topicref" data-id="chap7_tutorials_streaming" data-state="expanded"><span role="button" tabindex="0" aria-labelledby="button-collapse-action chap7_tutorials_streaming-d9713e3760-link" class="wh-expand-btn"></span><div class="title"><a href="../stream/str_intro.html" id="chap7_tutorials_streaming-d9713e3760-link"><span class="keyword label">流数据</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 流数据引擎及流数据计算的基本概念</p></div></div></div><ul role="group" class="navbar-nav nav-list"><li role="treeitem" aria-expanded="false"><div data-tocid="streamfunctions-d9713e3813" class="topicref" data-id="streamfunctions" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action streamfunctions-d9713e3813-link" class="wh-expand-btn"></span><div class="title"><a href="../stream/str_funcs.html" id="streamfunctions-d9713e3813-link">功能简介</a></div></div></li><li role="treeitem"><div data-tocid="入门示例-01实时计算买卖价差-d9713e4044" class="topicref" data-id="入门示例-01实时计算买卖价差" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../stream/try_example1.html" id="入门示例-01实时计算买卖价差-d9713e4044-link">入门示例</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="内置流式计算算子-d9713e4090" class="topicref" data-id="内置流式计算算子" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action 内置流式计算算子-d9713e4090-link" class="wh-expand-btn"></span><div class="title"><a href="../stream/str_operator.html" id="内置流式计算算子-d9713e4090-link"><span class="keyword label">流式计算算子</span></a></div></div></li><li role="treeitem" aria-expanded="true"><div data-tocid="streamingEngineTopic-d9713e4229" class="topicref" data-id="streamingEngineTopic" data-state="expanded"><span role="button" tabindex="0" aria-labelledby="button-collapse-action streamingEngineTopic-d9713e4229-link" class="wh-expand-btn"></span><div class="title"><a href="../funcs/themes/streamingEngine.html" id="streamingEngineTopic-d9713e4229-link"><span class="keyword label">流计算引擎</span></a></div></div><ul role="group" class="navbar-nav nav-list"><li role="treeitem"><div data-tocid="时序聚合引擎-d9713e4276" class="topicref" data-id="时序聚合引擎" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../stream/time_series_engine.html" id="时序聚合引擎-d9713e4276-link">时序聚合引擎</a></div></div></li><li role="treeitem" class="active"><div data-tocid="cross_sectional_engine-d9713e4322" class="topicref" data-id="cross_sectional_engine" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../stream/cross_sectional_engine.html" id="cross_sectional_engine-d9713e4322-link">横截面引擎</a></div></div></li><li role="treeitem"><div data-tocid="reactive_state_engine-d9713e4368" class="topicref" data-id="reactive_state_engine" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../stream/reactive_state_engine.html" id="reactive_state_engine-d9713e4368-link">响应式状态引擎</a></div></div></li><li role="treeitem"><div data-tocid="session_window_engine-d9713e4414" class="topicref" data-id="session_window_engine" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../stream/session_window_engine.html" id="session_window_engine-d9713e4414-link">会话窗口引擎</a></div></div></li><li role="treeitem"><div data-tocid="anomaly_detection_engine-d9713e4460" class="topicref" data-id="anomaly_detection_engine" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../stream/anomaly_detection_engine.html" id="anomaly_detection_engine-d9713e4460-link">异常检测引擎</a></div></div></li></ul></li><li role="treeitem" aria-expanded="false"><div data-tocid="chap7_tutorials_streaming-d9713e4506" class="topicref" data-id="chap7_tutorials_streaming" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action chap7_tutorials_streaming-d9713e4506-link" class="wh-expand-btn"></span><div class="title"><a href="../stream/str_join_engine.html" id="chap7_tutorials_streaming-d9713e4506-link"><span class="keyword label">内置多数据源流式关联引擎</span></a></div></div></li><li role="treeitem"><div data-tocid="streamha-d9713e4783" class="topicref" data-id="streamha" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../stream/str_ha.html" id="streamha-d9713e4783-link"><span class="keyword label">流数据高可用</span></a></div></div></li><li role="treeitem"><div data-tocid="流计算状态监控-d9713e4830" class="topicref" data-id="流计算状态监控" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../stream/str_monitor.html" id="流计算状态监控-d9713e4830-link">流计算状态监控</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="replay-d9713e4876" class="topicref" data-id="replay" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action replay-d9713e4876-link" class="wh-expand-btn"></span><div class="title"><a href="../stream/str_replay.html" id="replay-d9713e4876-link"><span class="keyword label">历史数据回放</span></a></div></div></li><li role="treeitem"><div data-tocid="流批一体功能-d9713e5061" class="topicref" data-id="流批一体功能" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../stream/str_batch.html" id="流批一体功能-d9713e5061-link"><span class="keyword label">流批一体</span></a></div></div></li><li role="treeitem"><div data-tocid="streamengineparser-解析原理介绍-d9713e5108" class="topicref" data-id="streamengineparser-解析原理介绍" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../stream/str_eng_parser.html" id="streamengineparser-解析原理介绍-d9713e5108-link">StreamEngineParser 解析原理</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="realtime_data_acces-d9713e5155" class="topicref" data-id="realtime_data_acces" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action realtime_data_acces-d9713e5155-link" class="wh-expand-btn"></span><div class="title"><a href="../stream/realtime_data_acces.html" id="realtime_data_acces-d9713e5155-link">实时流数据接入</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="cep-d9713e5617" class="topicref" data-id="cep" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action cep-d9713e5617-link" class="wh-expand-btn"></span><div class="title"><a href="../stream/cep.html" id="cep-d9713e5617-link">复杂事件处理（CEP）引擎</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e6123" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e6123-link" class="wh-expand-btn"></span><div class="title"><a href="../stream/local_sub.html" id="tocId-d9713e6123-link">流处理结果交互方式</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e6312" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e6312-link" class="wh-expand-btn"></span><div class="title"><a href="../stream/str_altair.html" id="tocId-d9713e6312-link">数据可视化工具</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e6405" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e6405-link" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/streaming_auto_sub.html" id="tocId-d9713e6405-link">金融场景应用案例</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e7097" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e7097-link" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/ddb_str_app_iot.html" id="tocId-d9713e7097-link">物联网场景应用案例</a></div></div></li></ul></li><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e7513" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e7513-link" class="wh-expand-btn"></span><div class="title"><a href="../db_distr_comp/db_oper/import_data.html" id="tocId-d9713e7513-link">数据迁移</a><div class="wh-tooltip"><p class="shortdesc">如何从不同数据源向 DolphinDB 迁移数据</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="chap7_tutorials_system_management-d9713e7940" class="topicref" data-id="chap7_tutorials_system_management" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action chap7_tutorials_system_management-d9713e7940-link" class="wh-expand-btn"></span><div class="title"><a href="../sys_man/om_intro.html" id="chap7_tutorials_system_management-d9713e7940-link"><span class="keyword label">系统运维</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 的系统运维功能及方法</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="troubleshooting-d9713e8780" class="topicref" data-id="troubleshooting" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action troubleshooting-d9713e8780-link" class="wh-expand-btn"></span><div class="title"><a href="../error_codes/troubleshooting.html" id="troubleshooting-d9713e8780-link">故障排查</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="about_language_resources-d9713e20911" class="topicref" data-id="about_language_resources" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action about_language_resources-d9713e20911-link" class="wh-expand-btn"></span><div class="title"><a href="../progr/progr_intro.html" id="about_language_resources-d9713e20911-link"><span class="keyword label">编程语言</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 编程基本概念与方法、SQL 在 DolphinDB 的应用</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="functions_references-d9713e30925" class="topicref" data-id="functions_references" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action functions_references-d9713e30925-link" class="wh-expand-btn"></span><div class="title"><a href="../funcs/funcs_intro.html" id="functions_references-d9713e30925-link"><span class="keyword label">函数参考</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 函数分类、语法、详解及示例</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="api_protocol-d9713e94064" class="topicref" data-id="api_protocol" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action api_protocol-d9713e94064-link" class="wh-expand-btn"></span><div class="title"><a href="../api/connapi_intro.html" id="api_protocol-d9713e94064-link"><span class="keyword label">连接器 &amp; API</span></a><div class="wh-tooltip"><p class="shortdesc">面向不同编程语言的 DolphinDB API 及连接器，相关协议和用法</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="chap6_plugin-d9713e94210" class="topicref" data-id="chap6_plugin" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action chap6_plugin-d9713e94210-link" class="wh-expand-btn"></span><div class="title"><a href="../plugins/plg_intro.html" id="chap6_plugin-d9713e94210-link"><span class="keyword label">插件</span></a><div class="wh-tooltip"><p class="shortdesc">多个应用场景的插件使用说明和插件开发指导</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="third_party-d9713e97904" class="topicref" data-id="third_party" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action third_party-d9713e97904-link" class="wh-expand-btn"></span><div class="title"><a href="../third_party.html" id="third_party-d9713e97904-link">第三方工具</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="about_tutorials-d9713e98227" class="topicref" data-id="about_tutorials" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action about_tutorials-d9713e98227-link" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/about_tutorials.html" id="about_tutorials-d9713e98227-link"><span class="keyword label">教程</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 产品使用教程</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e105982" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e105982-link" class="wh-expand-btn"></span><div class="title"><a href="../rn/server/3_00_2.html" id="tocId-d9713e105982-link">版本说明</a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 版本发布历史</p></div></div></div></li></ul></div>
+		                        
+                            </div>
+                        </nav>
+                    
+                    
+                    <div class="col-lg-9 col-md-9 col-sm-12" id="wh_topic_body">
+                        <button id="wh_close_publication_toc_button" class="close-toc-button d-none" aria-label="Toggle publishing table of content" aria-controls="wh_publication_toc" aria-expanded="true">
+                            <span class="close-toc-icon-container">
+                                <span class="close-toc-icon"></span>     
+                            </span>
+                        </button>
+                        
+                        
+                        <div class=" wh_topic_content body "><main role="main"><article class="- topic/topic topic" role="article" aria-labelledby="ariaid-title1">
+    <h1 class="- topic/title title topictitle1" id="ariaid-title1">横截面引擎</h1>
+    <div class="- topic/body body">
+        <p class="- topic/p p">横截面引擎适用于对截面数据（如每只股票代码最新时间戳下的数据）进行实时计算。如：金融场景下，使用某个指数的所有成分股的最新价格计算该指数的内在价值；工业物联网场景下，对某批设备最新温度求最值等等。</p>
+        <p class="- topic/p p">横截面引擎包含两个部分：</p>
+        <ul class="- topic/ul ul" id="cross_sectional_engine__ul_mr2_hgh_k2c" data-ofbid="cross_sectional_engine__ul_mr2_hgh_k2c">
+            <li class="- topic/li li">
+                <p class="- topic/p p">横截面数据表（键值表）：保存所有分组的最新记录</p>
+            </li>
+            <li class="- topic/li li">
+                <p class="- topic/p p">计算引擎：包含一组聚合计算表达式以及触发器，系统会根据指定规则触发对横截面数据表的计算，计算结果将保存到指定的数据表中。</p>
+            </li>
+        </ul>
+        <p class="- topic/p p">横截面引擎由 <code class="+ topic/ph pr-d/codeph ph codeph">createCrossSectionalEngine</code> 函数创建。语法如下：</p>
+        <p class="- topic/p p"><code class="+ topic/ph pr-d/codeph ph codeph">createCrossSectionalEngine(name, [metrics], dummyTable,
+                    [outputTable], keyColumn, [triggeringPattern='perBatch'],
+                    [triggeringInterval=1000], [useSystemTime=true], [timeColumn],
+                    [lastBatchOnly=false], [contextByColumn], [snapshotDir],
+                    [snapshotIntervalInMsgCount], [raftGroup], [outputElapsedMicroseconds=false],
+                    [roundTime=true], [keyFilter], [updatedContextGroupsOnly=false])</code>
+            </p>
+        <p class="- topic/p p">其参数的详细含义可以参考：<a class="- topic/xref xref" href="../funcs/c/createCrossSectionalEngine.html">createCrossSectionalEngine</a></p>
+    </div>
+    <article class="- topic/topic topic nested1" aria-labelledby="ariaid-title2" id="topic_qdk_5vk_xzb">
+        <h2 class="- topic/title title topictitle2" id="ariaid-title2">应用示例</h2>
+        <div class="- topic/body body">
+            <div class="- topic/p p">触发横截面引擎的计算方式非常灵活，只需在创建引擎时指定相应参数即可。本节将重点介绍横截面引擎在不同触发模式下的示例。<div class="- topic/note note note note_note" id="topic_qdk_5vk_xzb__note_hw4_2yg_k2c" data-ofbid="topic_qdk_5vk_xzb__note_hw4_2yg_k2c"><span class="note__title">注：</span> 
+                    <div class="- topic/p p">每次执行示例之前，建议先清理环境（取消订阅、取消横截面引擎，并删除数据表）。清理环境的代码示例如下：<pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_qdk_5vk_xzb__codeblock_k44_fyg_k2c" data-ofbid="topic_qdk_5vk_xzb__codeblock_k44_fyg_k2c"><code>unsubscribeTable(,`trades, "tradesCrossAggregator")
+dropStreamEngine("CrossSectionalDemo")
+undef(`trades, SHARED)</code></pre></div>
+                </div></div>
+            <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">例1. 每行触发计算的方式</strong></p>
+            <p class="- topic/p p">股市的交易数据会实时以流数据的形式写入数据表 <em class="+ topic/ph hi-d/i ph i">trades</em>。该表通常具有这些列：股票代码(sym)、
+                时间（time）、成交价（price）、成交数（qty）。以下步骤将使用横截面引擎结合流数据订阅，实时计算如下指标：所有股票的最新成交量之最大值、最新成交金额之最大值，以及最新交易金额之和。</p>
+            <p class="- topic/p p">定义流数据表，以写入模拟交易数据。</p>
+            <pre class="+ topic/pre pr-d/codeblock pre codeblock language-python" id="topic_qdk_5vk_xzb__codeblock_w22_jqk_xzb" data-ofbid="topic_qdk_5vk_xzb__codeblock_w22_jqk_xzb">share streamTable(<span class="hl-number">10</span>:<span class="hl-number">0</span>,`time`sym`price`qty,[TIMESTAMP,SYMBOL,DOUBLE,INT]) <strong class="hl-keyword">as</strong> trades</pre>
+            <p class="- topic/p p">定义结果表，以保存横截面引擎计算的结果。</p>
+            <pre class="+ topic/pre pr-d/codeblock pre codeblock language-python" id="topic_qdk_5vk_xzb__codeblock_kwm_jqk_xzb" data-ofbid="topic_qdk_5vk_xzb__codeblock_kwm_jqk_xzb">outputTable = table(<span class="hl-number">10</span>:<span class="hl-number">0</span>, `time`maxQty`maxDollarVolume`sumDollarVolume, [TIMESTAMP,INT,DOUBLE,DOUBLE])</pre>
+            <p class="- topic/p p">创建横截面引擎，指定表达式、输入表、结果表、分组列、计算频率。返回的对象 tradesCrossAggregator 为保存横截面数据的表。</p>
+            <pre class="+ topic/pre pr-d/codeblock pre codeblock language-python" id="topic_qdk_5vk_xzb__codeblock_xtb_1qk_xzb" data-ofbid="topic_qdk_5vk_xzb__codeblock_xtb_1qk_xzb">tradesCrossAggregator=createCrossSectionalEngine(name=<span class="hl-string">"CrossSectionalDemo"</span>, metrics=&lt;[max(qty), max(price*qty), sum(price*qty)]&gt;, dummyTable=trades, outputTable=outputTable, keyColumn=`sym, triggeringPattern=`perRow, useSystemTime=false, timeColumn=`time)</pre>
+            <p class="- topic/p p">订阅流数据表，将新写入的流数据追加到横截面引擎中。</p>
+            <pre class="+ topic/pre pr-d/codeblock pre codeblock language-python" id="topic_qdk_5vk_xzb__codeblock_fpk_kqk_xzb" data-ofbid="topic_qdk_5vk_xzb__codeblock_fpk_kqk_xzb">subscribeTable(tableName=<span class="hl-string">"trades"</span>, actionName=<span class="hl-string">"tradesCrossAggregator"</span>, offset=-<span class="hl-number">1</span>, handler=append!{tradesCrossAggregator}, msgAsTable=true)</pre>
+            <p class="- topic/p p">模拟生成实时交易流数据。</p>
+            <pre class="+ topic/pre pr-d/codeblock pre codeblock language-python" id="topic_qdk_5vk_xzb__codeblock_lys_kqk_xzb" data-ofbid="topic_qdk_5vk_xzb__codeblock_lys_kqk_xzb"><strong class="hl-keyword">def</strong> writeData(n){
+   timev  = <span class="hl-number">2000.10</span>.<span class="hl-number">08</span>T01:<span class="hl-number">01</span>:<span class="hl-number">01.001</span> + timestamp(<span class="hl-number">1.</span>.n)
+   symv   = take(`A`B, n)
+   pricev = take(<span class="hl-number">102.1</span> <span class="hl-number">33.4</span> <span class="hl-number">73.6</span> <span class="hl-number">223</span>,n)
+   qtyv   = take(<span class="hl-number">60</span> <span class="hl-number">74</span> <span class="hl-number">82</span> <span class="hl-number">59</span>, n)
+   insert into trades values(timev, symv, pricev, qtyv)
+}
+writeData(<span class="hl-number">4</span>)</pre>
+            <p class="- topic/p p">查询流数据表，共有 A 与 B 两只股票的 4 笔交易数据：</p>
+            <pre class="+ topic/pre pr-d/codeblock pre codeblock language-python" id="topic_qdk_5vk_xzb__codeblock_v5t_lqk_xzb" data-ofbid="topic_qdk_5vk_xzb__codeblock_v5t_lqk_xzb">select * <strong class="hl-keyword">from</strong> trades</pre>
+            <div class="table-container"><table class="- topic/table table" id="topic_qdk_5vk_xzb__table_ztb_1qk_xzb" data-ofbid="topic_qdk_5vk_xzb__table_ztb_1qk_xzb" data-cols="4"><caption></caption><colgroup><col/><col/><col/><col/></colgroup><thead class="- topic/thead thead">
+                        <tr class="- topic/row">
+                            <th class="- topic/entry entry align-left colsep-0 rowsep-0" id="topic_qdk_5vk_xzb__table_ztb_1qk_xzb__entry__1">time</th>
+                            <th class="- topic/entry entry align-left colsep-0 rowsep-0" id="topic_qdk_5vk_xzb__table_ztb_1qk_xzb__entry__2">sym</th>
+                            <th class="- topic/entry entry align-left colsep-0 rowsep-0" id="topic_qdk_5vk_xzb__table_ztb_1qk_xzb__entry__3">price</th>
+                            <th class="- topic/entry entry align-left colsep-0 rowsep-0" id="topic_qdk_5vk_xzb__table_ztb_1qk_xzb__entry__4">qty</th>
+                        </tr>
+                    </thead><tbody class="- topic/tbody tbody">
+                        <tr class="- topic/row">
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="topic_qdk_5vk_xzb__table_ztb_1qk_xzb__entry__1">2000.10.08T01:01:01.002</td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="topic_qdk_5vk_xzb__table_ztb_1qk_xzb__entry__2">A</td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="topic_qdk_5vk_xzb__table_ztb_1qk_xzb__entry__3">102.1</td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="topic_qdk_5vk_xzb__table_ztb_1qk_xzb__entry__4">60</td>
+                        </tr>
+                        <tr class="- topic/row">
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="topic_qdk_5vk_xzb__table_ztb_1qk_xzb__entry__1">2000.10.08T01:01:01.003</td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="topic_qdk_5vk_xzb__table_ztb_1qk_xzb__entry__2">B</td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="topic_qdk_5vk_xzb__table_ztb_1qk_xzb__entry__3">33.4</td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="topic_qdk_5vk_xzb__table_ztb_1qk_xzb__entry__4">74</td>
+                        </tr>
+                        <tr class="- topic/row">
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="topic_qdk_5vk_xzb__table_ztb_1qk_xzb__entry__1">2000.10.08T01:01:01.004</td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="topic_qdk_5vk_xzb__table_ztb_1qk_xzb__entry__2">A</td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="topic_qdk_5vk_xzb__table_ztb_1qk_xzb__entry__3">73.6</td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="topic_qdk_5vk_xzb__table_ztb_1qk_xzb__entry__4">82</td>
+                        </tr>
+                        <tr class="- topic/row">
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="topic_qdk_5vk_xzb__table_ztb_1qk_xzb__entry__1">2000.10.08T01:01:01.005</td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="topic_qdk_5vk_xzb__table_ztb_1qk_xzb__entry__2">B</td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="topic_qdk_5vk_xzb__table_ztb_1qk_xzb__entry__3">223</td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="topic_qdk_5vk_xzb__table_ztb_1qk_xzb__entry__4">59</td>
+                        </tr>
+                    </tbody></table></div>
+            <p class="- topic/p p">截面数据表保存了 A 与 B 两只股票最新的交易数据：</p>
+            <pre class="+ topic/pre pr-d/codeblock pre codeblock language-python" id="topic_qdk_5vk_xzb__codeblock_v11_4qk_xzb" data-ofbid="topic_qdk_5vk_xzb__codeblock_v11_4qk_xzb">select * <strong class="hl-keyword">from</strong> tradesCrossAggregator</pre>
+            <div class="table-container"><table class="- topic/table table" id="topic_qdk_5vk_xzb__table_e5b_1qk_xzb" data-ofbid="topic_qdk_5vk_xzb__table_e5b_1qk_xzb" data-cols="4"><caption></caption><colgroup><col/><col/><col/><col/></colgroup><thead class="- topic/thead thead">
+                        <tr class="- topic/row">
+                            <th class="- topic/entry entry align-left colsep-0 rowsep-0" id="topic_qdk_5vk_xzb__table_e5b_1qk_xzb__entry__1">time</th>
+                            <th class="- topic/entry entry align-left colsep-0 rowsep-0" id="topic_qdk_5vk_xzb__table_e5b_1qk_xzb__entry__2">sym</th>
+                            <th class="- topic/entry entry align-left colsep-0 rowsep-0" id="topic_qdk_5vk_xzb__table_e5b_1qk_xzb__entry__3">price</th>
+                            <th class="- topic/entry entry align-left colsep-0 rowsep-0" id="topic_qdk_5vk_xzb__table_e5b_1qk_xzb__entry__4">qty</th>
+                        </tr>
+                    </thead><tbody class="- topic/tbody tbody">
+                        <tr class="- topic/row">
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="topic_qdk_5vk_xzb__table_e5b_1qk_xzb__entry__1">2000.10.08T01:01:01.004</td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="topic_qdk_5vk_xzb__table_e5b_1qk_xzb__entry__2">A</td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="topic_qdk_5vk_xzb__table_e5b_1qk_xzb__entry__3">73.6</td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="topic_qdk_5vk_xzb__table_e5b_1qk_xzb__entry__4">82</td>
+                        </tr>
+                        <tr class="- topic/row">
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="topic_qdk_5vk_xzb__table_e5b_1qk_xzb__entry__1">2000.10.08T01:01:01.005</td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="topic_qdk_5vk_xzb__table_e5b_1qk_xzb__entry__2">B</td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="topic_qdk_5vk_xzb__table_e5b_1qk_xzb__entry__3">223</td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="topic_qdk_5vk_xzb__table_e5b_1qk_xzb__entry__4">59</td>
+                        </tr>
+                    </tbody></table></div>
+            <p class="- topic/p p">横截面引擎采用了每行触发计算的方式（<em class="+ topic/ph hi-d/i ph i">triggeringPattern</em>="perRow"
+                ），因此每向横截面表写入一行数据，横截面引擎都会进行一次计算，并向结果表插入一条结果数据：</p>
+            <pre class="+ topic/pre pr-d/codeblock pre codeblock language-python" id="topic_qdk_5vk_xzb__codeblock_arm_pqk_xzb" data-ofbid="topic_qdk_5vk_xzb__codeblock_arm_pqk_xzb">select * <strong class="hl-keyword">from</strong> outputTable</pre>
+            <div class="table-container"><table class="- topic/table table" id="topic_qdk_5vk_xzb__table_j5b_1qk_xzb" data-ofbid="topic_qdk_5vk_xzb__table_j5b_1qk_xzb" data-cols="4"><caption></caption><colgroup><col/><col/><col/><col/></colgroup><thead class="- topic/thead thead">
+                        <tr class="- topic/row">
+                            <th class="- topic/entry entry align-left colsep-0 rowsep-0" id="topic_qdk_5vk_xzb__table_j5b_1qk_xzb__entry__1">time</th>
+                            <th class="- topic/entry entry align-left colsep-0 rowsep-0" id="topic_qdk_5vk_xzb__table_j5b_1qk_xzb__entry__2">maxQty</th>
+                            <th class="- topic/entry entry align-left colsep-0 rowsep-0" id="topic_qdk_5vk_xzb__table_j5b_1qk_xzb__entry__3">maxDollarVolume</th>
+                            <th class="- topic/entry entry align-left colsep-0 rowsep-0" id="topic_qdk_5vk_xzb__table_j5b_1qk_xzb__entry__4">sumDollarVolume</th>
+                        </tr>
+                    </thead><tbody class="- topic/tbody tbody">
+                        <tr class="- topic/row">
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="topic_qdk_5vk_xzb__table_j5b_1qk_xzb__entry__1">2019.04.08T04:26:01.634</td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="topic_qdk_5vk_xzb__table_j5b_1qk_xzb__entry__2">60</td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="topic_qdk_5vk_xzb__table_j5b_1qk_xzb__entry__3">6126</td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="topic_qdk_5vk_xzb__table_j5b_1qk_xzb__entry__4">6126</td>
+                        </tr>
+                        <tr class="- topic/row">
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="topic_qdk_5vk_xzb__table_j5b_1qk_xzb__entry__1">2019.04.08T04:26:01.634</td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="topic_qdk_5vk_xzb__table_j5b_1qk_xzb__entry__2">74</td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="topic_qdk_5vk_xzb__table_j5b_1qk_xzb__entry__3">6126</td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="topic_qdk_5vk_xzb__table_j5b_1qk_xzb__entry__4">8597.6</td>
+                        </tr>
+                        <tr class="- topic/row">
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="topic_qdk_5vk_xzb__table_j5b_1qk_xzb__entry__1">2019.04.08T04:26:01.634</td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="topic_qdk_5vk_xzb__table_j5b_1qk_xzb__entry__2">82</td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="topic_qdk_5vk_xzb__table_j5b_1qk_xzb__entry__3">6035.2</td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="topic_qdk_5vk_xzb__table_j5b_1qk_xzb__entry__4">8506.8</td>
+                        </tr>
+                        <tr class="- topic/row">
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="topic_qdk_5vk_xzb__table_j5b_1qk_xzb__entry__1">2019.04.08T04:26:01.634</td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="topic_qdk_5vk_xzb__table_j5b_1qk_xzb__entry__2">82</td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="topic_qdk_5vk_xzb__table_j5b_1qk_xzb__entry__3">13157</td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="topic_qdk_5vk_xzb__table_j5b_1qk_xzb__entry__4">19192.2</td>
+                        </tr>
+                    </tbody></table></div>
+            <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">例2. 每写入一批数据触发一次计算</strong></p>
+            <p class="- topic/p p"><em class="+ topic/ph hi-d/i ph i">riggeringPattern</em> 取值为 "perBatch" 时，表示每追加一批数据触发一次写入。本例在创建引擎时指定
+                    <em class="+ topic/ph hi-d/i ph i">triggeringPattern</em>="perBatch"。以下脚本共生成 6 条记录，分两批写入，预期产生 2 次输出：</p>
+            <pre class="+ topic/pre pr-d/codeblock pre codeblock language-python" id="topic_qdk_5vk_xzb__codeblock_ufs_sqk_xzb" data-ofbid="topic_qdk_5vk_xzb__codeblock_ufs_sqk_xzb">share streamTable(<span class="hl-number">10</span>:<span class="hl-number">0</span>,`time`sym`price`qty,[TIMESTAMP,SYMBOL,DOUBLE,INT]) <strong class="hl-keyword">as</strong> trades
+outputTable = table(<span class="hl-number">1</span>:<span class="hl-number">0</span>, `time`maxQty`maxDollarVolume`sumDollarVolume, [TIMESTAMP,INT,DOUBLE,DOUBLE])
+tradesCrossAggregator=createCrossSectionalEngine(<span class="hl-string">"CrossSectionalDemo"</span>, &lt;[max(qty), max(price*qty), sum(price*qty)]&gt;, trades, outputTable, `sym, `perBatch, useSystemTime=false, timeColumn=`time)
+subscribeTable(,<span class="hl-string">"trades"</span>,<span class="hl-string">"tradesCrossAggregator"</span>,-<span class="hl-number">1</span>,append!{tradesCrossAggregator},true)
+<strong class="hl-keyword">def</strong> writeData1(){
+  timev  = <span class="hl-number">2000.10</span>.<span class="hl-number">08</span>T01:<span class="hl-number">01</span>:<span class="hl-number">01.001</span> + timestamp(<span class="hl-number">1.</span><span class="hl-number">.4</span>)
+  symv   = take(`A`B, <span class="hl-number">4</span>)
+  pricev = <span class="hl-number">102.1</span> <span class="hl-number">33.4</span> <span class="hl-number">102.3</span> <span class="hl-number">33.2</span>
+  qtyv   = <span class="hl-number">10</span> <span class="hl-number">20</span> <span class="hl-number">40</span> <span class="hl-number">30</span>
+  insert into trades values(timev, symv, pricev,qtyv)
+}
+<strong class="hl-keyword">def</strong> writeData2(){
+  timev  = <span class="hl-number">2000.10</span>.<span class="hl-number">08</span>T01:<span class="hl-number">01</span>:<span class="hl-number">01.005</span> + timestamp(<span class="hl-number">1.</span><span class="hl-number">.2</span>)
+  symv   = `A`B
+  pricev = <span class="hl-number">102.4</span> <span class="hl-number">33.1</span>
+  qtyv   = <span class="hl-number">120</span> <span class="hl-number">60</span>
+  insert into trades values(timev, symv, pricev,qtyv)
+}
+//写入2批数据，预期会触发2次计算，输出2次聚合结果。
+writeData1();
+sleep(<span class="hl-number">100</span>)
+writeData2();
+dropStreamEngine(`CrossSectionalDemo)
+unsubscribeTable(, `trades, `tradesCrossAggregator)</pre>
+            <p class="- topic/p p">trades 表中共写入了 6 条记录：</p>
+            <pre class="+ topic/pre pr-d/codeblock pre codeblock language-python" id="topic_qdk_5vk_xzb__codeblock_bmm_tqk_xzb" data-ofbid="topic_qdk_5vk_xzb__codeblock_bmm_tqk_xzb">select * <strong class="hl-keyword">from</strong> trades</pre>
+            <div class="table-container"><table class="- topic/table table" id="topic_qdk_5vk_xzb__table_q5b_1qk_xzb" data-ofbid="topic_qdk_5vk_xzb__table_q5b_1qk_xzb" data-cols="4"><caption></caption><colgroup><col/><col/><col/><col/></colgroup><thead class="- topic/thead thead">
+                        <tr class="- topic/row">
+                            <th class="- topic/entry entry align-left colsep-0 rowsep-0" id="topic_qdk_5vk_xzb__table_q5b_1qk_xzb__entry__1">time</th>
+                            <th class="- topic/entry entry align-left colsep-0 rowsep-0" id="topic_qdk_5vk_xzb__table_q5b_1qk_xzb__entry__2">sym</th>
+                            <th class="- topic/entry entry align-left colsep-0 rowsep-0" id="topic_qdk_5vk_xzb__table_q5b_1qk_xzb__entry__3">price</th>
+                            <th class="- topic/entry entry align-left colsep-0 rowsep-0" id="topic_qdk_5vk_xzb__table_q5b_1qk_xzb__entry__4">qty</th>
+                        </tr>
+                    </thead><tbody class="- topic/tbody tbody">
+                        <tr class="- topic/row">
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="topic_qdk_5vk_xzb__table_q5b_1qk_xzb__entry__1">2000.10.08T01:01:01.002</td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="topic_qdk_5vk_xzb__table_q5b_1qk_xzb__entry__2">A</td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="topic_qdk_5vk_xzb__table_q5b_1qk_xzb__entry__3">102.1</td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="topic_qdk_5vk_xzb__table_q5b_1qk_xzb__entry__4">10</td>
+                        </tr>
+                        <tr class="- topic/row">
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="topic_qdk_5vk_xzb__table_q5b_1qk_xzb__entry__1">2000.10.08T01:01:01.003</td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="topic_qdk_5vk_xzb__table_q5b_1qk_xzb__entry__2">B</td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="topic_qdk_5vk_xzb__table_q5b_1qk_xzb__entry__3">33.4</td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="topic_qdk_5vk_xzb__table_q5b_1qk_xzb__entry__4">20</td>
+                        </tr>
+                        <tr class="- topic/row">
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="topic_qdk_5vk_xzb__table_q5b_1qk_xzb__entry__1">2000.10.08T01:01:01.004</td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="topic_qdk_5vk_xzb__table_q5b_1qk_xzb__entry__2">A</td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="topic_qdk_5vk_xzb__table_q5b_1qk_xzb__entry__3">102.3</td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="topic_qdk_5vk_xzb__table_q5b_1qk_xzb__entry__4">40</td>
+                        </tr>
+                        <tr class="- topic/row">
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="topic_qdk_5vk_xzb__table_q5b_1qk_xzb__entry__1">2000.10.08T01:01:01.005</td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="topic_qdk_5vk_xzb__table_q5b_1qk_xzb__entry__2">B</td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="topic_qdk_5vk_xzb__table_q5b_1qk_xzb__entry__3">33.2</td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="topic_qdk_5vk_xzb__table_q5b_1qk_xzb__entry__4">30</td>
+                        </tr>
+                        <tr class="- topic/row">
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="topic_qdk_5vk_xzb__table_q5b_1qk_xzb__entry__1">2000.10.08T01:01:01.006</td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="topic_qdk_5vk_xzb__table_q5b_1qk_xzb__entry__2">A</td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="topic_qdk_5vk_xzb__table_q5b_1qk_xzb__entry__3">102.4</td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="topic_qdk_5vk_xzb__table_q5b_1qk_xzb__entry__4">120</td>
+                        </tr>
+                        <tr class="- topic/row">
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="topic_qdk_5vk_xzb__table_q5b_1qk_xzb__entry__1">2000.10.08T01:01:01.007</td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="topic_qdk_5vk_xzb__table_q5b_1qk_xzb__entry__2">B</td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="topic_qdk_5vk_xzb__table_q5b_1qk_xzb__entry__3">33.1</td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="topic_qdk_5vk_xzb__table_q5b_1qk_xzb__entry__4">60</td>
+                        </tr>
+                    </tbody></table></div>
+            <p class="- topic/p p">横截面表包含每组最新记录：</p>
+            <pre class="+ topic/pre pr-d/codeblock pre codeblock language-python" id="topic_qdk_5vk_xzb__codeblock_esz_5qk_xzb" data-ofbid="topic_qdk_5vk_xzb__codeblock_esz_5qk_xzb">select * <strong class="hl-keyword">from</strong> tradesCrossAggregator</pre>
+            <div class="table-container"><table class="- topic/table table" id="topic_qdk_5vk_xzb__table_v5b_1qk_xzb" data-ofbid="topic_qdk_5vk_xzb__table_v5b_1qk_xzb" data-cols="4"><caption></caption><colgroup><col/><col/><col/><col/></colgroup><thead class="- topic/thead thead">
+                        <tr class="- topic/row">
+                            <th class="- topic/entry entry align-left colsep-0 rowsep-0" id="topic_qdk_5vk_xzb__table_v5b_1qk_xzb__entry__1">time</th>
+                            <th class="- topic/entry entry align-left colsep-0 rowsep-0" id="topic_qdk_5vk_xzb__table_v5b_1qk_xzb__entry__2">sym</th>
+                            <th class="- topic/entry entry align-left colsep-0 rowsep-0" id="topic_qdk_5vk_xzb__table_v5b_1qk_xzb__entry__3">price</th>
+                            <th class="- topic/entry entry align-left colsep-0 rowsep-0" id="topic_qdk_5vk_xzb__table_v5b_1qk_xzb__entry__4">qty</th>
+                        </tr>
+                    </thead><tbody class="- topic/tbody tbody">
+                        <tr class="- topic/row">
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="topic_qdk_5vk_xzb__table_v5b_1qk_xzb__entry__1">2000.10.08T01:01:01.006</td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="topic_qdk_5vk_xzb__table_v5b_1qk_xzb__entry__2">A</td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="topic_qdk_5vk_xzb__table_v5b_1qk_xzb__entry__3">102.4</td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="topic_qdk_5vk_xzb__table_v5b_1qk_xzb__entry__4">120</td>
+                        </tr>
+                        <tr class="- topic/row">
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="topic_qdk_5vk_xzb__table_v5b_1qk_xzb__entry__1">2000.10.08T01:01:01.007</td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="topic_qdk_5vk_xzb__table_v5b_1qk_xzb__entry__2">B</td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="topic_qdk_5vk_xzb__table_v5b_1qk_xzb__entry__3">33.1</td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="topic_qdk_5vk_xzb__table_v5b_1qk_xzb__entry__4">60</td>
+                        </tr>
+                    </tbody></table></div>
+            <p class="- topic/p p">由于分 2 次写入，在 perBatch 模式下，横截面引擎输出了 2 条记录：</p>
+            <pre class="+ topic/pre pr-d/codeblock pre codeblock language-python" id="topic_qdk_5vk_xzb__codeblock_w5s_wqk_xzb" data-ofbid="topic_qdk_5vk_xzb__codeblock_w5s_wqk_xzb">select * <strong class="hl-keyword">from</strong> outputTable</pre>
+            <div class="table-container"><table class="- topic/table table" id="topic_qdk_5vk_xzb__table_avb_1qk_xzb" data-ofbid="topic_qdk_5vk_xzb__table_avb_1qk_xzb" data-cols="4"><caption></caption><colgroup><col/><col/><col/><col/></colgroup><thead class="- topic/thead thead">
+                        <tr class="- topic/row">
+                            <th class="- topic/entry entry align-left colsep-0 rowsep-0" id="topic_qdk_5vk_xzb__table_avb_1qk_xzb__entry__1">time</th>
+                            <th class="- topic/entry entry align-left colsep-0 rowsep-0" id="topic_qdk_5vk_xzb__table_avb_1qk_xzb__entry__2">maxQty</th>
+                            <th class="- topic/entry entry align-left colsep-0 rowsep-0" id="topic_qdk_5vk_xzb__table_avb_1qk_xzb__entry__3">maxDollarVolume</th>
+                            <th class="- topic/entry entry align-left colsep-0 rowsep-0" id="topic_qdk_5vk_xzb__table_avb_1qk_xzb__entry__4">sumDollarVolume</th>
+                        </tr>
+                    </thead><tbody class="- topic/tbody tbody">
+                        <tr class="- topic/row">
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="topic_qdk_5vk_xzb__table_avb_1qk_xzb__entry__1">2019.04.08T04:52:50.255</td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="topic_qdk_5vk_xzb__table_avb_1qk_xzb__entry__2">40</td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="topic_qdk_5vk_xzb__table_avb_1qk_xzb__entry__3">4092</td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="topic_qdk_5vk_xzb__table_avb_1qk_xzb__entry__4">5088</td>
+                        </tr>
+                        <tr class="- topic/row">
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="topic_qdk_5vk_xzb__table_avb_1qk_xzb__entry__1">2019.04.08T04:52:50.355</td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="topic_qdk_5vk_xzb__table_avb_1qk_xzb__entry__2">120</td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="topic_qdk_5vk_xzb__table_avb_1qk_xzb__entry__3">12288</td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="topic_qdk_5vk_xzb__table_avb_1qk_xzb__entry__4">14274</td>
+                        </tr>
+                    </tbody></table></div>
+            <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">例3. 基于系统时间间隔触发计算</strong></p>
+            <p class="- topic/p p"><em class="+ topic/ph hi-d/i ph i">triggeringPattern</em> 取值 "interval" 时，必须与 <em class="+ topic/ph hi-d/i ph i">triggeringInterval</em> 参数配合使用，表示每隔
+                    <em class="+ topic/ph hi-d/i ph i">triggeringInterval</em> 毫秒基于系统时间触发一次计算。本例中，数据分 6 次写入，每 500 毫秒触发一次计算，每次写入 1
+                条数据，间隔为 500 或 1000 毫秒。</p>
+            <pre class="+ topic/pre pr-d/codeblock pre codeblock language-python" id="topic_qdk_5vk_xzb__codeblock_fvb_1qk_xzb" data-ofbid="topic_qdk_5vk_xzb__codeblock_fvb_1qk_xzb">share streamTable(<span class="hl-number">10</span>:<span class="hl-number">0</span>,`time`sym`price`qty,[TIMESTAMP,SYMBOL,DOUBLE,INT]) <strong class="hl-keyword">as</strong> trades
+outputTable = table(<span class="hl-number">1</span>:<span class="hl-number">0</span>, `time`avgPrice`volume`dollarVolume`count, [TIMESTAMP,DOUBLE,INT,DOUBLE,INT])
+tradesCrossAggregator=createCrossSectionalEngine(name=<span class="hl-string">"tradesCrossAggregator"</span>, metrics=&lt;[avg(price), sum(qty), sum(price*qty), count(price)]&gt;, dummyTable=trades, outputTable=outputTable, keyColumn=`sym, triggeringPattern=<span class="hl-string">"interval"</span>, triggeringInterval=<span class="hl-number">500</span>)
+subscribeTable(tableName=<span class="hl-string">"trades"</span>, actionName=<span class="hl-string">"tradesStats"</span>, offset=-<span class="hl-number">1</span>, handler=append!{tradesCrossAggregator}, msgAsTable=true)
+
+insert into trades values(<span class="hl-number">2020.08</span>.<span class="hl-number">12</span>T09:<span class="hl-number">30</span>:<span class="hl-number">00.000</span>, `A, <span class="hl-number">10</span>, <span class="hl-number">20</span>)
+sleep(<span class="hl-number">500</span>)
+insert into trades values(<span class="hl-number">2020.08</span>.<span class="hl-number">12</span>T09:<span class="hl-number">30</span>:<span class="hl-number">00.000</span> + <span class="hl-number">500</span>, `B, <span class="hl-number">20</span>, <span class="hl-number">10</span>)
+sleep(<span class="hl-number">500</span>)
+insert into trades values(<span class="hl-number">2020.08</span>.<span class="hl-number">12</span>T09:<span class="hl-number">30</span>:<span class="hl-number">00.000</span> + <span class="hl-number">1000</span>, `A, <span class="hl-number">10.1</span>, <span class="hl-number">20</span>)
+sleep(<span class="hl-number">1000</span>)
+insert into trades values(<span class="hl-number">2020.08</span>.<span class="hl-number">12</span>T09:<span class="hl-number">30</span>:<span class="hl-number">00.000</span> + <span class="hl-number">2000</span>, `B, <span class="hl-number">20.1</span>, <span class="hl-number">30</span>)
+sleep(<span class="hl-number">500</span>)
+insert into trades values(<span class="hl-number">2020.08</span>.<span class="hl-number">12</span>T09:<span class="hl-number">30</span>:<span class="hl-number">00.000</span> + <span class="hl-number">2500</span>, `B, <span class="hl-number">20.2</span>, <span class="hl-number">40</span>)
+sleep(<span class="hl-number">500</span>)
+insert into trades values(<span class="hl-number">2020.08</span>.<span class="hl-number">12</span>T09:<span class="hl-number">30</span>:<span class="hl-number">00.000</span> + <span class="hl-number">3000</span>, `A, <span class="hl-number">10.2</span>, <span class="hl-number">20</span>)
+
+select * <strong class="hl-keyword">from</strong> outputTable;</pre>
+            <div class="table-container"><table class="- topic/table table" id="topic_qdk_5vk_xzb__table_mvb_1qk_xzb" data-ofbid="topic_qdk_5vk_xzb__table_mvb_1qk_xzb" data-cols="5"><caption></caption><colgroup><col/><col/><col/><col/><col/></colgroup><thead class="- topic/thead thead">
+                        <tr class="- topic/row">
+                            <th class="- topic/entry entry align-left colsep-0 rowsep-0" id="topic_qdk_5vk_xzb__table_mvb_1qk_xzb__entry__1">time</th>
+                            <th class="- topic/entry entry align-left colsep-0 rowsep-0" id="topic_qdk_5vk_xzb__table_mvb_1qk_xzb__entry__2">avgPrice</th>
+                            <th class="- topic/entry entry align-left colsep-0 rowsep-0" id="topic_qdk_5vk_xzb__table_mvb_1qk_xzb__entry__3">volume</th>
+                            <th class="- topic/entry entry align-left colsep-0 rowsep-0" id="topic_qdk_5vk_xzb__table_mvb_1qk_xzb__entry__4">dollarVolume</th>
+                            <th class="- topic/entry entry align-left colsep-0 rowsep-0" id="topic_qdk_5vk_xzb__table_mvb_1qk_xzb__entry__5">count</th>
+                        </tr>
+                    </thead><tbody class="- topic/tbody tbody">
+                        <tr class="- topic/row">
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="topic_qdk_5vk_xzb__table_mvb_1qk_xzb__entry__1">2021.07.27T10:54:00.303</td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="topic_qdk_5vk_xzb__table_mvb_1qk_xzb__entry__2">10</td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="topic_qdk_5vk_xzb__table_mvb_1qk_xzb__entry__3">20</td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="topic_qdk_5vk_xzb__table_mvb_1qk_xzb__entry__4">200</td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="topic_qdk_5vk_xzb__table_mvb_1qk_xzb__entry__5">1</td>
+                        </tr>
+                        <tr class="- topic/row">
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="topic_qdk_5vk_xzb__table_mvb_1qk_xzb__entry__1">2021.07.27T10:54:00.818</td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="topic_qdk_5vk_xzb__table_mvb_1qk_xzb__entry__2">15</td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="topic_qdk_5vk_xzb__table_mvb_1qk_xzb__entry__3">30</td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="topic_qdk_5vk_xzb__table_mvb_1qk_xzb__entry__4">400</td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="topic_qdk_5vk_xzb__table_mvb_1qk_xzb__entry__5">2</td>
+                        </tr>
+                        <tr class="- topic/row">
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="topic_qdk_5vk_xzb__table_mvb_1qk_xzb__entry__1">2021.07.27T10:54:01.331</td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="topic_qdk_5vk_xzb__table_mvb_1qk_xzb__entry__2">15.05</td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="topic_qdk_5vk_xzb__table_mvb_1qk_xzb__entry__3">30</td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="topic_qdk_5vk_xzb__table_mvb_1qk_xzb__entry__4">402</td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="topic_qdk_5vk_xzb__table_mvb_1qk_xzb__entry__5">2</td>
+                        </tr>
+                        <tr class="- topic/row">
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="topic_qdk_5vk_xzb__table_mvb_1qk_xzb__entry__1">2021.07.27T10:54:02.358</td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="topic_qdk_5vk_xzb__table_mvb_1qk_xzb__entry__2">15.1</td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="topic_qdk_5vk_xzb__table_mvb_1qk_xzb__entry__3">50</td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="topic_qdk_5vk_xzb__table_mvb_1qk_xzb__entry__4">805</td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="topic_qdk_5vk_xzb__table_mvb_1qk_xzb__entry__5">2</td>
+                        </tr>
+                        <tr class="- topic/row">
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="topic_qdk_5vk_xzb__table_mvb_1qk_xzb__entry__1">2021.07.27T10:54:02.871</td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="topic_qdk_5vk_xzb__table_mvb_1qk_xzb__entry__2">15.15</td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="topic_qdk_5vk_xzb__table_mvb_1qk_xzb__entry__3">60</td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="topic_qdk_5vk_xzb__table_mvb_1qk_xzb__entry__4">1010</td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="topic_qdk_5vk_xzb__table_mvb_1qk_xzb__entry__5">2</td>
+                        </tr>
+                        <tr class="- topic/row">
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="topic_qdk_5vk_xzb__table_mvb_1qk_xzb__entry__1">2021.07.27T10:54:03.386</td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="topic_qdk_5vk_xzb__table_mvb_1qk_xzb__entry__2">15.2</td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="topic_qdk_5vk_xzb__table_mvb_1qk_xzb__entry__3">60</td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="topic_qdk_5vk_xzb__table_mvb_1qk_xzb__entry__4">1012</td>
+                            <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="topic_qdk_5vk_xzb__table_mvb_1qk_xzb__entry__5">2</td>
+                        </tr>
+                    </tbody></table></div>
+            <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">例4. 保留并计算最新时间戳的截面数据。</strong></p>
+            <div class="- topic/p p">设置 <em class="+ topic/ph hi-d/i ph i">triggeringPattern</em>="keyCount"，同时设置 <em class="+ topic/ph hi-d/i ph i">lastBatchOnly</em> =
+                true，横截面引擎将仅保留最新时间戳上的数据并进行计算。这里设置 <em class="+ topic/ph hi-d/i ph i">triggeringInterval</em>=4，所以只有收到的具有相同时间戳的记录数达到 4
+                条或者收到更新时间戳的数据时，才会触发截面数据进行计算输出。<pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_qdk_5vk_xzb__codeblock_pym_svg_k2c" data-ofbid="topic_qdk_5vk_xzb__codeblock_pym_svg_k2c"><code>// 定义输入表与输出表
+share streamTable(10:0,`time`sym`price`qty,[TIMESTAMP,SYMBOL,DOUBLE,INT]) as tick
+share table(1:0, `time`amount, [TIMESTAMP,INT]) as opt
+
+// 创建引擎
+csEngine=createCrossSectionalEngine(name="csEngineDemo", metrics=&lt;[sum(qty)]&gt;, dummyTable=tick, outputTable=opt, keyColumn=`sym, triggeringPattern="keyCount", triggeringInterval=4, timeColumn=`time, useSystemTime=false,lastBatchOnly=true)
+
+subscribeTable(tableName=`tick, actionName="csEngineDemo", msgAsTable=true, handler=append!{csEngine})
+
+def writeData1(){
+    time = array(timestamp)
+    time=take(2020.10.08T10:01:01.000,7)
+    sym=take("A"+string(1..7),7)
+    price=1..7
+    qty=1..7
+    insert into tick values(time, sym, price, qty)
+}
+
+// 第一次写入数据
+writeData1();
+
+def writeData2(){
+    time = array(timestamp)
+    time=take(2020.10.08T10:30:01.000,5)
+    sym=take("A"+string(1..5),5)
+    price=1..5
+    qty=1..5
+    insert into tick values(time, sym, price, qty)
+}
+
+// 第二次写入数据
+writeData2();
+
+select * from opt</code></pre></div>
+            <div class="- topic/p p">
+                <div class="table-container"><table class="- topic/table table frame-all" id="topic_qdk_5vk_xzb__table_uvj_3wg_k2c" data-ofbid="topic_qdk_5vk_xzb__table_uvj_3wg_k2c" data-cols="2"><caption></caption><colgroup><col/><col/></colgroup><thead class="- topic/thead thead">
+                            <tr class="- topic/row">
+                                <th class="- topic/entry entry colsep-1 rowsep-1" id="topic_qdk_5vk_xzb__table_uvj_3wg_k2c__entry__1">time</th>
+                                <th class="- topic/entry entry colsep-0 rowsep-1" id="topic_qdk_5vk_xzb__table_uvj_3wg_k2c__entry__2">amount</th>
+                            </tr>
+                        </thead><tbody class="- topic/tbody tbody">
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_qdk_5vk_xzb__table_uvj_3wg_k2c__entry__1">2020.10.08 10:01:01.000</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="topic_qdk_5vk_xzb__table_uvj_3wg_k2c__entry__2">28</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-1 rowsep-0" headers="topic_qdk_5vk_xzb__table_uvj_3wg_k2c__entry__1">2020.10.08 10:30:01.000</td>
+                                <td class="- topic/entry entry colsep-0 rowsep-0" headers="topic_qdk_5vk_xzb__table_uvj_3wg_k2c__entry__2">15</td>
+                            </tr>
+                        </tbody></table></div>
+            </div>
+            <p class="- topic/p p">以上结果表中，第一行的结果由引擎收到的 2020.10.08T10:01:01.000 时刻的数据触发。此时横截面数据表中的
+                2020.10.08T10:01:01.000 时刻 A1~A7 每个分组中的最后一个记录进行求和，结果是28。第二行的结果由于收到的 2020.10.08
+                10:30:01.000 时刻的数据条数达到 4 条，触发计算输出。</p>
+            <p class="- topic/p p">由于设置了 <em class="+ topic/ph hi-d/i ph i">lastBatchOnly</em> = true，横截面数据表将只保留最新时间戳的各分组数据。查看截面数据表：</p>
+            <pre class="- topic/pre pre" id="topic_qdk_5vk_xzb__pre_vdx_qvg_k2c" data-ofbid="topic_qdk_5vk_xzb__pre_vdx_qvg_k2c"><code class="+ topic/ph pr-d/codeph ph codeph">select * from csEngine</code></pre>
+            <div class="table-container"><table class="- topic/table table frame-all" id="topic_qdk_5vk_xzb__table_m32_zfh_k2c" data-ofbid="topic_qdk_5vk_xzb__table_m32_zfh_k2c" data-cols="4"><caption></caption><colgroup><col/><col/><col/><col/></colgroup><thead class="- topic/thead thead">
+                        <tr class="- topic/row">
+                            <th class="- topic/entry entry colsep-1 rowsep-1" id="topic_qdk_5vk_xzb__table_m32_zfh_k2c__entry__1">time</th>
+                            <th class="- topic/entry entry colsep-1 rowsep-1" id="topic_qdk_5vk_xzb__table_m32_zfh_k2c__entry__2">sym</th>
+                            <th class="- topic/entry entry colsep-1 rowsep-1" id="topic_qdk_5vk_xzb__table_m32_zfh_k2c__entry__3">price</th>
+                            <th class="- topic/entry entry colsep-0 rowsep-1" id="topic_qdk_5vk_xzb__table_m32_zfh_k2c__entry__4">qty</th>
+                        </tr>
+                    </thead><tbody class="- topic/tbody tbody">
+                        <tr class="- topic/row">
+                            <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_qdk_5vk_xzb__table_m32_zfh_k2c__entry__1">2020.10.08 10:30:01.000</td>
+                            <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_qdk_5vk_xzb__table_m32_zfh_k2c__entry__2">A1</td>
+                            <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_qdk_5vk_xzb__table_m32_zfh_k2c__entry__3">1</td>
+                            <td class="- topic/entry entry colsep-0 rowsep-1" headers="topic_qdk_5vk_xzb__table_m32_zfh_k2c__entry__4">1</td>
+                        </tr>
+                        <tr class="- topic/row">
+                            <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_qdk_5vk_xzb__table_m32_zfh_k2c__entry__1">2020.10.08 10:30:01.000</td>
+                            <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_qdk_5vk_xzb__table_m32_zfh_k2c__entry__2">A2</td>
+                            <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_qdk_5vk_xzb__table_m32_zfh_k2c__entry__3">2</td>
+                            <td class="- topic/entry entry colsep-0 rowsep-1" headers="topic_qdk_5vk_xzb__table_m32_zfh_k2c__entry__4">2</td>
+                        </tr>
+                        <tr class="- topic/row">
+                            <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_qdk_5vk_xzb__table_m32_zfh_k2c__entry__1">2020.10.08 10:30:01.000</td>
+                            <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_qdk_5vk_xzb__table_m32_zfh_k2c__entry__2">A3</td>
+                            <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_qdk_5vk_xzb__table_m32_zfh_k2c__entry__3">3</td>
+                            <td class="- topic/entry entry colsep-0 rowsep-1" headers="topic_qdk_5vk_xzb__table_m32_zfh_k2c__entry__4">3</td>
+                        </tr>
+                        <tr class="- topic/row">
+                            <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_qdk_5vk_xzb__table_m32_zfh_k2c__entry__1">2020.10.08 10:30:01.000</td>
+                            <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_qdk_5vk_xzb__table_m32_zfh_k2c__entry__2">A4</td>
+                            <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_qdk_5vk_xzb__table_m32_zfh_k2c__entry__3">4</td>
+                            <td class="- topic/entry entry colsep-0 rowsep-1" headers="topic_qdk_5vk_xzb__table_m32_zfh_k2c__entry__4">4</td>
+                        </tr>
+                        <tr class="- topic/row">
+                            <td class="- topic/entry entry colsep-1 rowsep-0" headers="topic_qdk_5vk_xzb__table_m32_zfh_k2c__entry__1">2020.10.08 10:30:01.000</td>
+                            <td class="- topic/entry entry colsep-1 rowsep-0" headers="topic_qdk_5vk_xzb__table_m32_zfh_k2c__entry__2">A5</td>
+                            <td class="- topic/entry entry colsep-1 rowsep-0" headers="topic_qdk_5vk_xzb__table_m32_zfh_k2c__entry__3">5</td>
+                            <td class="- topic/entry entry colsep-0 rowsep-0" headers="topic_qdk_5vk_xzb__table_m32_zfh_k2c__entry__4">5</td>
+                        </tr>
+                    </tbody></table></div><p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">横截面表作为最终结果</strong></p>
+            <p class="- topic/p p">在以上的例子中，<code class="+ topic/ph pr-d/codeph ph codeph">createCrossSectionalEngine</code>
+                的返回结果（以下称为横截面表）是为聚合计算提供的一个中间结果，但横截面表亦可为最终结果。例如若需要定时刷新某只股票的最新交易价格，按照常规思路是从实时交易表中按代码筛选股票并取出最后一条记录，而交易表的数据量是随着时间快速增长的，如果频繁做这样的查询，无论从系统的资源消耗还是从查询的效能来看都不是最优的做法。而横截面表永远只保存所有股票的最近一次交易数据，数据量是稳定的，对于这种定时轮询的场景非常合适。</p>
+            <p class="- topic/p p">要将横截面表作为最终结果，需要在创建横截面时，对 <em class="+ topic/ph hi-d/i ph i">metrics</em> 与 <em class="+ topic/ph hi-d/i ph i">outputTable</em> 这两个参数置空。</p>
+            <pre class="+ topic/pre pr-d/codeblock pre codeblock language-python" id="topic_qdk_5vk_xzb__codeblock_swr_drk_xzb" data-ofbid="topic_qdk_5vk_xzb__codeblock_swr_drk_xzb">tradesCrossAggregator=createCrossSectionalEngine(<span class="hl-string">"CrossSectionalDemo"</span>, , trades, , `sym, `perRow)</pre>
+        </div>
+    </article>    
+</article></main></div>
+                        
+                        
+                        
+                        
+                        
+                        
+                    </div>
+                    
+                </div>
+            </div>
+            
+            
+            
+        </div> 
+        <footer class="navbar navbar-default wh_footer">
+  <div class=" footer-container mx-auto ">
+<title>Copyright</title><p><b> ©2025 浙江智臾科技有限公司 浙ICP备18048711号-3</b></p>
+  </div>
+</footer>
+        
+        <div id="go2top" class="d-print-none">
+            <span class="oxy-icon oxy-icon-up"></span>
+        </div>
+        
+        <div id="modal_img_large" class="modal">
+            <span class="close oxy-icon oxy-icon-remove"></span>
+            <div id="modal_img_container"></div>
+            <div id="caption"></div>
+        </div>
+        
+        
+        
+    </body>
+</html>

@@ -1,0 +1,455 @@
+<!DOCTYPE html><html xmlns="http://www.w3.org/1999/xhtml" xml:lang="zh" lang="zh" data-whc_version="26.0">
+    <head><link rel="shortcut icon" href="../../favicon.ico"/><link rel="icon" href="../../favicon.ico"/><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><meta name="description" content=" ..."/><meta name="DC.rights.owner" content="(C) 版权 2025"/><meta name="copyright" content="(C) 版权 2025"/><meta name="generator" content="DITA-OT"/><meta name="DC.type" content="topic"/><meta name="DC.coverage" content=""/><meta name="DC.relation" content="../../db_distr_comp/db/db_architecture.html"/><meta name="prodname" content="DolphinDB"/><meta name="brand" content="DolphinDB"/><meta name="DC.creator" content="DolphinDB"/><meta name="DC.publisher" content="DDB N/A DDB 200"/><meta name="DC.format" content="HTML5"/><meta name="DC.identifier" content="事务"/><title>分布式事务</title><!--  Generated with Oxygen version 26.0, build number 2024012323.  --><meta name="wh-path2root" content="../../"/><meta name="wh-toc-id" content="事务-d9713e2927"/><meta name="wh-source-relpath" content="db_distr_comp/db/transaction.dita"/><meta name="wh-out-relpath" content="db_distr_comp/db/transaction.html"/>
+
+    <link rel="stylesheet" type="text/css" href="../../oxygen-webhelp/app/commons.css?buildId=2024012323"/>
+    <link rel="stylesheet" type="text/css" href="../../oxygen-webhelp/app/topic.css?buildId=2024012323"/>
+
+    <script src="../../oxygen-webhelp/app/options/properties.js?buildId=20250305183303"></script>
+    <script src="../../oxygen-webhelp/app/localization/strings.js?buildId=2024012323"></script>
+    <script src="../../oxygen-webhelp/app/search/index/keywords.js?buildId=20250305183303"></script>
+    <script defer="defer" src="../../oxygen-webhelp/app/commons.js?buildId=2024012323"></script>
+    <script defer="defer" src="../../oxygen-webhelp/app/topic.js?buildId=2024012323"></script>
+<link rel="stylesheet" type="text/css" href="../../oxygen-webhelp/template/styles.css?buildId=2024012323"/><script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script><script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script></head>
+
+    <body id="事务" class="wh_topic_page frmBody">
+        <a href="#wh_topic_body" class="sr-only sr-only-focusable">
+            跳转到主要内容
+        </a>
+        
+        
+        
+        
+        <header class="navbar navbar-default wh_header">
+    <div class="container-fluid">
+        <div xmlns:whc="http://www.oxygenxml.com/webhelp/components" class="wh_header_flex_container navbar-nav navbar-expand-md navbar-dark">
+            <div class="wh_logo_and_publication_title_container">
+                <div class="wh_logo_and_publication_title">
+                    
+                    <a href="https://docs.dolphindb.cn/zh/index.html" class=" wh_logo d-none d-sm-block "><img src="../../logo.png" alt="  DolphinDB 文档中心  "/></a>
+                    <div class=" wh_publication_title "><a href="../../index.html"><span class="booktitle">  <span class="ph mainbooktitle">DolphinDB 文档中心</span>  </span></a></div>
+                    
+                </div>
+                
+                
+            </div>
+
+            <div class="wh_top_menu_and_indexterms_link collapse navbar-collapse" id="wh_top_menu_and_indexterms_link">
+                
+                
+                
+                
+            </div>
+        <div class=" wh_search_input navbar-form wh_topic_page_search search " role="form">
+            
+            
+            
+            <form id="searchForm" method="get" role="search" action="../../search.html"><div><input type="search" placeholder="搜索 " class="wh_search_textfield" id="textToSearch" name="searchQuery" aria-label="搜索查询" required="required"/><button type="submit" class="wh_search_button" aria-label="搜索"><span class="search_input_text">搜索</span></button></div></form>
+            
+            <script src="/vendors/react/umd/react.production.min.js" defer="defer"></script>
+<script src="/vendors/react-dom/umd/react-dom.production.min.js" defer="defer"></script>
+<script src="/vendors/dayjs/dayjs.min.js" defer="defer"></script>
+<script src="/vendors/antd/dist/antd.min.js" defer="defer"></script>
+<script src="/vendors/@ant-design/icons/dist/index.umd.min.js" defer="defer"></script>
+<script src="/zh/index.js" type="module"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" defer="defer"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML" defer="defer"><!--
+
+
+--></script>
+<script defer="defer"><!--
+
+// 从主页重定向
+const currentUrl = window.location.href;
+
+// 判断当前URL是否包含index.html并且路径最后部分是index.html
+if (currentUrl.endsWith('index.html')) {
+    // 处理根目录下的index.html跳转
+    const baseUrl = currentUrl.split('/index.html')[0]; // 获取index.html之前的部分
+    const redirectUrl = `${baseUrl}/about/ddb_intro.html`; // 构建跳转路径
+    window.location.href = redirectUrl; // 执行跳转
+}
+
+--></script>
+            
+        </div></div>
+    </div>
+</header>
+        
+        
+         
+        
+        
+        
+        <div class="container-fluid" id="wh_topic_container">
+            <div class="row">
+
+                <nav class="wh_tools d-print-none navbar-expand-md" aria-label="Tools">
+                    
+                    <div data-tooltip-position="bottom" class=" wh_breadcrumb "><ol class="d-print-none"><li><span class="home"><a href="../../index.html"><span>主页</span></a></span></li><li><div class="topicref" data-id="new_chap_database_manage_new_chap_dbmanage_landing_page"><div class="title"><a href="../../db_distr_comp/cfg/db_intro.html"><span class="keyword label">数据库</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 数据库的基本概念</p></div></div></div></li><li><div class="topicref" data-id="topic_pg3_22w_ryb"><div class="title"><a href="../../db_distr_comp/db/db_architecture.html"><span class="keyword label">分布式架构</span></a></div></div></li><li class="active"><div class="topicref" data-id="事务"><div class="title"><a href="../../db_distr_comp/db/transaction.html">分布式事务</a></div></div></li></ol></div>
+                    
+                    
+                    
+                    <div class="wh_right_tools">
+                        <button class="wh_hide_highlight" aria-label="切换搜索突出显示" title="切换搜索突出显示"></button>
+                        <button class="webhelp_expand_collapse_sections" data-next-state="collapsed" aria-label="折叠截面" title="折叠截面"></button>
+                        
+                        
+                        
+                        
+                        <div class=" wh_print_link print d-none d-md-inline-block "><button onClick="window.print()" title="打印此页" aria-label="打印此页"></button></div>
+                        
+                        <button type="button" id="wh_toc_button" class="custom-toggler navbar-toggler collapsed wh_toggle_button navbar-light" aria-expanded="false" aria-label="Toggle publishing table of content" aria-controls="wh_publication_toc">
+                            <span class="navbar-toggler-icon"></span>
+                        </button>
+                    </div>
+                    
+                </nav>
+            </div>
+            
+            
+            
+            
+            <div class="wh_content_area">
+                <div class="row">
+                    
+                        <nav id="wh_publication_toc" class="col-lg-3 col-md-3 col-sm-12 d-md-block d-none d-print-none" aria-label="Table of Contents Container">
+                            <div id="wh_publication_toc_content">
+		                        
+                            	<div class=" wh_publication_toc " data-tooltip-position="right"><span class="expand-button-action-labels"><span id="button-expand-action" role="button" aria-label="Expand"></span><span id="button-collapse-action" role="button" aria-label="Collapse"></span><span id="button-pending-action" role="button" aria-label="Pending"></span></span><ul role="tree" aria-label="Table of Contents"><li role="treeitem"><div data-tocid="ddb_intro-d9713e87" class="topicref" data-id="ddb_intro" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../about/ddb_intro.html" id="ddb_intro-d9713e87-link">关于DolphinDB</a></div></div></li><li role="treeitem"><div data-tocid="chap1_getstarted-d9713e136" class="topicref" data-id="chap1_getstarted" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../getstarted/chap1_getstarted.html" id="chap1_getstarted-d9713e136-link">快速上手</a><div class="wh-tooltip"><p class="shortdesc">如何快速部署 DolphinDB、建库建表、写入和查询数据</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="sectionddb_deployment-d9713e189" class="topicref" data-id="sectionddb_deployment" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action sectionddb_deployment-d9713e189-link" class="wh-expand-btn"></span><div class="title"><a href="../../deploy/deploy_intro.html" id="sectionddb_deployment-d9713e189-link"><span class="keyword label">部署</span></a><div class="wh-tooltip"><p class="shortdesc">如何在不同的场景中部署 DolphinDB</p></div></div></div></li><li role="treeitem" aria-expanded="true"><div data-tocid="new_chap_database_manage_new_chap_dbmanage_landing_page-d9713e2259" class="topicref" data-id="new_chap_database_manage_new_chap_dbmanage_landing_page" data-state="expanded"><span role="button" tabindex="0" aria-labelledby="button-collapse-action new_chap_database_manage_new_chap_dbmanage_landing_page-d9713e2259-link" class="wh-expand-btn"></span><div class="title"><a href="../../db_distr_comp/cfg/db_intro.html" id="new_chap_database_manage_new_chap_dbmanage_landing_page-d9713e2259-link"><span class="keyword label">数据库</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 数据库的基本概念</p></div></div></div><ul role="group" class="navbar-nav nav-list"><li role="treeitem" aria-expanded="false"><div data-tocid="chap3_sect_database_distributed_computing-d9713e2312" class="topicref" data-id="chap3_sect_database_distributed_computing" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action chap3_sect_database_distributed_computing-d9713e2312-link" class="wh-expand-btn"></span><div class="title"><a href="../../db_distr_comp/db_distr_comp.html" id="chap3_sect_database_distributed_computing-d9713e2312-link"><span class="keyword label">数据库操作</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 数据库的基本操作，例如创建数据库、表，增加列、分区，数据查询，表连接等。</p></div></div></div></li><li role="treeitem" aria-expanded="true"><div data-tocid="topic_pg3_22w_ryb-d9713e2880" class="topicref" data-id="topic_pg3_22w_ryb" data-state="expanded"><span role="button" tabindex="0" aria-labelledby="button-collapse-action topic_pg3_22w_ryb-d9713e2880-link" class="wh-expand-btn"></span><div class="title"><a href="../../db_distr_comp/db/db_architecture.html" id="topic_pg3_22w_ryb-d9713e2880-link"><span class="keyword label">分布式架构</span></a></div></div><ul role="group" class="navbar-nav nav-list"><li role="treeitem" class="active"><div data-tocid="事务-d9713e2927" class="topicref" data-id="事务" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../db_distr_comp/db/transaction.html" id="事务-d9713e2927-link">分布式事务</a></div></div></li><li role="treeitem"><div data-tocid="数据库分区-d9713e2973" class="topicref" data-id="数据库分区" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../db_distr_comp/db/db_partitioning.html" id="数据库分区-d9713e2973-link">数据分区</a></div></div></li><li role="treeitem"><div data-tocid="storage_compute_separation-d9713e3019" class="topicref" data-id="storage_compute_separation" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../db_distr_comp/db/storage_compute_separation.html" id="storage_compute_separation-d9713e3019-link">存算分离</a></div></div></li><li role="treeitem"><div data-tocid="topic_u1t_cqd_gcc-d9713e3065" class="topicref" data-id="topic_u1t_cqd_gcc" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../db_distr_comp/db/recovery.html" id="topic_u1t_cqd_gcc-d9713e3065-link">在线恢复</a></div></div></li><li role="treeitem"><div data-tocid="rebalance-d9713e3111" class="topicref" data-id="rebalance" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../db_distr_comp/db/rebalance.html" id="rebalance-d9713e3111-link">数据平衡</a></div></div></li><li role="treeitem"><div data-tocid="ha-d9713e3157" class="topicref" data-id="ha" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../db_distr_comp/db/ha.html" id="ha-d9713e3157-link">高可用</a></div></div></li><li role="treeitem"><div data-tocid="分级存储-d9713e3203" class="topicref" data-id="分级存储" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../db_distr_comp/db/tiered_storage.html" id="分级存储-d9713e3203-link">分级存储</a></div></div></li><li role="treeitem"><div data-tocid="集群间异步复制-d9713e3249" class="topicref" data-id="集群间异步复制" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../sys_man/cluster_async_replc.html" id="集群间异步复制-d9713e3249-link">异步复制</a></div></div></li><li role="treeitem"><div data-tocid="multimodal_storage-d9713e3295" class="topicref" data-id="multimodal_storage" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../db_distr_comp/db/multimodal_storage.html" id="multimodal_storage-d9713e3295-link">多模态存储</a></div></div></li><li role="treeitem"><div data-tocid="rdma-d9713e3341" class="topicref" data-id="rdma" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../db_distr_comp/db/rdma.html" id="rdma-d9713e3341-link">节点间传输协议</a></div></div></li></ul></li><li role="treeitem"><div data-tocid="tsdb-d9713e3387" class="topicref" data-id="tsdb" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../db_distr_comp/db/tsdb.html" id="tsdb-d9713e3387-link"><span class="keyword label">TSDB 存储引擎</span></a></div></div></li><li role="treeitem"><div data-tocid="olap-d9713e3434" class="topicref" data-id="olap" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../db_distr_comp/db/olap.html" id="olap-d9713e3434-link"><span class="keyword label">OLAP 存储引擎</span></a></div></div></li><li role="treeitem"><div data-tocid="pkey_engine-d9713e3481" class="topicref" data-id="pkey_engine" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../db_distr_comp/db/pkey_engine.html" id="pkey_engine-d9713e3481-link"><span class="keyword">主键存储引擎</span>  </a></div></div></li><li role="treeitem"><div data-tocid="imoltp-d9713e3529" class="topicref" data-id="imoltp" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../db_distr_comp/db/imoltp.html" id="imoltp-d9713e3529-link">内存在线事务处理引擎</a></div></div></li><li role="treeitem"><div data-tocid="vectordb-d9713e3575" class="topicref" data-id="vectordb" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../db_distr_comp/db/vectordb.html" id="vectordb-d9713e3575-link">向量存储引擎</a></div></div></li><li role="treeitem"><div data-tocid="textdb-d9713e3621" class="topicref" data-id="textdb" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../db_distr_comp/db/textdb.html" id="textdb-d9713e3621-link">文本存储引擎</a></div></div></li><li role="treeitem"><div data-tocid="catalog-d9713e3667" class="topicref" data-id="catalog" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../db_distr_comp/db/catalog.html" id="catalog-d9713e3667-link">数据目录</a></div></div></li><li role="treeitem"><div data-tocid="iotdb-d9713e3713" class="topicref" data-id="iotdb" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../db_distr_comp/db/iotdb.html" id="iotdb-d9713e3713-link">物联网点位管理引擎</a></div></div></li></ul></li><li role="treeitem" aria-expanded="false"><div data-tocid="chap7_tutorials_streaming-d9713e3760" class="topicref" data-id="chap7_tutorials_streaming" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action chap7_tutorials_streaming-d9713e3760-link" class="wh-expand-btn"></span><div class="title"><a href="../../stream/str_intro.html" id="chap7_tutorials_streaming-d9713e3760-link"><span class="keyword label">流数据</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 流数据引擎及流数据计算的基本概念</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e7513" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e7513-link" class="wh-expand-btn"></span><div class="title"><a href="../../db_distr_comp/db_oper/import_data.html" id="tocId-d9713e7513-link">数据迁移</a><div class="wh-tooltip"><p class="shortdesc">如何从不同数据源向 DolphinDB 迁移数据</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="chap7_tutorials_system_management-d9713e7940" class="topicref" data-id="chap7_tutorials_system_management" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action chap7_tutorials_system_management-d9713e7940-link" class="wh-expand-btn"></span><div class="title"><a href="../../sys_man/om_intro.html" id="chap7_tutorials_system_management-d9713e7940-link"><span class="keyword label">系统运维</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 的系统运维功能及方法</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="troubleshooting-d9713e8780" class="topicref" data-id="troubleshooting" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action troubleshooting-d9713e8780-link" class="wh-expand-btn"></span><div class="title"><a href="../../error_codes/troubleshooting.html" id="troubleshooting-d9713e8780-link">故障排查</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="about_language_resources-d9713e20911" class="topicref" data-id="about_language_resources" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action about_language_resources-d9713e20911-link" class="wh-expand-btn"></span><div class="title"><a href="../../progr/progr_intro.html" id="about_language_resources-d9713e20911-link"><span class="keyword label">编程语言</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 编程基本概念与方法、SQL 在 DolphinDB 的应用</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="functions_references-d9713e30925" class="topicref" data-id="functions_references" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action functions_references-d9713e30925-link" class="wh-expand-btn"></span><div class="title"><a href="../../funcs/funcs_intro.html" id="functions_references-d9713e30925-link"><span class="keyword label">函数参考</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 函数分类、语法、详解及示例</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="api_protocol-d9713e94064" class="topicref" data-id="api_protocol" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action api_protocol-d9713e94064-link" class="wh-expand-btn"></span><div class="title"><a href="../../api/connapi_intro.html" id="api_protocol-d9713e94064-link"><span class="keyword label">连接器 &amp; API</span></a><div class="wh-tooltip"><p class="shortdesc">面向不同编程语言的 DolphinDB API 及连接器，相关协议和用法</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="chap6_plugin-d9713e94210" class="topicref" data-id="chap6_plugin" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action chap6_plugin-d9713e94210-link" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/plg_intro.html" id="chap6_plugin-d9713e94210-link"><span class="keyword label">插件</span></a><div class="wh-tooltip"><p class="shortdesc">多个应用场景的插件使用说明和插件开发指导</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="third_party-d9713e97904" class="topicref" data-id="third_party" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action third_party-d9713e97904-link" class="wh-expand-btn"></span><div class="title"><a href="../../third_party.html" id="third_party-d9713e97904-link">第三方工具</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="about_tutorials-d9713e98227" class="topicref" data-id="about_tutorials" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action about_tutorials-d9713e98227-link" class="wh-expand-btn"></span><div class="title"><a href="../../tutorials/about_tutorials.html" id="about_tutorials-d9713e98227-link"><span class="keyword label">教程</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 产品使用教程</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e105982" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e105982-link" class="wh-expand-btn"></span><div class="title"><a href="../../rn/server/3_00_2.html" id="tocId-d9713e105982-link">版本说明</a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 版本发布历史</p></div></div></div></li></ul></div>
+		                        
+                            </div>
+                        </nav>
+                    
+                    
+                    <div class="col-lg-7 col-md-9 col-sm-12" id="wh_topic_body">
+                        <button id="wh_close_publication_toc_button" class="close-toc-button d-none" aria-label="Toggle publishing table of content" aria-controls="wh_publication_toc" aria-expanded="true">
+                            <span class="close-toc-icon-container">
+                                <span class="close-toc-icon"></span>     
+                            </span>
+                        </button>
+                        <button id="wh_close_topic_toc_button" class="close-toc-button d-none" aria-label="Toggle topic table of content" aria-controls="wh_topic_toc" aria-expanded="true">
+                            <span class="close-toc-icon-container">
+                                <span class="close-toc-icon"></span>     
+                            </span>
+                        </button>
+                        
+                        <div class=" wh_topic_content body "><main role="main"><article class="- topic/topic topic" role="article" aria-labelledby="ariaid-title1">
+    <h1 class="- topic/title title topictitle1" id="ariaid-title1">分布式事务</h1>
+    <div class="- topic/body body">
+        <p class="- topic/p p">事务是指对数据库中的数据对象进行的一系列增、删、改等操作。一次事务的所有操作全部纳入一个不可分割的执行单元，该执行单元里的所有操作要么都成功，要么都失败，只要其中任一操作执行失败，整个事务都将回滚。在分布式系统中，各个节点之间在物理上相互独立，通过网络进行沟通和协调。分布式事务是指分布式系统中的事务，一个分布式事务可能涉及到不同节点和分区的操作。同样，分布式事务要去对参与事务的所有节点的操作，要么全部成功，要么全部回滚，不能出现部分提交的情况。时序数据的某些场景，如物联网中的数据采集，丢失一部分数据并不会带来严重的后果。但作为一个分布式数据库，保证各节点上的数据一致性非常关键。DolphinDB
+            通过两阶段提交（Two-Phase Commit, 2PC）和多版本并发控制机制（MVCC, Multi-Version Concurrency
+            Control）实现分布式事务，能够确保每个事务的原子性（Atomicity）、数据的一致性（Consistency）、读写操作之间的隔离性（Isolation）以及已写入数据的持久性（Durability）。</p>
+        <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">原子性</strong></p>
+        <p class="- topic/p p">事务是一个原子操作单元，数据写入要么全都执行，要么全都不执行。比如，写入的数据涉及到多个分区，要么全部分区写入成功，要么全部分区写入失败。如果数据有多个副本，要么所有副本写入成功，要么所有副本写入失败。</p>
+        <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">一致性</strong></p>
+        <p class="- topic/p p">DolphinDB 的一个事务可以包含对不同分区的写入操作，事务成功或回滚，每个分区的各个副本的状态总是一致的。在集群模式中，DolphinDB
+            还能确保某一时刻任何节点上查询得到的数据都是一致的。</p>
+        <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">隔离性</strong></p>
+        <p class="- topic/p p">DolphinDB 通过多版本并发控制机制（MVCC, Multi-Version Concurrency
+            Control）实现事务隔离。每进行一次写入或删除操作，数据库的版本号都会增加。如果事务成功（commit），原先的版本会被覆盖，反之则回滚（roll
+            back）。当用户同时对数据库进行读写操作时，读和写的并发事务会相互隔离。多个事务可以同时对一个分区的不同表进行写入操作。</p>
+        <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">持久性</strong></p>
+        <p class="- topic/p p">事务完成后，它对数据的操作是永久性的。</p>
+    </div>
+    <article class="- topic/topic topic nested1" aria-labelledby="ariaid-title2" id="topic_n1j_c2l_vdc">
+        <h2 class="- topic/title title topictitle2" id="ariaid-title2">分布式事务实现</h2>
+        <div class="- topic/body body">
+            <p class="- topic/p p">在传统的单机应用中，所有的操作都在本地进行，事务管理相对简单。而在分布式系统中，实现事务时需要考虑数据分片、网络延迟、节点故障等因素，因此需要设计专门的事务管理机制，如分布式事务协议、事务日志和读写分离等，以确保分布式系统中事务的正确性和高可用性。</p>
+            <p class="- topic/p p">一个分布式事务涉及不同节点和分区的操作，所有参与节点要么全部成功执行，要么全部回滚，不能出现部分提交的情况。在 DolphinDB
+                中对分布式表进行的每一次写入、更新或删除操作被视为一个分布式事务。DolphinDB 通过两阶段提交（Two-Phase Commit,
+                2PC）、日志记录和多版本并发控制等机制（MVCC, Multi-Version Concurrency
+                Control），实现分布式事务管理，确保每个事务具备原子性（Atomicity）、数据的一致性（Consistency）、读写操作之间的隔离性（Isolation）以及已写入数据的持久性（Durability）。</p>
+        </div>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title3" id="topic_pyp_h2l_vdc">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title3">基本事务流程</h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p">DolphinDB 采用两阶段事务提交机制，每次由事务的发起节点作为协调者（coordinator）推进整个事务的执行流程。</p>
+                <br/><div class="imageleft"><img class="- topic/image image imageleft" id="topic_pyp_h2l_vdc__image_wfs_j2l_vdc" src="../../images/db_distr_comp/%E5%9F%BA%E6%9C%AC%E4%BA%8B%E5%8A%A1%E6%B5%81%E7%A8%8B%E5%9B%BE.png"/></div><br/>
+                <ol class="- topic/ol ol" id="topic_pyp_h2l_vdc__ol_nfs_j2l_vdc" data-ofbid="topic_pyp_h2l_vdc__ol_nfs_j2l_vdc">
+                    <li class="- topic/li li">协调者提出请求（例如写入数据），创建一个事务，向控制节点申请事务 ID（tid），得到事务所涉及分区在数据节点上的分布情况。</li>
+                    <li class="- topic/li li">协调者将数据分发到相应的数据节点，各个数据节点将数据写入磁盘。如果存在某个数据节点数据写入失败，则终止该事务。</li>
+                    <li class="- topic/li li">协调者准备提交，向控制节点申请 commit id（cid）。</li>
+                    <li class="- topic/li li">协调者向控制节点和所有参与事务的数据节点 commit 事务，开始两阶段提交的第一阶段。如果控制节点或任意数据节点 commit
+                        失败，则终止并回滚事务。</li>
+                    <li class="- topic/li li">协调者向控制节点和所有参与事务的数据节点 complete 事务，开始两阶段提交的第两阶段。不管控制节点或数据节点是否 complete
+                        失败，该事务都结束。如果存在 complete 失败的情况，则通过事务决议和 recovery 机制恢复。</li>
+                </ol>
+            </div>
+        </article>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title4" id="topic_smt_ydl_vdc">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title4">开启 Redo Log 与 Cache Engine 的事务流程</h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p">Redo Log 是确保事务持久性的关键机制，即使在系统崩溃时，也能保障数据一致性。缺乏 Redo
+                    Log，事务的持久性将会受到影响，因为数据库无法记录事务所做的修改，从而无法在故障或崩溃发生时进行恢复。DolphinDB 利用 Redo Log 和
+                    Cache Engine 来确保事务的持久性并提升写入性能。</p>
+                <p class="- topic/p p">DolphinDB 重做日志（Redo Log）与 预写式日志（Write-Ahead
+                    Logging，WAL）的概念相似，其核心理念是：只有在描述事务更改的日志记录已经刷新到持久化存储介质之后，才对数据库的数据文件进行修改。这样做可以避免在每次提交事务时都需要将数据页刷新到磁盘上，同时可以保证数据库发生宕机时，可以通过日志来恢复数据，所有尚未应用的更改都可以通过日志记录回放并重做。</p>
+                <p class="- topic/p p">Cache Engine 是 DolphinDB 中的一种数据写入缓存机制。数据在写入 Redo Log 的同时写入 Cache Engine。在 Cache
+                    Engine 中的数据累积到一个阈值或者达到一定时间后，再由 Cache Engine
+                    一次性异步写入数据文件。在一个事务涉及多个分区且数据量较小的情况下，如果每次事务结束都立即写入磁盘，写入效率将会受到影响。而利用 Cache Engine
+                    先将这些事务缓存起来，待累积到一定数量后，以批量的方式一次性写入磁盘，则可以提供较高的压缩比此外，批量顺序写入也有助于提高IO吞吐量，从而有效提升整体系统性能。</p>
+                <figure class="- topic/fig fig fignone" id="topic_smt_ydl_vdc__fig_h2z_txv_rzb" data-ofbid="topic_smt_ydl_vdc__fig_h2z_txv_rzb">
+                    <img class="- topic/image image" id="topic_smt_ydl_vdc__image_wqh_zxv_rzb" src="../../images/db_distr_comp/transaction.png"/>
+                    <p class="- topic/p p">一旦数据写入磁盘，事务完成，系统首先回收该事务的 Cache Engine 缓存，再回收 Redo Log 中的事务。DolphinDB 提供三种
+                        Cache Engine 中事务的回收机制：定期回收、待缓存数据量达到阈值、或通过函数手动清理。同时提供两种 Redo
+                        Log的回收机制：定期回收和文件大小达到阈值时回收。</p>
+                </figure>
+            </div>
+        </article>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title5" id="topic_ckj_q2l_vdc">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title5">事务决议</h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p">由上文事务流程可知，DolphinDB
+                    采用两阶段提交（2PC）机制，涉及数据/计算节点与控制节点的协同工作。当任一方出现故障，导致事务无法推进时，需要通过事务决议来确定最终状态。</p>
+                <p class="- topic/p p">在 DolphinDB 中，控制节点作为第一阶段提交过程中的最后提交节点，其状态决定了事务的最终状态。因此，无需通过 RPC
+                    从所有参与者收集信息，这简化了决策过程并提高了效率。在两阶段提交过程中，事务参与者检查日志或进行垃圾回收，当发现事务状态是第一阶段完成（COMMITTED）时，主动向控制节点发起决议请求。详细决议流程如下：</p>
+                <ol class="- topic/ol ol" id="topic_ckj_q2l_vdc__ol_kfz_r2l_vdc" data-ofbid="topic_ckj_q2l_vdc__ol_kfz_r2l_vdc">
+                    <li class="- topic/li li">
+                        <p class="- topic/p p">处理决议请求：</p>
+                        <p class="- topic/p p">控制节点接收到决议请求后，根据事务的 tid、cid 和 chunkId
+                            信息查询决议结果。首先查看决议结果缓存，如果缓存中可以查到结果，则直接返回结果。否则进行以下 2 步：</p>
+                    </li>
+                    <li class="- topic/li li">
+                        <p class="- topic/p p">事务状态查询：</p>
+                        <ul class="- topic/ul ul" id="topic_ckj_q2l_vdc__ul_yjt_fhl_vdc" data-ofbid="topic_ckj_q2l_vdc__ul_yjt_fhl_vdc">
+                            <li class="- topic/li li">
+                                <p class="- topic/p p"> 如果控制节点发起请求，则其事务状态为 COMMITTED，此时直接返回事务状态。</p>
+                            </li>
+                            <li class="- topic/li li">
+                                <p class="- topic/p p"> 如果数据节点发起请求，则需要依次进行下面两步从控制节点查询事务状态，直至查到事务状态并返回。</p>
+                                <ul class="- topic/ul ul" id="topic_ckj_q2l_vdc__ul_rtj_khl_vdc" data-ofbid="topic_ckj_q2l_vdc__ul_rtj_khl_vdc">
+                                    <li class="- topic/li li">
+                                        <p class="- topic/p p">从预写入日志（edit log）查询，若查询到结果则返回，否则进入第 3 步。</p>
+                                    </li>
+                                    <li class="- topic/li li">
+                                        <p class="- topic/p p">从分区的版本链查询，若查询到结果则返回，否则返回 ROLLBACK。</p>
+                                    </li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="- topic/li li">
+                        <p class="- topic/p p">处理决议结果：</p>
+                        <p class="- topic/p p">根据第 2 步查询到的状态，处理决议结果。可能的事务状态包括 UNCOMMITTED, COMMITTED, COMPLETE 和
+                            ROLLBACK。</p>
+                        <ul class="- topic/ul ul" id="topic_ckj_q2l_vdc__ul_nfz_r2l_vdc" data-ofbid="topic_ckj_q2l_vdc__ul_nfz_r2l_vdc">
+                            <li class="- topic/li li">
+                                <p class="- topic/p p">UMCOMMITTED：表示控制节点上的事务还未提交完成，暂时不能给出最后的状态，需要推迟决议时间，即将当前决议请求放入队列，等待后续再次决议。</p>
+                            </li>
+                            <li class="- topic/li li">
+                                <p class="- topic/p p">COMMITTED：表示控制节点上的事务已提交完成，在控制节点上完成事务，更新事务状态为
+                                    COMPLETE，并将该状态广播给所有参与者。</p>
+                            </li>
+                            <li class="- topic/li li">
+                                <p class="- topic/p p">COMPLETE 或 ROLLBACK：直接广播相应结果给所有事务参与者。</p>
+                            </li>
+                        </ul>
+                    </li>
+                </ol>
+                <p class="- topic/p p">DolphinDB
+                    的事务决议结果仅依赖于控制节点上的信息，无需从各个参与者收集信息。这一设计有效避免了因数据节点未恢复而导致的信息收集延迟，从而防止事务决议过程长时间停滞（尤其是在控制节点发起决议时，分区在此期间无法进行写入）。此外，这种方式也减少了因信息收集不足而导致的事务结果错误的风险。</p>
+            </div>
+        </article>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title6" id="topic_fsp_52l_vdc">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title6">事务并发控制</h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p">当多个事务不是先后顺序关系时，它们被称为并发事务。在并发情况下，多个事务同时读写同一个分区可能会导致冲突。本节将介绍 DolphinDB
+                    的写写并发控制和读写并发控制机制。</p>
+                <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">写写并发控制</strong></p>
+                <p class="- topic/p p">当多个客户端并发写入同一个分区时，会产生写写冲突。DolphinDB 确保同一时间内，一个分区只能被一个事务写入。在发生写写冲突时，DolphinDB 根据数据库
+                        <em class="+ topic/ph hi-d/i ph i">atomic</em> 参数设置（“TRANS” 或
+                    “CHUNK”）决定冲突的处理方式。这两种设置的主要区别在于，是否尝试自动解决检测到的冲突。</p>
+                <p class="- topic/p p">当<em class="+ topic/ph hi-d/i ph i"> atomic</em> 设置为 “TRANS” 时，写入流程如下：</p>
+                <ol class="- topic/ol ol" id="topic_fsp_52l_vdc__ol_rb5_x2l_vdc" data-ofbid="topic_fsp_52l_vdc__ol_rb5_x2l_vdc">
+                    <li class="- topic/li li">
+                        <p class="- topic/p p">客户端发起写入请求。</p>
+                    </li>
+                    <li class="- topic/li li">
+                        <p class="- topic/p p">数据节点收到写入请求后，计算涉及的分区。</p>
+                    </li>
+                    <li class="- topic/li li">
+                        <p class="- topic/p p">数据节点向控制节点申请事务的 tid。</p>
+                    </li>
+                    <li class="- topic/li li">
+                        <p class="- topic/p p">使用步骤3中的 tid，向控制节点申请涉及分区的分布式锁。如果所有锁申请成功，进入步骤 5；否则，进入步骤 6。</p>
+                    </li>
+                    <li class="- topic/li li">
+                        <p class="- topic/p p">开始向涉及的分区写入数据，事务完成后释放分布式锁，并向客户端返回写入成功。</p>
+                    </li>
+                    <li class="- topic/li li">
+                        <p class="- topic/p p">放弃写入，向客户端返回异常，并返回写入失败的原因。</p>
+                    </li>
+                </ol>
+                <p class="- topic/p p">由以上流程可知，在 TRANS 模式下，当检测到写入冲突时，系统会放弃写入并返回写入失败的原因。因此，用户需要确保不能对同一个分区进行并发写入。</p>
+                <p class="- topic/p p">当<em class="+ topic/ph hi-d/i ph i"> atomic</em> 设置为 “CHUNK” 时，系统会尝试自动解决冲突，写入流程如下：</p>
+                <ol class="- topic/ol ol" id="topic_fsp_52l_vdc__ol_sb5_x2l_vdc" data-ofbid="topic_fsp_52l_vdc__ol_sb5_x2l_vdc">
+                    <li class="- topic/li li">
+                        <p class="- topic/p p">客户端发起写入请求。</p>
+                    </li>
+                    <li class="- topic/li li">
+                        <p class="- topic/p p">数据节点收到写入请求后，计算涉及的分区。</p>
+                    </li>
+                    <li class="- topic/li li">
+                        <p class="- topic/p p">数据节点向控制节点申请事务的 tid。</p>
+                    </li>
+                    <li class="- topic/li li">
+                        <p class="- topic/p p">使用步骤 3 中的 tid, 向控制节点申请涉及分区的分布式锁。如果至少有一个分区的锁申请成功，则进入步骤 5；否则，进入步骤 6。</p>
+                    </li>
+                    <li class="- topic/li li">
+                        <p class="- topic/p p">向成功申请锁的分区写入数据，完成事务后释放已写入分区的锁。当所有分区的事务都完成，转入步骤 7 ，否则转步骤 3。</p>
+                    </li>
+                    <li class="- topic/li li">
+                        <p class="- topic/p p">等待一段时间后，回到步骤 3，尝试重新写入。直到多次（最多 250 次）尝试写入都失败，则返回写入失败。</p>
+                    </li>
+                    <li class="- topic/li li">
+                        <p class="- topic/p p">写客户端返回写入成功。</p>
+                    </li>
+                </ol>
+                <p class="- topic/p p">尽管在 CHUNK
+                    模式下，系统能够自动解决写写冲突，但其缺点在于一次写入会被分为多个事务，不能保证事务的原子性。如果发生回滚，可能导致某次写入操作只写入了一部分数据。</p>
+                <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">读写并发控制</strong></p>
+                <p class="- topic/p p">DolphinDB 采用两阶段事务机制，结合多版本并发控制机制（MVCC, Multi-Version Concurrency
+                    Control），实现读写快照级别隔离。MVCC
+                    通过保存数据多个事务的数据快照来进行控制，允许同一个数据记录拥有多个不同的版本，记录了一个版本链。每进行一次写入、更新或删除操作，数据的版本号都会增加，从而确保在用户同时对数据库进行读写操作时，读和写的并发事务能够相互隔离。为了有效管理版本，系统会定期回收版本链。</p>
+                <p class="- topic/p p">DolphinDB 的分布式事务提供基于 sid（snapshot id）的快照隔离。结合前文介绍的两阶段提交流程，接下来详细说明 DolphinDB
+                    的读写隔离机制：</p>
+                <ol class="- topic/ol ol" id="topic_fsp_52l_vdc__ol_c31_z2l_vdc" data-ofbid="topic_fsp_52l_vdc__ol_c31_z2l_vdc">
+                    <li class="- topic/li li">
+                        <p class="- topic/p p">协调者创建事务，向控制节点申请事务 tid。</p>
+                    </li>
+                    <li class="- topic/li li">
+                        <p class="- topic/p p">当事务第一次 commit 时，控制节点会生成一个全局递增的 cid，并将其记录在参与事务的所有数据节点上。此时，数据节点会生成一个新的
+                            CHUNK 副本（以”物理表名_cid”命名），并在该副本上进行数据的操作；为了防止 CHUNK 目录无限增长，数据节点最多保留5个旧版本的
+                            CHUNK 目录，并根据设置的保留时长进行定期回收。</p>
+                    </li>
+                    <li class="- topic/li li">
+                        <p class="- topic/p p">在完成两阶段提交时，控制节点生成一个全局递增的 sid（snapshot id），并将其记录在版本链上。sid
+                            的主要作用是协助控制节点获取已完成事务中的最大 cid 并将该 cid 返回给协调节点。如果我们不引入 sid，在查询时直接使用
+                            cid，存在一个潜在问题，即可能某个事务已经完成，但仍然有另一个小于该事务 cid
+                            的事务尚未完成。这种情况可能导致在查询时无法查到最新的已完成事务的数据。通过引入全局唯一的 sid，确保了所有已完成的事务都能被查询到。</p>
+                    </li>
+                    <li class="- topic/li li">
+                        <p class="- topic/p p">当协调者向控制节点请求查询最新的元数据信息时，控制节点通过当前版本链上的最大 sid，查询到满足小于等于这个 sid 的最新的
+                            cid，并返回给数据节点。对应这个 cid 的 CHUNK 版本即为当前可读的最新版本的 CHUNK 数据。</p>
+                    </li>
+                    <li class="- topic/li li">
+                        <p class="- topic/p p">协调者根据获取的 cid 到相应的数据节点上读取此 cid 对应版本的数据。</p>
+                    </li>
+                </ol>
+            </div>
+        </article>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title7" id="topic_umy_z2l_vdc">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title7">多副本写入事务控制</h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p">DolphinDB 支持多副本机制，允许在不同节点上存储分区的多个副本数据。本节将重点介绍多副本写入时的事务控制流程。</p>
+                <ol class="- topic/ol ol" id="topic_umy_z2l_vdc__ol_z4r_bfl_vdc" data-ofbid="topic_umy_z2l_vdc__ol_z4r_bfl_vdc">
+                    <li class="- topic/li li">
+                        <p class="- topic/p p">当事务开始时，协调者将事务所涉及的分区信息告知控制节点。</p>
+                    </li>
+                    <li class="- topic/li li">
+                        <p class="- topic/p p">控制节点收集写入事务所涉及分区的元数据和存活副本的信息。如果为新增分区，控制节点会创建该分区，并从数据节点中挑选一个或多个节点（由配置项
+                                <em class="+ topic/ph hi-d/i ph i">dfsReplicationFactor</em> 决定）来存储副本数据。</p>
+                    </li>
+                    <li class="- topic/li li">
+                        <p class="- topic/p p">控制节点将分区元数据和存活副本的信息告知协调者。协调者根据副本信息，通过 RPC 向各个副本发起事务操作。</p>
+                    </li>
+                    <li class="- topic/li li">
+                        <p class="- topic/p p">当所有副本的事务 complete
+                            时，控制节点会更新每个参与事务的副本的版本号。如果在事务过程中某个副本节点出现因宕机等无法继续推进事务，该事务将终止并回滚。</p>
+                    </li>
+                </ol>
+                <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">副本一致性</strong></p>
+                <p class="- topic/p p">数据节点定期向控制节点发送心跳信息。如果某个数据节点因意外宕机等原因变为离线状态，则控制节点将其标为未存活节点。当该节点重启后，它会向控制节点报告其所有分区的信息（包括版本号等）。控制节点将比较其存储的版本号与该节点报告的副本版本号。如果发现副本版本号落后，控制节点会推动自动进行在线恢复，以确保副本之间的数据一致性。关于在线恢复的机制和流程，参考<a class="- topic/xref xref" href="recovery.html">在线恢复</a>。</p>
+            </div>
+        </article>
+    </article>
+    <article class="- topic/topic topic nested1" aria-labelledby="ariaid-title8" id="topic_ank_jfl_vdc">
+        <h2 class="- topic/title title topictitle2" id="ariaid-title8">事务高可用</h2>
+        <div class="- topic/body body">
+            <p class="- topic/p p">事务高可用指在分布式系统或数据库中，确保事务处理在各种故障情况下仍然能够持续进行和完成的能力。DolphinDB 的分布式事务也具备高可用的能力。DolphinDB
+                通过实现事务高可用性来确保在节点故障的情况下也能持续推进事务。下面将根据参与事务的节点分类，分别介绍 DolphinDB 事务高可用实现。</p>
+            <ul class="- topic/ul ul" id="topic_ank_jfl_vdc__ul_azt_kfl_vdc" data-ofbid="topic_ank_jfl_vdc__ul_azt_kfl_vdc">
+                <li class="- topic/li li">
+                    <p class="- topic/p p">控制节点故障下的事务高可用</p>
+                    <p class="- topic/p p">控制节点高可用采用 Raft 算法，能够容忍少于一半的控制节点不可用。当控制节点中出现故障的数量少于一半时，高可用机制可以通过 Raft
+                        算法将事务状态同步到大多数控制节点。这样即使发生 Leader 切换，新的 Leader 也能获取当前进行中的事务信息。两阶段提交的协调者可以继续与新的
+                        Leader 进行通信，以推进事务的执行；如果需要做出事务决议，新的 Leader 也能直接给出决议结果。</p>
+                </li>
+            </ul>
+            <ul class="- topic/ul ul" id="topic_ank_jfl_vdc__ul_bzt_kfl_vdc" data-ofbid="topic_ank_jfl_vdc__ul_bzt_kfl_vdc">
+                <li class="- topic/li li">
+                    <p class="- topic/p p">数据节点故障下的事务高可用</p>
+                    <p class="- topic/p p">在数据节点故障的情况下，其余数据节点依然可以通过两阶段提交协议确定事务的最终结果，故障节点不会影响事务的决策。故障节点恢复后，只需向当前 Leader
+                        请求事务决议即可了解事务的最终状态，如果存在数据副本落后，可以通过恢复机制进行同步。</p>
+                </li>
+            </ul>
+        </div>
+    </article>
+    <article class="- topic/topic topic nested1" aria-labelledby="ariaid-title9" id="topic_gyl_nfl_vdc">
+        <h2 class="- topic/title title topictitle2" id="ariaid-title9">支持事务的 SQL 操作</h2>
+        <div class="- topic/body body">
+            <p class="- topic/p p">对分布式表的写入、更新和删除操作均支持分布式事务。本节将列出相关的语句和函数。</p>
+            <ul class="- topic/ul ul" id="topic_gyl_nfl_vdc__ul_v23_4fl_vdc" data-ofbid="topic_gyl_nfl_vdc__ul_v23_4fl_vdc">
+                <li class="- topic/li li">
+                    <p class="- topic/p p">DDL：<a class="- topic/xref xref" href="../../progr/sql/create.html">create</a> (database/table)，<a class="- topic/xref xref" href="../../progr/sql/alter.html">alter</a>，<a class="- topic/xref xref" href="../../progr/sql/drop.html">drop</a>。</p>
+                </li>
+                <li class="- topic/li li">
+                    <p class="- topic/p p">DML：<a class="- topic/xref xref" href="../../progr/sql/insertInto.html">insert into</a>，<a class="- topic/xref xref" href="../../progr/sql/update.html">update</a>，<a class="- topic/xref xref" href="../../progr/sql/delete.html">delete</a>。 </p>
+                </li>
+                <li class="- topic/li li">
+                    <p class="- topic/p p">表连接语句：<a class="- topic/xref xref" href="../../progr/sql/tb_joiner_intro.html">表连接</a></p>
+                </li>
+                <li class="- topic/li li">
+                    <p class="- topic/p p">分布式数据库/表相关操作函数：<a class="- topic/xref xref" href="../../funcs/a/addColumn.html">addColumn</a>，<a class="- topic/xref xref" href="../../funcs/a/addRangePartitions.html">addRangePartitions</a>，<a class="- topic/xref xref" href="../../funcs/a/addValuePartitions.html">addValuePartitions</a>，<a class="- topic/xref xref" href="../../funcs/c/createdimensiontable.html">createdimensiontable</a>，<a class="- topic/xref xref" href="../../funcs/c/createPartitionedTable.html">createPartitionedTable</a>，<a class="- topic/xref xref" href="../../funcs/d/database.html">database</a>，<a class="- topic/xref xref" href="../../funcs/d/dropColumns_.html">dropColumns!</a>，<a class="- topic/xref xref" href="../../funcs/d/dropDatabase.html">dropDatabase</a>，<a class="- topic/xref xref" href="../../funcs/d/dropPartition.html">dropPartition</a>，<a class="- topic/xref xref" href="../../funcs/d/dropTable.html">dropTable</a>，<a class="- topic/xref xref" href="../../funcs/r/rename_.html">rename!</a>，<a class="- topic/xref xref" href="../../funcs/r/renameTable.html">renameTable</a>，<a class="- topic/xref xref" href="../../funcs/r/reorderColumns_.html">reorderColumns!</a>，<a class="- topic/xref xref" href="../../funcs/r/replaceColumn_.html">replaceColumn!</a>，<a class="- topic/xref xref" href="../../funcs/t/tableInsert.html">tableInsert</a> ，<a class="- topic/xref xref" href="../../funcs/t/tableUpsert.html">tableUpsert</a>，<a class="- topic/xref xref" href="../../funcs/t/truncate.html">truncate</a>，<a class="- topic/xref xref" href="../../funcs/u/upsert_.html">upsert!</a></p>
+                </li>
+                <li class="- topic/li li">
+                    <p class="- topic/p p">备份恢复函数：<a class="- topic/xref xref" href="../../funcs/b/backup.html">backup</a>, <a class="- topic/xref xref" href="../../funcs/b/backupDB.html">backupDB</a>, <a class="- topic/xref xref" href="../../funcs/b/backupTable.html">backupTable</a>, <a class="- topic/xref xref" href="../../funcs/r/restore.html">restore</a>, <a class="- topic/xref xref" href="../../funcs/r/restoreDB.html">restoreDB</a>, <a class="- topic/xref xref" href="../../funcs/r/restoreTable.html">restoreTable</a></p>
+                </li>
+            </ul>
+        </div>
+    </article>
+</article></main></div>
+                        
+                        
+                        
+                        
+                        
+                        
+                    </div>
+                    
+                        <nav role="navigation" id="wh_topic_toc" aria-label="On this page" class="col-lg-2 d-none d-lg-block navbar d-print-none"> 
+                            <div id="wh_topic_toc_content">
+		                        
+	                            <div class=" wh_topic_toc "><div class="wh_topic_label">在本页上</div><ul><li class="topic-item"><a href="#topic_n1j_c2l_vdc" data-tocid="topic_n1j_c2l_vdc">分布式事务实现</a><ul><li class="topic-item"><a href="#topic_pyp_h2l_vdc" data-tocid="topic_pyp_h2l_vdc">基本事务流程</a></li><li class="topic-item"><a href="#topic_smt_ydl_vdc" data-tocid="topic_smt_ydl_vdc">开启 Redo Log 与 Cache Engine 的事务流程</a></li><li class="topic-item"><a href="#topic_ckj_q2l_vdc" data-tocid="topic_ckj_q2l_vdc">事务决议</a></li><li class="topic-item"><a href="#topic_fsp_52l_vdc" data-tocid="topic_fsp_52l_vdc">事务并发控制</a></li><li class="topic-item"><a href="#topic_umy_z2l_vdc" data-tocid="topic_umy_z2l_vdc">多副本写入事务控制</a></li></ul></li><li class="topic-item"><a href="#topic_ank_jfl_vdc" data-tocid="topic_ank_jfl_vdc">事务高可用</a></li><li class="topic-item"><a href="#topic_gyl_nfl_vdc" data-tocid="topic_gyl_nfl_vdc">支持事务的 SQL 操作</a></li></ul></div>
+	                        	
+                        	</div>
+                        </nav>
+                    
+                </div>
+            </div>
+            
+            
+            
+        </div> 
+        <footer class="navbar navbar-default wh_footer">
+  <div class=" footer-container mx-auto ">
+<title>Copyright</title><p><b> ©2025 浙江智臾科技有限公司 浙ICP备18048711号-3</b></p>
+  </div>
+</footer>
+        
+        <div id="go2top" class="d-print-none">
+            <span class="oxy-icon oxy-icon-up"></span>
+        </div>
+        
+        <div id="modal_img_large" class="modal">
+            <span class="close oxy-icon oxy-icon-remove"></span>
+            <div id="modal_img_container"></div>
+            <div id="caption"></div>
+        </div>
+        
+        
+        
+    </body>
+</html>

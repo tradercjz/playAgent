@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Copy Code Block without Prompt Symbols</title>
+<style>
+/* CSS for code block styling */
+pre{
+font-size: 14px;
+font-family: 'Consolas', monospace;
+text-align: left;
+background-color: #f6f8fa;
+color: #0f0f0f;
+margin-top: 5px;
+margin-bottom: 5px;
+padding-top: 5px;
+padding-bottom: 5px;
+}
+</style>
+</head>
+<body>
+
+<pre id="codeBlock">
+$ echo "Hello, World!"
+> Hello, World!
+>> Hello, World!
+>>> Hello, World!
+</pre>
+
+<script>
+document.getElementById('codeblock').addEventListener('copy', function(e) {
+    // Prevent default copy behavior
+    e.preventDefault();
+    
+    // Get selected text
+    var selectedText = window.getSelection().toString().replace(/[$>]/g, ''); // Remove $ and >
+    
+    // Copy selected text to clipboard
+    e.clipboardData.setData('text/plain', selectedText);
+});
+
+</script>
+
+</body>
+</html>

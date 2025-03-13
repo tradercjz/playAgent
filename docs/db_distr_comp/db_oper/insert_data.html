@@ -1,0 +1,464 @@
+<!DOCTYPE html><html xmlns="http://www.w3.org/1999/xhtml" xml:lang="zh" lang="zh" data-whc_version="26.0">
+    <head><link rel="shortcut icon" href="../../favicon.ico"/><link rel="icon" href="../../favicon.ico"/><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><meta name="description" content="DolphinDB 支持通过 INSERT INTO 语句、 append! 和 tableInsert 函数向表中插入数据。本页面将介绍这些方法的使用方式以及常见问题。 DolphinDB 提供了三种方法，向分布式表和内存表插入数据： INSERT INTO 语句 append! 函数 tableInsert 函数 通过 INSERT INTO 语句的 VALUES ..."/><meta name="DC.rights.owner" content="(C) 版权 2025"/><meta name="copyright" content="(C) 版权 2025"/><meta name="generator" content="DITA-OT"/><meta name="DC.type" content="topic"/><meta name="DC.coverage" content=""/><meta name="DC.relation" content="../../db_distr_comp/db_distr_comp.html"/><meta name="prodname" content="DolphinDB"/><meta name="brand" content="DolphinDB"/><meta name="DC.creator" content="DolphinDB"/><meta name="DC.publisher" content="DDB N/A DDB 200"/><meta name="DC.format" content="HTML5"/><meta name="DC.identifier" content="插入数据"/><title>插入数据</title><!--  Generated with Oxygen version 26.0, build number 2024012323.  --><meta name="wh-path2root" content="../../"/><meta name="wh-toc-id" content="插入数据-d9713e2410"/><meta name="wh-source-relpath" content="db_distr_comp/db_oper/insert_data.dita"/><meta name="wh-out-relpath" content="db_distr_comp/db_oper/insert_data.html"/>
+
+    <link rel="stylesheet" type="text/css" href="../../oxygen-webhelp/app/commons.css?buildId=2024012323"/>
+    <link rel="stylesheet" type="text/css" href="../../oxygen-webhelp/app/topic.css?buildId=2024012323"/>
+
+    <script src="../../oxygen-webhelp/app/options/properties.js?buildId=20250305183303"></script>
+    <script src="../../oxygen-webhelp/app/localization/strings.js?buildId=2024012323"></script>
+    <script src="../../oxygen-webhelp/app/search/index/keywords.js?buildId=20250305183303"></script>
+    <script defer="defer" src="../../oxygen-webhelp/app/commons.js?buildId=2024012323"></script>
+    <script defer="defer" src="../../oxygen-webhelp/app/topic.js?buildId=2024012323"></script>
+<link rel="stylesheet" type="text/css" href="../../oxygen-webhelp/template/styles.css?buildId=2024012323"/><script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script><script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script></head>
+
+    <body id="插入数据" class="wh_topic_page frmBody">
+        <a href="#wh_topic_body" class="sr-only sr-only-focusable">
+            跳转到主要内容
+        </a>
+        
+        
+        
+        
+        <header class="navbar navbar-default wh_header">
+    <div class="container-fluid">
+        <div xmlns:whc="http://www.oxygenxml.com/webhelp/components" class="wh_header_flex_container navbar-nav navbar-expand-md navbar-dark">
+            <div class="wh_logo_and_publication_title_container">
+                <div class="wh_logo_and_publication_title">
+                    
+                    <a href="https://docs.dolphindb.cn/zh/index.html" class=" wh_logo d-none d-sm-block "><img src="../../logo.png" alt="  DolphinDB 文档中心  "/></a>
+                    <div class=" wh_publication_title "><a href="../../index.html"><span class="booktitle">  <span class="ph mainbooktitle">DolphinDB 文档中心</span>  </span></a></div>
+                    
+                </div>
+                
+                
+            </div>
+
+            <div class="wh_top_menu_and_indexterms_link collapse navbar-collapse" id="wh_top_menu_and_indexterms_link">
+                
+                
+                
+                
+            </div>
+        <div class=" wh_search_input navbar-form wh_topic_page_search search " role="form">
+            
+            
+            
+            <form id="searchForm" method="get" role="search" action="../../search.html"><div><input type="search" placeholder="搜索 " class="wh_search_textfield" id="textToSearch" name="searchQuery" aria-label="搜索查询" required="required"/><button type="submit" class="wh_search_button" aria-label="搜索"><span class="search_input_text">搜索</span></button></div></form>
+            
+            <script src="/vendors/react/umd/react.production.min.js" defer="defer"></script>
+<script src="/vendors/react-dom/umd/react-dom.production.min.js" defer="defer"></script>
+<script src="/vendors/dayjs/dayjs.min.js" defer="defer"></script>
+<script src="/vendors/antd/dist/antd.min.js" defer="defer"></script>
+<script src="/vendors/@ant-design/icons/dist/index.umd.min.js" defer="defer"></script>
+<script src="/zh/index.js" type="module"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" defer="defer"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML" defer="defer"><!--
+
+
+--></script>
+<script defer="defer"><!--
+
+// 从主页重定向
+const currentUrl = window.location.href;
+
+// 判断当前URL是否包含index.html并且路径最后部分是index.html
+if (currentUrl.endsWith('index.html')) {
+    // 处理根目录下的index.html跳转
+    const baseUrl = currentUrl.split('/index.html')[0]; // 获取index.html之前的部分
+    const redirectUrl = `${baseUrl}/about/ddb_intro.html`; // 构建跳转路径
+    window.location.href = redirectUrl; // 执行跳转
+}
+
+--></script>
+            
+        </div></div>
+    </div>
+</header>
+        
+        
+         
+        
+        
+        
+        <div class="container-fluid" id="wh_topic_container">
+            <div class="row">
+
+                <nav class="wh_tools d-print-none navbar-expand-md" aria-label="Tools">
+                    
+                    <div data-tooltip-position="bottom" class=" wh_breadcrumb "><ol class="d-print-none"><li><span class="home"><a href="../../index.html"><span>主页</span></a></span></li><li><div class="topicref" data-id="new_chap_database_manage_new_chap_dbmanage_landing_page"><div class="title"><a href="../../db_distr_comp/cfg/db_intro.html"><span class="keyword label">数据库</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 数据库的基本概念</p></div></div></div></li><li><div class="topicref" data-id="chap3_sect_database_distributed_computing"><div class="title"><a href="../../db_distr_comp/db_distr_comp.html"><span class="keyword label">数据库操作</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 数据库的基本操作，例如创建数据库、表，增加列、分区，数据查询，表连接等。</p></div></div></div></li><li class="active"><div class="topicref" data-id="插入数据"><div class="title"><a href="../../db_distr_comp/db_oper/insert_data.html"><span class="keyword label">插入数据</span></a></div></div></li></ol></div>
+                    
+                    
+                    
+                    <div class="wh_right_tools">
+                        <button class="wh_hide_highlight" aria-label="切换搜索突出显示" title="切换搜索突出显示"></button>
+                        <button class="webhelp_expand_collapse_sections" data-next-state="collapsed" aria-label="折叠截面" title="折叠截面"></button>
+                        
+                        
+                        
+                        
+                        <div class=" wh_print_link print d-none d-md-inline-block "><button onClick="window.print()" title="打印此页" aria-label="打印此页"></button></div>
+                        
+                        <button type="button" id="wh_toc_button" class="custom-toggler navbar-toggler collapsed wh_toggle_button navbar-light" aria-expanded="false" aria-label="Toggle publishing table of content" aria-controls="wh_publication_toc">
+                            <span class="navbar-toggler-icon"></span>
+                        </button>
+                    </div>
+                    
+                </nav>
+            </div>
+            
+            
+            
+            
+            <div class="wh_content_area">
+                <div class="row">
+                    
+                        <nav id="wh_publication_toc" class="col-lg-3 col-md-3 col-sm-12 d-md-block d-none d-print-none" aria-label="Table of Contents Container">
+                            <div id="wh_publication_toc_content">
+		                        
+                            	<div class=" wh_publication_toc " data-tooltip-position="right"><span class="expand-button-action-labels"><span id="button-expand-action" role="button" aria-label="Expand"></span><span id="button-collapse-action" role="button" aria-label="Collapse"></span><span id="button-pending-action" role="button" aria-label="Pending"></span></span><ul role="tree" aria-label="Table of Contents"><li role="treeitem"><div data-tocid="ddb_intro-d9713e87" class="topicref" data-id="ddb_intro" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../about/ddb_intro.html" id="ddb_intro-d9713e87-link">关于DolphinDB</a></div></div></li><li role="treeitem"><div data-tocid="chap1_getstarted-d9713e136" class="topicref" data-id="chap1_getstarted" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../getstarted/chap1_getstarted.html" id="chap1_getstarted-d9713e136-link">快速上手</a><div class="wh-tooltip"><p class="shortdesc">如何快速部署 DolphinDB、建库建表、写入和查询数据</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="sectionddb_deployment-d9713e189" class="topicref" data-id="sectionddb_deployment" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action sectionddb_deployment-d9713e189-link" class="wh-expand-btn"></span><div class="title"><a href="../../deploy/deploy_intro.html" id="sectionddb_deployment-d9713e189-link"><span class="keyword label">部署</span></a><div class="wh-tooltip"><p class="shortdesc">如何在不同的场景中部署 DolphinDB</p></div></div></div></li><li role="treeitem" aria-expanded="true"><div data-tocid="new_chap_database_manage_new_chap_dbmanage_landing_page-d9713e2259" class="topicref" data-id="new_chap_database_manage_new_chap_dbmanage_landing_page" data-state="expanded"><span role="button" tabindex="0" aria-labelledby="button-collapse-action new_chap_database_manage_new_chap_dbmanage_landing_page-d9713e2259-link" class="wh-expand-btn"></span><div class="title"><a href="../../db_distr_comp/cfg/db_intro.html" id="new_chap_database_manage_new_chap_dbmanage_landing_page-d9713e2259-link"><span class="keyword label">数据库</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 数据库的基本概念</p></div></div></div><ul role="group" class="navbar-nav nav-list"><li role="treeitem" aria-expanded="true"><div data-tocid="chap3_sect_database_distributed_computing-d9713e2312" class="topicref" data-id="chap3_sect_database_distributed_computing" data-state="expanded"><span role="button" tabindex="0" aria-labelledby="button-collapse-action chap3_sect_database_distributed_computing-d9713e2312-link" class="wh-expand-btn"></span><div class="title"><a href="../../db_distr_comp/db_distr_comp.html" id="chap3_sect_database_distributed_computing-d9713e2312-link"><span class="keyword label">数据库操作</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 数据库的基本操作，例如创建数据库、表，增加列、分区，数据查询，表连接等。</p></div></div></div><ul role="group" class="navbar-nav nav-list"><li role="treeitem"><div data-tocid="创建数据库-d9713e2363" class="topicref" data-id="创建数据库" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../db_distr_comp/db_oper/create_db_tb.html" id="创建数据库-d9713e2363-link"><span class="keyword label">建库建表</span></a></div></div></li><li role="treeitem" class="active"><div data-tocid="插入数据-d9713e2410" class="topicref" data-id="插入数据" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../db_distr_comp/db_oper/insert_data.html" id="插入数据-d9713e2410-link"><span class="keyword label">插入数据</span></a></div></div></li><li role="treeitem"><div data-tocid="mod_data-d9713e2457" class="topicref" data-id="mod_data" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../db_distr_comp/mod_data.html" id="mod_data-d9713e2457-link"><span class="keyword label">更新数据</span></a></div></div></li><li role="treeitem"><div data-tocid="modify_table_structure-d9713e2504" class="topicref" data-id="modify_table_structure" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../db_distr_comp/modify_table_structure.html" id="modify_table_structure-d9713e2504-link"><span class="keyword label">更新表结构</span></a></div></div></li><li role="treeitem"><div data-tocid="增加分区-d9713e2551" class="topicref" data-id="增加分区" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../db_distr_comp/db_oper/add_partitions.html" id="增加分区-d9713e2551-link"><span class="keyword label">增加分区</span></a></div></div></li><li role="treeitem"><div data-tocid="查询数据-d9713e2598" class="topicref" data-id="查询数据" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../db_distr_comp/db_oper/queries.html" id="查询数据-d9713e2598-link"><span class="keyword label">查询数据</span></a></div></div></li><li role="treeitem"><div data-tocid="删除数据库和表-d9713e2645" class="topicref" data-id="删除数据库和表" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../db_distr_comp/db_oper/drop_db_tb.html" id="删除数据库和表-d9713e2645-link"><span class="keyword label">删除数据</span></a></div></div></li><li role="treeitem"><div data-tocid="drop_database_table-d9713e2692" class="topicref" data-id="drop_database_table" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../db_distr_comp/drop_database_table.html" id="drop_database_table-d9713e2692-link"><span class="keyword label">删除库表</span></a></div></div></li><li role="treeitem"><div data-tocid="删除分区-d9713e2739" class="topicref" data-id="删除分区" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../db_distr_comp/db_oper/drop_partitions.html" id="删除分区-d9713e2739-link"><span class="keyword label">删除分区</span></a></div></div></li><li role="treeitem"><div data-tocid="函数视图-d9713e2786" class="topicref" data-id="函数视图" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../db_distr_comp/db_oper/FunctionView.html" id="函数视图-d9713e2786-link"><span class="keyword label">函数视图</span></a></div></div></li><li role="treeitem"><div data-tocid="用户权限管理-d9713e2834" class="topicref" data-id="用户权限管理" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../tutorials/ACL_and_Security.html" id="用户权限管理-d9713e2834-link">用户权限管理</a></div></div></li></ul></li><li role="treeitem" aria-expanded="false"><div data-tocid="topic_pg3_22w_ryb-d9713e2880" class="topicref" data-id="topic_pg3_22w_ryb" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action topic_pg3_22w_ryb-d9713e2880-link" class="wh-expand-btn"></span><div class="title"><a href="../../db_distr_comp/db/db_architecture.html" id="topic_pg3_22w_ryb-d9713e2880-link"><span class="keyword label">分布式架构</span></a></div></div></li><li role="treeitem"><div data-tocid="tsdb-d9713e3387" class="topicref" data-id="tsdb" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../db_distr_comp/db/tsdb.html" id="tsdb-d9713e3387-link"><span class="keyword label">TSDB 存储引擎</span></a></div></div></li><li role="treeitem"><div data-tocid="olap-d9713e3434" class="topicref" data-id="olap" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../db_distr_comp/db/olap.html" id="olap-d9713e3434-link"><span class="keyword label">OLAP 存储引擎</span></a></div></div></li><li role="treeitem"><div data-tocid="pkey_engine-d9713e3481" class="topicref" data-id="pkey_engine" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../db_distr_comp/db/pkey_engine.html" id="pkey_engine-d9713e3481-link"><span class="keyword">主键存储引擎</span>  </a></div></div></li><li role="treeitem"><div data-tocid="imoltp-d9713e3529" class="topicref" data-id="imoltp" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../db_distr_comp/db/imoltp.html" id="imoltp-d9713e3529-link">内存在线事务处理引擎</a></div></div></li><li role="treeitem"><div data-tocid="vectordb-d9713e3575" class="topicref" data-id="vectordb" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../db_distr_comp/db/vectordb.html" id="vectordb-d9713e3575-link">向量存储引擎</a></div></div></li><li role="treeitem"><div data-tocid="textdb-d9713e3621" class="topicref" data-id="textdb" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../db_distr_comp/db/textdb.html" id="textdb-d9713e3621-link">文本存储引擎</a></div></div></li><li role="treeitem"><div data-tocid="catalog-d9713e3667" class="topicref" data-id="catalog" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../db_distr_comp/db/catalog.html" id="catalog-d9713e3667-link">数据目录</a></div></div></li><li role="treeitem"><div data-tocid="iotdb-d9713e3713" class="topicref" data-id="iotdb" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../db_distr_comp/db/iotdb.html" id="iotdb-d9713e3713-link">物联网点位管理引擎</a></div></div></li></ul></li><li role="treeitem" aria-expanded="false"><div data-tocid="chap7_tutorials_streaming-d9713e3760" class="topicref" data-id="chap7_tutorials_streaming" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action chap7_tutorials_streaming-d9713e3760-link" class="wh-expand-btn"></span><div class="title"><a href="../../stream/str_intro.html" id="chap7_tutorials_streaming-d9713e3760-link"><span class="keyword label">流数据</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 流数据引擎及流数据计算的基本概念</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e7513" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e7513-link" class="wh-expand-btn"></span><div class="title"><a href="../../db_distr_comp/db_oper/import_data.html" id="tocId-d9713e7513-link">数据迁移</a><div class="wh-tooltip"><p class="shortdesc">如何从不同数据源向 DolphinDB 迁移数据</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="chap7_tutorials_system_management-d9713e7940" class="topicref" data-id="chap7_tutorials_system_management" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action chap7_tutorials_system_management-d9713e7940-link" class="wh-expand-btn"></span><div class="title"><a href="../../sys_man/om_intro.html" id="chap7_tutorials_system_management-d9713e7940-link"><span class="keyword label">系统运维</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 的系统运维功能及方法</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="troubleshooting-d9713e8780" class="topicref" data-id="troubleshooting" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action troubleshooting-d9713e8780-link" class="wh-expand-btn"></span><div class="title"><a href="../../error_codes/troubleshooting.html" id="troubleshooting-d9713e8780-link">故障排查</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="about_language_resources-d9713e20911" class="topicref" data-id="about_language_resources" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action about_language_resources-d9713e20911-link" class="wh-expand-btn"></span><div class="title"><a href="../../progr/progr_intro.html" id="about_language_resources-d9713e20911-link"><span class="keyword label">编程语言</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 编程基本概念与方法、SQL 在 DolphinDB 的应用</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="functions_references-d9713e30925" class="topicref" data-id="functions_references" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action functions_references-d9713e30925-link" class="wh-expand-btn"></span><div class="title"><a href="../../funcs/funcs_intro.html" id="functions_references-d9713e30925-link"><span class="keyword label">函数参考</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 函数分类、语法、详解及示例</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="api_protocol-d9713e94064" class="topicref" data-id="api_protocol" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action api_protocol-d9713e94064-link" class="wh-expand-btn"></span><div class="title"><a href="../../api/connapi_intro.html" id="api_protocol-d9713e94064-link"><span class="keyword label">连接器 &amp; API</span></a><div class="wh-tooltip"><p class="shortdesc">面向不同编程语言的 DolphinDB API 及连接器，相关协议和用法</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="chap6_plugin-d9713e94210" class="topicref" data-id="chap6_plugin" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action chap6_plugin-d9713e94210-link" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/plg_intro.html" id="chap6_plugin-d9713e94210-link"><span class="keyword label">插件</span></a><div class="wh-tooltip"><p class="shortdesc">多个应用场景的插件使用说明和插件开发指导</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="third_party-d9713e97904" class="topicref" data-id="third_party" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action third_party-d9713e97904-link" class="wh-expand-btn"></span><div class="title"><a href="../../third_party.html" id="third_party-d9713e97904-link">第三方工具</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="about_tutorials-d9713e98227" class="topicref" data-id="about_tutorials" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action about_tutorials-d9713e98227-link" class="wh-expand-btn"></span><div class="title"><a href="../../tutorials/about_tutorials.html" id="about_tutorials-d9713e98227-link"><span class="keyword label">教程</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 产品使用教程</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e105982" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e105982-link" class="wh-expand-btn"></span><div class="title"><a href="../../rn/server/3_00_2.html" id="tocId-d9713e105982-link">版本说明</a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 版本发布历史</p></div></div></div></li></ul></div>
+		                        
+                            </div>
+                        </nav>
+                    
+                    
+                    <div class="col-lg-7 col-md-9 col-sm-12" id="wh_topic_body">
+                        <button id="wh_close_publication_toc_button" class="close-toc-button d-none" aria-label="Toggle publishing table of content" aria-controls="wh_publication_toc" aria-expanded="true">
+                            <span class="close-toc-icon-container">
+                                <span class="close-toc-icon"></span>     
+                            </span>
+                        </button>
+                        <button id="wh_close_topic_toc_button" class="close-toc-button d-none" aria-label="Toggle topic table of content" aria-controls="wh_topic_toc" aria-expanded="true">
+                            <span class="close-toc-icon-container">
+                                <span class="close-toc-icon"></span>     
+                            </span>
+                        </button>
+                        
+                        <div class=" wh_topic_content body "><main role="main"><article class="- topic/topic topic" role="article" aria-labelledby="ariaid-title1">
+    <h1 class="- topic/title title topictitle1" id="ariaid-title1"><span class="- topic/keyword keyword label">插入数据</span></h1>
+    <div class="- topic/body body">
+        <p class="- topic/p p">DolphinDB 支持通过 <code class="+ topic/ph pr-d/codeph ph codeph">INSERT INTO</code> 语句、 <code class="+ topic/ph pr-d/codeph ph codeph">append!</code> 和
+                <code class="+ topic/ph pr-d/codeph ph codeph">tableInsert</code> 函数向表中插入数据。本页面将介绍这些方法的使用方式以及常见问题。</p>
+    </div>
+    <article class="- topic/topic topic nested1" aria-labelledby="ariaid-title2" id="topic_rwd_fjc_pdc">
+        <h2 class="- topic/title title topictitle2" id="ariaid-title2">插入方法</h2>
+        <div class="- topic/body body">
+            <div class="- topic/p p">DolphinDB 提供了三种方法，向分布式表和内存表插入数据：<ul class="- topic/ul ul" id="topic_rwd_fjc_pdc__ul_gtx_3jc_pdc" data-ofbid="topic_rwd_fjc_pdc__ul_gtx_3jc_pdc">
+                    <li class="- topic/li li"><code class="+ topic/ph pr-d/codeph ph codeph">INSERT INTO</code> 语句</li>
+                    <li class="- topic/li li"><code class="+ topic/ph pr-d/codeph ph codeph">append!</code> 函数</li>
+                    <li class="- topic/li li"><code class="+ topic/ph pr-d/codeph ph codeph">tableInsert</code> 函数</li>
+                </ul></div>
+        </div>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title3" id="topic_p3l_tgc_pdc">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title3">INSERT INTO 语句</h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p">通过 <a class="- topic/xref xref" href="../../progr/sql/insertInto.html">INSERT INTO</a> 语句的
+                        <code class="+ topic/ph pr-d/codeph ph codeph">VALUES</code> 子句可以插入数据。此方法默认仅支持内存表，不适用于分布式表。要对分布式表中使用此方法，可以启用配置项
+                    enableInsertStatementForDFSTable，详细信息请参考 <a class="- topic/xref xref" href="../cfg/function_configuration.html#topic_idq_flk_gcc">数据库与数据表</a>。</p>
+            </div>
+            <article class="- topic/topic topic nested3" aria-labelledby="ariaid-title4" id="topic_xnh_23c_pdc">
+                <h4 class="- topic/title title topictitle4" id="ariaid-title4">插入所有列</h4>
+                <div class="- topic/body body">
+                    <p class="- topic/p p">如果不指定列，默认插入所有列。此时在 <code class="+ topic/ph pr-d/codeph ph codeph">VALUES</code> 关键字后的括号中按照表的列顺序提供相应的值。</p>
+                    <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_xnh_23c_pdc__codeblock_zhv_f3c_pdc" data-ofbid="topic_xnh_23c_pdc__codeblock_zhv_f3c_pdc"><code>// 插入所有列
+INSERT INTO &lt;tableName&gt; VALUES (val1, val2, val3, ...);</code></pre>
+                </div>
+            </article>
+            <article class="- topic/topic topic nested3" aria-labelledby="ariaid-title5" id="topic_cwn_g3c_pdc">
+                <h4 class="- topic/title title topictitle4" id="ariaid-title5">插入指定列</h4>
+                <div class="- topic/body body">
+                    <p class="- topic/p p">如果只想插入表的某几列，可以在表名后的括号中指定列名，<code class="+ topic/ph pr-d/codeph ph codeph">VALUES</code>
+                        关键字后的括号中按照指定列的顺序提供相应的值，未指定列的对应值将填充为 NULL。如果插入的是分区表，则指定的列中必须包含分区列。</p>
+                    <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_cwn_g3c_pdc__codeblock_xkt_h3c_pdc" data-ofbid="topic_cwn_g3c_pdc__codeblock_xkt_h3c_pdc"><code>// 插入指定列 col1,col2,col3...
+INSERT INTO &lt;tableName&gt; (col1, col2, col3, ...) VALUES (val1, val2, val3, ...);</code></pre>
+                    <p class="- topic/p p">向表 t 中插入1 行只包含 id 和 sym 两列的数据，val 列为空。</p>
+                    <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_cwn_g3c_pdc__codeblock_sbs_33c_pdc" data-ofbid="topic_cwn_g3c_pdc__codeblock_sbs_33c_pdc"><code>t = table(1:0,`id`sym`val,[INT,STRING,DOUBLE])
+// 插入 1 行只包含 id, vale 两列的数据
+INSERT INTO t (id,val) VALUES (1,7.6)</code></pre>
+                    <p class="- topic/p p">向表中插入多行数据有两种写法：</p>
+                    <ul class="- topic/ul ul" id="topic_cwn_g3c_pdc__ul_yq2_j3c_pdc" data-ofbid="topic_cwn_g3c_pdc__ul_yq2_j3c_pdc">
+                        <li class="- topic/li li">
+                            <p class="- topic/p p">逐行定义数据，values 关键字后每个括号代表一行</p>
+                            <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_cwn_g3c_pdc__codeblock_okz_l3c_pdc" data-ofbid="topic_cwn_g3c_pdc__codeblock_okz_l3c_pdc"><code>insert into t values (2, "A02", 2.2),(3, "B03", 3.3)</code></pre>
+                        </li>
+                        <li class="- topic/li li">
+                            <p class="- topic/p p">按列定义数据，values 关键字后的括号内为等长向量，对应表 t 的各列</p>
+                            <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_cwn_g3c_pdc__codeblock_z5m_n3c_pdc" data-ofbid="topic_cwn_g3c_pdc__codeblock_z5m_n3c_pdc"><code>insert into t values ([5,6], ["C05","D06"], [5.5,6.6])</code></pre>
+                        </li>
+                    </ul>
+                </div>
+            </article>
+        </article>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title6" id="topic_yvd_v3c_pdc">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title6">append! 函数</h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p"><a class="- topic/xref xref" href="../../funcs/a/append!.html">append!</a>函数可将一个与原表结构相同的表整体追加到原表中。</p>
+                <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_yvd_v3c_pdc__codeblock_mjw_y3c_pdc" data-ofbid="topic_yvd_v3c_pdc__codeblock_mjw_y3c_pdc"><code>t = table(1:0,`id`sym`val,[INT,SYMBOL,DOUBLE])
+tmp = table(1..10 as id, take(`A001`B001,10) as sym, rand(10.0,10) as val)
+append!(t,tmp)</code></pre>
+                <div class="- topic/note note note note_note" id="topic_yvd_v3c_pdc__note_vcf_z3c_pdc" data-ofbid="topic_yvd_v3c_pdc__note_vcf_z3c_pdc"><span class="note__title">注：</span> <code class="+ topic/ph pr-d/codeph ph codeph">append!</code>
+                    函数并不会检查两表的列名和顺序，只要两表每列的数据类型一致即可执行，也不会根据列名进行对齐。因此，对数据表进行 <code class="+ topic/ph pr-d/codeph ph codeph">append!</code>
+                    操作时，需要仔细检查表结构是否一致，以免出错。</div>
+            </div>
+        </article>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title7" id="topic_ktf_43c_pdc">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title7">tableInsert 函数</h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p"><a class="- topic/xref xref" href="../../funcs/t/tableInsert.html">tableInsert</a>
+                    可用于将表、元组、字典，或多个向量或元组加入原表中。</p>
+                <p class="- topic/p p">不同于 <code class="+ topic/ph pr-d/codeph ph codeph">append!</code> 的是，<code class="+ topic/ph pr-d/codeph ph codeph">tableInsert</code> 会返回此次插入成功的条数。</p>
+                <p class="- topic/p p">例如，向一个分区内存表中插入 10 条数据，此分区内存表只有 5 个分区，在这 5 个分区内的数据成功插入，其余数据被舍去。</p>
+                <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_ktf_43c_pdc__codeblock_zcn_s3c_pdc" data-ofbid="topic_ktf_43c_pdc__codeblock_zcn_s3c_pdc"><code>db = database("", VALUE, 1..5)
+schemaTb = table(1:0, `id`sym`val, [INT,SYMBOL,DOUBLE])
+t = db.createPartitionedTable(schemaTb, `mpt, `id)
+
+tmp = table(1..10 as id, take(`A`B,10) as sym, rand(10.0,10) as val)
+tableInsert(t, tmp)
+// output:5</code></pre>
+            </div>
+        </article>
+    </article>
+    <article class="- topic/topic topic nested1" aria-labelledby="ariaid-title8" id="插入数据到分布式表">
+        <h2 class="- topic/title title topictitle2" id="ariaid-title8">向分布式表插入数据注意事项</h2>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title9" id="topic_t23_pkc_pdc">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title9">数据大小限制</h3>
+            <div class="- topic/body body">
+                <ul class="- topic/ul ul" id="topic_t23_pkc_pdc__ul_e2p_skc_pdc" data-ofbid="topic_t23_pkc_pdc__ul_e2p_skc_pdc">
+                    <li class="- topic/li li">插入 STRING 类型数据时，每个 STRING 不能超过 64KB，超过 64KB 的部分会被截断。</li>
+                    <li class="- topic/li li">插入 BLOB 类型数据时，每个 BLOB 不能超过 64MB，超过 64MB 的部分会被截断。</li>
+                    <li class="- topic/li li">插入 SYMBOL 类型数据时，每个 SYMBOL 不能超过 255B，超出时会抛出异常。</li>
+                </ul>
+            </div>
+        </article>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title10" id="topic_lwy_ykc_pdc">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title10">特殊字符处理</h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p">如果数据库为 VALUE 分区，且分区列为 STRING 类型或 SYMBOL 类型，那么插入的分区列数据不能包含空格、"\n"、"\r" 和
+                    "\t"，否则会插入失败并报错 <code class="+ topic/ph pr-d/codeph ph codeph">A STRING or SYMBOL column used for value-partitioning
+                        cannot contain invisible characters.</code></p>
+            </div>
+        </article>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title11" id="topic_fw3_mq3_pdc">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title11">无序数据写入</h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p">存储引擎对数据的排序是异步的，因此插入有序和乱序数据对写入性能几乎没有影响。</p>
+                <div class="- topic/p p">数据在数据库中按照分区存储。其每个分区内部的顺序与选择的存储引擎有关：<ul class="- topic/ul ul" id="topic_fw3_mq3_pdc__ul_ygv_4q3_pdc" data-ofbid="topic_fw3_mq3_pdc__ul_ygv_4q3_pdc">
+                        <li class="- topic/li li">OLAP：分区内数据的顺序与插入的顺序相同。</li>
+                        <li class="- topic/li li">TSDB：在 levelfile 内会根据 <em class="+ topic/ph hi-d/i ph i">sortColumns</em> 进行排序。</li>
+                        <li class="- topic/li li">PKEY：在 levelfile 内会根据 <em class="+ topic/ph hi-d/i ph i">primaryKey</em> 进行排序。</li>
+                    </ul></div>
+            </div>
+        </article>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title12" id="topic_r15_xq3_pdc">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title12">原子性事务</h3>
+            <div class="- topic/body body">
+                <div class="- topic/p p">向分布式表的多个分区插入数据，是否支持事务取决于创建数据库时的指定的参数 <em class="+ topic/ph hi-d/i ph i">atomic</em>：<ul class="- topic/ul ul" id="topic_r15_xq3_pdc__ul_inz_ls3_pdc" data-ofbid="topic_r15_xq3_pdc__ul_inz_ls3_pdc">
+                        <li class="- topic/li li"><em class="+ topic/ph hi-d/i ph i">atomic</em> 设置为
+                            'TRANS'，则支持事务。如果某个分区写入失败，例如被其他写入事务锁定而出现写入冲突，则本次写入事务全部失败。<pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_r15_xq3_pdc__codeblock_n2p_vs3_pdc" data-ofbid="topic_r15_xq3_pdc__codeblock_n2p_vs3_pdc"><code>// 创建一个原子性层级为 TRANS 的数据库
+if(existsDatabase("dfs://test")) dropDatabase("dfs://test")
+db1 = database("",VALUE,2024.01.01..2024.01.03)
+db2 = database("",HASH,[SYMBOL,4])
+db = database("dfs://test", COMPO, [db1,db2],,"TSDB","TRANS")
+tmp = table(1:0, `date`time`sym`val, [DATE,SECOND,SYMBOL,INT])
+pt = db.createPartitionedTable(tmp,`pt,`date`sym,,`time,ALL)
+
+// 后台提交任务模拟并发写入场景
+n =  100
+t1 = table(take(2024.01.01..2024.01.03,n) as date, 00:00:00 + 1..n as time, rand(`A`B`C`D`E`F,n) as sym, rand(100,n) as val)
+t2 = table(take(2024.01.01..2024.01.03,n) as date, 00:00:00 + 1..n as time, rand(`A`B`C`D`E`F,n) as sym, rand(100,n) as val)
+t3 = table(take(2024.01.01..2024.01.03,n) as date, 00:00:00 + 1..n as time, rand(`A`B`C`D`E`F,n) as sym, rand(100,n) as val)
+submitJob("writeData1", "writeData1", tableInsert, pt, t1)
+submitJob("writeData2", "writeData2", tableInsert, pt, t2)
+submitJob("writeData3", "writeData3", tableInsert, pt, t3)
+
+// 任务完成后执行查询
+select count(*) from pt  
+// output: 100</code></pre>通过 <code class="+ topic/ph pr-d/codeph ph codeph">getRecentJobs()</code>
+                                方法可以看到，有两个写入任务因为涉及的分区被其他事务锁定导致写入失败：<code class="+ topic/ph pr-d/codeph ph codeph">The openChunks operation
+                                failed because the chunk '/test/20240101/Key1/OQ' is currently
+                                locked and in use by transaction 3153.</code></li>
+                        <li class="- topic/li li">当此数据库事务的原子性层级为
+                            CHUNK，若某分区被其它写入事务锁定而出现冲突，系统会完成其他分区的写入，同时对之前发生冲突的分区不断尝试写入，尝试数分钟后仍冲突才放弃写入。此设置下，允许并发写入同一个分区，但由于不能完全保证事务的原子性，可能出现部分分区写入成功而部分分区写入失败的情况。同时由于采用了重试机制，写入速度可能较慢。<pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_r15_xq3_pdc__codeblock_vfg_kt3_pdc" data-ofbid="topic_r15_xq3_pdc__codeblock_vfg_kt3_pdc"><code>if(existsDatabase("dfs://test")) dropDatabase("dfs://test")
+db1 = database("",VALUE,2024.01.01..2024.01.03)
+db2 = database("",HASH,[SYMBOL,4])
+db = database("dfs://test", COMPO, [db1,db2],,"TSDB","CHUNK")
+tmp = table(1:0, `date`time`sym`val, [DATE,SECOND,SYMBOL,INT])
+pt = db.createPartitionedTable(tmp,`pt,`date`sym,,`time,ALL)
+
+n =  100
+t1 = table(take(2024.01.01..2024.01.03,n) as date, 00:00:00 + 1..n as time, rand(`A`B`C`D`E`F,n) as sym, rand(100,n) as val)
+t2 = table(take(2024.01.01..2024.01.03,n) as date, 00:00:00 + 1..n as time, rand(`A`B`C`D`E`F,n) as sym, rand(100,n) as val)
+t3 = table(take(2024.01.01..2024.01.03,n) as date, 00:00:00 + 1..n as time, rand(`A`B`C`D`E`F,n) as sym, rand(100,n) as val)
+
+
+submitJob("writeData1", "writeData1", tableInsert, pt, t1)
+submitJob("writeData2", "writeData2", tableInsert, pt, t2)
+submitJob("writeData3", "writeData3", tableInsert, pt, t3)
+
+// 任务完成后执行查询
+select count(*) from pt 
+// output: 300</code></pre></li>
+                    </ul></div>
+            </div>
+        </article>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title13" id="topic_bms_mt3_pdc">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title13">向分布式表插入大量数据</h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p">在已知分区结构的情况下，最好的方式是将数据按照分区划分后分别提交后台作业，如此既可以充分利用多线程并发写入，提高写入效率，又可以确保不会因为写入冲突而造成写入失败。</p>
+                <p class="- topic/p p">下例简单模拟了少量数据进行性能对比，当处理大批量的历史数据时，性能差距更加明显。</p>
+                <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_bms_mt3_pdc__codeblock_fvb_tt3_pdc" data-ofbid="topic_bms_mt3_pdc__codeblock_fvb_tt3_pdc"><code>// 建库建表
+if(existsDatabase("dfs://test")) dropDatabase("dfs://test")
+db1 = database("",VALUE,2024.01.01..2024.01.03)
+db2 = database("",HASH,[SYMBOL,4])
+db = database("dfs://test", COMPO, [db1,db2],,"TSDB")
+tmp = table(1:0, `date`time`sym`val, [DATE,SECOND,SYMBOL,INT])
+pt = db.createPartitionedTable(tmp,`pt,`date`sym,,`time,ALL)
+
+// 模拟一亿条数据一次性写入
+n = 100000000
+t = table(take(2024.01.01..2024.01.03,n*3) as date,00:00:00 + 1..(n*3) as time, rand(`A`B`C`D`E`F,n*3) as sym, rand(100,n*3) as val)
+timer pt.tableInsert(t)
+// Time elapsed: 49329.098 ms
+
+// 模拟一亿条数据，按照分区划分，分别提交三个后台作业
+t1 = table(take(2024.01.01,n) as date, 00:00:00 + 1..n as time, rand(`A`B`C`D`E`F,n) as sym, rand(100,n) as val)
+t2 = table(take(2024.01.02,n) as date, 00:00:00 + 1..n as time, rand(`A`B`C`D`E`F,n) as sym, rand(100,n) as val)
+t3 = table(take(2024.01.03,n) as date, 00:00:00 + 1..n as time, rand(`A`B`C`D`E`F,n) as sym, rand(100,n) as val)
+submitJob("writeData1", "writeData1", tableInsert, pt, t1)
+submitJob("writeData2", "writeData2", tableInsert, pt, t2)
+submitJob("writeData3", "writeData3", tableInsert, pt, t3)
+// 通过 getRecentJobs() 查看耗时约为28秒。</code></pre>
+            </div>
+        </article>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title14" id="topic_wck_xrj_pdc">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title14">插入现有分区以外的数据</h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p">对于 VALUE 分区或含有 COMPO 分区的 VALUE 层级，可通过设置配置参数
+                        <em class="+ topic/ph hi-d/i ph i">newValuePartitionPolicy=add</em>，实现自动创建对应分区并写入数据。更多细节请参考<a class="- topic/xref xref" href="add_partitions.html">增加分区</a>。</p>
+            </div>
+        </article>
+    </article>
+    <article class="- topic/topic topic nested1" aria-labelledby="ariaid-title15" id="topic_tgg_bsj_pdc">
+        <h2 class="- topic/title title topictitle2" id="ariaid-title15">常见问题解答</h2>
+        <div class="- topic/body body">
+            <ol class="- topic/ol ol" id="topic_tgg_bsj_pdc__ol_l4t_3sj_pdc" data-ofbid="topic_tgg_bsj_pdc__ol_l4t_3sj_pdc">
+                <li class="- topic/li li"><strong class="+ topic/ph hi-d/b ph b">问题1：如果列的数据类型不匹配，数据能成功插入吗？</strong><p class="- topic/p p">这取决于插入列与目标列的数据类型之间能否进行隐式转换：如果能够进行隐式类型转换，会转换为目标类型后插入，但这可能会造成数据精度的损失；如遇到不能隐式转换的类型，则本次插入失败。</p><p class="- topic/p p">例如存在一个表
+                            <em class="+ topic/ph hi-d/i ph i">t</em>，其中列 id 为 INT 类型，当向其写入 DOUBLE、CHAR 类型的数据时，会进行数据类型转换后写入；而向其写入
+                        STRING
+                    类型的数据，会因为无法进行类型转换导致插入失败。</p><pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_tgg_bsj_pdc__codeblock_zxn_tsj_pdc" data-ofbid="topic_tgg_bsj_pdc__codeblock_zxn_tsj_pdc"><code>t = table(3:0,[`id],[INT])
+t.tableInsert(table(1.2 as id)) // 返回1
+t.tableInsert(table('a' as id)) // 返回1
+t.tableInsert(table("str" as id)) // Failed to append data to column 'id' with error: Incompatible type. Expected: INT, Actual: STRING</code></pre></li>
+                <li class="- topic/li li"><strong class="+ topic/ph hi-d/b ph b">问题2：如果列的顺序与目标表的列顺序不一致，数据能成功插入吗？</strong><p class="- topic/p p">如果采用 <code class="+ topic/ph pr-d/codeph ph codeph">INSERT INTO</code>
+                        指定插入的列，则数据会按照列名，插入对应的列。</p><pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_tgg_bsj_pdc__codeblock_xxw_2tj_pdc" data-ofbid="topic_tgg_bsj_pdc__codeblock_xxw_2tj_pdc"><code>t = table(1:0,`id`sym,[INT,STRING])
+INSERT INTO t (sym,id) VALUES ("AAA",1)</code></pre><p class="- topic/p p">其他情况下，会按照顺序依次写入，即尝试将待插入数据的第
+                        n 列插入到目标表的第 n
+                        列，与列名无关。此时如果存在数据类型不匹配的问题，插入能否成功取决于数据类型能否进行转换，详情参考<strong class="+ topic/ph hi-d/b ph b">问题1</strong>。</p></li>
+                <li class="- topic/li li"><strong class="+ topic/ph hi-d/b ph b">问题3：如果插入的列数多于目标表的列数，数据能成功插入吗？</strong><p class="- topic/p p">当插入的列数大于目标表时，插入总是失败。</p><pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_tgg_bsj_pdc__codeblock_hcv_mtj_pdc" data-ofbid="topic_tgg_bsj_pdc__codeblock_hcv_mtj_pdc"><code>t = table(1:0,[`id],[INT])
+t.tableInsert(table(1 as id, 2 as val)) // The number of columns of the table to insert must be the same as that of the original table.</code></pre><p class="- topic/p p">当插入的列数小于目标表时：</p><div class="- topic/p p">（1）对内存表：<ul class="- topic/ul ul" id="topic_tgg_bsj_pdc__ul_b3f_hyj_pdc" data-ofbid="topic_tgg_bsj_pdc__ul_b3f_hyj_pdc">
+                            <li class="- topic/li li">使用 <code class="+ topic/ph pr-d/codeph ph codeph">INSERT INTO</code> 语句指定插入的列<ul class="- topic/ul ul" id="topic_tgg_bsj_pdc__ul_pb2_4yj_pdc" data-ofbid="topic_tgg_bsj_pdc__ul_pb2_4yj_pdc">
+                                    <li class="- topic/li li">
+                                        <div class="- topic/p p">如果插入分区表，则必须包含分区列；否则无法插入，且系统不会报错并丢弃对应数据。<pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_tgg_bsj_pdc__codeblock_owy_4yj_pdc" data-ofbid="topic_tgg_bsj_pdc__codeblock_owy_4yj_pdc"><code>db = database("",VALUE,1..3)
+t = db.createPartitionedTable(table(1:0,`id`price`qty,[INT,DOUBLE,INT]),`pt,`id)
+INSERT INTO t (price,qty) VALUES (3.6,100)</code></pre></div>
+                                    </li>
+                                    <li class="- topic/li li">
+                                        <div class="- topic/p p">插入其它类型内存表，则插入成功。<pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_tgg_bsj_pdc__codeblock_yjw_wyj_pdc" data-ofbid="topic_tgg_bsj_pdc__codeblock_yjw_wyj_pdc"><code>t = table(1:0,`id`price`qty,[INT,DOUBLE,INT])
+INSERT INTO t (price,qty) VALUES (3.6,100) </code></pre></div>
+                                    </li>
+                                </ul></li>
+                            <li class="- topic/li li">使用 INSERT INTO 语句未指定插入的列，或使用 <code class="+ topic/ph pr-d/codeph ph codeph">tableInsert</code> 或
+                                    <code class="+ topic/ph pr-d/codeph ph codeph">append!</code>
+                                插入，则插入失败，此时系统会报错。<pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_tgg_bsj_pdc__codeblock_mq2_lzj_pdc" data-ofbid="topic_tgg_bsj_pdc__codeblock_mq2_lzj_pdc"><code>t = table(1:0,`id`price`qty,[INT,DOUBLE,INT])
+INSERT INTO t VALUES (3.6,100) //The number of table columns doesn't match the number of columns to append.
+t.append!(table(3.6 as price,100 as qty)) //The number of columns of the table to insert must be the same as that of the original table.
+t.tableInsert(table(3.6 as price,100 as qty)) //The number of columns of the table to insert must be the same as that of the original table.  </code></pre></li>
+                        </ul></div><div class="- topic/p p">（2）对分布式表：<ul class="- topic/ul ul" id="topic_tgg_bsj_pdc__ul_x4j_tzj_pdc" data-ofbid="topic_tgg_bsj_pdc__ul_x4j_tzj_pdc">
+                            <li class="- topic/li li">
+                                <div class="- topic/p p">插入分区表的数据必须包含分区列，否则插入失败。<pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_tgg_bsj_pdc__codeblock_j3g_5zj_pdc" data-ofbid="topic_tgg_bsj_pdc__codeblock_j3g_5zj_pdc"><code>// 建库建表
+if(existsDatabase("dfs://test")) dropDatabase("dfs://test")
+db = database("dfs://test",VALUE,1..5)
+t = table(1:0,`sym`id`price`qty,[SYMBOL,INT,DOUBLE,INT])
+pt = db.createPartitionedTable(t,`pt,`id)
+​
+// 插入数据
+pt.tableInsert(table("A" as sym)) //不包含分区列，失败报错 The number of columns of the current table must match that of the target table.
+pt.tableInsert(table("A" as sym, 1 as id)) // 包含分区列，返回1，插入成功。 </code></pre></div>
+                            </li>
+                            <li class="- topic/li li">
+                                <p class="- topic/p p">如果某一个分区内成功插入过 n 列数据，则不允许再向该分区插入 m（m&lt;n）列数据，可以继续插入大于等于 n
+                                    列的数据。</p>
+                                <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_tgg_bsj_pdc__codeblock_qwf_vzj_pdc" data-ofbid="topic_tgg_bsj_pdc__codeblock_qwf_vzj_pdc"><code>// 创建库表
+if(existsDatabase("dfs://test1")) dropDatabase("dfs://test1")
+db = database("dfs://test1", VALUE, 1..5) 
+t = table(1:0,`id`sym`price`qty,[INT,SYMBOL,DOUBLE,INT])
+pt = db.createPartitionedTable(t,`pt,`id)
+​
+//插入数据
+pt.tableInsert(table(1 as id, "A" as sym)) // 返回1，成功向分区1中插入包含2列的数据
+pt.tableInsert(table(1 as id)) // 无法向分区1中插入包含1列的数据，报错 The data to append contains fewer columns than the schema.
+pt.tableInsert(table(1 as id, "A" as sym, 3.6 as price)) // 返回1，成功向分区1中插入包含3列的数据
+pt.tableInsert(table(2 as id)) // 返回1，成功向分区2中插入包含1列的数据 </code></pre>
+                            </li>
+                        </ul></div></li>
+                <li class="- topic/li li"><strong class="+ topic/ph hi-d/b ph b">问题4：tableInsert 返回结果不符合预期，可能是什么原因？</strong><div class="- topic/p p">
+                        <ul class="- topic/ul ul" id="topic_tgg_bsj_pdc__ul_qdg_c1k_pdc" data-ofbid="topic_tgg_bsj_pdc__ul_qdg_c1k_pdc">
+                            <li class="- topic/li li">
+                                <p class="- topic/p p">分区表写入分区范围外的数据，且分区不满足自动创建的条件，此时分区之外的数据没有写入。</p>
+                            </li>
+                            <li class="- topic/li li">
+                                <p class="- topic/p p">当写入键值表或者索引表时，如果要写入的数据在数据表中已经存在对应键值，则会更新该键值对应的数据，但写入成功的统计结果不会包含此条更新。因为写入成功的条数只包括新增的数据条数。
+                                    下例中，一个键值表 <em class="+ topic/ph hi-d/i ph i">kt</em> 中，存在键值为 1 的数据，此时插入三条键值为 1、2、3 的数据，此时会更新键值为 1
+                                    的数据，并插入键值为 2、3 的数据，而 <code class="+ topic/ph pr-d/codeph ph codeph">tableInsert</code> 返回 2，是指新插入了键值为
+                                    2、3 的数据。</p>
+                            </li>
+                        </ul>
+                    </div><pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_tgg_bsj_pdc__codeblock_hld_d1k_pdc" data-ofbid="topic_tgg_bsj_pdc__codeblock_hld_d1k_pdc"><code>kt = keyedTable(`id,1 as id, 1 as val)
+kt.tableInsert(table(1..3 as id, 7..9 as val)) // 返回2</code></pre></li>
+            </ol>
+        </div>
+    </article>
+</article></main></div>
+                        
+                        
+                        
+                        
+                        
+                        
+                    </div>
+                    
+                        <nav role="navigation" id="wh_topic_toc" aria-label="On this page" class="col-lg-2 d-none d-lg-block navbar d-print-none"> 
+                            <div id="wh_topic_toc_content">
+		                        
+	                            <div class=" wh_topic_toc "><div class="wh_topic_label">在本页上</div><ul><li class="topic-item"><a href="#topic_rwd_fjc_pdc" data-tocid="topic_rwd_fjc_pdc">插入方法</a><ul><li class="topic-item"><a href="#topic_p3l_tgc_pdc" data-tocid="topic_p3l_tgc_pdc">INSERT INTO 语句</a><ul><li class="topic-item"><a href="#topic_xnh_23c_pdc" data-tocid="topic_xnh_23c_pdc">插入所有列</a></li><li class="topic-item"><a href="#topic_cwn_g3c_pdc" data-tocid="topic_cwn_g3c_pdc">插入指定列</a></li></ul></li><li class="topic-item"><a href="#topic_yvd_v3c_pdc" data-tocid="topic_yvd_v3c_pdc">append! 函数</a></li><li class="topic-item"><a href="#topic_ktf_43c_pdc" data-tocid="topic_ktf_43c_pdc">tableInsert 函数</a></li></ul></li><li class="topic-item"><a href="#%E6%8F%92%E5%85%A5%E6%95%B0%E6%8D%AE%E5%88%B0%E5%88%86%E5%B8%83%E5%BC%8F%E8%A1%A8" data-tocid="插入数据到分布式表">向分布式表插入数据注意事项</a><ul><li class="topic-item"><a href="#topic_t23_pkc_pdc" data-tocid="topic_t23_pkc_pdc">数据大小限制</a></li><li class="topic-item"><a href="#topic_lwy_ykc_pdc" data-tocid="topic_lwy_ykc_pdc">特殊字符处理</a></li><li class="topic-item"><a href="#topic_fw3_mq3_pdc" data-tocid="topic_fw3_mq3_pdc">无序数据写入</a></li><li class="topic-item"><a href="#topic_r15_xq3_pdc" data-tocid="topic_r15_xq3_pdc">原子性事务</a></li><li class="topic-item"><a href="#topic_bms_mt3_pdc" data-tocid="topic_bms_mt3_pdc">向分布式表插入大量数据</a></li><li class="topic-item"><a href="#topic_wck_xrj_pdc" data-tocid="topic_wck_xrj_pdc">插入现有分区以外的数据</a></li></ul></li><li class="topic-item"><a href="#topic_tgg_bsj_pdc" data-tocid="topic_tgg_bsj_pdc">常见问题解答</a></li></ul></div>
+	                        	
+                        	</div>
+                        </nav>
+                    
+                </div>
+            </div>
+            
+            
+            
+        </div> 
+        <footer class="navbar navbar-default wh_footer">
+  <div class=" footer-container mx-auto ">
+<title>Copyright</title><p><b> ©2025 浙江智臾科技有限公司 浙ICP备18048711号-3</b></p>
+  </div>
+</footer>
+        
+        <div id="go2top" class="d-print-none">
+            <span class="oxy-icon oxy-icon-up"></span>
+        </div>
+        
+        <div id="modal_img_large" class="modal">
+            <span class="close oxy-icon oxy-icon-remove"></span>
+            <div id="modal_img_container"></div>
+            <div id="caption"></div>
+        </div>
+        
+        
+        
+    </body>
+</html>

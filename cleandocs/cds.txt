@@ -1,0 +1,52 @@
+
+
+```dolphindb
+# cds
+
+## 语法
+
+`cds(settlement, maturity, evalDate, notional, spread, riskFree, recovery, isSeller, frequency, calendar, [convention='Following'], [termDateConvention='Following'], [rule='CDS'], [basis=1])`
+
+## 详情
+
+本函数对信用违约互换（CDS）进行估值计算，返回 DOUBLE 类型的标量或向量。
+
+## 参数
+
+| 参数                | 类型             | 描述                                                                                                                                                                                                 |
+|---------------------|------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| settlement          | DATE             | CDS合约生效日（早于对应maturity）                                                                                                                                                                   |
+| maturity            | DATE             | CDS合约到期日                                                                                                                                                                                       |
+| evalDate            | DATE             | 估值日（不晚于对应settlement）                                                                                                                                                                      |
+| notional            | 数值类型          | 名义本金（非负）                                                                                                                                                                                   |
+| spread              | 数值类型          | 利差（以基点表示）                                                                                                                                                                                 |
+| riskFree            | 数值类型          | 无风险利率（非负）                                                                                                                                                                                 |
+| recovery            | 数值类型          | 回收率（0-1之间）                                                                                                                                                                                  |
+| isSeller            | 整数类型          | 交易方类型：1-卖方，0-买方                                                                                                                                                                         |
+| frequency           | 整型/DURATION    | 支付频率：1（年付）、2（半年付）、4（季付）等，或duration值                                                                                                                                         |
+| calendar            | 字符串            | 交易日历类型（参见[交易日历](../../modules/MarketHoliday/mkt_calendar.html)）                                                                                                                     |
+| convention          | 字符串（可选）    | 非工作日调整规则，默认'Following'                                                                                                                                                                  |
+| termDateConvention  | 字符串（可选）    | 终止日调整规则，默认'Following'                                                                                                                                                                    |
+| rule                | 字符串（可选）    | 日期生成规则，默认'CDS'                                                                                                                                                                            |
+| basis               | 整型/字符串(可选)| 日计数基准，默认1（"ActualActual"）                                                                                                                                                                |
+
+## 示例
+
+```dolphindb
+valDate = 2007.05.15     
+settlement = 2007.05.16
+maturity = 2007.08.16
+notional = 1000000.0
+spread = 0.0150
+riskFreeRate = 0.01
+recoveryRate = 0.5
+isSeller = true
+frequency = 4
+convention = 'Following'
+termDateConvention = 'Unadjusted'
+rule = 'TwentiethIMM'
+basis = 3
+
+cds(settlement, maturity, valDate, notional, spread, riskFreeRate, recoveryRate, isSeller, frequency, 'CCFX', convention, termDateConvention, rule, basis)
+// 返回值：-5.448913728297157
+```

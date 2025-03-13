@@ -1,0 +1,530 @@
+<!DOCTYPE html><html xmlns="http://www.w3.org/1999/xhtml" xml:lang="zh" lang="zh" data-whc_version="26.0">
+    <head><link rel="shortcut icon" href="../../favicon.ico"/><link rel="icon" href="../../favicon.ico"/><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><meta name="description" content="在金融行业的交易系统等一些数据库应用场景中，主要工作负载来源于对关系表的高频率、高并发的更新和查询操作。这类应用场景对数据处理提出了严格的要求，包括低延迟、高并发的读写性能，严格的数据一致性，以及对符合 ACID 特性的事务支持，属于典型的在线事务处理（OLTP）场景。 ..."/><meta name="DC.rights.owner" content="(C) 版权 2025"/><meta name="copyright" content="(C) 版权 2025"/><meta name="generator" content="DITA-OT"/><meta name="DC.type" content="topic"/><meta name="DC.coverage" content=""/><meta name="DC.relation" content="../../db_distr_comp/cfg/db_intro.html"/><meta name="prodname" content="DolphinDB"/><meta name="brand" content="DolphinDB"/><meta name="DC.creator" content="DolphinDB"/><meta name="DC.publisher" content="DDB N/A DDB 200"/><meta name="DC.format" content="HTML5"/><meta name="DC.identifier" content="imoltp"/><title>内存在线事务处理引擎</title><!--  Generated with Oxygen version 26.0, build number 2024012323.  --><meta name="wh-path2root" content="../../"/><meta name="wh-toc-id" content="imoltp-d9713e3529"/><meta name="wh-source-relpath" content="db_distr_comp/db/imoltp.dita"/><meta name="wh-out-relpath" content="db_distr_comp/db/imoltp.html"/>
+
+    <link rel="stylesheet" type="text/css" href="../../oxygen-webhelp/app/commons.css?buildId=2024012323"/>
+    <link rel="stylesheet" type="text/css" href="../../oxygen-webhelp/app/topic.css?buildId=2024012323"/>
+
+    <script src="../../oxygen-webhelp/app/options/properties.js?buildId=20250305183303"></script>
+    <script src="../../oxygen-webhelp/app/localization/strings.js?buildId=2024012323"></script>
+    <script src="../../oxygen-webhelp/app/search/index/keywords.js?buildId=20250305183303"></script>
+    <script defer="defer" src="../../oxygen-webhelp/app/commons.js?buildId=2024012323"></script>
+    <script defer="defer" src="../../oxygen-webhelp/app/topic.js?buildId=2024012323"></script>
+<link rel="stylesheet" type="text/css" href="../../oxygen-webhelp/template/styles.css?buildId=2024012323"/><script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script><script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script></head>
+
+    <body id="imoltp" class="wh_topic_page frmBody">
+        <a href="#wh_topic_body" class="sr-only sr-only-focusable">
+            跳转到主要内容
+        </a>
+        
+        
+        
+        
+        <header class="navbar navbar-default wh_header">
+    <div class="container-fluid">
+        <div xmlns:whc="http://www.oxygenxml.com/webhelp/components" class="wh_header_flex_container navbar-nav navbar-expand-md navbar-dark">
+            <div class="wh_logo_and_publication_title_container">
+                <div class="wh_logo_and_publication_title">
+                    
+                    <a href="https://docs.dolphindb.cn/zh/index.html" class=" wh_logo d-none d-sm-block "><img src="../../logo.png" alt="  DolphinDB 文档中心  "/></a>
+                    <div class=" wh_publication_title "><a href="../../index.html"><span class="booktitle">  <span class="ph mainbooktitle">DolphinDB 文档中心</span>  </span></a></div>
+                    
+                </div>
+                
+                
+            </div>
+
+            <div class="wh_top_menu_and_indexterms_link collapse navbar-collapse" id="wh_top_menu_and_indexterms_link">
+                
+                
+                
+                
+            </div>
+        <div class=" wh_search_input navbar-form wh_topic_page_search search " role="form">
+            
+            
+            
+            <form id="searchForm" method="get" role="search" action="../../search.html"><div><input type="search" placeholder="搜索 " class="wh_search_textfield" id="textToSearch" name="searchQuery" aria-label="搜索查询" required="required"/><button type="submit" class="wh_search_button" aria-label="搜索"><span class="search_input_text">搜索</span></button></div></form>
+            
+            <script src="/vendors/react/umd/react.production.min.js" defer="defer"></script>
+<script src="/vendors/react-dom/umd/react-dom.production.min.js" defer="defer"></script>
+<script src="/vendors/dayjs/dayjs.min.js" defer="defer"></script>
+<script src="/vendors/antd/dist/antd.min.js" defer="defer"></script>
+<script src="/vendors/@ant-design/icons/dist/index.umd.min.js" defer="defer"></script>
+<script src="/zh/index.js" type="module"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" defer="defer"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML" defer="defer"><!--
+
+
+--></script>
+<script defer="defer"><!--
+
+// 从主页重定向
+const currentUrl = window.location.href;
+
+// 判断当前URL是否包含index.html并且路径最后部分是index.html
+if (currentUrl.endsWith('index.html')) {
+    // 处理根目录下的index.html跳转
+    const baseUrl = currentUrl.split('/index.html')[0]; // 获取index.html之前的部分
+    const redirectUrl = `${baseUrl}/about/ddb_intro.html`; // 构建跳转路径
+    window.location.href = redirectUrl; // 执行跳转
+}
+
+--></script>
+            
+        </div></div>
+    </div>
+</header>
+        
+        
+         
+        
+        
+        
+        <div class="container-fluid" id="wh_topic_container">
+            <div class="row">
+
+                <nav class="wh_tools d-print-none navbar-expand-md" aria-label="Tools">
+                    
+                    <div data-tooltip-position="bottom" class=" wh_breadcrumb "><ol class="d-print-none"><li><span class="home"><a href="../../index.html"><span>主页</span></a></span></li><li><div class="topicref" data-id="new_chap_database_manage_new_chap_dbmanage_landing_page"><div class="title"><a href="../../db_distr_comp/cfg/db_intro.html"><span class="keyword label">数据库</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 数据库的基本概念</p></div></div></div></li><li class="active"><div class="topicref" data-id="imoltp"><div class="title"><a href="../../db_distr_comp/db/imoltp.html">内存在线事务处理引擎</a></div></div></li></ol></div>
+                    
+                    
+                    
+                    <div class="wh_right_tools">
+                        <button class="wh_hide_highlight" aria-label="切换搜索突出显示" title="切换搜索突出显示"></button>
+                        <button class="webhelp_expand_collapse_sections" data-next-state="collapsed" aria-label="折叠截面" title="折叠截面"></button>
+                        
+                        
+                        
+                        
+                        <div class=" wh_print_link print d-none d-md-inline-block "><button onClick="window.print()" title="打印此页" aria-label="打印此页"></button></div>
+                        
+                        <button type="button" id="wh_toc_button" class="custom-toggler navbar-toggler collapsed wh_toggle_button navbar-light" aria-expanded="false" aria-label="Toggle publishing table of content" aria-controls="wh_publication_toc">
+                            <span class="navbar-toggler-icon"></span>
+                        </button>
+                    </div>
+                    
+                </nav>
+            </div>
+            
+            
+            
+            
+            <div class="wh_content_area">
+                <div class="row">
+                    
+                        <nav id="wh_publication_toc" class="col-lg-3 col-md-3 col-sm-12 d-md-block d-none d-print-none" aria-label="Table of Contents Container">
+                            <div id="wh_publication_toc_content">
+		                        
+                            	<div class=" wh_publication_toc " data-tooltip-position="right"><span class="expand-button-action-labels"><span id="button-expand-action" role="button" aria-label="Expand"></span><span id="button-collapse-action" role="button" aria-label="Collapse"></span><span id="button-pending-action" role="button" aria-label="Pending"></span></span><ul role="tree" aria-label="Table of Contents"><li role="treeitem"><div data-tocid="ddb_intro-d9713e87" class="topicref" data-id="ddb_intro" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../about/ddb_intro.html" id="ddb_intro-d9713e87-link">关于DolphinDB</a></div></div></li><li role="treeitem"><div data-tocid="chap1_getstarted-d9713e136" class="topicref" data-id="chap1_getstarted" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../getstarted/chap1_getstarted.html" id="chap1_getstarted-d9713e136-link">快速上手</a><div class="wh-tooltip"><p class="shortdesc">如何快速部署 DolphinDB、建库建表、写入和查询数据</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="sectionddb_deployment-d9713e189" class="topicref" data-id="sectionddb_deployment" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action sectionddb_deployment-d9713e189-link" class="wh-expand-btn"></span><div class="title"><a href="../../deploy/deploy_intro.html" id="sectionddb_deployment-d9713e189-link"><span class="keyword label">部署</span></a><div class="wh-tooltip"><p class="shortdesc">如何在不同的场景中部署 DolphinDB</p></div></div></div></li><li role="treeitem" aria-expanded="true"><div data-tocid="new_chap_database_manage_new_chap_dbmanage_landing_page-d9713e2259" class="topicref" data-id="new_chap_database_manage_new_chap_dbmanage_landing_page" data-state="expanded"><span role="button" tabindex="0" aria-labelledby="button-collapse-action new_chap_database_manage_new_chap_dbmanage_landing_page-d9713e2259-link" class="wh-expand-btn"></span><div class="title"><a href="../../db_distr_comp/cfg/db_intro.html" id="new_chap_database_manage_new_chap_dbmanage_landing_page-d9713e2259-link"><span class="keyword label">数据库</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 数据库的基本概念</p></div></div></div><ul role="group" class="navbar-nav nav-list"><li role="treeitem" aria-expanded="false"><div data-tocid="chap3_sect_database_distributed_computing-d9713e2312" class="topicref" data-id="chap3_sect_database_distributed_computing" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action chap3_sect_database_distributed_computing-d9713e2312-link" class="wh-expand-btn"></span><div class="title"><a href="../../db_distr_comp/db_distr_comp.html" id="chap3_sect_database_distributed_computing-d9713e2312-link"><span class="keyword label">数据库操作</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 数据库的基本操作，例如创建数据库、表，增加列、分区，数据查询，表连接等。</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="topic_pg3_22w_ryb-d9713e2880" class="topicref" data-id="topic_pg3_22w_ryb" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action topic_pg3_22w_ryb-d9713e2880-link" class="wh-expand-btn"></span><div class="title"><a href="../../db_distr_comp/db/db_architecture.html" id="topic_pg3_22w_ryb-d9713e2880-link"><span class="keyword label">分布式架构</span></a></div></div></li><li role="treeitem"><div data-tocid="tsdb-d9713e3387" class="topicref" data-id="tsdb" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../db_distr_comp/db/tsdb.html" id="tsdb-d9713e3387-link"><span class="keyword label">TSDB 存储引擎</span></a></div></div></li><li role="treeitem"><div data-tocid="olap-d9713e3434" class="topicref" data-id="olap" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../db_distr_comp/db/olap.html" id="olap-d9713e3434-link"><span class="keyword label">OLAP 存储引擎</span></a></div></div></li><li role="treeitem"><div data-tocid="pkey_engine-d9713e3481" class="topicref" data-id="pkey_engine" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../db_distr_comp/db/pkey_engine.html" id="pkey_engine-d9713e3481-link"><span class="keyword">主键存储引擎</span>  </a></div></div></li><li role="treeitem" class="active"><div data-tocid="imoltp-d9713e3529" class="topicref" data-id="imoltp" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../db_distr_comp/db/imoltp.html" id="imoltp-d9713e3529-link">内存在线事务处理引擎</a></div></div></li><li role="treeitem"><div data-tocid="vectordb-d9713e3575" class="topicref" data-id="vectordb" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../db_distr_comp/db/vectordb.html" id="vectordb-d9713e3575-link">向量存储引擎</a></div></div></li><li role="treeitem"><div data-tocid="textdb-d9713e3621" class="topicref" data-id="textdb" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../db_distr_comp/db/textdb.html" id="textdb-d9713e3621-link">文本存储引擎</a></div></div></li><li role="treeitem"><div data-tocid="catalog-d9713e3667" class="topicref" data-id="catalog" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../db_distr_comp/db/catalog.html" id="catalog-d9713e3667-link">数据目录</a></div></div></li><li role="treeitem"><div data-tocid="iotdb-d9713e3713" class="topicref" data-id="iotdb" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../db_distr_comp/db/iotdb.html" id="iotdb-d9713e3713-link">物联网点位管理引擎</a></div></div></li></ul></li><li role="treeitem" aria-expanded="false"><div data-tocid="chap7_tutorials_streaming-d9713e3760" class="topicref" data-id="chap7_tutorials_streaming" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action chap7_tutorials_streaming-d9713e3760-link" class="wh-expand-btn"></span><div class="title"><a href="../../stream/str_intro.html" id="chap7_tutorials_streaming-d9713e3760-link"><span class="keyword label">流数据</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 流数据引擎及流数据计算的基本概念</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e7513" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e7513-link" class="wh-expand-btn"></span><div class="title"><a href="../../db_distr_comp/db_oper/import_data.html" id="tocId-d9713e7513-link">数据迁移</a><div class="wh-tooltip"><p class="shortdesc">如何从不同数据源向 DolphinDB 迁移数据</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="chap7_tutorials_system_management-d9713e7940" class="topicref" data-id="chap7_tutorials_system_management" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action chap7_tutorials_system_management-d9713e7940-link" class="wh-expand-btn"></span><div class="title"><a href="../../sys_man/om_intro.html" id="chap7_tutorials_system_management-d9713e7940-link"><span class="keyword label">系统运维</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 的系统运维功能及方法</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="troubleshooting-d9713e8780" class="topicref" data-id="troubleshooting" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action troubleshooting-d9713e8780-link" class="wh-expand-btn"></span><div class="title"><a href="../../error_codes/troubleshooting.html" id="troubleshooting-d9713e8780-link">故障排查</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="about_language_resources-d9713e20911" class="topicref" data-id="about_language_resources" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action about_language_resources-d9713e20911-link" class="wh-expand-btn"></span><div class="title"><a href="../../progr/progr_intro.html" id="about_language_resources-d9713e20911-link"><span class="keyword label">编程语言</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 编程基本概念与方法、SQL 在 DolphinDB 的应用</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="functions_references-d9713e30925" class="topicref" data-id="functions_references" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action functions_references-d9713e30925-link" class="wh-expand-btn"></span><div class="title"><a href="../../funcs/funcs_intro.html" id="functions_references-d9713e30925-link"><span class="keyword label">函数参考</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 函数分类、语法、详解及示例</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="api_protocol-d9713e94064" class="topicref" data-id="api_protocol" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action api_protocol-d9713e94064-link" class="wh-expand-btn"></span><div class="title"><a href="../../api/connapi_intro.html" id="api_protocol-d9713e94064-link"><span class="keyword label">连接器 &amp; API</span></a><div class="wh-tooltip"><p class="shortdesc">面向不同编程语言的 DolphinDB API 及连接器，相关协议和用法</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="chap6_plugin-d9713e94210" class="topicref" data-id="chap6_plugin" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action chap6_plugin-d9713e94210-link" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/plg_intro.html" id="chap6_plugin-d9713e94210-link"><span class="keyword label">插件</span></a><div class="wh-tooltip"><p class="shortdesc">多个应用场景的插件使用说明和插件开发指导</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="third_party-d9713e97904" class="topicref" data-id="third_party" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action third_party-d9713e97904-link" class="wh-expand-btn"></span><div class="title"><a href="../../third_party.html" id="third_party-d9713e97904-link">第三方工具</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="about_tutorials-d9713e98227" class="topicref" data-id="about_tutorials" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action about_tutorials-d9713e98227-link" class="wh-expand-btn"></span><div class="title"><a href="../../tutorials/about_tutorials.html" id="about_tutorials-d9713e98227-link"><span class="keyword label">教程</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 产品使用教程</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e105982" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e105982-link" class="wh-expand-btn"></span><div class="title"><a href="../../rn/server/3_00_2.html" id="tocId-d9713e105982-link">版本说明</a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 版本发布历史</p></div></div></div></li></ul></div>
+		                        
+                            </div>
+                        </nav>
+                    
+                    
+                    <div class="col-lg-7 col-md-9 col-sm-12" id="wh_topic_body">
+                        <button id="wh_close_publication_toc_button" class="close-toc-button d-none" aria-label="Toggle publishing table of content" aria-controls="wh_publication_toc" aria-expanded="true">
+                            <span class="close-toc-icon-container">
+                                <span class="close-toc-icon"></span>     
+                            </span>
+                        </button>
+                        <button id="wh_close_topic_toc_button" class="close-toc-button d-none" aria-label="Toggle topic table of content" aria-controls="wh_topic_toc" aria-expanded="true">
+                            <span class="close-toc-icon-container">
+                                <span class="close-toc-icon"></span>     
+                            </span>
+                        </button>
+                        
+                        <div class=" wh_topic_content body "><main role="main"><article class="- topic/topic topic" role="article" aria-labelledby="ariaid-title1">
+    <h1 class="- topic/title title topictitle1" id="ariaid-title1">内存在线事务处理引擎</h1>
+    <div class="- topic/body body">
+        <p class="- topic/p p">在金融行业的交易系统等一些数据库应用场景中，主要工作负载来源于对关系表的高频率、高并发的更新和查询操作。这类应用场景对数据处理提出了严格的要求，包括低延迟、高并发的读写性能，严格的数据一致性，以及对符合
+            ACID 特性的事务支持，属于典型的在线事务处理（OLTP）场景。</p>
+        <p class="- topic/p p">传统存储引擎的架构设计通常以磁盘为主要存储介质，在应对高频读写和高并发操作时，软硬件层面容易出现性能瓶颈，难以满足这些场景对延迟和吞吐量的极高要求。然而，在这些系统中，尽管数据流量大，但需要维护的数据量往往有限。因此，是否可以将所有数据存储在内存中，从而消除磁盘读写带来的延迟瓶颈，成为关键的优化方向。</p>
+        <p class="- topic/p p">于 3.00.0 版本推出的内存在线事务处理（IMOLTP, In-Memory Online Transaction
+            Processing）引擎，利用内存存储的特性显著降低操作延迟，提升并发性能，为 OLTP 场景提供了更优的解决方案。IMOLTP 引擎具有以下特点：</p>
+        <ul class="- topic/ul ul" id="imoltp__ul_zrm_blm_h2c" data-ofbid="imoltp__ul_zrm_blm_h2c">
+            <li class="- topic/li li"><strong class="+ topic/ph hi-d/b ph b">按行存储</strong>：采用行存形式组织数据，适用于 OLTP 场景，满足高频次事务需求。</li>
+            <li class="- topic/li li"><strong class="+ topic/ph hi-d/b ph b">事务支持</strong>：提供 ACID 事务保障，采用快照隔离级别确保一致性。</li>
+            <li class="- topic/li li"><strong class="+ topic/ph hi-d/b ph b">高效索引</strong>：支持创建 B+ 树索引，包括主键索引和二级索引，以优化高频、高并发的更新与查询性能。</li>
+            <li class="- topic/li li"><strong class="+ topic/ph hi-d/b ph b">持久化与恢复</strong>：通过 WAL（Write-Ahead Logging）和 Checkpoint 机制，确保数据的持久化与快速恢复。</li>
+        </ul>
+    </div>
+    <article class="- topic/topic topic nested1" aria-labelledby="ariaid-title2" id="topic_rxx_clm_h2c">
+        <h2 class="- topic/title title topictitle2" id="ariaid-title2">总体架构</h2>
+        <div class="- topic/body body">
+            <p class="- topic/p p">IMOLTP 引擎主要由四个核心模块组成：索引、事务、持久化和恢复。接下来，将逐一对这些模块进行详细介绍。</p>
+        </div>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title3" id="topic_lw4_dlm_h2c">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title3">索引</h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p">作为内存引擎，IMOLTP 的磁盘 I/O 大大减少，查询操作更是无需读写磁盘。同时，由于无需实现 Buffer Manager
+                    组件，性能瓶颈更多转移到索引部分。</p>
+                <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">数据结构</strong></p>
+                <p class="- topic/p p">尽管 Lock-free 数据结构（如 BwTree）理论上具备较高的扩展性，但其实现复杂，正确性难以验证。此外，BwTree
+                    由于结构复杂，容易引起缓存不命中，在实践中的性能往往低于经过优化的 B+ 树。</p>
+                <p class="- topic/p p">因此，IMOLTP 引擎的索引采用 B+ 树数据结构，其实现复杂度相对 Lock-free 更低，且兼具点查和范围查询的高效性能。</p>
+                <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">算法</strong></p>
+                <p class="- topic/p p">为支持并发操作，B+ 树通常采用基于细粒度读/写锁的 Lock Coupling
+                    算法。每个节点内设有锁，访问时先获取父节点的锁，再获取子节点的锁，然后释放父节点的锁，如图 1-1 所示。</p>
+                <figure class="- topic/fig fig fignone" id="topic_lw4_dlm_h2c__fig_jfs_2mm_h2c" data-ofbid="topic_lw4_dlm_h2c__fig_jfs_2mm_h2c"><figcaption data-caption-side="top" class="- topic/title title figcap"><span class="figtitleprefix fig--title-label">图<span class="fig--title-label-number"> 1</span><span class="fig--title-label-punctuation">. </span></span><span class="fig--title">图 1-1 Lock Coupling 算法</span></figcaption>
+                    
+                    <img class="- topic/image image" id="topic_lw4_dlm_h2c__image_kfs_2mm_h2c" src="images/imoltp/1-1.png"/>
+                </figure>
+                <p class="- topic/p p">然而，由于 B+ 树仅有一个根节点，所有操作都需首先对根节点加锁。即使是读锁，其获取或释放仍会触发对内存同一地址的写入，导致冲突并引发 CPU
+                    缓存失效，从而增加缓存不命中的开销。在多核架构下，根节点锁会严重地限制 B+ 树的扩展性。</p>
+                <p class="- topic/p p">因此，权衡收益与工程复杂度后，IMOLTP 引擎采用了 <a class="- topic/xref xref" href="http://sites.computer.org/debull/A19mar/p73.pdf" target="_blank" rel="external noopener">Optimistic-Lock-Coupling</a>（以下简称 OLC）算法。OLC 在实现上保持了
+                    Lock Coupling 的简单性，同时显著提升了扩展性。OLC 算法如图 1-2 所示：</p>
+                <figure class="- topic/fig fig fignone" id="topic_lw4_dlm_h2c__fig_imn_fmm_h2c" data-ofbid="topic_lw4_dlm_h2c__fig_imn_fmm_h2c"><figcaption data-caption-side="top" class="- topic/title title figcap"><span class="figtitleprefix fig--title-label">图<span class="fig--title-label-number"> 2</span><span class="fig--title-label-punctuation">. </span></span><span class="fig--title">图1-2 OLC 算法</span></figcaption>
+                    
+                    <img class="- topic/image image" id="topic_lw4_dlm_h2c__image_jmn_fmm_h2c" src="images/imoltp/1-2.png"/>
+                </figure>
+                <p class="- topic/p p">在 OLC 实现中，传统加锁操作替换为读取节点版本号，解锁操作替换为验证先前读取的版本号。在 B+
+                    树查询的整个代码路径中，不涉及任何内存写入操作，避免了缓存不命中问题。</p>
+                <p class="- topic/p p">B+ 树和 OLC 算法，它们实现复杂度低意味着更易测试与验证，从而确保系统的稳定性，这对于 OLTP 系统尤为重要。</p>
+            </div>
+        </article>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title4" id="topic_csp_dlm_h2c">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title4">事务</h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p">IMOLTP 引擎采用 MV2PL协议，是多版本并发控制（MVCC）与两阶段锁（2PL）的结合，为事务提供快照隔离级别的支持。</p>
+                <p class="- topic/p p">一个事务可以包含多条对 IMOLTP 表的 DML 操作，并支持跨表事务。在事务范围内，所有 DML
+                    操作要么全部成功，要么全部回滚，当一个事务执行异常时，会自动撤销本事务对所有表的所有更改。当前版本中 DDL 操作暂不支持事务，若在事务中存在 DDL
+                    操作，会抛出异常。</p>
+                <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">MVCC 实现</strong></p>
+                <p class="- topic/p p">IMOLTP 引擎按行组织数据，每行数据（以下称 tuple）的版本的存储结构如下图 1-3 所示：</p>
+                <figure class="- topic/fig fig fignone" id="topic_csp_dlm_h2c__fig_gyb_ylm_h2c" data-ofbid="topic_csp_dlm_h2c__fig_gyb_ylm_h2c"><figcaption data-caption-side="top" class="- topic/title title figcap"><span class="figtitleprefix fig--title-label">图<span class="fig--title-label-number"> 3</span><span class="fig--title-label-punctuation">. </span></span><span class="fig--title">图 1-3 tuple 版本存储结构</span></figcaption>
+                    
+                    <img class="- topic/image image" id="topic_csp_dlm_h2c__image_hyb_ylm_h2c" src="images/imoltp/1-3.png"/>
+                </figure>
+                <p class="- topic/p p">其中 <em class="+ topic/ph hi-d/i ph i">txnId </em>充当写锁的作用，<em class="+ topic/ph hi-d/i ph i">readCount </em>充当读锁的作用，<em class="+ topic/ph hi-d/i ph i">beginTs </em>和 <em class="+ topic/ph hi-d/i ph i">endTs
+                    </em>决定了这个版本的可见性。</p>
+                <ul class="- topic/ul ul" id="topic_csp_dlm_h2c__ul_sjf_zlm_h2c" data-ofbid="topic_csp_dlm_h2c__ul_sjf_zlm_h2c">
+                    <li class="- topic/li li">每个事务开始时，系统会分配一个唯一的全局递增的 <em class="+ topic/ph hi-d/i ph i">tid</em>，当该事务读一个版本时，如果满足 <em class="+ topic/ph hi-d/i ph i">beginTs</em> ≤
+                            <em class="+ topic/ph hi-d/i ph i">tid</em> ＜ <em class="+ topic/ph hi-d/i ph i">endTs</em>，说明这个版本对该事务可见。</li>
+                    <li class="- topic/li li">每个写事务结束时，系统会分配一个唯一的全局递增的 <em class="+ topic/ph hi-d/i ph i">cid</em>。对于该事务创建的所有的新版本，都会将 <em class="+ topic/ph hi-d/i ph i">beginTs</em> 设置为
+                            <em class="+ topic/ph hi-d/i ph i">cid</em>，将 <em class="+ topic/ph hi-d/i ph i">endTs</em> 设置为无穷大；对于版本链的下一个版本，会将 <em class="+ topic/ph hi-d/i ph i">endTs</em> 设置为
+                            <em class="+ topic/ph hi-d/i ph i">cid</em>。</li>
+                </ul>
+                <p class="- topic/p p">IMOLTP 引擎中的 MVCC 实现采用 append-only 模式，即数据只能被追加，而不能被修改或删除。每个 tuple 的所有版本按链表形式存储，顺序为
+                    Newest-to-Oldest。每次更新 tuple 时，在链表头部插入新版本，同时更新索引指针确保其始终指向版本链的头部。这种设计确保了对最新版本
+                    tuple 的查询性能。</p>
+                <p class="- topic/p p">由于在事务处理中，对 tuple 的写操作并非原地修改，而是通过在版本链的头部创建新版本来实现，随着新的事务不断对同一 tuple
+                    进行写操作，其版本链会逐渐变长，占用大量内存。版本链中某些旧版本对于当前系统中的所有活跃事务均不可见，因此需要清理这些无用版本以释放内存资源。IMOLTP
+                    引擎通过专门的垃圾回收（GC, Garbage Collection）线程来完成这一任务。</p>
+                <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">2PL</strong></p>
+                <p class="- topic/p p">2PL 在事务执行期间包括加锁和解锁两个阶段。事务内部会维护两个集合：</p>
+                <ul class="- topic/ul ul" id="topic_csp_dlm_h2c__ul_tjf_zlm_h2c" data-ofbid="topic_csp_dlm_h2c__ul_tjf_zlm_h2c">
+                    <li class="- topic/li li">读集合，包含所有已读过即加了读锁的 tuple；</li>
+                    <li class="- topic/li li">写集合，包含所有已写过即加了写锁的 tuple。</li>
+                </ul>
+                <p class="- topic/p p">事务回滚时，首先释放读集合里的每个 tuple 的读锁，然后对于写集合里的每个 tuple，删除该事务创建的版本，然后释放写锁。</p>
+                <p class="- topic/p p">事务提交时，同样先释放读集合里的每个 tuple 的读锁，然后按照上述更新版本 <em class="+ topic/ph hi-d/i ph i">beginTs</em> 和 <em class="+ topic/ph hi-d/i ph i">endTs</em>
+                    的规则更新写集合里的每个 tuple，然后释放写锁。</p>
+            </div>
+        </article>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title5" id="topic_arq_gmm_h2c">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title5">持久化</h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p">在基于磁盘的数据库系统中，数据一般按照页面为单位进行组织。为了保证对数据修改的持久性，通常采用
+                    WAL（Write-Ahead-Logging）日志技术。在修改数据页面之前，先将修改操作记录到日志文件中，确保日志落盘后再执行数据页面的修改操作。</p>
+                <p class="- topic/p p">尽管 IMOLTP 引擎将所有数据存储在内存中，但为了实现持久化（即在系统重启后能够恢复到与重启前一致的状态），仍然实现了
+                    WAL。然而，与传统磁盘数据库相比，IMOLTP 的 WAL
+                    实现更加简化：因为所有数据都在内存中，不像磁盘数据库那样可能会把内存中未提交的数据（即脏页）落盘，所以只需要在日志文件里记录 redo log，不需要 undo
+                    log。并且 IMOLTP 引擎不需要记录关于索引的修改，因为索引不需要持久化到磁盘上，重启时只需要在内存里重建索引。</p>
+                <p class="- topic/p p">为了避免日志文件无限增长导致磁盘空间消耗过多，以及缩短重启时的日志回放时间，IMOLTP 引擎在日志文件达到设定阈值时会自动触发 Checkpoint
+                    操作，将系统的当前状态（快照）保存到独立的磁盘文件中，并回收旧的日志文件。</p>
+                <p class="- topic/p p">如上文所述，IMOLTP 引擎实现了 MVCC，天然地支持快照隔离级别。在执行 Checkpoint 时，首先申请一个
+                    <em class="+ topic/ph hi-d/i ph i">tid</em>，相当于开启一个只读事务，通过该 tid，系统可以获取 Checkpoint 开始时的系统状态，并且确保在 Checkpoint
+                    过程中不阻塞其他事务的读写操作。</p>
+            </div>
+        </article>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title6" id="topic_tv5_hmm_h2c">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title6">恢复</h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p">IMOLTP 引擎数据的恢复借助 Checkpoint 文件和日志文件完成。Checkpoint 文件保存了系统在某一时刻 T 的快照状态；日志文件记录了时刻 T
+                    之后所有事务执行的操作，它具有以下两个特点：</p>
+                <ul class="- topic/ul ul" id="topic_tv5_hmm_h2c__ul_fgr_jmm_h2c" data-ofbid="topic_tv5_hmm_h2c__ul_fgr_jmm_h2c">
+                    <li class="- topic/li li"><strong class="+ topic/ph hi-d/b ph b">事务内部操作顺序一致性</strong>，即一个事务中的所有操作在日志文件中记录的顺序与实际执行的顺序一致。比如一个事务先插入 A，然后删除
+                        A，则日志文件中，也是先记录插入 A，再记录删除 A。</li>
+                    <li class="- topic/li li"><strong class="+ topic/ph hi-d/b ph b">事务间依赖顺序一致性</strong>，如果事务 Txn1 修改了 A 后，事务 Txn2 再修改 A，则日志文件中事务 Txn1 的所有操作一定出现在事务
+                        Txn2 的操作之前。</li>
+                </ul>
+                <p class="- topic/p p">重启时，首先读取 Checkpoint 文件，将系统重置为 Checkpoint
+                    文件里保存的状态。然后读取日志文件，逐条（串行）回放事务进行过的操作，就可以恢复到与系统重启之前一致的状态。</p>
+                <p class="- topic/p p">主键索引会在恢复过程中重建。但二级索引无需在恢复时重建，可在日志回放完成后统一重建所有二级索引。</p>
+            </div>
+        </article>
+    </article>
+    <article class="- topic/topic topic nested1" aria-labelledby="ariaid-title7" id="topic_nbh_dlm_h2c">
+        <h2 class="- topic/title title topictitle2" id="ariaid-title7">数据读写流程</h2>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title8" id="topic_q1x_dlm_h2c">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title8">写入数据</h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p">IMOLTP 引擎写入数据的流程如下：</p>
+                <ol class="- topic/ol ol" id="topic_q1x_dlm_h2c__ol_zhk_nmm_h2c" data-ofbid="topic_q1x_dlm_h2c__ol_zhk_nmm_h2c">
+                    <li class="- topic/li li"><strong class="+ topic/ph hi-d/b ph b">开启事务</strong>（如果写入语句已经在事务内，即在 <em class="+ topic/ph hi-d/i ph i">transaction</em>
+                        语句块内部且不是语句块的第一条语句，则跳过这一步），生成事务开始的 WAL 日志，提交给异步的日志写入线程；</li>
+                    <li class="- topic/li li"><strong class="+ topic/ph hi-d/b ph b">构造主键索引</strong>，根据待写入的数据，构造主键索引的键，尝试插入到主键索引；如果此时发现违背了唯一性约束或发生读写冲突/写写冲突，则结束事务；</li>
+                    <li class="- topic/li li"><strong class="+ topic/ph hi-d/b ph b">构造二级索引</strong>，对于每一个二级索引，构造二级索引的键，尝试插入到二级索引；如果此时发现违背了索引的唯一性（若有），或者存在读写冲突/写写冲突，则结束事务；</li>
+                    <li class="- topic/li li"><strong class="+ topic/ph hi-d/b ph b">数据写入</strong>，将数据写入表的内存区域，生成新的 tuple 版本并插入到该版本链的头部。随后，生成数据写入的 <strong class="+ topic/ph hi-d/b ph b">WAL</strong>
+                        日志，提交给异步日志写入线程；</li>
+                    <li class="- topic/li li"><strong class="+ topic/ph hi-d/b ph b">结束事务</strong>（如果写入语句已经在事务内，即在 <em class="+ topic/ph hi-d/i ph i">transaction</em>
+                            语句块内部且不是语句块的最后一条语句，则跳过这一步）：<ul class="- topic/ul ul" id="topic_q1x_dlm_h2c__ul_a3k_nmm_h2c" data-ofbid="topic_q1x_dlm_h2c__ul_a3k_nmm_h2c">
+                            <li class="- topic/li li"><strong class="+ topic/ph hi-d/b ph b">提交事务</strong>：如果没有错误发生，则提交事务，并生成事务提交的 WAL 日志，提交给异步日志写入线程，并等待该事务所有 WAL
+                                日志写盘完成。</li>
+                            <li class="- topic/li li"><strong class="+ topic/ph hi-d/b ph b">回滚事务</strong>：如果有错误发生，则回滚该事务的任何修改，并生成事务回滚的 WAL
+                                日志，提交给异步日志写入线程，并等待该事务所有的 WAL 日志写盘完成。</li>
+                        </ul></li>
+                </ol>
+            </div>
+        </article>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title9" id="topic_ejx_dlm_h2c">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title9">查询数据</h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p">IMOLTP 引擎查询数据的流程如下：</p>
+                <ol class="- topic/ol ol" id="topic_ejx_dlm_h2c__ol_btv_4mm_h2c" data-ofbid="topic_ejx_dlm_h2c__ol_btv_4mm_h2c">
+                    <li class="- topic/li li"><strong class="+ topic/ph hi-d/b ph b">开启事务</strong>（如果写入语句已经在事务内，即在 <em class="+ topic/ph hi-d/i ph i">transaction</em>
+                        语句块内部且不是语句块的第一条语句，则跳过这一步）。对于单独的 SQL 查询语句，它是只读的，不会进行任何写入操作，所以不用生成任何的 WAL
+                        日志；</li>
+                    <li class="- topic/li li"><strong class="+ topic/ph hi-d/b ph b">选择索引，</strong>根据查询的过滤条件，判断应该使用哪个索引进行查询；</li>
+                    <li class="- topic/li li"><strong class="+ topic/ph hi-d/b ph b">查询索引，</strong>构造索引键并查询索引。对于二级索引，其 value 为主键，因此需要再次查询主键索引以获取指向实际 tuple
+                        的指针。</li>
+                    <li class="- topic/li li"><strong class="+ topic/ph hi-d/b ph b">遍历版本链</strong>，遍历 tuple 的版本链，找到对于该事务可见的版本，检查是否存在读写冲突；若存在冲突，则结束当前事务；</li>
+                    <li class="- topic/li li"><strong class="+ topic/ph hi-d/b ph b">过滤</strong>，对于上述步骤未使用到的过滤条件，检查之前查到的 tuple 是否满足这些条件，将符合条件的 tuple 加入到结果集；</li>
+                    <li class="- topic/li li"><strong class="+ topic/ph hi-d/b ph b">结束事务</strong>。</li>
+                </ol>
+            </div>
+        </article>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title10" id="topic_frx_dlm_h2c">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title10">删除数据</h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p">IMOLTP 引擎删除数据的流程如下：</p>
+                <ol class="- topic/ol ol" id="topic_frx_dlm_h2c__ol_gcx_pmm_h2c" data-ofbid="topic_frx_dlm_h2c__ol_gcx_pmm_h2c">
+                    <li class="- topic/li li"><strong class="+ topic/ph hi-d/b ph b">开启事务</strong>（如果删除语句已经在事务内，即在 <em class="+ topic/ph hi-d/i ph i">transaction</em>
+                        语句块内部且不是语句块的第一条语句，则跳过这一步），生成事务开始的 WAL 日志，提交给异步的日志写入线程；</li>
+                    <li class="- topic/li li"><strong class="+ topic/ph hi-d/b ph b">定位数据</strong>，按照查询数据的流程，确定需要被删除的 tuple。如果发生错误，则结束事务；</li>
+                    <li class="- topic/li li"><strong class="+ topic/ph hi-d/b ph b">标记删除</strong>，在 tuple 版本链的头部尝试插入一个表示“已删除”的版本（该 tuple 后续由 GC
+                        线程回收），如果检测到读写冲突，则终止当前事务。随后，生成数据删除的 WAL 日志，提交给异步的日志写入线程；</li>
+                    <li class="- topic/li li"><strong class="+ topic/ph hi-d/b ph b">结束事务</strong>（如果删除语句已经在事务内，即在 <em class="+ topic/ph hi-d/i ph i">transaction</em>
+                            语句块内部且不是语句块的最后一条语句，则跳过这一步）：<ul class="- topic/ul ul" id="topic_frx_dlm_h2c__ul_hcx_pmm_h2c" data-ofbid="topic_frx_dlm_h2c__ul_hcx_pmm_h2c">
+                            <li class="- topic/li li"><strong class="+ topic/ph hi-d/b ph b">提交事务</strong>，如果没有错误发生，则提交事务，并生成事务提交的 WAL 日志，提交给异步日志写入线程，并等待该事务所有 WAL
+                                日志写盘完成。</li>
+                            <li class="- topic/li li"><strong class="+ topic/ph hi-d/b ph b">回滚事务</strong>：如果有错误发生，则回滚该事务的任何修改，并生成事务回滚的 WAL
+                                日志，提交给异步日志写入线程，并等待该事务所有的 WAL 日志写盘完成。</li>
+                        </ul></li>
+                </ol>
+            </div>
+        </article>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title11" id="topic_wxx_dlm_h2c">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title11">更新数据</h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p">IMOLTP 引擎更新数据的流程可视为先删除数据，再写入数据，可分别参考上文。</p>
+            </div>
+        </article>
+    </article>
+    <article class="- topic/topic topic nested1" aria-labelledby="ariaid-title12" id="topic_fkh_dlm_h2c">
+        <h2 class="- topic/title title topictitle2" id="ariaid-title12">IMOLTP 引擎使用示例</h2>
+        <div class="- topic/body body">
+            <p class="- topic/p p">IMOLTP 引擎支持在 3.00.0 及更高版本的单节点模式下使用。</p>
+        </div>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title13" id="topic_czy_2lm_h2c">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title13">设置配置项</h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p">使用前应在配置文件中设置配置项 <code class="+ topic/ph pr-d/codeph ph codeph">enableIMOLTPEngine=true</code> 以开启 IMOLTP。更多关于 IMOLTP
+                        引擎的配置项请参考<a class="- topic/xref xref" href="../cfg/function_configuration.html#topic_lhv_hlk_gcc">功能配置</a>。</p>
+            </div>
+        </article>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title14" id="topic_i4z_2lm_h2c">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title14">创建数据库</h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p">IMOLTP 内存数据库支持通过 <a class="- topic/xref xref" href="../../funcs/d/database.html">database</a> 函数和
+                        <a class="- topic/xref xref" href="../../progr/sql/create.html">CREATE DATABASE</a>
+                    语句两种方式创建。</p>
+                <p class="- topic/p p">创建数据库时，部分参数须满足以下要求：</p>
+                <ul class="- topic/ul ul" id="topic_i4z_2lm_h2c__ul_cnk_zmm_h2c" data-ofbid="topic_i4z_2lm_h2c__ul_cnk_zmm_h2c">
+                    <li class="- topic/li li"><em class="+ topic/ph hi-d/i ph i">directory</em> 必须以 <code class="+ topic/ph pr-d/codeph ph codeph">oltp://</code> 开头，表征该数据库为 IMOLTP 内存数据库。</li>
+                    <li class="- topic/li li"><em class="+ topic/ph hi-d/i ph i">engine</em> 必须设置为 <code class="+ topic/ph pr-d/codeph ph codeph">IMOLTP</code>，指定 IMOLTP 引擎。</li>
+                    <li class="- topic/li li"><em class="+ topic/ph hi-d/i ph i">partitionType</em> 和 <em class="+ topic/ph hi-d/i ph i">partitionScheme</em> 在 IMOLTP
+                        内存数据库中不起作用，但为了保持接口的一致性仍需指定。例如，下例中指定了 VALUE 分区。然而，这仅是为了接口一致性而做的形式化设置，IMOLTP
+                        内存数据库在当前版本上暂不支持分区。</li>
+                </ul>
+                <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_i4z_2lm_h2c__codeblock_yyw_bnm_h2c" data-ofbid="topic_i4z_2lm_h2c__codeblock_yyw_bnm_h2c"><code>// 使用 database 函数创建数据库
+database(directory="oltp://my_imoltp",
+    partitionType=VALUE, partitionScheme=1..3, engine="IMOLTP")
+    
+// 使用 CREATE DATABASE 创建数据库
+CREATE DATABASE "oltp://my_imoltp"
+PARTITIONED BY VALUE(1..3)
+engine="IMOLTP"</code></pre>
+            </div>
+        </article>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title15" id="topic_m11_flm_h2c">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title15">创建数据表</h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p">IMOLTP 内存数据表支持通过 <a class="- topic/xref xref" href="../../funcs/c/createIMOLTPTable.html">createIMOLTPTable</a> 函数创建。语法如下：</p>
+                <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_m11_flm_h2c__codeblock_csy_cnm_h2c" data-ofbid="topic_m11_flm_h2c__codeblock_csy_cnm_h2c"><code>createIMOLTPTable(dbHandle, table, tableName, primaryKey, [secondaryKey], [uniqueFlag])</code></pre>
+                <p class="- topic/p p">其中，<em class="+ topic/ph hi-d/i ph i">primaryKey</em> 必须设置，每个表有且仅有一个主键索引，该索引支持包含多个字段。<em class="+ topic/ph hi-d/i ph i">secondaryKey
+                    </em>为可选项，用于指定二级索引，每个表可设置多个二级索引，二级索引是否满足唯一性约束由参数 <em class="+ topic/ph hi-d/i ph i">uniqueFlag </em>指定。</p>
+                <p class="- topic/p p">通常，查询条件中包含主键索引的性能优于仅包含二级索引，二级索引的性能又优于无索引的查询。当无法利用任何索引时，系统将执行全表扫描。合理创建二级索引有助于提升查询效率，但由于写入、删除和更新操作需要更新索引，二级索引的引入会在一定程度上降低这些操作的性能。</p>
+                <p class="- topic/p p">下例中展示了不含二级索引的表 t1，具有唯一二级索引的表 t2，以及同时包含唯一和非唯一二级索引的表 t3 的创建方法。</p>
+                <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_m11_flm_h2c__codeblock_ayr_dnm_h2c" data-ofbid="topic_m11_flm_h2c__codeblock_ayr_dnm_h2c"><code>dummyTable = table(1:0, `id`sym`val1`val2, [INT,STRING,LONG,DOUBLE])
+
+// t1 以 id 为主键，没有二级索引
+t1 = createIMOLTPTable(dbHandle=database("oltp://my_imoltp"), 
+    table=dummyTable, tableName="t1", primaryKey="id")
+
+// t2 以 id 为主键，有一个 unique 二级索引：以 sym,val1 为键
+t2 = createIMOLTPTable(dbHandle=database("oltp://my_imoltp"),
+    table=dummyTable, tableName="t2", primaryKey="id",
+    secondaryKey=`sym`val1, uniqueFlag=true)
+
+// t3 以 id 为主键，有一个 unique 二级索引：以 sym 为键；一个非 unique 二级索引：以 val1 为键
+t3 = createIMOLTPTable(dbHandle=database("oltp://my_imoltp"),
+    table=dummyTable, tableName="t3", primaryKey="id",
+    secondaryKey=`sym`val1, uniqueFlag=[true,false])</code></pre>
+            </div>
+        </article>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title16" id="topic_kp1_flm_h2c">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title16">写入数据</h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p">IMOLTP 内存数据表支持通过 <code class="+ topic/ph pr-d/codeph ph codeph">INSERT INTO</code> 语句、<code class="+ topic/ph pr-d/codeph ph codeph">append!</code> 函数和
+                        <code class="+ topic/ph pr-d/codeph ph codeph">tableInsert</code> 函数写入数据。</p>
+                <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_kp1_flm_h2c__codeblock_kns_2nm_h2c" data-ofbid="topic_kp1_flm_h2c__codeblock_kns_2nm_h2c"><code>insert into t3 VALUES (1,"Aa",6,5)
+
+t3.append!(table([2,3,4] as id, ["Bb","Cc","Dd"] as sym,
+ [3,6,9] as val1, [2,4,6] as val2))
+ 
+t3.tableInsert(table([5,6,7] as id, ["Ee","Ff","Gg"] as sym,
+ [5,6,7] as val1, [7,8,9] as val2))</code></pre>
+                <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">注意：</strong>写入数据时，若主键或唯一二级索引包含重复值，则会导致写入失败。如下例所示：</p>
+                <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_kp1_flm_h2c__codeblock_tp3_fnm_h2c" data-ofbid="topic_kp1_flm_h2c__codeblock_tp3_fnm_h2c"><code>// 主键 id 重复，写入失败
+ insert into t3 VALUES (1,"Hh",6,5)
+
+// 唯一二级索引 sym 重复，写入失败
+insert into t3 VALUES (8,"Aa",6,5)
+
+// 主键和唯一二级索引不重复，val1 虽然重复，但它是非唯一的，故写入成功
+insert into t3 VALUES (8,"Hh",6,5)</code></pre>
+            </div>
+        </article>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title17" id="topic_gcb_flm_h2c">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title17">查询数据</h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p">查询条件中包含主键索引的性能优于仅包含二级索引，二级索引的性能又优于无索引的查询，如下例所示：</p>
+                <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_gcb_flm_h2c__codeblock_skh_gnm_h2c" data-ofbid="topic_gcb_flm_h2c__codeblock_skh_gnm_h2c"><code>// 模拟 100 万条数据写入
+n = 1000000
+t2.tableInsert(table(1..n as id, take("Aa"+string(1..1000),n) as sym,
+ stretch(1..1000,n) as val1, 1..n as val2))
+
+// 包含主键索引，10次查询耗时 0.304 ms
+timer(10) select * from t2 where id = 1
+
+// 不包含主键索引，仅包含二级索引，10次查询耗时 8.424 ms
+timer(10) select * from t2 where sym = "Aa1" and val2 = 1
+
+// 不包含主键索引和二级索引，10次查询耗时 3003.61 ms
+timer(10) select * from t2 where val2 = 1</code></pre>
+                <p class="- topic/p p">对于由多列组成的组合二级索引，若查询条件中包含其中某一列，根据建表时指定的索引顺序，只有当该列左侧的所有列均以等值条件指定时，才能使用该二级索引进行加速。</p>
+                <p class="- topic/p p">例如，表 t2 的组合二级索引设置为 sym 和 val1（<code class="+ topic/ph pr-d/codeph ph codeph">secondaryKey=`sym`val1</code>）。此时，对 sym
+                    列的过滤可以加速查询；但仅对 val1 列进行过滤无法利用索引加速查询，只有同时指定其左侧所有列（本例为 sym
+                    列）的等值过滤条件，才能利用索引对查询进行加速。</p>
+                <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_gcb_flm_h2c__codeblock_ylb_hnm_h2c" data-ofbid="topic_gcb_flm_h2c__codeblock_ylb_hnm_h2c"><code>// 对 sym 进行过滤，10次查询耗时 8.241 ms
+timer(10) select * from t2 where sym = "Aa1" and val2 = 1
+
+// 仅对 val1 进行过滤，不包含 sym 过滤条件，10次查询耗时 3128.887 ms
+timer(10) select * from t2 where val1 = 1 and val2 = 1
+
+// 对 val1 过滤时同时指定 sym 的等值过滤条件，10次查询耗时 0.456 ms
+timer(10) select * from t2 where sym = "Aa1" and val1 = 1 and val2 = 1</code></pre>
+            </div>
+        </article>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title18" id="topic_ylb_flm_h2c">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title18">事务处理</h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p">IMOLTP 引擎支持两种事务管理方式：默认事务和手动封装事务。</p>
+                <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">默认事务</strong></p>
+                <p class="- topic/p p">每条 SQL 语句都被视为一个独立的事务。</p>
+                <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">手动封装事务</strong></p>
+                <p class="- topic/p p">使用 <a class="- topic/xref xref" href="../../progr/statements/transaction.html">transaction</a>
+                    语句块封装的所有操作被视作一个事务，所有操作要么全部成功，要么全部失败。在语句块中：</p>
+                <ul class="- topic/ul ul" id="topic_ylb_flm_h2c__ul_zxw_hnm_h2c" data-ofbid="topic_ylb_flm_h2c__ul_zxw_hnm_h2c">
+                    <li class="- topic/li li">当前版本仅支持 DML 语句，不支持 DDL 语句。</li>
+                    <li class="- topic/li li"><code class="+ topic/ph pr-d/codeph ph codeph">commit</code> 命令可用于提交事务，此命令可省略，语句块中所有语句执行成功后系统将自动提交事务。</li>
+                    <li class="- topic/li li"><code class="+ topic/ph pr-d/codeph ph codeph">rollback</code> 命令可用于回滚事务。</li>
+                </ul>
+                <p class="- topic/p p">例如：</p>
+                <p class="- topic/p p">用 <code class="+ topic/ph pr-d/codeph ph codeph">transaction</code> 语句块封装事务并执行，全部成功。</p>
+                <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_ylb_flm_h2c__codeblock_pqb_knm_h2c" data-ofbid="topic_ylb_flm_h2c__codeblock_pqb_knm_h2c"><code>transaction{
+    insert into t1 VALUES (1,"Aa",1,1)
+    insert into t1 VALUES (2,"Bb",2,2)
+    insert into t1 VALUES (3,"Cc",3,3)
+    // commit
+}
+
+//查询表中数据条数，共 3 条
+select count(*) from t1 </code></pre>
+                <p class="- topic/p p">事务中最后一句执行失败，则所有操作全部回滚。</p>
+                <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_ylb_flm_h2c__codeblock_tl4_knm_h2c" data-ofbid="topic_ylb_flm_h2c__codeblock_tl4_knm_h2c"><code>transaction{
+    insert into t1 VALUES (4,"Dd",4,4)
+    insert into t1 VALUES (1,"Aa",1,1)
+}
+
+//查询表中数据条数，共 3 条，表示本事务全部回滚
+select count(*) from t1 </code></pre>
+                <p class="- topic/p p">// 事务中使用 <code class="+ topic/ph pr-d/codeph ph codeph">rollback</code> 命令，则所有操作全部回滚。</p>
+                <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_ylb_flm_h2c__codeblock_zbv_lnm_h2c" data-ofbid="topic_ylb_flm_h2c__codeblock_zbv_lnm_h2c"><code>transaction{
+    insert into t1 VALUES (4,"Dd",4,4)
+    if((exec count(*) from t1) &gt; 3){
+        rollback
+    }
+}
+
+//查询表中数据条数，共 3 条，表示本事务全部回滚
+select count(*) from t1 </code></pre>
+            </div>
+        </article>
+    </article>
+</article></main></div>
+                        
+                        
+                        
+                        
+                        
+                        
+                    </div>
+                    
+                        <nav role="navigation" id="wh_topic_toc" aria-label="On this page" class="col-lg-2 d-none d-lg-block navbar d-print-none"> 
+                            <div id="wh_topic_toc_content">
+		                        
+	                            <div class=" wh_topic_toc "><div class="wh_topic_label">在本页上</div><ul><li class="topic-item"><a href="#topic_rxx_clm_h2c" data-tocid="topic_rxx_clm_h2c">总体架构</a><ul><li class="topic-item"><a href="#topic_lw4_dlm_h2c" data-tocid="topic_lw4_dlm_h2c">索引</a></li><li class="topic-item"><a href="#topic_csp_dlm_h2c" data-tocid="topic_csp_dlm_h2c">事务</a></li><li class="topic-item"><a href="#topic_arq_gmm_h2c" data-tocid="topic_arq_gmm_h2c">持久化</a></li><li class="topic-item"><a href="#topic_tv5_hmm_h2c" data-tocid="topic_tv5_hmm_h2c">恢复</a></li></ul></li><li class="topic-item"><a href="#topic_nbh_dlm_h2c" data-tocid="topic_nbh_dlm_h2c">数据读写流程</a><ul><li class="topic-item"><a href="#topic_q1x_dlm_h2c" data-tocid="topic_q1x_dlm_h2c">写入数据</a></li><li class="topic-item"><a href="#topic_ejx_dlm_h2c" data-tocid="topic_ejx_dlm_h2c">查询数据</a></li><li class="topic-item"><a href="#topic_frx_dlm_h2c" data-tocid="topic_frx_dlm_h2c">删除数据</a></li><li class="topic-item"><a href="#topic_wxx_dlm_h2c" data-tocid="topic_wxx_dlm_h2c">更新数据</a></li></ul></li><li class="topic-item"><a href="#topic_fkh_dlm_h2c" data-tocid="topic_fkh_dlm_h2c">IMOLTP 引擎使用示例</a><ul><li class="topic-item"><a href="#topic_czy_2lm_h2c" data-tocid="topic_czy_2lm_h2c">设置配置项</a></li><li class="topic-item"><a href="#topic_i4z_2lm_h2c" data-tocid="topic_i4z_2lm_h2c">创建数据库</a></li><li class="topic-item"><a href="#topic_m11_flm_h2c" data-tocid="topic_m11_flm_h2c">创建数据表</a></li><li class="topic-item"><a href="#topic_kp1_flm_h2c" data-tocid="topic_kp1_flm_h2c">写入数据</a></li><li class="topic-item"><a href="#topic_gcb_flm_h2c" data-tocid="topic_gcb_flm_h2c">查询数据</a></li><li class="topic-item"><a href="#topic_ylb_flm_h2c" data-tocid="topic_ylb_flm_h2c">事务处理</a></li></ul></li></ul></div>
+	                        	
+                        	</div>
+                        </nav>
+                    
+                </div>
+            </div>
+            
+            
+            
+        </div> 
+        <footer class="navbar navbar-default wh_footer">
+  <div class=" footer-container mx-auto ">
+<title>Copyright</title><p><b> ©2025 浙江智臾科技有限公司 浙ICP备18048711号-3</b></p>
+  </div>
+</footer>
+        
+        <div id="go2top" class="d-print-none">
+            <span class="oxy-icon oxy-icon-up"></span>
+        </div>
+        
+        <div id="modal_img_large" class="modal">
+            <span class="close oxy-icon oxy-icon-remove"></span>
+            <div id="modal_img_container"></div>
+            <div id="caption"></div>
+        </div>
+        
+        
+        
+    </body>
+</html>

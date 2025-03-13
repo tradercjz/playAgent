@@ -1,0 +1,584 @@
+<!DOCTYPE html><html xmlns="http://www.w3.org/1999/xhtml" xml:lang="zh" lang="zh" data-whc_version="26.0">
+    <head><link rel="shortcut icon" href="../../favicon.ico"/><link rel="icon" href="../../favicon.ico"/><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><meta name="description" content="新增支持订阅北交所股转快照数据。 （3.00.1.6） 新增函数 setLogLevel 用于设置插件输出日志的等级，同时新增函数 getLogLevel ，用于获取插件当前的输出日志等级。 （3.00.1.6） 新增支持配置与监控订阅队列的深度（ 3.00.1.10 ）： subscribe 新增参数 queueDepth ，支持设置订阅队列的深度。 getStatus ..."/><meta name="DC.rights.owner" content="(C) 版权 2025"/><meta name="copyright" content="(C) 版权 2025"/><meta name="generator" content="DITA-OT"/><meta name="DC.type" content="topic"/><meta name="DC.coverage" content=""/><meta name="prodname" content="DolphinDB"/><meta name="brand" content="DolphinDB"/><meta name="DC.creator" content="DolphinDB"/><meta name="DC.publisher" content="DDB N/A DDB 200"/><meta name="DC.format" content="HTML5"/><meta name="DC.identifier" content="_3_00_1"/><title>3.00.1</title><!--  Generated with Oxygen version 26.0, build number 2024012323.  --><meta name="wh-path2root" content="../../"/><meta name="wh-toc-id" content="_3_00_1-d9713e106335"/><meta name="wh-source-relpath" content="rn/plugin/3_00_1.dita"/><meta name="wh-out-relpath" content="rn/plugin/3_00_1.html"/>
+
+    <link rel="stylesheet" type="text/css" href="../../oxygen-webhelp/app/commons.css?buildId=2024012323"/>
+    <link rel="stylesheet" type="text/css" href="../../oxygen-webhelp/app/topic.css?buildId=2024012323"/>
+
+    <script src="../../oxygen-webhelp/app/options/properties.js?buildId=20250305183303"></script>
+    <script src="../../oxygen-webhelp/app/localization/strings.js?buildId=2024012323"></script>
+    <script src="../../oxygen-webhelp/app/search/index/keywords.js?buildId=20250305183303"></script>
+    <script defer="defer" src="../../oxygen-webhelp/app/commons.js?buildId=2024012323"></script>
+    <script defer="defer" src="../../oxygen-webhelp/app/topic.js?buildId=2024012323"></script>
+<link rel="stylesheet" type="text/css" href="../../oxygen-webhelp/template/styles.css?buildId=2024012323"/><script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script><script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script></head>
+
+    <body id="_3_00_1" class="wh_topic_page frmBody">
+        <a href="#wh_topic_body" class="sr-only sr-only-focusable">
+            跳转到主要内容
+        </a>
+        
+        
+        
+        
+        <header class="navbar navbar-default wh_header">
+    <div class="container-fluid">
+        <div xmlns:whc="http://www.oxygenxml.com/webhelp/components" class="wh_header_flex_container navbar-nav navbar-expand-md navbar-dark">
+            <div class="wh_logo_and_publication_title_container">
+                <div class="wh_logo_and_publication_title">
+                    
+                    <a href="https://docs.dolphindb.cn/zh/index.html" class=" wh_logo d-none d-sm-block "><img src="../../logo.png" alt="  DolphinDB 文档中心  "/></a>
+                    <div class=" wh_publication_title "><a href="../../index.html"><span class="booktitle">  <span class="ph mainbooktitle">DolphinDB 文档中心</span>  </span></a></div>
+                    
+                </div>
+                
+                
+            </div>
+
+            <div class="wh_top_menu_and_indexterms_link collapse navbar-collapse" id="wh_top_menu_and_indexterms_link">
+                
+                
+                
+                
+            </div>
+        <div class=" wh_search_input navbar-form wh_topic_page_search search " role="form">
+            
+            
+            
+            <form id="searchForm" method="get" role="search" action="../../search.html"><div><input type="search" placeholder="搜索 " class="wh_search_textfield" id="textToSearch" name="searchQuery" aria-label="搜索查询" required="required"/><button type="submit" class="wh_search_button" aria-label="搜索"><span class="search_input_text">搜索</span></button></div></form>
+            
+            <script src="/vendors/react/umd/react.production.min.js" defer="defer"></script>
+<script src="/vendors/react-dom/umd/react-dom.production.min.js" defer="defer"></script>
+<script src="/vendors/dayjs/dayjs.min.js" defer="defer"></script>
+<script src="/vendors/antd/dist/antd.min.js" defer="defer"></script>
+<script src="/vendors/@ant-design/icons/dist/index.umd.min.js" defer="defer"></script>
+<script src="/zh/index.js" type="module"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" defer="defer"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML" defer="defer"><!--
+
+
+--></script>
+<script defer="defer"><!--
+
+// 从主页重定向
+const currentUrl = window.location.href;
+
+// 判断当前URL是否包含index.html并且路径最后部分是index.html
+if (currentUrl.endsWith('index.html')) {
+    // 处理根目录下的index.html跳转
+    const baseUrl = currentUrl.split('/index.html')[0]; // 获取index.html之前的部分
+    const redirectUrl = `${baseUrl}/about/ddb_intro.html`; // 构建跳转路径
+    window.location.href = redirectUrl; // 执行跳转
+}
+
+--></script>
+            
+        </div></div>
+    </div>
+</header>
+        
+        
+         
+        
+        
+        
+        <div class="container-fluid" id="wh_topic_container">
+            <div class="row">
+
+                <nav class="wh_tools d-print-none navbar-expand-md" aria-label="Tools">
+                    
+                    <div data-tooltip-position="bottom" class=" wh_breadcrumb "><ol class="d-print-none"><li><span class="home"><a href="../../index.html"><span>主页</span></a></span></li><li><div class="topicref"><div class="title"><a href="../../rn/server/3_00_2.html">版本说明</a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 版本发布历史</p></div></div></div></li><li><div class="topicref"><div class="title"><a href="../../rn/plugin/3_00_2.html">插件</a></div></div></li><li class="active"><div class="topicref" data-id="_3_00_1"><div class="title"><a href="../../rn/plugin/3_00_1.html">3.00.1</a></div></div></li></ol></div>
+                    
+                    
+                    
+                    <div class="wh_right_tools">
+                        <button class="wh_hide_highlight" aria-label="切换搜索突出显示" title="切换搜索突出显示"></button>
+                        <button class="webhelp_expand_collapse_sections" data-next-state="collapsed" aria-label="折叠截面" title="折叠截面"></button>
+                        
+                        
+                        
+                        
+                        <div class=" wh_print_link print d-none d-md-inline-block "><button onClick="window.print()" title="打印此页" aria-label="打印此页"></button></div>
+                        
+                        <button type="button" id="wh_toc_button" class="custom-toggler navbar-toggler collapsed wh_toggle_button navbar-light" aria-expanded="false" aria-label="Toggle publishing table of content" aria-controls="wh_publication_toc">
+                            <span class="navbar-toggler-icon"></span>
+                        </button>
+                    </div>
+                    
+                </nav>
+            </div>
+            
+            
+            
+            
+            <div class="wh_content_area">
+                <div class="row">
+                    
+                        <nav id="wh_publication_toc" class="col-lg-3 col-md-3 col-sm-12 d-md-block d-none d-print-none" aria-label="Table of Contents Container">
+                            <div id="wh_publication_toc_content">
+		                        
+                            	<div class=" wh_publication_toc " data-tooltip-position="right"><span class="expand-button-action-labels"><span id="button-expand-action" role="button" aria-label="Expand"></span><span id="button-collapse-action" role="button" aria-label="Collapse"></span><span id="button-pending-action" role="button" aria-label="Pending"></span></span><ul role="tree" aria-label="Table of Contents"><li role="treeitem"><div data-tocid="ddb_intro-d9713e87" class="topicref" data-id="ddb_intro" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../about/ddb_intro.html" id="ddb_intro-d9713e87-link">关于DolphinDB</a></div></div></li><li role="treeitem"><div data-tocid="chap1_getstarted-d9713e136" class="topicref" data-id="chap1_getstarted" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../getstarted/chap1_getstarted.html" id="chap1_getstarted-d9713e136-link">快速上手</a><div class="wh-tooltip"><p class="shortdesc">如何快速部署 DolphinDB、建库建表、写入和查询数据</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="sectionddb_deployment-d9713e189" class="topicref" data-id="sectionddb_deployment" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action sectionddb_deployment-d9713e189-link" class="wh-expand-btn"></span><div class="title"><a href="../../deploy/deploy_intro.html" id="sectionddb_deployment-d9713e189-link"><span class="keyword label">部署</span></a><div class="wh-tooltip"><p class="shortdesc">如何在不同的场景中部署 DolphinDB</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="new_chap_database_manage_new_chap_dbmanage_landing_page-d9713e2259" class="topicref" data-id="new_chap_database_manage_new_chap_dbmanage_landing_page" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action new_chap_database_manage_new_chap_dbmanage_landing_page-d9713e2259-link" class="wh-expand-btn"></span><div class="title"><a href="../../db_distr_comp/cfg/db_intro.html" id="new_chap_database_manage_new_chap_dbmanage_landing_page-d9713e2259-link"><span class="keyword label">数据库</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 数据库的基本概念</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="chap7_tutorials_streaming-d9713e3760" class="topicref" data-id="chap7_tutorials_streaming" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action chap7_tutorials_streaming-d9713e3760-link" class="wh-expand-btn"></span><div class="title"><a href="../../stream/str_intro.html" id="chap7_tutorials_streaming-d9713e3760-link"><span class="keyword label">流数据</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 流数据引擎及流数据计算的基本概念</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e7513" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e7513-link" class="wh-expand-btn"></span><div class="title"><a href="../../db_distr_comp/db_oper/import_data.html" id="tocId-d9713e7513-link">数据迁移</a><div class="wh-tooltip"><p class="shortdesc">如何从不同数据源向 DolphinDB 迁移数据</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="chap7_tutorials_system_management-d9713e7940" class="topicref" data-id="chap7_tutorials_system_management" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action chap7_tutorials_system_management-d9713e7940-link" class="wh-expand-btn"></span><div class="title"><a href="../../sys_man/om_intro.html" id="chap7_tutorials_system_management-d9713e7940-link"><span class="keyword label">系统运维</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 的系统运维功能及方法</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="troubleshooting-d9713e8780" class="topicref" data-id="troubleshooting" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action troubleshooting-d9713e8780-link" class="wh-expand-btn"></span><div class="title"><a href="../../error_codes/troubleshooting.html" id="troubleshooting-d9713e8780-link">故障排查</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="about_language_resources-d9713e20911" class="topicref" data-id="about_language_resources" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action about_language_resources-d9713e20911-link" class="wh-expand-btn"></span><div class="title"><a href="../../progr/progr_intro.html" id="about_language_resources-d9713e20911-link"><span class="keyword label">编程语言</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 编程基本概念与方法、SQL 在 DolphinDB 的应用</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="functions_references-d9713e30925" class="topicref" data-id="functions_references" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action functions_references-d9713e30925-link" class="wh-expand-btn"></span><div class="title"><a href="../../funcs/funcs_intro.html" id="functions_references-d9713e30925-link"><span class="keyword label">函数参考</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 函数分类、语法、详解及示例</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="api_protocol-d9713e94064" class="topicref" data-id="api_protocol" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action api_protocol-d9713e94064-link" class="wh-expand-btn"></span><div class="title"><a href="../../api/connapi_intro.html" id="api_protocol-d9713e94064-link"><span class="keyword label">连接器 &amp; API</span></a><div class="wh-tooltip"><p class="shortdesc">面向不同编程语言的 DolphinDB API 及连接器，相关协议和用法</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="chap6_plugin-d9713e94210" class="topicref" data-id="chap6_plugin" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action chap6_plugin-d9713e94210-link" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/plg_intro.html" id="chap6_plugin-d9713e94210-link"><span class="keyword label">插件</span></a><div class="wh-tooltip"><p class="shortdesc">多个应用场景的插件使用说明和插件开发指导</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="third_party-d9713e97904" class="topicref" data-id="third_party" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action third_party-d9713e97904-link" class="wh-expand-btn"></span><div class="title"><a href="../../third_party.html" id="third_party-d9713e97904-link">第三方工具</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="about_tutorials-d9713e98227" class="topicref" data-id="about_tutorials" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action about_tutorials-d9713e98227-link" class="wh-expand-btn"></span><div class="title"><a href="../../tutorials/about_tutorials.html" id="about_tutorials-d9713e98227-link"><span class="keyword label">教程</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 产品使用教程</p></div></div></div></li><li role="treeitem" aria-expanded="true"><div data-tocid="tocId-d9713e105982" class="topicref" data-state="expanded"><span role="button" tabindex="0" aria-labelledby="button-collapse-action tocId-d9713e105982-link" class="wh-expand-btn"></span><div class="title"><a href="../../rn/server/3_00_2.html" id="tocId-d9713e105982-link">版本说明</a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 版本发布历史</p></div></div></div><ul role="group" class="navbar-nav nav-list"><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e106047" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e106047-link" class="wh-expand-btn"></span><div class="title"><a href="../../rn/server/3_00_2.html" id="tocId-d9713e106047-link">Server</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="api-d9713e106186" class="topicref" data-id="api" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action api-d9713e106186-link" class="wh-expand-btn"></span><div class="title"><a href="../../rn/server/api.html" id="api-d9713e106186-link">API 和连接器</a></div></div></li><li role="treeitem" aria-expanded="true"><div data-tocid="tocId-d9713e106288" class="topicref" data-state="expanded"><span role="button" tabindex="0" aria-labelledby="button-collapse-action tocId-d9713e106288-link" class="wh-expand-btn"></span><div class="title"><a href="../../rn/plugin/3_00_2.html" id="tocId-d9713e106288-link">插件</a></div></div><ul role="group" class="navbar-nav nav-list"><li role="treeitem"><div data-tocid="_3_00_2-d9713e106289" class="topicref" data-id="_3_00_2" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../rn/plugin/3_00_2.html" id="_3_00_2-d9713e106289-link">3.00.2</a></div></div></li><li role="treeitem" class="active"><div data-tocid="_3_00_1-d9713e106335" class="topicref" data-id="_3_00_1" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../rn/plugin/3_00_1.html" id="_3_00_1-d9713e106335-link">3.00.1</a></div></div></li><li role="treeitem"><div data-tocid="_2_00_15-d9713e106381" class="topicref" data-id="_2_00_15" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../rn/plugin/2_00_15.html" id="_2_00_15-d9713e106381-link">2.00.15</a></div></div></li><li role="treeitem"><div data-tocid="plg300rn-d9713e106427" class="topicref" data-id="plg300rn" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../rn/plugin/plg300rn.html" id="plg300rn-d9713e106427-link">3.00.00</a></div></div></li></ul></li><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e106473" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e106473-link" class="wh-expand-btn"></span><div class="title"><a href="../../rn/rn_web.html" id="tocId-d9713e106473-link">客户端</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="third_party_rn-d9713e106612" class="topicref" data-id="third_party_rn" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action third_party_rn-d9713e106612-link" class="wh-expand-btn"></span><div class="title"><a href="../../rn/server/third_party_rn.html" id="third_party_rn-d9713e106612-link">第三方工具</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="compatibility_def-d9713e106796" class="topicref" data-id="compatibility_def" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action compatibility_def-d9713e106796-link" class="wh-expand-btn"></span><div class="title"><a href="../../rn/compat_def.html" id="compatibility_def-d9713e106796-link">版本兼容性说明</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e107118" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e107118-link" class="wh-expand-btn"></span><div class="title"><a href="../../rn/compact_report_2410.html" id="tocId-d9713e107118-link">版本兼容性列表</a></div></div></li></ul></li></ul></div>
+		                        
+                            </div>
+                        </nav>
+                    
+                    
+                    <div class="col-lg-7 col-md-9 col-sm-12" id="wh_topic_body">
+                        <button id="wh_close_publication_toc_button" class="close-toc-button d-none" aria-label="Toggle publishing table of content" aria-controls="wh_publication_toc" aria-expanded="true">
+                            <span class="close-toc-icon-container">
+                                <span class="close-toc-icon"></span>     
+                            </span>
+                        </button>
+                        <button id="wh_close_topic_toc_button" class="close-toc-button d-none" aria-label="Toggle topic table of content" aria-controls="wh_topic_toc" aria-expanded="true">
+                            <span class="close-toc-icon-container">
+                                <span class="close-toc-icon"></span>     
+                            </span>
+                        </button>
+                        
+                        <div class=" wh_topic_content body "><main role="main"><article class="- topic/topic topic" role="article" aria-labelledby="ariaid-title1">
+    <h1 class="- topic/title title topictitle1" id="ariaid-title1">3.00.1</h1>
+    <article class="- topic/topic topic nested1" aria-labelledby="ariaid-title2" id="topic_zk2_tcw_wcc">
+        <h2 class="- topic/title title topictitle2" id="ariaid-title2">amdQuote</h2>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title3" id="topic_m41_vcw_wcc">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title3">新功能</h3>
+            <div class="- topic/body body">
+                <ul class="- topic/ul ul" id="topic_m41_vcw_wcc__ul_yzm_wcw_wcc" data-ofbid="topic_m41_vcw_wcc__ul_yzm_wcw_wcc">
+                    <li class="- topic/li li">新增支持订阅北交所股转快照数据。<strong class="+ topic/ph hi-d/b ph b">（3.00.1.6）</strong></li>
+                    <li class="- topic/li li">新增函数 <code class="+ topic/ph pr-d/codeph ph codeph">setLogLevel</code>用于设置插件输出日志的等级，同时新增函数
+                            <code class="+ topic/ph pr-d/codeph ph codeph">getLogLevel</code>，用于获取插件当前的输出日志等级。<strong class="+ topic/ph hi-d/b ph b">（3.00.1.6）</strong></li>
+                </ul>
+            </div>
+        </article>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title4" id="topic_gcr_z4s_ndc">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title4">功能优化</h3>
+            <div class="- topic/body body">
+                <ul class="- topic/ul ul" id="topic_gcr_z4s_ndc__ul_vvv_bps_ndc" data-ofbid="topic_gcr_z4s_ndc__ul_vvv_bps_ndc">
+                    <li class="- topic/li li">
+                        <p class="- topic/p p">新增支持配置与监控订阅队列的深度（<strong class="+ topic/ph hi-d/b ph b">3.00.1.10</strong>）：</p>
+                        <ul class="- topic/ul ul" id="topic_gcr_z4s_ndc__ul_wvv_bps_ndc" data-ofbid="topic_gcr_z4s_ndc__ul_wvv_bps_ndc">
+                            <li class="- topic/li li">
+                                <p class="- topic/p p"><code class="+ topic/ph pr-d/codeph ph codeph">subscribe</code> 新增参数
+                                    <em class="+ topic/ph hi-d/i ph i">queueDepth</em>，支持设置订阅队列的深度。</p>
+                            </li>
+                            <li class="- topic/li li">
+                                <p class="- topic/p p"><code class="+ topic/ph pr-d/codeph ph codeph">getStatus</code> 支持获取当前订阅队列的深度。</p>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </article>
+    </article>
+    <article class="- topic/topic topic nested1" aria-labelledby="ariaid-title5" id="topic_zzj_2hg_4dc">
+        <h2 class="- topic/title title topictitle2" id="ariaid-title5">Arrow</h2>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title6" id="topic_upx_2hg_4dc">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title6">缺陷修复</h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p">任务执行过程中若发生续传，可能会出现任务卡住。（<strong class="+ topic/ph hi-d/b ph b">3.00.1.10</strong>）</p>
+            </div>
+        </article>
+    </article>
+    <article class="- topic/topic topic nested1" aria-labelledby="ariaid-title7" id="topic_kq5_xzk_zbc">
+        <h2 class="- topic/title title topictitle2" id="ariaid-title7">Backtest</h2>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title8" id="topic_efx_zbn_fcc">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title8">新功能</h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p">新增期权回测引擎，支持期权业务逻辑。<strong class="+ topic/ph hi-d/b ph b">（3.00.1.1）</strong></p>
+            </div>
+        </article>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title9" id="topic_ob1_42g_hcc">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title9">功能优化</h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p">优化期货回测在快照模式下的性能，并修改部分接口。<strong class="+ topic/ph hi-d/b ph b">（3.00.1.3）</strong></p>
+            </div>
+        </article>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title10" id="topic_dpx_bcn_fcc">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title10">故障修复</h3>
+            <div class="- topic/body body">
+                <ul class="- topic/ul ul" id="topic_dpx_bcn_fcc__ul_bzg_3gg_hcc" data-ofbid="topic_dpx_bcn_fcc__ul_bzg_3gg_hcc">
+                    <li class="- topic/li li">部分计算逻辑和计算 bug 。<strong class="+ topic/ph hi-d/b ph b">（3.00.1.3）</strong></li>
+                    <li class="- topic/li li">股票、期货、期权平仓时持仓数量检查错误。<strong class="+ topic/ph hi-d/b ph b">（3.00.1.3）</strong></li>
+                    <li class="- topic/li li">部分计算逻辑和计算 bug 。<strong class="+ topic/ph hi-d/b ph b">（3.00.1.1）</strong></li>
+                </ul>
+            </div>
+        </article>
+    </article>
+    <article class="- topic/topic topic nested1" aria-labelledby="ariaid-title11" id="topic_l4g_ttk_gdc">
+        <h2 class="- topic/title title topictitle2" id="ariaid-title11">EFH</h2>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title12" id="topic_m4g_ttk_gdc">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title12">新功能</h3>
+            <div class="- topic/body body">
+                <ul class="- topic/ul ul" id="topic_m4g_ttk_gdc__ul_oyl_dz4_rdc" data-ofbid="topic_m4g_ttk_gdc__ul_oyl_dz4_rdc">
+                    <li class="- topic/li li">新增支持上交所逐笔合并数据。<strong class="+ topic/ph hi-d/b ph b">（3.00.1.8）</strong></li>
+                </ul>
+            </div>
+        </article>
+    </article>
+    <article class="- topic/topic topic nested1" aria-labelledby="ariaid-title13" id="topic_lkd_ny4_rdc">
+        <h2 class="- topic/title title topictitle2" id="ariaid-title13">EncoderDecoder</h2>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title14" id="topic_mkd_ny4_rdc">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title14">功能优化</h3>
+            <div class="- topic/body body">
+                <ul class="- topic/ul ul" id="topic_mkd_ny4_rdc__ul_nkd_ny4_rdc" data-ofbid="topic_mkd_ny4_rdc__ul_nkd_ny4_rdc">
+                    <li class="- topic/li li">支持解析 protobuf 的枚举类型（enum）。（<strong class="+ topic/ph hi-d/b ph b">3.00.1.11</strong>）</li>
+                </ul>
+            </div>
+        </article>
+    </article>
+    <article class="- topic/topic topic nested1" aria-labelledby="ariaid-title15" id="topic_kng_hnd_scc">
+        <h2 class="- topic/title title topictitle2" id="ariaid-title15">httpClient</h2>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title16" id="topic_ayf_jnd_scc">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title16">功能优化</h3>
+            <div class="- topic/body body">
+                <ul class="- topic/ul ul" id="topic_ayf_jnd_scc__ul_qyc_pnd_scc" data-ofbid="topic_ayf_jnd_scc__ul_qyc_pnd_scc">
+                    <li class="- topic/li li">优化 <code class="+ topic/ph pr-d/codeph ph codeph">sendEmail</code> 函数的功能（<strong class="+ topic/ph hi-d/b ph b">3.00.1.5</strong>）：<ul class="- topic/ul ul" id="topic_ayf_jnd_scc__ul_ryc_pnd_scc" data-ofbid="topic_ayf_jnd_scc__ul_ryc_pnd_scc">
+                            <li class="- topic/li li">新增可选参数 <em class="+ topic/ph hi-d/i ph i">msg</em>，支持填入完整的邮件正文信息。</li>
+                            <li class="- topic/li li">将 <em class="+ topic/ph hi-d/i ph i">subject</em>, <em class="+ topic/ph hi-d/i ph i">body</em>
+                                参数改为可选，同时将通过这两个参数发送的邮件正文中的换行符修改为标准换行符。</li>
+                        </ul></li>
+                </ul>
+            </div>
+        </article>
+    </article>
+    <article class="- topic/topic topic nested1" aria-labelledby="ariaid-title17" id="topic_i3x_v4d_xbc">
+        <h2 class="- topic/title title topictitle2" id="ariaid-title17">insight</h2>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title18" id="topic_pc1_jcn_fcc">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title18">故障修复</h3>
+            <div class="- topic/body body">
+                <ul class="- topic/ul ul" id="topic_pc1_jcn_fcc__ul_g1y_y4d_xbc" data-ofbid="topic_pc1_jcn_fcc__ul_g1y_y4d_xbc">
+                    <li class="- topic/li li">集群状态下，无法自动找到 insight 插件加密认证所需的 cert 文件。</li>
+                    <li class="- topic/li li">订阅 orderTransaction 类型数据，出现错误的状态显示。</li>
+                </ul>
+            </div>
+        </article>
+    </article>
+    <article class="- topic/topic topic nested1" aria-labelledby="ariaid-title19" id="topic_zfw_lkg_4cc">
+        <h2 class="- topic/title title topictitle2" id="ariaid-title19">Kafka</h2>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title20" id="topic_cxj_nkg_4cc">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title20">新功能</h3>
+            <div class="- topic/body body">
+                <ul class="- topic/ul ul" id="topic_cxj_nkg_4cc__ul_fjd_4kg_4cc" data-ofbid="topic_cxj_nkg_4cc__ul_fjd_4kg_4cc">
+                    <li class="- topic/li li">
+                        <p class="- topic/p p">支持连接启用 SSL 认证的 Kafka Server。（<strong class="+ topic/ph hi-d/b ph b">3.00.1.11</strong>）</p>
+                    </li>
+                    <li class="- topic/li li">
+                        <p class="- topic/p p">创建 consumer 与 producer 时增加异常回调机制。 （<strong class="+ topic/ph hi-d/b ph b">3.00.1.4</strong>）</p>
+                    </li>
+                    <li class="- topic/li li">
+                        <p class="- topic/p p">新增 <code class="+ topic/ph pr-d/codeph ph codeph">getOffsetInfo</code> 函数，支持一键查询消费者偏移量信息。（<strong class="+ topic/ph hi-d/b ph b">3.00.1.4</strong>）</p>
+                    </li>
+                </ul>
+            </div>
+        </article>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title21" id="topic_w1l_4kg_4cc">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title21">功能优化</h3>
+            <div class="- topic/body body">
+                <ul class="- topic/ul ul" id="topic_w1l_4kg_4cc__ul_ibb_pkg_4cc" data-ofbid="topic_w1l_4kg_4cc__ul_ibb_pkg_4cc">
+                    <li class="- topic/li li">
+                        <p class="- topic/p p">优化 <code class="+ topic/ph pr-d/codeph ph codeph">createSubJob</code> 接收数据的性能，新增参数 <em class="+ topic/ph hi-d/i ph i">msgAsTable
+                                </em>，用于控制订阅的数据是否以表的形式返回。（<strong class="+ topic/ph hi-d/b ph b">3.00.1.4</strong>）</p>
+                    </li>
+                    <li class="- topic/li li">
+                        <p class="- topic/p p">优化 <code class="+ topic/ph pr-d/codeph ph codeph">getJobStat</code> 函数，扩展返回的信息内容。 （<strong class="+ topic/ph hi-d/b ph b">3.00.1.4</strong>）</p>
+                    </li>
+                    <li class="- topic/li li">
+                        <p class="- topic/p p">新增以纯字符串读写 Kafka 消息的功能。（<strong class="+ topic/ph hi-d/b ph b">3.00.1.4</strong>） </p>
+                    </li>
+                    <li class="- topic/li li">
+                        <p class="- topic/p p">增加 producer、consumer 无法连接时的错误提示。（<strong class="+ topic/ph hi-d/b ph b">3.00.1.4</strong>）</p>
+                    </li>
+                </ul>
+            </div>
+        </article>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title22" id="topic_umr_pkg_4cc">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title22">兼容性</h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p">删除了原有冗余函数 30 余个，如果情况特殊需要用到之前函数，请联系技术支持获取带有全部函数的插件 txt 文件。（<strong class="+ topic/ph hi-d/b ph b">3.00.1.4</strong>）</p>
+            </div>
+        </article>
+    </article>
+    <article class="- topic/topic topic nested1" aria-labelledby="ariaid-title23" id="topic_jm3_22d_scc">
+        <h2 class="- topic/title title topictitle2" id="ariaid-title23">Kdb+</h2>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title24" id="topic_km3_22d_scc">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title24">新功能</h3>
+            <div class="- topic/body body">
+                <ul class="- topic/ul ul" id="topic_km3_22d_scc__ul_lm3_22d_scc" data-ofbid="topic_km3_22d_scc__ul_lm3_22d_scc">
+                    <li class="- topic/li li">
+                        <p class="- topic/p p">新增函数 <code class="+ topic/ph pr-d/codeph ph codeph">execute</code> ，可以通过 kdb+ 数据库执行 q 语句，获取数据到 DolphinDB 数据库。
+                                （<strong class="+ topic/ph hi-d/b ph b">3.00.1.5</strong>）</p>
+                    </li>
+                    <li class="- topic/li li">
+                        <p class="- topic/p p">新增函数 <code class="+ topic/ph pr-d/codeph ph codeph">loadTableEx</code> 和 <code class="+ topic/ph pr-d/codeph ph codeph">loadFileEx</code> ，支持将 kdb+
+                            表格数据或磁盘数据导入 DolphinDB 数据库。（<strong class="+ topic/ph hi-d/b ph b">3.00.1.5</strong>）</p>
+                    </li>
+                    <li class="- topic/li li">
+                        <p class="- topic/p p">新增函数 <code class="+ topic/ph pr-d/codeph ph codeph">extractTableSchema</code> 和
+                                <code class="+ topic/ph pr-d/codeph ph codeph">extractFileSchema</code> ，支持获取 kdb+ 表格数据文件或磁盘序列化文件的
+                                schema。（<strong class="+ topic/ph hi-d/b ph b">3.00.1.5</strong>）</p>
+                    </li>
+                </ul>
+            </div>
+        </article>
+    </article>
+    <article class="- topic/topic topic nested1" aria-labelledby="ariaid-title25" id="topic_gzy_zmn_4dc">
+        <h2 class="- topic/title title topictitle2" id="ariaid-title25">lgbm</h2>
+        <div class="- topic/body body">
+            <p class="- topic/p p">首次发布，用于调用 LightGBM 库，对 DolphinDB 数据进行分类和回归。（<strong class="+ topic/ph hi-d/b ph b">3.00.1.10</strong>）</p>
+        </div>
+    </article>
+    <article class="- topic/topic topic nested1" aria-labelledby="ariaid-title26" id="topic_wtv_zy5_x1c">
+        <h2 class="- topic/title title topictitle2" id="ariaid-title26">LibTorch</h2>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title27" id="topic_g5n_s1x_wcc">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title27">新功能</h3>
+            <div class="- topic/body body">
+                <ul class="- topic/ul ul" id="topic_g5n_s1x_wcc__ul_qfr_v1x_wcc" data-ofbid="topic_g5n_s1x_wcc__ul_qfr_v1x_wcc">
+                    <li class="- topic/li li">支持模型预测结果为包含 tensor 的 tuple 。（<strong class="+ topic/ph hi-d/b ph b">3.00.1.6</strong>）</li>
+                    <li class="- topic/li li">首次发布，用于在 DolphinDB 环境中使用 TorchScript 模型进行高效的模型预测和数据分析。（<strong class="+ topic/ph hi-d/b ph b">3.00.1.1</strong>）</li>
+                </ul>
+            </div>
+        </article>
+    </article>
+    <article class="- topic/topic topic nested1" aria-labelledby="ariaid-title28" id="topic_r5k_gd4_fcc">
+        <h2 class="- topic/title title topictitle2" id="ariaid-title28">MDL</h2>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title29" id="topic_fsc_hd4_fcc">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title29">新功能</h3>
+            <div class="- topic/body body">
+                <ul class="- topic/ul ul" id="topic_fsc_hd4_fcc__ul_vlm_3d4_fcc" data-ofbid="topic_fsc_hd4_fcc__ul_vlm_3d4_fcc">
+                    <li class="- topic/li li">
+                        <p class="- topic/p p">接口 <code class="+ topic/ph pr-d/codeph ph codeph">createHandle</code> 和 <code class="+ topic/ph pr-d/codeph ph codeph">getSchema</code> 增加参数
+                                <em class="+ topic/ph hi-d/i ph i">options</em>，用于记录数据接收时间、插件处理时延。（<strong class="+ topic/ph hi-d/b ph b">3.00.1.8</strong>）</p>
+                    </li>
+                    <li class="- topic/li li">支持接收股票、期货市场的 L1 数据。（<strong class="+ topic/ph hi-d/b ph b">3.00.1.2</strong>）</li>
+                    <li class="- topic/li li">增加 <code class="+ topic/ph pr-d/codeph ph codeph">getStatus</code> 函数用于查询具体数据品类的订阅信息。（<strong class="+ topic/ph hi-d/b ph b">3.00.1.2</strong>）</li>
+                </ul>
+            </div>
+        </article>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title30" id="topic_rc2_tdl_scc">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title30">功能优化</h3>
+            <div class="- topic/body body">
+                <div class="- topic/p p">
+                    <ul class="- topic/ul ul">
+                        <li class="- topic/li li">
+                            <p class="- topic/p p">提升了逐笔数据的接收处理效率。（<strong class="+ topic/ph hi-d/b ph b">3.00.1.8</strong>）</p>
+                        </li>
+                        <li class="- topic/li li">
+                            <p class="- topic/p p">order_and_transaction 类型（上交所 L2 和深交所 L2 的 order 和 transaction
+                                合并类型行情，接口 <code class="+ topic/ph pr-d/codeph ph codeph">getSchema</code>, <code class="+ topic/ph pr-d/codeph ph codeph">subscribe</code>,
+                                    <code class="+ topic/ph pr-d/codeph ph codeph">unsubscribe</code>会用到）将 receivedTime 字段修改为
+                                NANOTIMESTAMP 类型。（<strong class="+ topic/ph hi-d/b ph b">3.00.1.8</strong>）</p>
+                        </li>
+                    </ul>
+                </div>
+                <ul class="- topic/ul ul" id="topic_rc2_tdl_scc__ul_gdv_pgq_gdc" data-ofbid="topic_rc2_tdl_scc__ul_gdv_pgq_gdc">
+                    <li class="- topic/li li">适配最新版本的订单簿引擎。（<strong class="+ topic/ph hi-d/b ph b">3.00.1.5</strong>）</li>
+                </ul>
+            </div>
+        </article>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title31" id="topic_bkx_pdl_scc">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title31">故障修复</h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p">订阅逐笔合并数据时，跨天后日期不更新。（<strong class="+ topic/ph hi-d/b ph b">3.00.1.5</strong>）</p>
+            </div>
+        </article>
+    </article>
+    <article class="- topic/topic topic nested1" aria-labelledby="ariaid-title32" id="topic_f1r_krw_wcc">
+        <h2 class="- topic/title title topictitle2" id="ariaid-title32">MongoDB</h2>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title33" id="topic_iqx_krw_wcc">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title33">故障修复</h3>
+            <div class="- topic/body body">
+                <ul class="- topic/ul ul" id="topic_iqx_krw_wcc__ul_jqx_krw_wcc" data-ofbid="topic_iqx_krw_wcc__ul_jqx_krw_wcc">
+                    <li class="- topic/li li">[DPLG-3303] MongoDB 的浮点数转换为 DolphinDB 整型时，结果错误。<strong class="+ topic/ph hi-d/b ph b">（3.00.1.6）</strong></li>
+                    <li class="- topic/li li">[DPLG-3304] 在查询返回的数据里，若第一行的 oid 类型列的值为空，会导致 server 崩溃。<strong class="+ topic/ph hi-d/b ph b">（3.00.1.6）</strong></li>
+                    <li class="- topic/li li">[DPLG-3312] 在查询数据时，若某列的前 1024 行都是空值，会导致 server 崩溃。<strong class="+ topic/ph hi-d/b ph b">（3.00.1.6）</strong></li>
+                </ul>
+            </div>
+        </article>
+    </article>
+    <article class="- topic/topic topic nested1" aria-labelledby="ariaid-title34" id="topic_osf_324_ybc">
+        <h2 class="- topic/title title topictitle2" id="ariaid-title34">mqtt</h2>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title35" id="topic_njd_xcn_fcc">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title35">新功能</h3>
+            <div class="- topic/body body">
+                <ul class="- topic/ul ul" id="topic_njd_xcn_fcc__ul_qsf_324_ybc" data-ofbid="topic_njd_xcn_fcc__ul_qsf_324_ybc">
+                    <li class="- topic/li li"><code class="+ topic/ph pr-d/codeph ph codeph">mqtt::connect</code> 新增可选参数 <em class="+ topic/ph hi-d/i ph i">config</em>，支持以下设置 <ul class="- topic/ul ul" id="topic_njd_xcn_fcc__ul_qnf_p24_ybc" data-ofbid="topic_njd_xcn_fcc__ul_qnf_p24_ybc">
+                            <li class="- topic/li li">"recvBufSize"：接收缓冲区大小。（<strong class="+ topic/ph hi-d/b ph b">3.00.1.1</strong>）</li>
+                            <li class="- topic/li li">"clientID"：指定发布连接的 ID。（<strong class="+ topic/ph hi-d/b ph b">3.00.1.1</strong>）</li>
+                        </ul></li>
+                    <li class="- topic/li li"><code class="+ topic/ph pr-d/codeph ph codeph">mqtt::subscribe</code> 新增可选参数 <em class="+ topic/ph hi-d/i ph i">config</em>，支持以下设置： <ul class="- topic/ul ul" id="topic_njd_xcn_fcc__ul_e5v_t24_ybc" data-ofbid="topic_njd_xcn_fcc__ul_e5v_t24_ybc">
+                            <li class="- topic/li li">"sendBufSize"：设置发送缓冲区大小。（<strong class="+ topic/ph hi-d/b ph b">3.00.1.1</strong>）</li>
+                            <li class="- topic/li li">"subscribeID"：指定订阅连接的 ID。（<strong class="+ topic/ph hi-d/b ph b">3.00.1.1</strong>）</li>
+                            <li class="- topic/li li">"asyncFlag"：是否开启异步订阅模式。（<strong class="+ topic/ph hi-d/b ph b">3.00.1.1</strong>） </li>
+                        </ul></li>
+                </ul>
+            </div>
+        </article>
+    </article>
+    <article class="- topic/topic topic nested1" aria-labelledby="ariaid-title36" id="topic_ow5_sjg_kcc">
+        <h2 class="- topic/title title topictitle2" id="ariaid-title36">NSQ</h2>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title37" id="topic_mzg_tjg_kcc">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title37">故障修复</h3>
+            <div class="- topic/body body">
+                <ul class="- topic/ul ul" id="topic_mzg_tjg_kcc__ul_v1d_5jg_kcc" data-ofbid="topic_mzg_tjg_kcc__ul_v1d_5jg_kcc">
+                    <li class="- topic/li li">
+                        <p class="- topic/p p">[DPLG-3392] 订阅 orderTrade 行情数据后无法取消订阅 order 或 trade
+                            类型数据。（<strong class="+ topic/ph hi-d/b ph b">3.00.1.4</strong>）</p>
+                    </li>
+                    <li class="- topic/li li">
+                        <p class="- topic/p p">[DPLG-3393] NSQ 插件触发自动重连后，重新接入数据导致宕机。（<strong class="+ topic/ph hi-d/b ph b">3.00.1.4</strong>）</p>
+                    </li>
+                </ul>
+            </div>
+        </article>
+    </article>
+    <article class="- topic/topic topic nested1" aria-labelledby="ariaid-title38" id="topic_lgf_gg4_ybc">
+        <h2 class="- topic/title title topictitle2" id="ariaid-title38">ODBC</h2>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title39" id="topic_ybf_zcn_fcc">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title39">功能优化</h3>
+            <div class="- topic/body body">
+                <ul class="- topic/ul ul" id="topic_ybf_zcn_fcc__ul_ngf_gg4_ybc" data-ofbid="topic_ybf_zcn_fcc__ul_ngf_gg4_ybc">
+                    <li class="- topic/li li">Linux 版本插件支持根据 ODBC 驱动库接口，自动选择合适的字符编码驱动，支持了 SQLServer、SQLite
+                            的中文读取和写入。（<strong class="+ topic/ph hi-d/b ph b">3.00.1.1</strong>）</li>
+                </ul>
+            </div>
+        </article>
+    </article>
+    <article class="- topic/topic topic nested1" aria-labelledby="ariaid-title40" id="topic_eqn_lhg_4dc">
+        <h2 class="- topic/title title topictitle2" id="ariaid-title40">OPC</h2>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title41" id="topic_z25_lhg_4dc">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title41">功能优化</h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p">增强插件稳定性。（<strong class="+ topic/ph hi-d/b ph b">3.00.1.10</strong>）</p>
+            </div>
+        </article>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title42" id="topic_pjf_mhg_4dc">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title42">缺陷修复</h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p">执行 <code class="+ topic/ph pr-d/codeph ph codeph">opc::close</code> 断开连接失败。（<strong class="+ topic/ph hi-d/b ph b">3.00.1.10</strong>）</p>
+            </div>
+        </article>
+    </article>
+    <article class="- topic/topic topic nested1" aria-labelledby="ariaid-title43" id="topic_owf_ln5_jdc">
+        <h2 class="- topic/title title topictitle2" id="ariaid-title43">OPCUA</h2>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title44" id="topic_pwf_ln5_jdc">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title44">功能优化</h3>
+            <div class="- topic/body body">
+                <ul class="- topic/ul ul" id="topic_pwf_ln5_jdc__ul_on1_mn5_jdc" data-ofbid="topic_pwf_ln5_jdc__ul_on1_mn5_jdc">
+                    <li class="- topic/li li"><code class="+ topic/ph pr-d/codeph ph codeph">subscribe</code> 新增参数 <em class="+ topic/ph hi-d/i ph i">reconnect</em> 和
+                            <em class="+ topic/ph hi-d/i ph i">resubscribeInterval</em>，支持在订阅断开时自动重连。（<strong class="+ topic/ph hi-d/b ph b">3.00.1.10</strong>）</li>
+                    <li class="- topic/li li"><code class="+ topic/ph pr-d/codeph ph codeph">subscribe</code> 函数新增参数
+                            <em class="+ topic/ph hi-d/i ph i">actionName</em>，可以指定订阅任务的名称。（<strong class="+ topic/ph hi-d/b ph b">3.00.1.9</strong>）</li>
+                </ul>
+            </div>
+        </article>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title45" id="topic_rfh_4n5_jdc">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title45">故障修复</h3>
+            <div class="- topic/body body">
+                <ul class="- topic/ul ul" id="topic_rfh_4n5_jdc__ul_hrw_4n5_jdc" data-ofbid="topic_rfh_4n5_jdc__ul_hrw_4n5_jdc">
+                    <li class="- topic/li li">在某些情况下，调用 <code class="+ topic/ph pr-d/codeph ph codeph">getSubscriberStat</code> 查看订阅状态导致 server
+                            宕机。（<strong class="+ topic/ph hi-d/b ph b">3.00.1.9</strong>）</li>
+                </ul>
+            </div>
+        </article>
+    </article>
+    <article class="- topic/topic topic nested1" aria-labelledby="ariaid-title46" id="topic_efj_phg_4dc">
+        <h2 class="- topic/title title topictitle2" id="ariaid-title46">SevenZip</h2>
+        <div class="- topic/body body">
+            <p class="- topic/p p">首次发布，支持压缩和解压缩多种格式文件。</p>
+        </div>
+    </article>
+    <article class="- topic/topic topic nested1" aria-labelledby="ariaid-title47" id="id_t31_qwf_4cc">
+        <h2 class="- topic/title title topictitle2" id="ariaid-title47">SSEQuotationFile</h2>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title48" id="topic_sk1_qwf_4cc">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title48">新功能</h3>
+            <div class="- topic/body body">
+                <ul class="- topic/ul ul" id="topic_sk1_qwf_4cc__ul_tk1_qwf_4cc" data-ofbid="topic_sk1_qwf_4cc__ul_tk1_qwf_4cc">
+                    <li class="- topic/li li"><code class="+ topic/ph pr-d/codeph ph codeph">subscribe</code> 接口在订阅 mktdt04 行情文件时，新增 MktStatus 列和 MDTime 列，分别表示
+                        mktdt04 行情文件头中的交易状态信息和文件生成时间。（<strong class="+ topic/ph hi-d/b ph b">3.00.1.4</strong>）</li>
+                </ul>
+            </div>
+        </article>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title49" id="topic_bg3_bhq_gdc">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title49">功能优化</h3>
+            <div class="- topic/body body">
+                <ul class="- topic/ul ul" id="topic_bg3_bhq_gdc__ul_wgb_gmv_fdc" data-ofbid="topic_bg3_bhq_gdc__ul_wgb_gmv_fdc">
+                    <li class="- topic/li li">提升了解析文件的效率。（<strong class="+ topic/ph hi-d/b ph b">3.00.1.8</strong>）</li>
+                </ul>
+            </div>
+        </article>
+    </article>
+    <article class="- topic/topic topic nested1" aria-labelledby="ariaid-title50" id="topic_g5t_kd4_ybc">
+        <h2 class="- topic/title title topictitle2" id="ariaid-title50">WindTDF</h2>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title51" id="topic_op4_1dn_fcc">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title51">新功能</h3>
+            <div class="- topic/body body">
+                <ul class="- topic/ul ul" id="topic_op4_1dn_fcc__ul_i5t_kd4_ybc" data-ofbid="topic_op4_1dn_fcc__ul_i5t_kd4_ybc">
+                    <li class="- topic/li li"><code class="+ topic/ph pr-d/codeph ph codeph">connect</code> 新增参数
+                            <em class="+ topic/ph hi-d/i ph i">replay</em>，用于设置在交易结束后是否回放当天的所有数据。（<strong class="+ topic/ph hi-d/b ph b">3.00.1.1</strong>）</li>
+                </ul>
+            </div>
+        </article>
+    </article>
+    <article class="- topic/topic topic nested1" aria-labelledby="ariaid-title52" id="topic_vq2_sbn_fcc">
+        <h2 class="- topic/title title topictitle2" id="ariaid-title52">WebSocket</h2>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title53" id="topic_icl_tbn_fcc">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title53">功能改进</h3>
+            <div class="- topic/body body">
+                <ul class="- topic/ul ul" id="topic_icl_tbn_fcc__ul_m1y_3dn_fcc" data-ofbid="topic_icl_tbn_fcc__ul_m1y_3dn_fcc">
+                    <li class="- topic/li li">在打印日志中输出订阅标识（tag）。（<strong class="+ topic/ph hi-d/b ph b">3.00.1.2</strong>） </li>
+                </ul>
+            </div>
+        </article>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title54" id="topic_njd_jdn_fcc">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title54">故障修复</h3>
+            <div class="- topic/body body">
+                <ul class="- topic/ul ul" id="topic_njd_jdn_fcc__ul_tyz_jdn_fcc" data-ofbid="topic_njd_jdn_fcc__ul_tyz_jdn_fcc">
+                    <li class="- topic/li li">WebSocket 插件重连失败，导致 server 宕机。（<strong class="+ topic/ph hi-d/b ph b">3.00.1.8</strong>）</li>
+                    <li class="- topic/li li">当 <code class="+ topic/ph pr-d/codeph ph codeph">cancelSubJob</code> 取消任务的执行时间超过 5 秒 时，任务还在取消中，却返回了
+                            false。（<strong class="+ topic/ph hi-d/b ph b">3.00.1.2</strong>） </li>
+                </ul>
+            </div>
+        </article>
+    </article>
+</article></main></div>
+                        
+                        
+                        
+                        
+                        
+                        
+                    </div>
+                    
+                        <nav role="navigation" id="wh_topic_toc" aria-label="On this page" class="col-lg-2 d-none d-lg-block navbar d-print-none"> 
+                            <div id="wh_topic_toc_content">
+		                        
+	                            <div class=" wh_topic_toc "><div class="wh_topic_label">在本页上</div><ul><li class="topic-item"><a href="#topic_zk2_tcw_wcc" data-tocid="topic_zk2_tcw_wcc">amdQuote</a><ul><li class="topic-item"><a href="#topic_m41_vcw_wcc" data-tocid="topic_m41_vcw_wcc">新功能</a></li><li class="topic-item"><a href="#topic_gcr_z4s_ndc" data-tocid="topic_gcr_z4s_ndc">功能优化</a></li></ul></li><li class="topic-item"><a href="#topic_zzj_2hg_4dc" data-tocid="topic_zzj_2hg_4dc">Arrow</a><ul><li class="topic-item"><a href="#topic_upx_2hg_4dc" data-tocid="topic_upx_2hg_4dc">缺陷修复</a></li></ul></li><li class="topic-item"><a href="#topic_kq5_xzk_zbc" data-tocid="topic_kq5_xzk_zbc">Backtest</a><ul><li class="topic-item"><a href="#topic_efx_zbn_fcc" data-tocid="topic_efx_zbn_fcc">新功能</a></li><li class="topic-item"><a href="#topic_ob1_42g_hcc" data-tocid="topic_ob1_42g_hcc">功能优化</a></li><li class="topic-item"><a href="#topic_dpx_bcn_fcc" data-tocid="topic_dpx_bcn_fcc">故障修复</a></li></ul></li><li class="topic-item"><a href="#topic_l4g_ttk_gdc" data-tocid="topic_l4g_ttk_gdc">EFH</a><ul><li class="topic-item"><a href="#topic_m4g_ttk_gdc" data-tocid="topic_m4g_ttk_gdc">新功能</a></li></ul></li><li class="topic-item"><a href="#topic_lkd_ny4_rdc" data-tocid="topic_lkd_ny4_rdc">EncoderDecoder</a><ul><li class="topic-item"><a href="#topic_mkd_ny4_rdc" data-tocid="topic_mkd_ny4_rdc">功能优化</a></li></ul></li><li class="topic-item"><a href="#topic_kng_hnd_scc" data-tocid="topic_kng_hnd_scc">httpClient</a><ul><li class="topic-item"><a href="#topic_ayf_jnd_scc" data-tocid="topic_ayf_jnd_scc">功能优化</a></li></ul></li><li class="topic-item"><a href="#topic_i3x_v4d_xbc" data-tocid="topic_i3x_v4d_xbc">insight</a><ul><li class="topic-item"><a href="#topic_pc1_jcn_fcc" data-tocid="topic_pc1_jcn_fcc">故障修复</a></li></ul></li><li class="topic-item"><a href="#topic_zfw_lkg_4cc" data-tocid="topic_zfw_lkg_4cc">Kafka</a><ul><li class="topic-item"><a href="#topic_cxj_nkg_4cc" data-tocid="topic_cxj_nkg_4cc">新功能</a></li><li class="topic-item"><a href="#topic_w1l_4kg_4cc" data-tocid="topic_w1l_4kg_4cc">功能优化</a></li><li class="topic-item"><a href="#topic_umr_pkg_4cc" data-tocid="topic_umr_pkg_4cc">兼容性</a></li></ul></li><li class="topic-item"><a href="#topic_jm3_22d_scc" data-tocid="topic_jm3_22d_scc">Kdb+</a><ul><li class="topic-item"><a href="#topic_km3_22d_scc" data-tocid="topic_km3_22d_scc">新功能</a></li></ul></li><li class="topic-item"><a href="#topic_gzy_zmn_4dc" data-tocid="topic_gzy_zmn_4dc">lgbm</a></li><li class="topic-item"><a href="#topic_wtv_zy5_x1c" data-tocid="topic_wtv_zy5_x1c">LibTorch</a><ul><li class="topic-item"><a href="#topic_g5n_s1x_wcc" data-tocid="topic_g5n_s1x_wcc">新功能</a></li></ul></li><li class="topic-item"><a href="#topic_r5k_gd4_fcc" data-tocid="topic_r5k_gd4_fcc">MDL</a><ul><li class="topic-item"><a href="#topic_fsc_hd4_fcc" data-tocid="topic_fsc_hd4_fcc">新功能</a></li><li class="topic-item"><a href="#topic_rc2_tdl_scc" data-tocid="topic_rc2_tdl_scc">功能优化</a></li><li class="topic-item"><a href="#topic_bkx_pdl_scc" data-tocid="topic_bkx_pdl_scc">故障修复</a></li></ul></li><li class="topic-item"><a href="#topic_f1r_krw_wcc" data-tocid="topic_f1r_krw_wcc">MongoDB</a><ul><li class="topic-item"><a href="#topic_iqx_krw_wcc" data-tocid="topic_iqx_krw_wcc">故障修复</a></li></ul></li><li class="topic-item"><a href="#topic_osf_324_ybc" data-tocid="topic_osf_324_ybc">mqtt</a><ul><li class="topic-item"><a href="#topic_njd_xcn_fcc" data-tocid="topic_njd_xcn_fcc">新功能</a></li></ul></li><li class="topic-item"><a href="#topic_ow5_sjg_kcc" data-tocid="topic_ow5_sjg_kcc">NSQ</a><ul><li class="topic-item"><a href="#topic_mzg_tjg_kcc" data-tocid="topic_mzg_tjg_kcc">故障修复</a></li></ul></li><li class="topic-item"><a href="#topic_lgf_gg4_ybc" data-tocid="topic_lgf_gg4_ybc">ODBC</a><ul><li class="topic-item"><a href="#topic_ybf_zcn_fcc" data-tocid="topic_ybf_zcn_fcc">功能优化</a></li></ul></li><li class="topic-item"><a href="#topic_eqn_lhg_4dc" data-tocid="topic_eqn_lhg_4dc">OPC</a><ul><li class="topic-item"><a href="#topic_z25_lhg_4dc" data-tocid="topic_z25_lhg_4dc">功能优化</a></li><li class="topic-item"><a href="#topic_pjf_mhg_4dc" data-tocid="topic_pjf_mhg_4dc">缺陷修复</a></li></ul></li><li class="topic-item"><a href="#topic_owf_ln5_jdc" data-tocid="topic_owf_ln5_jdc">OPCUA</a><ul><li class="topic-item"><a href="#topic_pwf_ln5_jdc" data-tocid="topic_pwf_ln5_jdc">功能优化</a></li><li class="topic-item"><a href="#topic_rfh_4n5_jdc" data-tocid="topic_rfh_4n5_jdc">故障修复</a></li></ul></li><li class="topic-item"><a href="#topic_efj_phg_4dc" data-tocid="topic_efj_phg_4dc">SevenZip</a></li><li class="topic-item"><a href="#id_t31_qwf_4cc" data-tocid="id_t31_qwf_4cc">SSEQuotationFile</a><ul><li class="topic-item"><a href="#topic_sk1_qwf_4cc" data-tocid="topic_sk1_qwf_4cc">新功能</a></li><li class="topic-item"><a href="#topic_bg3_bhq_gdc" data-tocid="topic_bg3_bhq_gdc">功能优化</a></li></ul></li><li class="topic-item"><a href="#topic_g5t_kd4_ybc" data-tocid="topic_g5t_kd4_ybc">WindTDF</a><ul><li class="topic-item"><a href="#topic_op4_1dn_fcc" data-tocid="topic_op4_1dn_fcc">新功能</a></li></ul></li><li class="topic-item"><a href="#topic_vq2_sbn_fcc" data-tocid="topic_vq2_sbn_fcc">WebSocket</a><ul><li class="topic-item"><a href="#topic_icl_tbn_fcc" data-tocid="topic_icl_tbn_fcc">功能改进</a></li><li class="topic-item"><a href="#topic_njd_jdn_fcc" data-tocid="topic_njd_jdn_fcc">故障修复</a></li></ul></li></ul></div>
+	                        	
+                        	</div>
+                        </nav>
+                    
+                </div>
+            </div>
+            
+            
+            
+        </div> 
+        <footer class="navbar navbar-default wh_footer">
+  <div class=" footer-container mx-auto ">
+<title>Copyright</title><p><b> ©2025 浙江智臾科技有限公司 浙ICP备18048711号-3</b></p>
+  </div>
+</footer>
+        
+        <div id="go2top" class="d-print-none">
+            <span class="oxy-icon oxy-icon-up"></span>
+        </div>
+        
+        <div id="modal_img_large" class="modal">
+            <span class="close oxy-icon oxy-icon-remove"></span>
+            <div id="modal_img_container"></div>
+            <div id="caption"></div>
+        </div>
+        
+        
+        
+    </body>
+</html>

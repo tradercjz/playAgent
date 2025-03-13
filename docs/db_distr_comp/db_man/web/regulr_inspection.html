@@ -1,0 +1,276 @@
+<!DOCTYPE html><html xmlns="http://www.w3.org/1999/xhtml" xml:lang="zh" lang="zh" data-whc_version="26.0">
+    <head><link rel="shortcut icon" href="../../../favicon.ico"/><link rel="icon" href="../../../favicon.ico"/><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><meta name="description" content="巡检是确保系统的稳定性的重要环节，能够及时发现潜在隐患。为方便用户进行数据库巡检，DolphinDB 自 3.00.2.2 版本起实现了定时巡检功能，支持丰富的巡检指标，包括集群基础信息、集群运行状态和服务器运行状态等。同时提供了邮件告警功能，当发现异常时可以通过邮件及时通知用户。 DolphinDB 巡检操作基于 Web 页面进行，具备易操作、实时监控和便捷查看日志等优势。本文将详细介绍如何通过 ..."/><meta name="DC.rights.owner" content="(C) 版权 2025"/><meta name="copyright" content="(C) 版权 2025"/><meta name="generator" content="DITA-OT"/><meta name="DC.type" content="topic"/><meta name="DC.coverage" content=""/><meta name="DC.relation" content="../../../db_distr_comp/db_man/web/intro.html"/><meta name="prodname" content="DolphinDB"/><meta name="brand" content="DolphinDB"/><meta name="DC.creator" content="DolphinDB"/><meta name="DC.publisher" content="DDB N/A DDB 200"/><meta name="DC.format" content="HTML5"/><meta name="DC.identifier" content="regular_inspection"/><title>定时巡检</title><!--  Generated with Oxygen version 26.0, build number 2024012323.  --><meta name="wh-path2root" content="../../../"/><meta name="wh-toc-id" content="regular_inspection-d9713e1608"/><meta name="wh-source-relpath" content="db_distr_comp/db_man/web/regulr_inspection.dita"/><meta name="wh-out-relpath" content="db_distr_comp/db_man/web/regulr_inspection.html"/>
+
+    <link rel="stylesheet" type="text/css" href="../../../oxygen-webhelp/app/commons.css?buildId=2024012323"/>
+    <link rel="stylesheet" type="text/css" href="../../../oxygen-webhelp/app/topic.css?buildId=2024012323"/>
+
+    <script src="../../../oxygen-webhelp/app/options/properties.js?buildId=20250305183303"></script>
+    <script src="../../../oxygen-webhelp/app/localization/strings.js?buildId=2024012323"></script>
+    <script src="../../../oxygen-webhelp/app/search/index/keywords.js?buildId=20250305183303"></script>
+    <script defer="defer" src="../../../oxygen-webhelp/app/commons.js?buildId=2024012323"></script>
+    <script defer="defer" src="../../../oxygen-webhelp/app/topic.js?buildId=2024012323"></script>
+<link rel="stylesheet" type="text/css" href="../../../oxygen-webhelp/template/styles.css?buildId=2024012323"/><script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script><script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script></head>
+
+    <body id="regular_inspection" class="wh_topic_page frmBody">
+        <a href="#wh_topic_body" class="sr-only sr-only-focusable">
+            跳转到主要内容
+        </a>
+        
+        
+        
+        
+        <header class="navbar navbar-default wh_header">
+    <div class="container-fluid">
+        <div xmlns:whc="http://www.oxygenxml.com/webhelp/components" class="wh_header_flex_container navbar-nav navbar-expand-md navbar-dark">
+            <div class="wh_logo_and_publication_title_container">
+                <div class="wh_logo_and_publication_title">
+                    
+                    <a href="https://docs.dolphindb.cn/zh/index.html" class=" wh_logo d-none d-sm-block "><img src="../../../logo.png" alt="  DolphinDB 文档中心  "/></a>
+                    <div class=" wh_publication_title "><a href="../../../index.html"><span class="booktitle">  <span class="ph mainbooktitle">DolphinDB 文档中心</span>  </span></a></div>
+                    
+                </div>
+                
+                
+            </div>
+
+            <div class="wh_top_menu_and_indexterms_link collapse navbar-collapse" id="wh_top_menu_and_indexterms_link">
+                
+                
+                
+                
+            </div>
+        <div class=" wh_search_input navbar-form wh_topic_page_search search " role="form">
+            
+            
+            
+            <form id="searchForm" method="get" role="search" action="../../../search.html"><div><input type="search" placeholder="搜索 " class="wh_search_textfield" id="textToSearch" name="searchQuery" aria-label="搜索查询" required="required"/><button type="submit" class="wh_search_button" aria-label="搜索"><span class="search_input_text">搜索</span></button></div></form>
+            
+            <script src="/vendors/react/umd/react.production.min.js" defer="defer"></script>
+<script src="/vendors/react-dom/umd/react-dom.production.min.js" defer="defer"></script>
+<script src="/vendors/dayjs/dayjs.min.js" defer="defer"></script>
+<script src="/vendors/antd/dist/antd.min.js" defer="defer"></script>
+<script src="/vendors/@ant-design/icons/dist/index.umd.min.js" defer="defer"></script>
+<script src="/zh/index.js" type="module"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" defer="defer"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML" defer="defer"><!--
+
+
+--></script>
+<script defer="defer"><!--
+
+// 从主页重定向
+const currentUrl = window.location.href;
+
+// 判断当前URL是否包含index.html并且路径最后部分是index.html
+if (currentUrl.endsWith('index.html')) {
+    // 处理根目录下的index.html跳转
+    const baseUrl = currentUrl.split('/index.html')[0]; // 获取index.html之前的部分
+    const redirectUrl = `${baseUrl}/about/ddb_intro.html`; // 构建跳转路径
+    window.location.href = redirectUrl; // 执行跳转
+}
+
+--></script>
+            
+        </div></div>
+    </div>
+</header>
+        
+        
+         
+        
+        
+        
+        <div class="container-fluid" id="wh_topic_container">
+            <div class="row">
+
+                <nav class="wh_tools d-print-none navbar-expand-md" aria-label="Tools">
+                    
+                    <div data-tooltip-position="bottom" class=" wh_breadcrumb "><ol class="d-print-none"><li><span class="home"><a href="../../../index.html"><span>主页</span></a></span></li><li><div class="topicref" data-id="sectionddb_deployment"><div class="title"><a href="../../../deploy/deploy_intro.html"><span class="keyword label">部署</span></a><div class="wh-tooltip"><p class="shortdesc">如何在不同的场景中部署 DolphinDB</p></div></div></div></li><li><div class="topicref" data-id="chap1_sect_using_clients"><div class="title"><a href="../../../db_distr_comp/clients.html">操作手册</a></div></div></li><li><div class="topicref" data-id="intro"><div class="title"><a href="../../../db_distr_comp/db_man/web/intro.html"><span class="keyword label">Web 操作手册</span></a></div></div></li><li class="active"><div class="topicref" data-id="regular_inspection"><div class="title"><a href="../../../db_distr_comp/db_man/web/regulr_inspection.html">定时巡检</a></div></div></li></ol></div>
+                    
+                    
+                    
+                    <div class="wh_right_tools">
+                        <button class="wh_hide_highlight" aria-label="切换搜索突出显示" title="切换搜索突出显示"></button>
+                        <button class="webhelp_expand_collapse_sections" data-next-state="collapsed" aria-label="折叠截面" title="折叠截面"></button>
+                        
+                        
+                        
+                        
+                        <div class=" wh_print_link print d-none d-md-inline-block "><button onClick="window.print()" title="打印此页" aria-label="打印此页"></button></div>
+                        
+                        <button type="button" id="wh_toc_button" class="custom-toggler navbar-toggler collapsed wh_toggle_button navbar-light" aria-expanded="false" aria-label="Toggle publishing table of content" aria-controls="wh_publication_toc">
+                            <span class="navbar-toggler-icon"></span>
+                        </button>
+                    </div>
+                    
+                </nav>
+            </div>
+            
+            
+            
+            
+            <div class="wh_content_area">
+                <div class="row">
+                    
+                        <nav id="wh_publication_toc" class="col-lg-3 col-md-3 col-sm-12 d-md-block d-none d-print-none" aria-label="Table of Contents Container">
+                            <div id="wh_publication_toc_content">
+		                        
+                            	<div class=" wh_publication_toc " data-tooltip-position="right"><span class="expand-button-action-labels"><span id="button-expand-action" role="button" aria-label="Expand"></span><span id="button-collapse-action" role="button" aria-label="Collapse"></span><span id="button-pending-action" role="button" aria-label="Pending"></span></span><ul role="tree" aria-label="Table of Contents"><li role="treeitem"><div data-tocid="ddb_intro-d9713e87" class="topicref" data-id="ddb_intro" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../../about/ddb_intro.html" id="ddb_intro-d9713e87-link">关于DolphinDB</a></div></div></li><li role="treeitem"><div data-tocid="chap1_getstarted-d9713e136" class="topicref" data-id="chap1_getstarted" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../../getstarted/chap1_getstarted.html" id="chap1_getstarted-d9713e136-link">快速上手</a><div class="wh-tooltip"><p class="shortdesc">如何快速部署 DolphinDB、建库建表、写入和查询数据</p></div></div></div></li><li role="treeitem" aria-expanded="true"><div data-tocid="sectionddb_deployment-d9713e189" class="topicref" data-id="sectionddb_deployment" data-state="expanded"><span role="button" tabindex="0" aria-labelledby="button-collapse-action sectionddb_deployment-d9713e189-link" class="wh-expand-btn"></span><div class="title"><a href="../../../deploy/deploy_intro.html" id="sectionddb_deployment-d9713e189-link"><span class="keyword label">部署</span></a><div class="wh-tooltip"><p class="shortdesc">如何在不同的场景中部署 DolphinDB</p></div></div></div><ul role="group" class="navbar-nav nav-list"><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e242" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e242-link" class="wh-expand-btn"></span><div class="title"><a href="../../../tutorials/standalone_server.html" id="tocId-d9713e242-link">单节点部署与升级</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e335" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e335-link" class="wh-expand-btn"></span><div class="title"><a href="../../../tutorials/single_machine_cluster_deploy.html" id="tocId-d9713e335-link">集群部署与升级</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e520" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e520-link" class="wh-expand-btn"></span><div class="title"><a href="../../../tutorials/docker_single_deployment.html" id="tocId-d9713e520-link">云环境部署</a></div></div></li><li role="treeitem"><div data-tocid="linux-系统部署准备-d9713e797" class="topicref" data-id="linux-系统部署准备" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../../tutorials/prep_linux_for_deploy.html" id="linux-系统部署准备-d9713e797-link">Linux 系统部署准备</a></div></div></li><li role="treeitem" aria-expanded="true"><div data-tocid="chap1_sect_using_clients-d9713e843" class="topicref" data-id="chap1_sect_using_clients" data-state="expanded"><span role="button" tabindex="0" aria-labelledby="button-collapse-action chap1_sect_using_clients-d9713e843-link" class="wh-expand-btn"></span><div class="title"><a href="../../../db_distr_comp/clients.html" id="chap1_sect_using_clients-d9713e843-link">操作手册</a></div></div><ul role="group" class="navbar-nav nav-list"><li role="treeitem" aria-expanded="true"><div data-tocid="intro-d9713e916" class="topicref" data-id="intro" data-state="expanded"><span role="button" tabindex="0" aria-labelledby="button-collapse-action intro-d9713e916-link" class="wh-expand-btn"></span><div class="title"><a href="../../../db_distr_comp/db_man/web/intro.html" id="intro-d9713e916-link"><span class="keyword label">Web 操作手册</span></a></div></div><ul role="group" class="navbar-nav nav-list"><li role="treeitem"><div data-tocid="getting_start-d9713e990" class="topicref" data-id="getting_start" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../../db_distr_comp/db_man/web/GettingStart.html" id="getting_start-d9713e990-link">如何开始</a></div></div></li><li role="treeitem"><div data-tocid="cluster_overview-d9713e1036" class="topicref" data-id="cluster_overview" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../../db_distr_comp/db_man/web/cluster_overview.html" id="cluster_overview-d9713e1036-link"><span class="keyword">集群总览</span></a></div></div></li><li role="treeitem"><div data-tocid="cfg_man-d9713e1083" class="topicref" data-id="cfg_man" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../../db_distr_comp/db_man/web/cfg_man.html" id="cfg_man-d9713e1083-link">配置管理</a></div></div></li><li role="treeitem"><div data-tocid="module_introduction-d9713e1129" class="topicref" data-id="module_introduction" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../../db_distr_comp/db_man/web/Shell.html" id="module_introduction-d9713e1129-link">交互编程</a></div></div></li><li role="treeitem"><div data-tocid="querybuilder-d9713e1189" class="topicref" data-id="querybuilder" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../../db_distr_comp/db_man/web/querybuilder.html" id="querybuilder-d9713e1189-link"><span class="keyword">查询向导</span></a></div></div></li><li role="treeitem"><div data-tocid="dashboard-使用教程-d9713e1236" class="topicref" data-id="dashboard-使用教程" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../../tutorials/dashboard_tutorial.html" id="dashboard-使用教程-d9713e1236-link"><span class="keyword label">数据面板</span></a><div class="wh-tooltip"><p class="shortdesc">数据面板</p></div></div></div></li><li role="treeitem"><div data-tocid="stream_monitor-d9713e1352" class="topicref" data-id="stream_monitor" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../../db_distr_comp/db_man/web/stream_monitor.html" id="stream_monitor-d9713e1352-link"><span class="keyword label">流计算监控</span></a><div class="wh-tooltip"><p class="shortdesc">流计算监控</p></div></div></div></li><li role="treeitem"><div data-tocid="cep-d9713e1468" class="topicref" data-id="cep" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../../db_distr_comp/db_man/web/cep.html" id="cep-d9713e1468-link">CEP 流计算引擎状态</a></div></div></li><li role="treeitem"><div data-tocid="access_man-d9713e1514" class="topicref" data-id="access_man" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../../db_distr_comp/db_man/web/access_man.html" id="access_man-d9713e1514-link">权限管理</a></div></div></li><li role="treeitem"><div data-tocid="job_management-d9713e1560" class="topicref" data-id="job_management" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../../db_distr_comp/db_man/web/job_man.html" id="job_management-d9713e1560-link"><span class="keyword">作业管理</span></a></div></div></li><li role="treeitem" class="active"><div data-tocid="regular_inspection-d9713e1608" class="topicref" data-id="regular_inspection" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../../db_distr_comp/db_man/web/regulr_inspection.html" id="regular_inspection-d9713e1608-link">定时巡检</a></div></div></li><li role="treeitem"><div data-tocid="function_panel-d9713e1654" class="topicref" data-id="function_panel" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../../db_distr_comp/db_man/web/log.html" id="function_panel-d9713e1654-link"><span class="keyword">日志查看</span></a></div></div></li><li role="treeitem"><div data-tocid="function_panel-d9713e1701" class="topicref" data-id="function_panel" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../../db_distr_comp/db_man/web/feature_settings.html" id="function_panel-d9713e1701-link"><span class="keyword">功能设置</span></a></div></div></li><li role="treeitem"><div data-tocid="kafka_mqtt-d9713e1748" class="topicref" data-id="kafka_mqtt" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../../db_distr_comp/db_man/web/kafka_mqtt.html" id="kafka_mqtt-d9713e1748-link">数据采集平台</a></div></div></li></ul></li><li role="treeitem"><div data-tocid="vscode_client-d9713e1794" class="topicref" data-id="vscode_client" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../../db_distr_comp/vscode.html" id="vscode_client-d9713e1794-link"><span class="keyword label">VS Code 插件</span></a></div></div></li><li role="treeitem"><div data-tocid="gui_client-d9713e1868" class="topicref" data-id="gui_client" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../../db_distr_comp/gui.html" id="gui_client-d9713e1868-link"><span class="keyword label">GUI 客户端</span></a></div></div></li><li role="treeitem"><div data-tocid="notebook_client-d9713e1929" class="topicref" data-id="notebook_client" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../../db_distr_comp/jupyter.html" id="notebook_client-d9713e1929-link">Jupyter Notebook 客户端</a></div></div></li><li role="treeitem"><div data-tocid="terminal_client-d9713e1975" class="topicref" data-id="terminal_client" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../../db_distr_comp/terminal.html" id="terminal_client-d9713e1975-link"><span class="keyword">DolphinDB 终端</span></a></div></div></li></ul></li><li role="treeitem" aria-expanded="false"><div data-tocid="parameters_configuration-d9713e2022" class="topicref" data-id="parameters_configuration" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action parameters_configuration-d9713e2022-link" class="wh-expand-btn"></span><div class="title"><a href="../../../db_distr_comp/cfg/para_cfg.html" id="parameters_configuration-d9713e2022-link"><span class="keyword label">参数配置</span></a></div></div></li></ul></li><li role="treeitem" aria-expanded="false"><div data-tocid="new_chap_database_manage_new_chap_dbmanage_landing_page-d9713e2259" class="topicref" data-id="new_chap_database_manage_new_chap_dbmanage_landing_page" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action new_chap_database_manage_new_chap_dbmanage_landing_page-d9713e2259-link" class="wh-expand-btn"></span><div class="title"><a href="../../../db_distr_comp/cfg/db_intro.html" id="new_chap_database_manage_new_chap_dbmanage_landing_page-d9713e2259-link"><span class="keyword label">数据库</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 数据库的基本概念</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="chap7_tutorials_streaming-d9713e3760" class="topicref" data-id="chap7_tutorials_streaming" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action chap7_tutorials_streaming-d9713e3760-link" class="wh-expand-btn"></span><div class="title"><a href="../../../stream/str_intro.html" id="chap7_tutorials_streaming-d9713e3760-link"><span class="keyword label">流数据</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 流数据引擎及流数据计算的基本概念</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e7513" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e7513-link" class="wh-expand-btn"></span><div class="title"><a href="../../../db_distr_comp/db_oper/import_data.html" id="tocId-d9713e7513-link">数据迁移</a><div class="wh-tooltip"><p class="shortdesc">如何从不同数据源向 DolphinDB 迁移数据</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="chap7_tutorials_system_management-d9713e7940" class="topicref" data-id="chap7_tutorials_system_management" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action chap7_tutorials_system_management-d9713e7940-link" class="wh-expand-btn"></span><div class="title"><a href="../../../sys_man/om_intro.html" id="chap7_tutorials_system_management-d9713e7940-link"><span class="keyword label">系统运维</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 的系统运维功能及方法</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="troubleshooting-d9713e8780" class="topicref" data-id="troubleshooting" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action troubleshooting-d9713e8780-link" class="wh-expand-btn"></span><div class="title"><a href="../../../error_codes/troubleshooting.html" id="troubleshooting-d9713e8780-link">故障排查</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="about_language_resources-d9713e20911" class="topicref" data-id="about_language_resources" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action about_language_resources-d9713e20911-link" class="wh-expand-btn"></span><div class="title"><a href="../../../progr/progr_intro.html" id="about_language_resources-d9713e20911-link"><span class="keyword label">编程语言</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 编程基本概念与方法、SQL 在 DolphinDB 的应用</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="functions_references-d9713e30925" class="topicref" data-id="functions_references" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action functions_references-d9713e30925-link" class="wh-expand-btn"></span><div class="title"><a href="../../../funcs/funcs_intro.html" id="functions_references-d9713e30925-link"><span class="keyword label">函数参考</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 函数分类、语法、详解及示例</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="api_protocol-d9713e94064" class="topicref" data-id="api_protocol" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action api_protocol-d9713e94064-link" class="wh-expand-btn"></span><div class="title"><a href="../../../api/connapi_intro.html" id="api_protocol-d9713e94064-link"><span class="keyword label">连接器 &amp; API</span></a><div class="wh-tooltip"><p class="shortdesc">面向不同编程语言的 DolphinDB API 及连接器，相关协议和用法</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="chap6_plugin-d9713e94210" class="topicref" data-id="chap6_plugin" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action chap6_plugin-d9713e94210-link" class="wh-expand-btn"></span><div class="title"><a href="../../../plugins/plg_intro.html" id="chap6_plugin-d9713e94210-link"><span class="keyword label">插件</span></a><div class="wh-tooltip"><p class="shortdesc">多个应用场景的插件使用说明和插件开发指导</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="third_party-d9713e97904" class="topicref" data-id="third_party" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action third_party-d9713e97904-link" class="wh-expand-btn"></span><div class="title"><a href="../../../third_party.html" id="third_party-d9713e97904-link">第三方工具</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="about_tutorials-d9713e98227" class="topicref" data-id="about_tutorials" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action about_tutorials-d9713e98227-link" class="wh-expand-btn"></span><div class="title"><a href="../../../tutorials/about_tutorials.html" id="about_tutorials-d9713e98227-link"><span class="keyword label">教程</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 产品使用教程</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e105982" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e105982-link" class="wh-expand-btn"></span><div class="title"><a href="../../../rn/server/3_00_2.html" id="tocId-d9713e105982-link">版本说明</a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 版本发布历史</p></div></div></div></li></ul></div>
+		                        
+                            </div>
+                        </nav>
+                    
+                    
+                    <div class="col-lg-7 col-md-9 col-sm-12" id="wh_topic_body">
+                        <button id="wh_close_publication_toc_button" class="close-toc-button d-none" aria-label="Toggle publishing table of content" aria-controls="wh_publication_toc" aria-expanded="true">
+                            <span class="close-toc-icon-container">
+                                <span class="close-toc-icon"></span>     
+                            </span>
+                        </button>
+                        <button id="wh_close_topic_toc_button" class="close-toc-button d-none" aria-label="Toggle topic table of content" aria-controls="wh_topic_toc" aria-expanded="true">
+                            <span class="close-toc-icon-container">
+                                <span class="close-toc-icon"></span>     
+                            </span>
+                        </button>
+                        
+                        <div class=" wh_topic_content body "><main role="main"><article class="- topic/topic topic" role="article" aria-labelledby="ariaid-title1">
+    <h1 class="- topic/title title topictitle1" id="ariaid-title1">定时巡检</h1>
+    <div class="- topic/body body">
+        <p class="- topic/p p">巡检是确保系统的稳定性的重要环节，能够及时发现潜在隐患。为方便用户进行数据库巡检，DolphinDB 自 3.00.2.2
+            版本起实现了定时巡检功能，支持丰富的巡检指标，包括集群基础信息、集群运行状态和服务器运行状态等。同时提供了邮件告警功能，当发现异常时可以通过邮件及时通知用户。</p>
+        <p class="- topic/p p">DolphinDB 巡检操作基于 Web 页面进行，具备易操作、实时监控和便捷查看日志等优势。本文将详细介绍如何通过 Web 制定巡检计划、设置巡检指标以及查看巡检报告。</p>
+    </div>
+    <article class="- topic/topic topic nested1" aria-labelledby="ariaid-title2" id="topic_irg_syg_rdc">
+        <h2 class="- topic/title title topictitle2" id="ariaid-title2">初始化</h2>
+        <div class="- topic/body body">
+            <p class="- topic/p p">首次使用定时巡检功能时，必须由管理员 admin
+                在数据节点进行初始化，其他用户或节点无法执行该操作。点击左侧边栏的“定时巡检”，进入初始化页面，点击<strong class="+ topic/ph hi-d/b ph b">初始化</strong>按钮，等待系统完成初始化后，即可进入定时巡检主页。</p>
+            <p class="- topic/p p">通过定时巡检主页，可以新增巡检、设置邮件告警，搜索巡检计划等。通过该页面可以了解巡检任务的执行情况、启用或停止巡检计划、查看巡检结结果。</p>
+            <img class="- topic/image image" id="topic_irg_syg_rdc__image_z3y_zyg_rdc" src="../images/reguar_inspection/1-1.png"/>
+        </div>
+    </article>
+    <article class="- topic/topic topic nested1" aria-labelledby="ariaid-title3" id="topic_ejp_tyg_rdc">
+        <h2 class="- topic/title title topictitle2" id="ariaid-title3">新增巡检</h2>
+        <div class="- topic/body body">
+            <p class="- topic/p p">点击上图中<strong class="+ topic/ph hi-d/b ph b">新增巡检</strong>按钮，进入新增巡检计划页面，如下图。</p>
+            <img class="- topic/image image" id="topic_ejp_tyg_rdc__image_gdg_2zg_rdc" src="../images/reguar_inspection/2-1.png"/>
+            <p class="- topic/p p">如果需要邮件告警，可以在主页中设置发送邮件的邮箱。在设置邮箱之前，需在集群中所有数据节点和计算节点上安装 httpClient
+                    插件。安装完成后，点击主页上的<strong class="+ topic/ph hi-d/b ph b">邮件告警设置</strong>按钮，进入设置页面。然后，启用“是否启用”开关，填写发送人邮箱名称、账号、密码，以及邮箱的 SMTP
+                服务器地址和端口，最后保存设置。</p>
+            <p class="- topic/p p">点击主页中的<strong class="+ topic/ph hi-d/b ph b">新增巡检</strong>，进入新增巡检计划页面。通过该页面设置新的巡检计划。巡检计划中必须指定巡检名称、巡检周期、执行节点和巡检指标。用户可按需设置是否启用邮件告警的功能。</p>
+        </div>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title4" id="topic_zrg_fzg_rdc">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title4">添加指标</h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p">新的巡检指标必须通过“添加指标”页面进行添加。点击上图的<strong class="+ topic/ph hi-d/b ph b">管理指标</strong>按钮，进入“添加指标”页面，如下图：<img class="- topic/image image" id="topic_zrg_fzg_rdc__image_o1x_jzg_rdc" src="../images/reguar_inspection/2-2.png"/></p>
+                <p class="- topic/p p">该页面列举了所有支持的巡检指标，用户可以点击勾选框以新增指标，取消勾选以删除指标，点击保存按钮保存到指标列表。</p>
+                <p class="- topic/p p">新增指标成功后，将回到“新增巡检计划”页面。通过该页面的“指标列表”，也可以进一步编辑或删除指标，如下图：<img class="- topic/image image" id="topic_zrg_fzg_rdc__image_fj1_lzg_rdc" src="../images/reguar_inspection/2-3.png"/></p>
+            </div>
+        </article>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title5" id="topic_cvm_hzg_rdc">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title5">编辑指标</h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p">点击指标分组前的 <strong class="+ topic/ph hi-d/b ph b">+/-</strong> 按钮，可以展开或收展指标列表。点击<strong class="+ topic/ph hi-d/b ph b">编辑</strong>按钮可以查看指标脚本内容或编辑参数，如下图：<img class="- topic/image image" id="topic_cvm_hzg_rdc__image_egv_lzg_rdc" src="../images/reguar_inspection/2-4.png"/></p>
+                <p class="- topic/p p">在描述中展示了该指标的详情和参数说明。所有指标的参数都设置了默认值，可通过页面下方的参数配置修改参数值。</p>
+                <p class="- topic/p p">巡检计划保存后，如果需要启用巡检任务，则点击<strong class="+ topic/ph hi-d/b ph b">启用</strong>开关；巡检计划将出现在“正在执行的巡检计划”列标中。点击<strong class="+ topic/ph hi-d/b ph b">立即巡检</strong>按钮，巡检计划将出现在“待执行的巡检计划”列表中。</p>
+            </div>
+        </article>
+    </article>
+    <article class="- topic/topic topic nested1" aria-labelledby="ariaid-title6" id="topic_bdx_tyg_rdc">
+        <h2 class="- topic/title title topictitle2" id="ariaid-title6">巡检计划状态</h2>
+        <div class="- topic/body body">
+            <p class="- topic/p p">”巡检结果“列表中会展示正在执行和已经执行完成的巡检结果。通过该列表，可以查看巡检的基本信息，包括名称、表示、起始时间、结果等。也可以点击<strong class="+ topic/ph hi-d/b ph b">查看详细报告</strong>、<strong class="+ topic/ph hi-d/b ph b">查看日志</strong>进一步查看详细信息<strong class="+ topic/ph hi-d/b ph b">。</strong></p>
+        </div>
+    </article>
+    <article class="- topic/topic topic nested1" aria-labelledby="ariaid-title7" id="topic_q1y_tyg_rdc">
+        <h2 class="- topic/title title topictitle2" id="ariaid-title7">查看报告和日志</h2>
+        <div class="- topic/body body">
+            <p class="- topic/p p">巡检计划执行一段时间后，点击<strong class="+ topic/ph hi-d/b ph b">刷新</strong>按钮，查看巡检结果。若巡检计划已完成，可以点击查看详细报告：<img class="- topic/image image" id="topic_q1y_tyg_rdc__image_slm_nzg_rdc" src="../images/reguar_inspection/4-1.png"/></p>
+            <p class="- topic/p p">详细报告包含了该次巡检运行的指标的详细结果，其中，”巡检结果总览“下包含了所有失败的巡检指标。</p>
+            <img class="- topic/image image" id="topic_q1y_tyg_rdc__image_fg5_rzg_rdc" src="../images/reguar_inspection/4-2.png"/>
+        </div>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title8" id="topic_n2l_szg_rdc">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title8">查看详报告</h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p">在巡检结果总览列表下，点击右侧的<strong class="+ topic/ph hi-d/b ph b">查看详情</strong>按钮，跳转到该指标的结果详情：</p>
+                <img class="- topic/image image" id="topic_n2l_szg_rdc__image_mpn_tzg_rdc" src="../images/reguar_inspection/4-3.png"/>
+                <p class="- topic/p p">若需要下载巡检报告，可点击”巡检结果详细报告“页面的<strong class="+ topic/ph hi-d/b ph b">下载巡检报告</strong>按钮。</p>
+            </div>
+        </article>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title9" id="topic_stz_5zg_rdc">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title9">查看日志</h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p">在”巡检结果“列表中，点击巡检结果右侧的<strong class="+ topic/ph hi-d/b ph b">查看日志</strong>，可查对应巡检指标的完整日志。</p>
+                <img class="- topic/image image" id="topic_stz_5zg_rdc__image_mvr_wzg_rdc" src="../images/reguar_inspection/4-4.png"/>
+                <p class="- topic/p p">此外，如果启用了邮件告警，在巡检失败时，将向指定邮箱发送巡检结果概述邮件。</p>
+                <img class="- topic/image image" id="topic_stz_5zg_rdc__image_v3n_xzg_rdc" src="../images/reguar_inspection/4-5.png"/>
+            </div>
+        </article>
+    </article>
+    <article class="- topic/topic topic nested1" aria-labelledby="ariaid-title10" id="topic_qmy_tyg_rdc">
+        <h2 class="- topic/title title topictitle2" id="ariaid-title10">暂停和启用巡检</h2>
+        <div class="- topic/body body">
+            <p class="- topic/p p">返回主页，点击图中<strong class="+ topic/ph hi-d/b ph b">暂停</strong>按钮，可停止正在执行的巡检。该计划将立即进入待执行的巡检队列，如图：</p>
+            <img class="- topic/image image" id="topic_qmy_tyg_rdc__image_e3y_blh_rdc" src="../images/reguar_inspection/5-1.png"/>
+            <p class="- topic/p p">在“待执行的巡检计划”栏中，点击巡检计划列表后面的<strong class="+ topic/ph hi-d/b ph b">启用</strong>按钮，将启用该计划。同时该计划将立即进行”正在执行的巡检计划“列表中。</p>
+            <img class="- topic/image image" id="topic_qmy_tyg_rdc__image_vrk_dlh_rdc" src="../images/reguar_inspection/5-2.png"/>
+        </div>
+    </article>
+    <article class="- topic/topic topic nested1" aria-labelledby="ariaid-title11" id="topic_yty_tyg_rdc">
+        <h2 class="- topic/title title topictitle2" id="ariaid-title11">查看和编辑巡检</h2>
+        <div class="- topic/body body">
+            <p class="- topic/p p">在“待执行的巡检计划”栏中，点击<strong class="+ topic/ph hi-d/b ph b">查看详情</strong>，进入巡检计划查看页面。在该页面可以查看巡检计划的详细内容。也可以修改指标，操作步骤参考“<a class="- topic/xref xref" href="#topic_ejp_tyg_rdc">新增巡检</a>”小节，本节不再赘述。</p>
+        </div>
+    </article>
+    <article class="- topic/topic topic nested1" aria-labelledby="ariaid-title12" id="topic_jzy_tyg_rdc">
+        <h2 class="- topic/title title topictitle2" id="ariaid-title12">删除巡检计划或结果</h2>
+        <div class="- topic/body body">
+            <p class="- topic/p p">返回主页，在”待执行的巡检计划“栏中，点击巡检计划列表右侧的<strong class="+ topic/ph hi-d/b ph b">删除</strong>按钮，可以删除该巡检计划。在”巡检结果“栏中，点击巡检结果列表右侧的<strong class="+ topic/ph hi-d/b ph b">删除</strong>按钮，可以删除该巡检结果。</p>
+            <img class="- topic/image image" id="topic_jzy_tyg_rdc__image_gjl_llh_rdc" src="../images/reguar_inspection/7-1.png"/>
+        </div>
+    </article>
+</article></main></div>
+                        
+                        
+                        
+                        
+                        
+                        
+                    </div>
+                    
+                        <nav role="navigation" id="wh_topic_toc" aria-label="On this page" class="col-lg-2 d-none d-lg-block navbar d-print-none"> 
+                            <div id="wh_topic_toc_content">
+		                        
+	                            <div class=" wh_topic_toc "><div class="wh_topic_label">在本页上</div><ul><li class="topic-item"><a href="#topic_irg_syg_rdc" data-tocid="topic_irg_syg_rdc">初始化</a></li><li class="topic-item"><a href="#topic_ejp_tyg_rdc" data-tocid="topic_ejp_tyg_rdc">新增巡检</a><ul><li class="topic-item"><a href="#topic_zrg_fzg_rdc" data-tocid="topic_zrg_fzg_rdc">添加指标</a></li><li class="topic-item"><a href="#topic_cvm_hzg_rdc" data-tocid="topic_cvm_hzg_rdc">编辑指标</a></li></ul></li><li class="topic-item"><a href="#topic_bdx_tyg_rdc" data-tocid="topic_bdx_tyg_rdc">巡检计划状态</a></li><li class="topic-item"><a href="#topic_q1y_tyg_rdc" data-tocid="topic_q1y_tyg_rdc">查看报告和日志</a><ul><li class="topic-item"><a href="#topic_n2l_szg_rdc" data-tocid="topic_n2l_szg_rdc">查看详报告</a></li><li class="topic-item"><a href="#topic_stz_5zg_rdc" data-tocid="topic_stz_5zg_rdc">查看日志</a></li></ul></li><li class="topic-item"><a href="#topic_qmy_tyg_rdc" data-tocid="topic_qmy_tyg_rdc">暂停和启用巡检</a></li><li class="topic-item"><a href="#topic_yty_tyg_rdc" data-tocid="topic_yty_tyg_rdc">查看和编辑巡检</a></li><li class="topic-item"><a href="#topic_jzy_tyg_rdc" data-tocid="topic_jzy_tyg_rdc">删除巡检计划或结果</a></li></ul></div>
+	                        	
+                        	</div>
+                        </nav>
+                    
+                </div>
+            </div>
+            
+            
+            
+        </div> 
+        <footer class="navbar navbar-default wh_footer">
+  <div class=" footer-container mx-auto ">
+<title>Copyright</title><p><b> ©2025 浙江智臾科技有限公司 浙ICP备18048711号-3</b></p>
+  </div>
+</footer>
+        
+        <div id="go2top" class="d-print-none">
+            <span class="oxy-icon oxy-icon-up"></span>
+        </div>
+        
+        <div id="modal_img_large" class="modal">
+            <span class="close oxy-icon oxy-icon-remove"></span>
+            <div id="modal_img_container"></div>
+            <div id="caption"></div>
+        </div>
+        
+        
+        
+    </body>
+</html>

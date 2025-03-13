@@ -1,0 +1,398 @@
+<!DOCTYPE html><html xmlns="http://www.w3.org/1999/xhtml" xml:lang="zh" lang="zh" data-whc_version="26.0">
+    <head><link rel="shortcut icon" href="../favicon.ico"/><link rel="icon" href="../favicon.ico"/><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><meta name="description" content="在公司内部，各个业务部门往往会独立搭建数据存储和计算集群，以满足各自的需求。然而，这种独立性导致了资源的分散和利用效率的低下。为充分利用各个集群资源，DolphiDB 提供了多集群管理工具，实现了对所有集群的统一管理和监控。其支持跨集群的数据查询，使得各部门能够更好地共享和利用资源，从而提高整体数据处理效率和决策能力。 DolphinDB ..."/><meta name="DC.rights.owner" content="(C) 版权 2025"/><meta name="copyright" content="(C) 版权 2025"/><meta name="generator" content="DITA-OT"/><meta name="DC.type" content="topic"/><meta name="DC.coverage" content=""/><meta name="DC.relation" content="../sys_man/cluster_manage.html"/><meta name="prodname" content="DolphinDB"/><meta name="brand" content="DolphinDB"/><meta name="DC.creator" content="DolphinDB"/><meta name="DC.publisher" content="DDB N/A DDB 200"/><meta name="DC.format" content="HTML5"/><meta name="DC.identifier" content="multi_cluster_management"/><title>多集群管理</title><!--  Generated with Oxygen version 26.0, build number 2024012323.  --><meta name="wh-path2root" content="../"/><meta name="wh-toc-id" content="multi_cluster_management-d9713e8223"/><meta name="wh-source-relpath" content="sys_man/multi_cluster_management.dita"/><meta name="wh-out-relpath" content="sys_man/multi_cluster_management.html"/>
+
+    <link rel="stylesheet" type="text/css" href="../oxygen-webhelp/app/commons.css?buildId=2024012323"/>
+    <link rel="stylesheet" type="text/css" href="../oxygen-webhelp/app/topic.css?buildId=2024012323"/>
+
+    <script src="../oxygen-webhelp/app/options/properties.js?buildId=20250305183303"></script>
+    <script src="../oxygen-webhelp/app/localization/strings.js?buildId=2024012323"></script>
+    <script src="../oxygen-webhelp/app/search/index/keywords.js?buildId=20250305183303"></script>
+    <script defer="defer" src="../oxygen-webhelp/app/commons.js?buildId=2024012323"></script>
+    <script defer="defer" src="../oxygen-webhelp/app/topic.js?buildId=2024012323"></script>
+<link rel="stylesheet" type="text/css" href="../oxygen-webhelp/template/styles.css?buildId=2024012323"/><script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script><script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script></head>
+
+    <body id="multi_cluster_management" class="wh_topic_page frmBody">
+        <a href="#wh_topic_body" class="sr-only sr-only-focusable">
+            跳转到主要内容
+        </a>
+        
+        
+        
+        
+        <header class="navbar navbar-default wh_header">
+    <div class="container-fluid">
+        <div xmlns:whc="http://www.oxygenxml.com/webhelp/components" class="wh_header_flex_container navbar-nav navbar-expand-md navbar-dark">
+            <div class="wh_logo_and_publication_title_container">
+                <div class="wh_logo_and_publication_title">
+                    
+                    <a href="https://docs.dolphindb.cn/zh/index.html" class=" wh_logo d-none d-sm-block "><img src="../logo.png" alt="  DolphinDB 文档中心  "/></a>
+                    <div class=" wh_publication_title "><a href="../index.html"><span class="booktitle">  <span class="ph mainbooktitle">DolphinDB 文档中心</span>  </span></a></div>
+                    
+                </div>
+                
+                
+            </div>
+
+            <div class="wh_top_menu_and_indexterms_link collapse navbar-collapse" id="wh_top_menu_and_indexterms_link">
+                
+                
+                
+                
+            </div>
+        <div class=" wh_search_input navbar-form wh_topic_page_search search " role="form">
+            
+            
+            
+            <form id="searchForm" method="get" role="search" action="../search.html"><div><input type="search" placeholder="搜索 " class="wh_search_textfield" id="textToSearch" name="searchQuery" aria-label="搜索查询" required="required"/><button type="submit" class="wh_search_button" aria-label="搜索"><span class="search_input_text">搜索</span></button></div></form>
+            
+            <script src="/vendors/react/umd/react.production.min.js" defer="defer"></script>
+<script src="/vendors/react-dom/umd/react-dom.production.min.js" defer="defer"></script>
+<script src="/vendors/dayjs/dayjs.min.js" defer="defer"></script>
+<script src="/vendors/antd/dist/antd.min.js" defer="defer"></script>
+<script src="/vendors/@ant-design/icons/dist/index.umd.min.js" defer="defer"></script>
+<script src="/zh/index.js" type="module"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" defer="defer"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML" defer="defer"><!--
+
+
+--></script>
+<script defer="defer"><!--
+
+// 从主页重定向
+const currentUrl = window.location.href;
+
+// 判断当前URL是否包含index.html并且路径最后部分是index.html
+if (currentUrl.endsWith('index.html')) {
+    // 处理根目录下的index.html跳转
+    const baseUrl = currentUrl.split('/index.html')[0]; // 获取index.html之前的部分
+    const redirectUrl = `${baseUrl}/about/ddb_intro.html`; // 构建跳转路径
+    window.location.href = redirectUrl; // 执行跳转
+}
+
+--></script>
+            
+        </div></div>
+    </div>
+</header>
+        
+        
+         
+        
+        
+        
+        <div class="container-fluid" id="wh_topic_container">
+            <div class="row">
+
+                <nav class="wh_tools d-print-none navbar-expand-md" aria-label="Tools">
+                    
+                    <div data-tooltip-position="bottom" class=" wh_breadcrumb "><ol class="d-print-none"><li><span class="home"><a href="../index.html"><span>主页</span></a></span></li><li><div class="topicref" data-id="chap7_tutorials_system_management"><div class="title"><a href="../sys_man/om_intro.html"><span class="keyword label">系统运维</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 的系统运维功能及方法</p></div></div></div></li><li><div class="topicref" data-id="cluster_manage"><div class="title"><a href="../sys_man/cluster_manage.html">集群管理</a></div></div></li><li class="active"><div class="topicref" data-id="multi_cluster_management"><div class="title"><a href="../sys_man/multi_cluster_management.html">多集群管理</a></div></div></li></ol></div>
+                    
+                    
+                    
+                    <div class="wh_right_tools">
+                        <button class="wh_hide_highlight" aria-label="切换搜索突出显示" title="切换搜索突出显示"></button>
+                        <button class="webhelp_expand_collapse_sections" data-next-state="collapsed" aria-label="折叠截面" title="折叠截面"></button>
+                        
+                        
+                        
+                        
+                        <div class=" wh_print_link print d-none d-md-inline-block "><button onClick="window.print()" title="打印此页" aria-label="打印此页"></button></div>
+                        
+                        <button type="button" id="wh_toc_button" class="custom-toggler navbar-toggler collapsed wh_toggle_button navbar-light" aria-expanded="false" aria-label="Toggle publishing table of content" aria-controls="wh_publication_toc">
+                            <span class="navbar-toggler-icon"></span>
+                        </button>
+                    </div>
+                    
+                </nav>
+            </div>
+            
+            
+            
+            
+            <div class="wh_content_area">
+                <div class="row">
+                    
+                        <nav id="wh_publication_toc" class="col-lg-3 col-md-3 col-sm-12 d-md-block d-none d-print-none" aria-label="Table of Contents Container">
+                            <div id="wh_publication_toc_content">
+		                        
+                            	<div class=" wh_publication_toc " data-tooltip-position="right"><span class="expand-button-action-labels"><span id="button-expand-action" role="button" aria-label="Expand"></span><span id="button-collapse-action" role="button" aria-label="Collapse"></span><span id="button-pending-action" role="button" aria-label="Pending"></span></span><ul role="tree" aria-label="Table of Contents"><li role="treeitem"><div data-tocid="ddb_intro-d9713e87" class="topicref" data-id="ddb_intro" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../about/ddb_intro.html" id="ddb_intro-d9713e87-link">关于DolphinDB</a></div></div></li><li role="treeitem"><div data-tocid="chap1_getstarted-d9713e136" class="topicref" data-id="chap1_getstarted" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../getstarted/chap1_getstarted.html" id="chap1_getstarted-d9713e136-link">快速上手</a><div class="wh-tooltip"><p class="shortdesc">如何快速部署 DolphinDB、建库建表、写入和查询数据</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="sectionddb_deployment-d9713e189" class="topicref" data-id="sectionddb_deployment" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action sectionddb_deployment-d9713e189-link" class="wh-expand-btn"></span><div class="title"><a href="../deploy/deploy_intro.html" id="sectionddb_deployment-d9713e189-link"><span class="keyword label">部署</span></a><div class="wh-tooltip"><p class="shortdesc">如何在不同的场景中部署 DolphinDB</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="new_chap_database_manage_new_chap_dbmanage_landing_page-d9713e2259" class="topicref" data-id="new_chap_database_manage_new_chap_dbmanage_landing_page" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action new_chap_database_manage_new_chap_dbmanage_landing_page-d9713e2259-link" class="wh-expand-btn"></span><div class="title"><a href="../db_distr_comp/cfg/db_intro.html" id="new_chap_database_manage_new_chap_dbmanage_landing_page-d9713e2259-link"><span class="keyword label">数据库</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 数据库的基本概念</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="chap7_tutorials_streaming-d9713e3760" class="topicref" data-id="chap7_tutorials_streaming" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action chap7_tutorials_streaming-d9713e3760-link" class="wh-expand-btn"></span><div class="title"><a href="../stream/str_intro.html" id="chap7_tutorials_streaming-d9713e3760-link"><span class="keyword label">流数据</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 流数据引擎及流数据计算的基本概念</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e7513" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e7513-link" class="wh-expand-btn"></span><div class="title"><a href="../db_distr_comp/db_oper/import_data.html" id="tocId-d9713e7513-link">数据迁移</a><div class="wh-tooltip"><p class="shortdesc">如何从不同数据源向 DolphinDB 迁移数据</p></div></div></div></li><li role="treeitem" aria-expanded="true"><div data-tocid="chap7_tutorials_system_management-d9713e7940" class="topicref" data-id="chap7_tutorials_system_management" data-state="expanded"><span role="button" tabindex="0" aria-labelledby="button-collapse-action chap7_tutorials_system_management-d9713e7940-link" class="wh-expand-btn"></span><div class="title"><a href="../sys_man/om_intro.html" id="chap7_tutorials_system_management-d9713e7940-link"><span class="keyword label">系统运维</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 的系统运维功能及方法</p></div></div></div><ul role="group" class="navbar-nav nav-list"><li role="treeitem" aria-expanded="true"><div data-tocid="cluster_manage-d9713e7993" class="topicref" data-id="cluster_manage" data-state="expanded"><span role="button" tabindex="0" aria-labelledby="button-collapse-action cluster_manage-d9713e7993-link" class="wh-expand-btn"></span><div class="title"><a href="../sys_man/cluster_manage.html" id="cluster_manage-d9713e7993-link">集群管理</a></div></div><ul role="group" class="navbar-nav nav-list"><li role="treeitem"><div data-tocid="集群扩容-d9713e8039" class="topicref" data-id="集群扩容" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/scale_out_cluster.html" id="集群扩容-d9713e8039-link">集群扩容</a></div></div></li><li role="treeitem"><div data-tocid="使用计算节点-d9713e8085" class="topicref" data-id="使用计算节点" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/Compute_Node.html" id="使用计算节点-d9713e8085-link">使用计算节点</a></div></div></li><li role="treeitem"><div data-tocid="高可用集群的灰度升级-d9713e8131" class="topicref" data-id="高可用集群的灰度升级" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/gray_scale_upgrade_ha.html" id="高可用集群的灰度升级-d9713e8131-link">高可用集群的灰度升级</a></div></div></li><li role="treeitem"><div data-tocid="使用-haproxy-实现负载均衡-d9713e8177" class="topicref" data-id="使用-haproxy-实现负载均衡" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/haProxy_best_practices.html" id="使用-haproxy-实现负载均衡-d9713e8177-link">使用 HAProxy 实现负载均衡</a></div></div></li><li role="treeitem" class="active"><div data-tocid="multi_cluster_management-d9713e8223" class="topicref" data-id="multi_cluster_management" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../sys_man/multi_cluster_management.html" id="multi_cluster_management-d9713e8223-link">多集群管理</a></div></div></li></ul></li><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e8269" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e8269-link" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/thread_intro.html" id="tocId-d9713e8269-link">任务管理</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="e6_97_a0_e6_a0_87_e9_a2_9810-d9713e8454" class="topicref" data-id="e6_97_a0_e6_a0_87_e9_a2_9810" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action e6_97_a0_e6_a0_87_e9_a2_9810-d9713e8454-link" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/e6_97_a0_e6_a0_87_e9_a2_9810.html" id="e6_97_a0_e6_a0_87_e9_a2_9810-d9713e8454-link">登录管理</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="性能监控-d9713e8546" class="topicref" data-id="性能监控" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action 性能监控-d9713e8546-link" class="wh-expand-btn"></span><div class="title"><a href="../sys_man/perf_man.html" id="性能监控-d9713e8546-link"><span class="keyword label">运维监控</span></a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e8639" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e8639-link" class="wh-expand-btn"></span><div class="title"><a href="../sys_man/bak_resto.html" id="tocId-d9713e8639-link">安全与容灾</a></div></div></li></ul></li><li role="treeitem" aria-expanded="false"><div data-tocid="troubleshooting-d9713e8780" class="topicref" data-id="troubleshooting" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action troubleshooting-d9713e8780-link" class="wh-expand-btn"></span><div class="title"><a href="../error_codes/troubleshooting.html" id="troubleshooting-d9713e8780-link">故障排查</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="about_language_resources-d9713e20911" class="topicref" data-id="about_language_resources" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action about_language_resources-d9713e20911-link" class="wh-expand-btn"></span><div class="title"><a href="../progr/progr_intro.html" id="about_language_resources-d9713e20911-link"><span class="keyword label">编程语言</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 编程基本概念与方法、SQL 在 DolphinDB 的应用</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="functions_references-d9713e30925" class="topicref" data-id="functions_references" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action functions_references-d9713e30925-link" class="wh-expand-btn"></span><div class="title"><a href="../funcs/funcs_intro.html" id="functions_references-d9713e30925-link"><span class="keyword label">函数参考</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 函数分类、语法、详解及示例</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="api_protocol-d9713e94064" class="topicref" data-id="api_protocol" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action api_protocol-d9713e94064-link" class="wh-expand-btn"></span><div class="title"><a href="../api/connapi_intro.html" id="api_protocol-d9713e94064-link"><span class="keyword label">连接器 &amp; API</span></a><div class="wh-tooltip"><p class="shortdesc">面向不同编程语言的 DolphinDB API 及连接器，相关协议和用法</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="chap6_plugin-d9713e94210" class="topicref" data-id="chap6_plugin" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action chap6_plugin-d9713e94210-link" class="wh-expand-btn"></span><div class="title"><a href="../plugins/plg_intro.html" id="chap6_plugin-d9713e94210-link"><span class="keyword label">插件</span></a><div class="wh-tooltip"><p class="shortdesc">多个应用场景的插件使用说明和插件开发指导</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="third_party-d9713e97904" class="topicref" data-id="third_party" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action third_party-d9713e97904-link" class="wh-expand-btn"></span><div class="title"><a href="../third_party.html" id="third_party-d9713e97904-link">第三方工具</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="about_tutorials-d9713e98227" class="topicref" data-id="about_tutorials" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action about_tutorials-d9713e98227-link" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/about_tutorials.html" id="about_tutorials-d9713e98227-link"><span class="keyword label">教程</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 产品使用教程</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e105982" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e105982-link" class="wh-expand-btn"></span><div class="title"><a href="../rn/server/3_00_2.html" id="tocId-d9713e105982-link">版本说明</a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 版本发布历史</p></div></div></div></li></ul></div>
+		                        
+                            </div>
+                        </nav>
+                    
+                    
+                    <div class="col-lg-7 col-md-9 col-sm-12" id="wh_topic_body">
+                        <button id="wh_close_publication_toc_button" class="close-toc-button d-none" aria-label="Toggle publishing table of content" aria-controls="wh_publication_toc" aria-expanded="true">
+                            <span class="close-toc-icon-container">
+                                <span class="close-toc-icon"></span>     
+                            </span>
+                        </button>
+                        <button id="wh_close_topic_toc_button" class="close-toc-button d-none" aria-label="Toggle topic table of content" aria-controls="wh_topic_toc" aria-expanded="true">
+                            <span class="close-toc-icon-container">
+                                <span class="close-toc-icon"></span>     
+                            </span>
+                        </button>
+                        
+                        <div class=" wh_topic_content body "><main role="main"><article class="- topic/topic topic" role="article" aria-labelledby="ariaid-title1">
+    <h1 class="- topic/title title topictitle1" id="ariaid-title1">多集群管理</h1>
+    <div class="- topic/body body">
+        <p class="- topic/p p">在公司内部，各个业务部门往往会独立搭建数据存储和计算集群，以满足各自的需求。然而，这种独立性导致了资源的分散和利用效率的低下。为充分利用各个集群资源，DolphiDB
+            提供了多集群管理工具，实现了对所有集群的统一管理和监控。其支持跨集群的数据查询，使得各部门能够更好地共享和利用资源，从而提高整体数据处理效率和决策能力。</p>
+    </div>
+    <article class="- topic/topic topic nested1" aria-labelledby="ariaid-title2" id="topic_dpr_rkl_cdc">
+        <h2 class="- topic/title title topictitle2" id="ariaid-title2">1 架构设计</h2>
+        <div class="- topic/body body">
+            <p class="- topic/p p">DolphinDB 多集群管理采用中心化的架构，通过一个中心节点或集群作为多集群的管理者（MoM，Master of
+                Master）来统一管理和维护多个成员集群。其中，MoM 只能是非高可用集群，而成员集群可以是高可用或非高可用集群。架构图如下：</p>
+            <figure class="- topic/fig fig fignone" id="topic_dpr_rkl_cdc__fig_qh1_tkl_cdc" data-ofbid="topic_dpr_rkl_cdc__fig_qh1_tkl_cdc">
+                <img class="- topic/image image" id="topic_dpr_rkl_cdc__image_d3d_cll_cdc" src="images/multi_cluster_arch.png"/>
+            </figure>
+            <p class="- topic/p p">在 DolphinDB 多集群架构中，MoM 负责维护多个集群的拓扑结构、数据库和表等信息。成员集群的 Master 节点（高可用时为 Leader，非高可用时为
+                Controller）和 MoM 节点定时向 MoM 汇报心跳信息，这些信息包含集群的状态和其他相关信息。当 MoM 收到来自成员集群的 Master
+                节点和自身的心跳信息时，将心跳信息作为参数调用预设的回调函数。该回调函数负责将心跳信息写入分布式分区表，以存储各个集群的监控信息。</p>
+        </div>
+    </article>
+    <article class="- topic/topic topic nested1" aria-labelledby="ariaid-title3" id="topic_txt_dll_cdc">
+        <h2 class="- topic/title title topictitle2" id="ariaid-title3">2 基本功能</h2>
+        <div class="- topic/body body">
+            <p class="- topic/p p">基于以上架构，DolphinDB 实现了以下功能：对多个集群的状态进行监控、在不同的集群间进行数据访问操作，同时提供对数据访问的权限控制。</p>
+        </div>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title4" id="topic_d5x_hll_cdc">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title4">2.1 集群管理</h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p">通过多集群管理工具（近期发布）进行集群管理，包括对集群状态进行监控、查看集群详细信息、对集群中的数据库、表进行管理等。</p>
+                <ul class="- topic/ul ul" id="topic_d5x_hll_cdc__ul_z1y_3ll_cdc" data-ofbid="topic_d5x_hll_cdc__ul_z1y_3ll_cdc">
+                    <li class="- topic/li li">
+                        <p class="- topic/p p">监控状态</p>
+                    </li>
+                </ul>
+                <p class="- topic/p p">通过该页面实时查看集群的详细状态，包括使用负载、启用节点数、CPU 使用率、磁盘容量及剩余容量、节点写入读取速率等。监控页面如下图：</p>
+                <figure class="- topic/fig fig fignone" id="topic_d5x_hll_cdc__fig_fv3_vll_cdc" data-ofbid="topic_d5x_hll_cdc__fig_fv3_vll_cdc">
+                    <img class="- topic/image image" id="topic_d5x_hll_cdc__image_mtg_wll_cdc" src="images/multi_cluster_monitoring.png"/>
+                </figure>
+                <ul class="- topic/ul ul" id="topic_d5x_hll_cdc__ul_vjd_yll_cdc" data-ofbid="topic_d5x_hll_cdc__ul_vjd_yll_cdc">
+                    <li class="- topic/li li">
+                        <p class="- topic/p p">查看集群信息</p>
+                    </li>
+                </ul>
+                <p class="- topic/p p">在集群信息页面，选择特定的集群，可以查看该集群详细的状态监控、节点及作业信息。也可以指定要查看的时间范围和刷新的频率：</p>
+                <figure class="- topic/fig fig fignone" id="topic_d5x_hll_cdc__fig_qwt_zll_cdc" data-ofbid="topic_d5x_hll_cdc__fig_qwt_zll_cdc">
+                    <img class="- topic/image image" id="topic_d5x_hll_cdc__image_g1k_1ml_cdc" src="images/multi_cluster_info.png"/>
+                </figure>
+                <p class="- topic/p p">点击”节点总览”，查看该集群下的节点信息：</p>
+                <figure class="- topic/fig fig fignone" id="topic_d5x_hll_cdc__fig_yvb_dml_cdc" data-ofbid="topic_d5x_hll_cdc__fig_yvb_dml_cdc">
+                    <img class="- topic/image image" id="topic_d5x_hll_cdc__image_apt_dml_cdc" src="images/multi_cluster_nodes.png"/>
+                </figure>
+                <p class="- topic/p p">点击”作业管理”，查看该集群下的作业状态：</p>
+                <figure class="- topic/fig fig fignone" id="topic_d5x_hll_cdc__fig_vxf_gml_cdc" data-ofbid="topic_d5x_hll_cdc__fig_vxf_gml_cdc">
+                    <img class="- topic/image image" id="topic_d5x_hll_cdc__image_j2x_gml_cdc" src="images/multi_cluster_jobs.png"/>
+                </figure>
+                <ul class="- topic/ul ul" id="topic_d5x_hll_cdc__ul_ikk_hml_cdc" data-ofbid="topic_d5x_hll_cdc__ul_ikk_hml_cdc">
+                    <li class="- topic/li li">
+                        <p class="- topic/p p">数据管理</p>
+                    </li>
+                </ul>
+                <p class="- topic/p p">通过数据管理也能，可以查看所有集群拥有的 Catalog, Schema 以及数据库表。通过点击具体对象查看它们的详细信息：</p>
+                <figure class="- topic/fig fig fignone" id="topic_d5x_hll_cdc__fig_osx_3ml_cdc" data-ofbid="topic_d5x_hll_cdc__fig_osx_3ml_cdc">
+                    <img class="- topic/image image" id="topic_d5x_hll_cdc__image_ghp_jml_cdc" src="images/multi_cluster_data.png"/>
+                </figure>
+            </div>
+        </article>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title5" id="topic_g1j_kml_cdc">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title5">2.2 跨集群数据访问</h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p">DolphinDB 在其 catalog 机制的基础上，引入”集群标识符“的概念，从而实现了多集群管理模式下的跨集群数据访问功能。用户必须在集群中使用
+                    catalog 来定义数据库和数据表。否则，将无法进行跨集群的数据访问，只能监控集群的状态。</p>
+                <p class="- topic/p p">使用 catalog 来定义数据库和数据表的语法如下：</p>
+                <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_g1j_kml_cdc__codeblock_asb_mml_cdc" data-ofbid="topic_g1j_kml_cdc__codeblock_asb_mml_cdc"><code>&lt;catalog&gt;.&lt;schema&gt;.&lt;table&gt;[@&lt;cluster_identifier&gt;]</code></pre>
+                <p class="- topic/p p">其中，@ 之前的内容表示数据目录的存储结构，而 @ 之后的内容则是集群标识符，用于指示当前目录下的集群名称。在进行跨集群访问时，需要通过
+                    cluster_identifier 指定要访问的集群。例如，在集群 cluster1 中存在表 trading.stock.quote。如果想在集群
+                    cluster2 中查询 cluster1 中的这张表，可以使用以下语句：</p>
+                <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_g1j_kml_cdc__codeblock_nxg_nml_cdc" data-ofbid="topic_g1j_kml_cdc__codeblock_nxg_nml_cdc"><code>select * from trading.stock.quote@cluster1</code></pre>
+                <p class="- topic/p p">注意：</p>
+                <ul class="- topic/ul ul" id="topic_g1j_kml_cdc__ul_mdh_lml_cdc" data-ofbid="topic_g1j_kml_cdc__ul_mdh_lml_cdc">
+                    <li class="- topic/li li">
+                        <p class="- topic/p p">目前仅支持对跨集群库表进行查询，不支持写入、更新等修改操作，也不支持表连接。</p>
+                    </li>
+                    <li class="- topic/li li">
+                        <p class="- topic/p p">不支持在一个查询语句中同时访问来自多个不同集群的数据。</p>
+                    </li>
+                </ul>
+                <p class="- topic/p p">在进行跨集群数据访问时，成员集群需要先通过 MoM 获取其他集群的信息并进行身份验证，验证成功后便可以访问其他集群的数据。下一节将展开讨论访问权限管理。</p>
+            </div>
+        </article>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title6" id="topic_psr_nml_cdc">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title6">2.3 访问权限管理</h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p">多集群管理中的权限管理与用户所在集群的权限管理相互独立，互不影响。在多集群管理中，所有跨集群的权限设置必须在 MoM 节点上执行，相关权限信息也会保存在 MoM
+                    节点上。在未授权之前，成员集群的用户仅能访问本集群的库表。只有在 MoM 节点授予其对某个集群的访问权限后，才能访问该集群的库表。在 MoM
+                    上进行跨集群权限管理时：</p>
+                <ul class="- topic/ul ul" id="topic_psr_nml_cdc__ul_m5n_4ml_cdc" data-ofbid="topic_psr_nml_cdc__ul_m5n_4ml_cdc">
+                    <li class="- topic/li li">
+                        <p class="- topic/p p">需要在用户（user）后面需要加上 @&lt;cluster_identifier&gt;，以指示该用户属于哪个集群。</p>
+                    </li>
+                    <li class="- topic/li li">
+                        <p class="- topic/p p">在应用对象/约束规则（objs）后面也需要加上 @&lt;cluster_identifier&gt;，以指示进行权限管理的对象属于哪个集群。</p>
+                    </li>
+                </ul>
+                <p class="- topic/p p">例如：如果集群 cluster2 上的用户 user1 想要读取集群 cluster1 上的表 trading.stock.quote，则需要在 MoM
+                    上执行以下脚本以授予相应权限：</p>
+                <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_psr_nml_cdc__codeblock_mhb_pml_cdc" data-ofbid="topic_psr_nml_cdc__codeblock_mhb_pml_cdc"><code>grant("user1@cluster2", TABLE_READ, "trading.stock.quote@cluster1")</code></pre>
+                <p class="- topic/p p">需要注意，目前仅支持设置以下权限类型：TABLE_READ<em class="+ topic/ph hi-d/i ph i">, </em>SCHEMA_READ, CATALOG_READ。</p>
+            </div>
+        </article>
+    </article>
+    <article class="- topic/topic topic nested1" aria-labelledby="ariaid-title7" id="topic_xd4_pml_cdc">
+        <h2 class="- topic/title title topictitle2" id="ariaid-title7">3 多集群管理配置</h2>
+        <div class="- topic/body body">
+            <p class="- topic/p p">要使用多集群管理功能，需要在 MoM 和成员集群的 Master 中进行相关配置：</p>
+            <ul class="- topic/ul ul" id="topic_xd4_pml_cdc__ul_jnw_zys_cdc" data-ofbid="topic_xd4_pml_cdc__ul_jnw_zys_cdc">
+                <li class="- topic/li li">
+                    <p class="- topic/p p">在 MoM 集群上：</p>
+                    <ul class="- topic/ul ul" id="topic_xd4_pml_cdc__ul_knw_zys_cdc" data-ofbid="topic_xd4_pml_cdc__ul_knw_zys_cdc">
+                        <li class="- topic/li li">
+                            <p class="- topic/p p">配置当前集群是 MoM 集群，配置项 <em class="+ topic/ph hi-d/i ph i">isMasterOfMaster</em>。</p>
+                        </li>
+                        <li class="- topic/li li">
+                            <p class="- topic/p p">MoM 集群的名称，配置项 <em class="+ topic/ph hi-d/i ph i">clusterName</em>。</p>
+                        </li>
+                        <li class="- topic/li li">
+                            <p class="- topic/p p">回调函数的函数视图名称，配置项 <em class="+ topic/ph hi-d/i ph i">momHeartbeatHandler</em>。</p>
+                        </li>
+                        <li class="- topic/li li">
+                            <p class="- topic/p p">要通过多集群管理工具监控各集群的状态，还需要完成以下配置：</p>
+                            <ul class="- topic/ul ul" id="topic_xd4_pml_cdc__ul_lnw_zys_cdc" data-ofbid="topic_xd4_pml_cdc__ul_lnw_zys_cdc">
+                                <li class="- topic/li li">
+                                    <p class="- topic/p p"><em class="+ topic/ph hi-d/i ph i">momHeartbeatDb</em>：配置存放收集到的集群信息的数据库地址，格式为 dfs://xxx。</p>
+                                </li>
+                                <li class="- topic/li li">
+                                    <p class="- topic/p p"><em class="+ topic/ph hi-d/i ph i">momHeartbeatTable</em>：配置存放收集到的集群信息的的数据表名。</p>
+                                </li>
+                                <li class="- topic/li li">
+                                    <p class="- topic/p p"><em class="+ topic/ph hi-d/i ph i">momDatanode</em>：配置存放数据库表的数据节点名称。</p>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+                </li>
+                <li class="- topic/li li">
+                    <p class="- topic/p p">在成员集群 Master 上：</p>
+                    <ul class="- topic/ul ul" id="topic_xd4_pml_cdc__ul_mnw_zys_cdc" data-ofbid="topic_xd4_pml_cdc__ul_mnw_zys_cdc">
+                        <li class="- topic/li li">
+                            <p class="- topic/p p">配置 MoM 的 controller 的地址，配置项 <em class="+ topic/ph hi-d/i ph i">masterOfMasterSite</em>。</p>
+                        </li>
+                        <li class="- topic/li li">
+                            <p class="- topic/p p">当前集群（成员集群）的名称，配置项 <em class="+ topic/ph hi-d/i ph i">clusterName</em>。</p>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+            <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">示例：</strong></p>
+            <p class="- topic/p p">希望对集群 1，集群 2 和集群 3 进行多集群管理。其中，集群 1 的 controller 将作为 MoM，其地址为192.168.1.1:8848。</p>
+            <ul class="- topic/ul ul" id="topic_xd4_pml_cdc__ul_qdp_qml_cdc" data-ofbid="topic_xd4_pml_cdc__ul_qdp_qml_cdc">
+                <li class="- topic/li li">
+                    <p class="- topic/p p">在集群 1 的 controller.cfg 配置文件中添加：</p>
+                    <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_xd4_pml_cdc__codeblock_eny_rml_cdc" data-ofbid="topic_xd4_pml_cdc__codeblock_eny_rml_cdc"><code>isMasterOfMaster=true
+clusterName=Hangzhou_cluster1
+momHeartbeatHandler=writeClusterLogToMoM
+momHeartbeatDb=dfs://clusterLogs
+momHeartbeatTable=logs
+momDatanode=dnode1</code></pre>
+                </li>
+                <li class="- topic/li li">
+                    <p class="- topic/p p">在集群 2 的 controller.cfg 配置文件中添加：</p>
+                    <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_xd4_pml_cdc__codeblock_udp_qml_cdc" data-ofbid="topic_xd4_pml_cdc__codeblock_udp_qml_cdc"><code>clusterName=ShangHai_cluster1
+masterOfMasterSite=192.168.1.1:8848</code></pre>
+                </li>
+                <li class="- topic/li li">
+                    <p class="- topic/p p">在集群 3 的 controller.cfg 配置文件中添加：</p>
+                    <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_xd4_pml_cdc__codeblock_xdp_qml_cdc" data-ofbid="topic_xd4_pml_cdc__codeblock_xdp_qml_cdc"><code>clusterName=cluster2
+masterOfMasterSite=192.168.1.1:8848</code></pre>
+                </li>
+            </ul>
+            <div class="- topic/note note note note_note" id="topic_xd4_pml_cdc__note_lnt_5ml_cdc" data-ofbid="topic_xd4_pml_cdc__note_lnt_5ml_cdc"><span class="note__title">注：</span> 如果成员集群为高可用集群，则需要在每个控制节点的 controller.cfg 中进行上述配置。</div>
+            <div class="- topic/p p">完成配置后，在由 <em class="+ topic/ph hi-d/i ph i">momDatanode</em>
+                指定的节点上进行如下操作，完成数据库表的创建：<pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_xd4_pml_cdc__codeblock_j5t_1yt_cdc" data-ofbid="topic_xd4_pml_cdc__codeblock_j5t_1yt_cdc"><code>// 填写 controller 的别名。如果是单机节点，则直接调用 getClusterPerf()
+t = rpc("controller8900" ,getClusterPerf)
+t.addColumn(["clusterName", "timeStamp"], [STRING, TIMESTAMP])
+// 数据库名和配置文件中的配置保持一致
+db = database("dfs://clusterLogs", VALUE, ["a", "b"])
+// 表名和配置文件中的配置保持一致
+tb = createPartitionedTable(db, t, `logs, `clusterName)
+def writeClusterLogToMoM(table) {
+	writeLog("new heart table")
+	// 和配置文件中的配置保持一致
+	tbHandle = loadTable("dfs://clusterLogs", `logs)
+	append!(tbHandle, table)
+}
+
+// 函数名和配置文件中的 momHeartbeatHandler 保持一致
+addFunctionView(writeClusterLogToMoM)</code></pre></div>
+            <p class="- topic/p p">至此，完成多集群管理工具需要的所有配置。启动所有集群后，便可通过该工具监控所有集群状态。</p>
+        </div>
+    </article>
+    <article class="- topic/topic topic nested1" aria-labelledby="ariaid-title8" id="topic_fmq_vml_cdc">
+        <h2 class="- topic/title title topictitle2" id="ariaid-title8">4 未来规划</h2>
+        <div class="- topic/body body">
+            <p class="- topic/p p">DolphinDB 将继续优化多集群管理，规划在未来版本中实现以下功能：</p>
+            <ul class="- topic/ul ul" id="topic_fmq_vml_cdc__ul_fnz_tnl_cdc" data-ofbid="topic_fmq_vml_cdc__ul_fnz_tnl_cdc">
+                <li class="- topic/li li">
+                    <p class="- topic/p p">持在一个查询语句中同时访问来自多个不同集群的数据。</p>
+                </li>
+                <li class="- topic/li li">
+                    <p class="- topic/p p">支持写入、更新等修改操作，不支持表连接。</p>
+                </li>
+                <li class="- topic/li li">
+                    <p class="- topic/p p">支持更全面的权限控制。</p>
+                </li>
+                <li class="- topic/li li">
+                    <p class="- topic/p p">提供支持更多维度的多集群管理工具，包括资源监控、数据访问和权限控制等功能。</p>
+                </li>
+            </ul>
+        </div>
+    </article>
+</article></main></div>
+                        
+                        
+                        
+                        
+                        
+                        
+                    </div>
+                    
+                        <nav role="navigation" id="wh_topic_toc" aria-label="On this page" class="col-lg-2 d-none d-lg-block navbar d-print-none"> 
+                            <div id="wh_topic_toc_content">
+		                        
+	                            <div class=" wh_topic_toc "><div class="wh_topic_label">在本页上</div><ul><li class="topic-item"><a href="#topic_dpr_rkl_cdc" data-tocid="topic_dpr_rkl_cdc">1 架构设计</a></li><li class="topic-item"><a href="#topic_txt_dll_cdc" data-tocid="topic_txt_dll_cdc">2 基本功能</a><ul><li class="topic-item"><a href="#topic_d5x_hll_cdc" data-tocid="topic_d5x_hll_cdc">2.1 集群管理</a></li><li class="topic-item"><a href="#topic_g1j_kml_cdc" data-tocid="topic_g1j_kml_cdc">2.2 跨集群数据访问</a></li><li class="topic-item"><a href="#topic_psr_nml_cdc" data-tocid="topic_psr_nml_cdc">2.3 访问权限管理</a></li></ul></li><li class="topic-item"><a href="#topic_xd4_pml_cdc" data-tocid="topic_xd4_pml_cdc">3 多集群管理配置</a></li><li class="topic-item"><a href="#topic_fmq_vml_cdc" data-tocid="topic_fmq_vml_cdc">4 未来规划</a></li></ul></div>
+	                        	
+                        	</div>
+                        </nav>
+                    
+                </div>
+            </div>
+            
+            
+            
+        </div> 
+        <footer class="navbar navbar-default wh_footer">
+  <div class=" footer-container mx-auto ">
+<title>Copyright</title><p><b> ©2025 浙江智臾科技有限公司 浙ICP备18048711号-3</b></p>
+  </div>
+</footer>
+        
+        <div id="go2top" class="d-print-none">
+            <span class="oxy-icon oxy-icon-up"></span>
+        </div>
+        
+        <div id="modal_img_large" class="modal">
+            <span class="close oxy-icon oxy-icon-remove"></span>
+            <div id="modal_img_container"></div>
+            <div id="caption"></div>
+        </div>
+        
+        
+        
+    </body>
+</html>

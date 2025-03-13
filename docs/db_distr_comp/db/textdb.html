@@ -1,0 +1,625 @@
+<!DOCTYPE html><html xmlns="http://www.w3.org/1999/xhtml" xml:lang="zh" lang="zh" data-whc_version="26.0">
+    <head><link rel="shortcut icon" href="../../favicon.ico"/><link rel="icon" href="../../favicon.ico"/><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><meta name="description" content="DolphinDB 在 3.00.2 版本中，推出了基于倒排索引的文本存储引擎（TextDB）。TextDB 能够为主键存储引擎（ PKEY） 中的文本数据建立倒排索引，使得用户在对有倒排索引的文本列上进行全文检索时，性能得到显著提升，满足现代应用对海量文本数据高效检索与快速响应的需求： 在金融领域，可提取文本中的关键信息，结合 NLP 工具实现市场情绪分析、信息过滤与处理等高效应用。 ..."/><meta name="DC.rights.owner" content="(C) 版权 2025"/><meta name="copyright" content="(C) 版权 2025"/><meta name="generator" content="DITA-OT"/><meta name="DC.type" content="topic"/><meta name="DC.coverage" content=""/><meta name="DC.relation" content="../../db_distr_comp/cfg/db_intro.html"/><meta name="prodname" content="DolphinDB"/><meta name="brand" content="DolphinDB"/><meta name="DC.creator" content="DolphinDB"/><meta name="DC.publisher" content="DDB N/A DDB 200"/><meta name="DC.format" content="HTML5"/><meta name="DC.identifier" content="textdb"/><title>文本存储引擎</title><!--  Generated with Oxygen version 26.0, build number 2024012323.  --><meta name="wh-path2root" content="../../"/><meta name="wh-toc-id" content="textdb-d9713e3621"/><meta name="wh-source-relpath" content="db_distr_comp/db/textdb.dita"/><meta name="wh-out-relpath" content="db_distr_comp/db/textdb.html"/>
+
+    <link rel="stylesheet" type="text/css" href="../../oxygen-webhelp/app/commons.css?buildId=2024012323"/>
+    <link rel="stylesheet" type="text/css" href="../../oxygen-webhelp/app/topic.css?buildId=2024012323"/>
+
+    <script src="../../oxygen-webhelp/app/options/properties.js?buildId=20250305183303"></script>
+    <script src="../../oxygen-webhelp/app/localization/strings.js?buildId=2024012323"></script>
+    <script src="../../oxygen-webhelp/app/search/index/keywords.js?buildId=20250305183303"></script>
+    <script defer="defer" src="../../oxygen-webhelp/app/commons.js?buildId=2024012323"></script>
+    <script defer="defer" src="../../oxygen-webhelp/app/topic.js?buildId=2024012323"></script>
+<link rel="stylesheet" type="text/css" href="../../oxygen-webhelp/template/styles.css?buildId=2024012323"/><script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script><script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script></head>
+
+    <body id="textdb" class="wh_topic_page frmBody">
+        <a href="#wh_topic_body" class="sr-only sr-only-focusable">
+            跳转到主要内容
+        </a>
+        
+        
+        
+        
+        <header class="navbar navbar-default wh_header">
+    <div class="container-fluid">
+        <div xmlns:whc="http://www.oxygenxml.com/webhelp/components" class="wh_header_flex_container navbar-nav navbar-expand-md navbar-dark">
+            <div class="wh_logo_and_publication_title_container">
+                <div class="wh_logo_and_publication_title">
+                    
+                    <a href="https://docs.dolphindb.cn/zh/index.html" class=" wh_logo d-none d-sm-block "><img src="../../logo.png" alt="  DolphinDB 文档中心  "/></a>
+                    <div class=" wh_publication_title "><a href="../../index.html"><span class="booktitle">  <span class="ph mainbooktitle">DolphinDB 文档中心</span>  </span></a></div>
+                    
+                </div>
+                
+                
+            </div>
+
+            <div class="wh_top_menu_and_indexterms_link collapse navbar-collapse" id="wh_top_menu_and_indexterms_link">
+                
+                
+                
+                
+            </div>
+        <div class=" wh_search_input navbar-form wh_topic_page_search search " role="form">
+            
+            
+            
+            <form id="searchForm" method="get" role="search" action="../../search.html"><div><input type="search" placeholder="搜索 " class="wh_search_textfield" id="textToSearch" name="searchQuery" aria-label="搜索查询" required="required"/><button type="submit" class="wh_search_button" aria-label="搜索"><span class="search_input_text">搜索</span></button></div></form>
+            
+            <script src="/vendors/react/umd/react.production.min.js" defer="defer"></script>
+<script src="/vendors/react-dom/umd/react-dom.production.min.js" defer="defer"></script>
+<script src="/vendors/dayjs/dayjs.min.js" defer="defer"></script>
+<script src="/vendors/antd/dist/antd.min.js" defer="defer"></script>
+<script src="/vendors/@ant-design/icons/dist/index.umd.min.js" defer="defer"></script>
+<script src="/zh/index.js" type="module"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" defer="defer"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML" defer="defer"><!--
+
+
+--></script>
+<script defer="defer"><!--
+
+// 从主页重定向
+const currentUrl = window.location.href;
+
+// 判断当前URL是否包含index.html并且路径最后部分是index.html
+if (currentUrl.endsWith('index.html')) {
+    // 处理根目录下的index.html跳转
+    const baseUrl = currentUrl.split('/index.html')[0]; // 获取index.html之前的部分
+    const redirectUrl = `${baseUrl}/about/ddb_intro.html`; // 构建跳转路径
+    window.location.href = redirectUrl; // 执行跳转
+}
+
+--></script>
+            
+        </div></div>
+    </div>
+</header>
+        
+        
+         
+        
+        
+        
+        <div class="container-fluid" id="wh_topic_container">
+            <div class="row">
+
+                <nav class="wh_tools d-print-none navbar-expand-md" aria-label="Tools">
+                    
+                    <div data-tooltip-position="bottom" class=" wh_breadcrumb "><ol class="d-print-none"><li><span class="home"><a href="../../index.html"><span>主页</span></a></span></li><li><div class="topicref" data-id="new_chap_database_manage_new_chap_dbmanage_landing_page"><div class="title"><a href="../../db_distr_comp/cfg/db_intro.html"><span class="keyword label">数据库</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 数据库的基本概念</p></div></div></div></li><li class="active"><div class="topicref" data-id="textdb"><div class="title"><a href="../../db_distr_comp/db/textdb.html">文本存储引擎</a></div></div></li></ol></div>
+                    
+                    
+                    
+                    <div class="wh_right_tools">
+                        <button class="wh_hide_highlight" aria-label="切换搜索突出显示" title="切换搜索突出显示"></button>
+                        <button class="webhelp_expand_collapse_sections" data-next-state="collapsed" aria-label="折叠截面" title="折叠截面"></button>
+                        
+                        
+                        
+                        
+                        <div class=" wh_print_link print d-none d-md-inline-block "><button onClick="window.print()" title="打印此页" aria-label="打印此页"></button></div>
+                        
+                        <button type="button" id="wh_toc_button" class="custom-toggler navbar-toggler collapsed wh_toggle_button navbar-light" aria-expanded="false" aria-label="Toggle publishing table of content" aria-controls="wh_publication_toc">
+                            <span class="navbar-toggler-icon"></span>
+                        </button>
+                    </div>
+                    
+                </nav>
+            </div>
+            
+            
+            
+            
+            <div class="wh_content_area">
+                <div class="row">
+                    
+                        <nav id="wh_publication_toc" class="col-lg-3 col-md-3 col-sm-12 d-md-block d-none d-print-none" aria-label="Table of Contents Container">
+                            <div id="wh_publication_toc_content">
+		                        
+                            	<div class=" wh_publication_toc " data-tooltip-position="right"><span class="expand-button-action-labels"><span id="button-expand-action" role="button" aria-label="Expand"></span><span id="button-collapse-action" role="button" aria-label="Collapse"></span><span id="button-pending-action" role="button" aria-label="Pending"></span></span><ul role="tree" aria-label="Table of Contents"><li role="treeitem"><div data-tocid="ddb_intro-d9713e87" class="topicref" data-id="ddb_intro" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../about/ddb_intro.html" id="ddb_intro-d9713e87-link">关于DolphinDB</a></div></div></li><li role="treeitem"><div data-tocid="chap1_getstarted-d9713e136" class="topicref" data-id="chap1_getstarted" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../getstarted/chap1_getstarted.html" id="chap1_getstarted-d9713e136-link">快速上手</a><div class="wh-tooltip"><p class="shortdesc">如何快速部署 DolphinDB、建库建表、写入和查询数据</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="sectionddb_deployment-d9713e189" class="topicref" data-id="sectionddb_deployment" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action sectionddb_deployment-d9713e189-link" class="wh-expand-btn"></span><div class="title"><a href="../../deploy/deploy_intro.html" id="sectionddb_deployment-d9713e189-link"><span class="keyword label">部署</span></a><div class="wh-tooltip"><p class="shortdesc">如何在不同的场景中部署 DolphinDB</p></div></div></div></li><li role="treeitem" aria-expanded="true"><div data-tocid="new_chap_database_manage_new_chap_dbmanage_landing_page-d9713e2259" class="topicref" data-id="new_chap_database_manage_new_chap_dbmanage_landing_page" data-state="expanded"><span role="button" tabindex="0" aria-labelledby="button-collapse-action new_chap_database_manage_new_chap_dbmanage_landing_page-d9713e2259-link" class="wh-expand-btn"></span><div class="title"><a href="../../db_distr_comp/cfg/db_intro.html" id="new_chap_database_manage_new_chap_dbmanage_landing_page-d9713e2259-link"><span class="keyword label">数据库</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 数据库的基本概念</p></div></div></div><ul role="group" class="navbar-nav nav-list"><li role="treeitem" aria-expanded="false"><div data-tocid="chap3_sect_database_distributed_computing-d9713e2312" class="topicref" data-id="chap3_sect_database_distributed_computing" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action chap3_sect_database_distributed_computing-d9713e2312-link" class="wh-expand-btn"></span><div class="title"><a href="../../db_distr_comp/db_distr_comp.html" id="chap3_sect_database_distributed_computing-d9713e2312-link"><span class="keyword label">数据库操作</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 数据库的基本操作，例如创建数据库、表，增加列、分区，数据查询，表连接等。</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="topic_pg3_22w_ryb-d9713e2880" class="topicref" data-id="topic_pg3_22w_ryb" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action topic_pg3_22w_ryb-d9713e2880-link" class="wh-expand-btn"></span><div class="title"><a href="../../db_distr_comp/db/db_architecture.html" id="topic_pg3_22w_ryb-d9713e2880-link"><span class="keyword label">分布式架构</span></a></div></div></li><li role="treeitem"><div data-tocid="tsdb-d9713e3387" class="topicref" data-id="tsdb" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../db_distr_comp/db/tsdb.html" id="tsdb-d9713e3387-link"><span class="keyword label">TSDB 存储引擎</span></a></div></div></li><li role="treeitem"><div data-tocid="olap-d9713e3434" class="topicref" data-id="olap" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../db_distr_comp/db/olap.html" id="olap-d9713e3434-link"><span class="keyword label">OLAP 存储引擎</span></a></div></div></li><li role="treeitem"><div data-tocid="pkey_engine-d9713e3481" class="topicref" data-id="pkey_engine" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../db_distr_comp/db/pkey_engine.html" id="pkey_engine-d9713e3481-link"><span class="keyword">主键存储引擎</span>  </a></div></div></li><li role="treeitem"><div data-tocid="imoltp-d9713e3529" class="topicref" data-id="imoltp" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../db_distr_comp/db/imoltp.html" id="imoltp-d9713e3529-link">内存在线事务处理引擎</a></div></div></li><li role="treeitem"><div data-tocid="vectordb-d9713e3575" class="topicref" data-id="vectordb" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../db_distr_comp/db/vectordb.html" id="vectordb-d9713e3575-link">向量存储引擎</a></div></div></li><li role="treeitem" class="active"><div data-tocid="textdb-d9713e3621" class="topicref" data-id="textdb" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../db_distr_comp/db/textdb.html" id="textdb-d9713e3621-link">文本存储引擎</a></div></div></li><li role="treeitem"><div data-tocid="catalog-d9713e3667" class="topicref" data-id="catalog" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../db_distr_comp/db/catalog.html" id="catalog-d9713e3667-link">数据目录</a></div></div></li><li role="treeitem"><div data-tocid="iotdb-d9713e3713" class="topicref" data-id="iotdb" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../db_distr_comp/db/iotdb.html" id="iotdb-d9713e3713-link">物联网点位管理引擎</a></div></div></li></ul></li><li role="treeitem" aria-expanded="false"><div data-tocid="chap7_tutorials_streaming-d9713e3760" class="topicref" data-id="chap7_tutorials_streaming" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action chap7_tutorials_streaming-d9713e3760-link" class="wh-expand-btn"></span><div class="title"><a href="../../stream/str_intro.html" id="chap7_tutorials_streaming-d9713e3760-link"><span class="keyword label">流数据</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 流数据引擎及流数据计算的基本概念</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e7513" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e7513-link" class="wh-expand-btn"></span><div class="title"><a href="../../db_distr_comp/db_oper/import_data.html" id="tocId-d9713e7513-link">数据迁移</a><div class="wh-tooltip"><p class="shortdesc">如何从不同数据源向 DolphinDB 迁移数据</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="chap7_tutorials_system_management-d9713e7940" class="topicref" data-id="chap7_tutorials_system_management" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action chap7_tutorials_system_management-d9713e7940-link" class="wh-expand-btn"></span><div class="title"><a href="../../sys_man/om_intro.html" id="chap7_tutorials_system_management-d9713e7940-link"><span class="keyword label">系统运维</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 的系统运维功能及方法</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="troubleshooting-d9713e8780" class="topicref" data-id="troubleshooting" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action troubleshooting-d9713e8780-link" class="wh-expand-btn"></span><div class="title"><a href="../../error_codes/troubleshooting.html" id="troubleshooting-d9713e8780-link">故障排查</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="about_language_resources-d9713e20911" class="topicref" data-id="about_language_resources" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action about_language_resources-d9713e20911-link" class="wh-expand-btn"></span><div class="title"><a href="../../progr/progr_intro.html" id="about_language_resources-d9713e20911-link"><span class="keyword label">编程语言</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 编程基本概念与方法、SQL 在 DolphinDB 的应用</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="functions_references-d9713e30925" class="topicref" data-id="functions_references" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action functions_references-d9713e30925-link" class="wh-expand-btn"></span><div class="title"><a href="../../funcs/funcs_intro.html" id="functions_references-d9713e30925-link"><span class="keyword label">函数参考</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 函数分类、语法、详解及示例</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="api_protocol-d9713e94064" class="topicref" data-id="api_protocol" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action api_protocol-d9713e94064-link" class="wh-expand-btn"></span><div class="title"><a href="../../api/connapi_intro.html" id="api_protocol-d9713e94064-link"><span class="keyword label">连接器 &amp; API</span></a><div class="wh-tooltip"><p class="shortdesc">面向不同编程语言的 DolphinDB API 及连接器，相关协议和用法</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="chap6_plugin-d9713e94210" class="topicref" data-id="chap6_plugin" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action chap6_plugin-d9713e94210-link" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/plg_intro.html" id="chap6_plugin-d9713e94210-link"><span class="keyword label">插件</span></a><div class="wh-tooltip"><p class="shortdesc">多个应用场景的插件使用说明和插件开发指导</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="third_party-d9713e97904" class="topicref" data-id="third_party" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action third_party-d9713e97904-link" class="wh-expand-btn"></span><div class="title"><a href="../../third_party.html" id="third_party-d9713e97904-link">第三方工具</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="about_tutorials-d9713e98227" class="topicref" data-id="about_tutorials" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action about_tutorials-d9713e98227-link" class="wh-expand-btn"></span><div class="title"><a href="../../tutorials/about_tutorials.html" id="about_tutorials-d9713e98227-link"><span class="keyword label">教程</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 产品使用教程</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e105982" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e105982-link" class="wh-expand-btn"></span><div class="title"><a href="../../rn/server/3_00_2.html" id="tocId-d9713e105982-link">版本说明</a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 版本发布历史</p></div></div></div></li></ul></div>
+		                        
+                            </div>
+                        </nav>
+                    
+                    
+                    <div class="col-lg-7 col-md-9 col-sm-12" id="wh_topic_body">
+                        <button id="wh_close_publication_toc_button" class="close-toc-button d-none" aria-label="Toggle publishing table of content" aria-controls="wh_publication_toc" aria-expanded="true">
+                            <span class="close-toc-icon-container">
+                                <span class="close-toc-icon"></span>     
+                            </span>
+                        </button>
+                        <button id="wh_close_topic_toc_button" class="close-toc-button d-none" aria-label="Toggle topic table of content" aria-controls="wh_topic_toc" aria-expanded="true">
+                            <span class="close-toc-icon-container">
+                                <span class="close-toc-icon"></span>     
+                            </span>
+                        </button>
+                        
+                        <div class=" wh_topic_content body "><main role="main"><article class="- topic/topic topic" role="article" aria-labelledby="ariaid-title1">
+    <h1 class="- topic/title title topictitle1" id="ariaid-title1">文本存储引擎</h1>
+    <div class="- topic/body body">
+        <div class="- topic/p p">DolphinDB 在 3.00.2 版本中，推出了基于倒排索引的文本存储引擎（TextDB）。TextDB 能够为主键存储引擎（ PKEY）
+                中的文本数据建立倒排索引，使得用户在对有倒排索引的文本列上进行全文检索时，性能得到显著提升，满足现代应用对海量文本数据高效检索与快速响应的需求：<ul class="- topic/ul ul" id="textdb__ul_mt1_sp2_l2c" data-ofbid="textdb__ul_mt1_sp2_l2c">
+                <li class="- topic/li li">
+                    <p class="- topic/p p">在金融领域，可提取文本中的关键信息，结合 NLP 工具实现市场情绪分析、信息过滤与处理等高效应用。</p>
+                </li>
+                <li class="- topic/li li">
+                    <p class="- topic/p p">在物联网领域，可高效管理海量日志数据，并支持实时搜索与分析。</p>
+                </li>
+            </ul></div>
+        <p class="- topic/p p">DolphinDB TextDB 具有以下功能和特点：</p>
+        <ul class="- topic/ul ul" id="textdb__ul_rmv_fcn_cdc" data-ofbid="textdb__ul_rmv_fcn_cdc">
+            <li class="- topic/li li">
+                <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">查询加速</strong>：</p>
+                <ul class="- topic/ul ul" id="textdb__ul_smv_fcn_cdc" data-ofbid="textdb__ul_smv_fcn_cdc">
+                    <li class="- topic/li li">
+                        <p class="- topic/p p">对字符串类型的全文检索进行优化，相较于传统的 <code class="+ topic/ph pr-d/codeph ph codeph">LIKE</code> 查询，性能显著提升。</p>
+                    </li>
+                    <li class="- topic/li li">
+                        <p class="- topic/p p">对字符串类型的等值查询进行加速。</p>
+                    </li>
+                </ul>
+            </li>
+            <li class="- topic/li li">
+                <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">多种检索方式支持</strong>：支持关键词、短语检索，前缀、后缀匹配，并允许在短语检索时指定词距。</p>
+            </li>
+            <li class="- topic/li li">
+                <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">多语言支持</strong>：适用于中文、英文及中英文混合内容的检索。</p>
+            </li>
+            <li class="- topic/li li">
+                <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">高效存储与索引</strong>：深度集成于 DolphinDB 存储引擎，相较于外部维护独立的倒排索引，减少了索引的空间占用，并提升了索引的读写效率。</p>
+            </li>
+        </ul>
+    </div>
+    <article class="- topic/topic topic nested1" aria-labelledby="ariaid-title2" id="topic_r55_gcn_cdc">
+        <h2 class="- topic/title title topictitle2" id="ariaid-title2">实现原理</h2>
+        <div class="- topic/body body">
+            <p class="- topic/p p">TextDB 的实现围绕以下几个方面展开：文本数据存储、文本索引构建、文本索引存储、文本数据检索。</p>
+        </div>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title3" id="topic_gjs_hcn_cdc">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title3">文本数据存储</h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p">DolphinDB 中现有的存储引擎都支持存储文本数据，因此 TextDB
+                    无需单独实现文本存储功能，而是基于现有存储引擎进行文本数据的存储。当前版本中，TextDB 仅支持基于主键存储引擎（PKEY）进行文本数据存储</p>
+                <p class="- topic/p p">。关于主键存储引擎的原理介绍，请参考<a class="- topic/xref xref" href="pkey_engine.html">主键存储引擎</a>。</p>
+            </div>
+        </article>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title4" id="topic_mdt_wcn_cdc">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title4">文本索引构建</h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p">TextDB 在指定的文本列上构建文本索引（倒排索引）。构建文本索引的步骤包括：</p>
+                <ul class="- topic/ul ul" id="topic_mdt_wcn_cdc__ul_ywp_xcn_cdc" data-ofbid="topic_mdt_wcn_cdc__ul_ywp_xcn_cdc">
+                    <li class="- topic/li li">
+                        <p class="- topic/p p">通过分词器将文本划分为单词序列。可能会对生成的单词序列做一定处理，包括将英文单词转为词干、将英文单词转为小写、忽略停止词等。（不会对原数据造成影响）</p>
+                    </li>
+                    <li class="- topic/li li">
+                        <p class="- topic/p p">依据分词器划分出的单词序列构建文本索引。</p>
+                    </li>
+                </ul>
+                <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">分词器</strong></p>
+                <p class="- topic/p p">分词器是 TextDB 的内部组件，其作用是将文本划分为单词序列，这些单词序列将用于后续构建文本索引。TextDB
+                    内部支持多种分词器，用户需要在构建索引时指定合适的分词器类型：</p>
+                <ul class="- topic/ul ul" id="topic_mdt_wcn_cdc__ul_yzm_1dn_cdc" data-ofbid="topic_mdt_wcn_cdc__ul_yzm_1dn_cdc">
+                    <li class="- topic/li li">
+                        <p class="- topic/p p">英文分词器：按照空格和标点进行分词，适合于英文为主要内容的场景。</p>
+                    </li>
+                    <li class="- topic/li li">
+                        <p class="- topic/p p">中文分词器：TextDB 使用 Jieba
+                            分词器作为内部中文分词器，其会按照预置的中文词库、空格和标点进行分词。适合于中文较多，仅有少量英文或对英文要求不高的场景。</p>
+                    </li>
+                    <li class="- topic/li li">
+                        <p class="- topic/p p">混合分词器：英文按照单词分词，中文部分按照 Bigram 分词（以两个连续字符为单位进行分词，且会重叠。如 ‘武汉市长江大桥' 会被分词为
+                            '武汉' '汉市' '市长' '长江' '江大' '大桥'）。适合于中英文交替，且对英文要求较高的场景。</p>
+                    </li>
+                    <li class="- topic/li li">
+                        <p class="- topic/p p">none
+                            分词器：不分词。设置为该类型分词器后，将不对输入的文本进行分词处理，而是直接将整个文本索引起来。因此设置为不分词后，无法查询和匹配单个单词，只能查询和匹配整个文本。如，输入文本句子为
+                            ”apple is delicious”，则搜索 ”apple”, “delicious“ 均无法搜到输入的句子，只有搜索整个句子 ”apple
+                            is delicious” 才能搜索到结果。</p>
+                    </li>
+                </ul>
+                <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">停止词处理</strong></p>
+                <p class="- topic/p p">停止词是常见的无重要意义的词汇。TextDB 使用的停止词列表如下：</p>
+                <ul class="- topic/ul ul" id="topic_mdt_wcn_cdc__ul_zj3_cdn_cdc" data-ofbid="topic_mdt_wcn_cdc__ul_zj3_cdn_cdc">
+                    <li class="- topic/li li">
+                        <p class="- topic/p p">英文停止词：</p>
+                        <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_mdt_wcn_cdc__codeblock_ak3_cdn_cdc" data-ofbid="topic_mdt_wcn_cdc__codeblock_ak3_cdn_cdc"><code>"a", "an", "and", "are", "as", "at", "be", "but", "by",
+"for", "if", "in", "into", "is", "it",
+"no", "not", "of", "on", "or", "such",
+"that", "the", "their", "then", "there", "these",
+"they", "this", "to", "was", "will", "with"</code></pre>
+                    </li>
+                    <li class="- topic/li li">
+                        <ul class="- topic/ul ul" id="topic_mdt_wcn_cdc__ul_bk3_cdn_cdc" data-ofbid="topic_mdt_wcn_cdc__ul_bk3_cdn_cdc">
+                            <li class="- topic/li li">
+                                <p class="- topic/p p">中文停止词与 Jieba 分词器的停止词列表一致。</p>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+                <p class="- topic/p p">查询中如果包含停止词，TextDB 会自动忽略它们，请注意这一行为对查询结果造成的影响。比如，由于 such 是停止词，所以查询 <code class="+ topic/ph pr-d/codeph ph codeph">apple
+                        such banana</code> 等效于查询 <code class="+ topic/ph pr-d/codeph ph codeph">apple banana</code>。</p>
+                <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">倒排索引</strong></p>
+                <p class="- topic/p p">TextDB使用倒排索引作为文本索引的实现方案。倒排索引是一种文本索引技术，先通过分词器将文本切分成词语，然后建立词语到文本 ID
+                    的映射关系，这种映射关系被称为倒排表。倒排表的结构以单词作为 key，包含该单词的文本 ID 链表作为
+                    value。这种结构使得在查询时，可以迅速定位到相关文本，而不需要逐一遍历所有文本。</p>
+            </div>
+        </article>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title5" id="topic_ebq_pdn_cdc">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title5">文本索引存储</h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p">TextDB 会以 Level File 为单位进行文本索引的构建和存储。因此每个 Level File 内部都有独立的文本索引，用于对 Level File
+                    内部存储的文本数据进行索引。在生成新的 Level File 时，TextDB
+                    进行文本索引的构建与存储，文本数据的写入顺序与其在文本索引中的添加顺序一致，因此文本数据在 Level File 中的行号即为其在文本索引中的文本
+                    ID，这种设计既简化了文本数据检索的查询步骤，也节省了存储空间。</p>
+            </div>
+        </article>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title6" id="topic_skq_rdn_cdc">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title6">文本数据检索</h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p">TextDB 在接收到查询请求后，会分别对内存中的数据和 Level File 进行检索，合并结果后返回。</p>
+                <p class="- topic/p p">详细步骤如下：</p>
+                <ol class="- topic/ol ol" id="topic_skq_rdn_cdc__ol_xmy_tdn_cdc" data-ofbid="topic_skq_rdn_cdc__ol_xmy_tdn_cdc">
+                    <li class="- topic/li li">
+                        <p class="- topic/p p">首先，对 Cache Engine 中的数据（如果有）进行搜索。由于 TextDB 不会对 Cache Engine
+                            中的数据建立文本索引，因此对于 Cache Engine 中的数据，采取先分词器分词，后遍历检索的策略。</p>
+                    </li>
+                    <li class="- topic/li li">
+                        <p class="- topic/p p">其次，对 Level File 中的数据进行检索。因为每个 Level File 都有各自的文本索引，因此需要遍历所有 Level
+                            File，加载出对应文本列上的文本索引，在文本索引上进行检索，得到符合条件的检索结果。</p>
+                    </li>
+                    <li class="- topic/li li">
+                        <p class="- topic/p p">合并前两步中的结果作为最终返回结果。</p>
+                    </li>
+                </ol>
+                <p class="- topic/p p">与 <code class="+ topic/ph pr-d/codeph ph codeph">LIKE</code> 在查询时进行全表遍历不同，TextDB
+                    通过索引进行查询。因此当数据总量越大且满足查询条件的数据越少时，TextDB 的查询性能相较于 <code class="+ topic/ph pr-d/codeph ph codeph">LIKE</code>
+                    提升更加显著。</p>
+            </div>
+        </article>
+    </article>
+    <article class="- topic/topic topic nested1" aria-labelledby="ariaid-title7" id="topic_wz3_pp2_l2c">
+        <h2 class="- topic/title title topictitle2" id="ariaid-title7">文本索引分析器</h2>
+        <div class="- topic/body body">
+            <p class="- topic/p p">TextDB 提供丰富的配置选项，支持设置分词器、大小写敏感、中文分词模式以及英文词干匹配。可在创建文本索引时，设置 <em class="+ topic/ph hi-d/i ph i">indexes </em>参数，例如：</p>
+            <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_wz3_pp2_l2c__codeblock_jtn_5p2_l2c" data-ofbid="topic_wz3_pp2_l2c__codeblock_jtn_5p2_l2c"><code>indexes=textindex(parser=english, full=false, lowercase=true, stem=true)</code></pre>
+            <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">分词器</strong></p>
+            <p class="- topic/p p"><em class="+ topic/ph hi-d/i ph i">parser</em> 参数用于指定分词器。此参数没有默认值，必须显式指定。可选值包括：none、english、chinese 和 mixed：</p>
+            <ul class="- topic/ul ul" id="topic_wz3_pp2_l2c__ul_p4r_xp2_l2c" data-ofbid="topic_wz3_pp2_l2c__ul_p4r_xp2_l2c">
+                <li class="- topic/li li">
+                    <p class="- topic/p p">none：不分词。</p>
+                </li>
+                <li class="- topic/li li">
+                    <p class="- topic/p p">english：英文分词器，按空格和标点符号进行分词，适合英文为主的场景。</p>
+                </li>
+                <li class="- topic/li li">
+                    <p class="- topic/p p">chinese：中文分词器。基于中文词库、空格和标点进行分词。适用于中文内容为主，且英文较少或对英文要求不高的场景。</p>
+                </li>
+                <li class="- topic/li li">
+                    <p class="- topic/p p">mixed：混合分词器。英文按单词分词，中文按 Bigram 分词（以两个连续字符为单位进行分词，且会重叠。如 '武汉市长江大桥' 会被分词为 '武汉'
+                        '汉市' '市长' '长江' '江大' '大桥'）。适合于中英文交替，且对英文要求较高的场景。</p>
+                </li>
+            </ul>
+            <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">大小写敏感</strong></p>
+            <p class="- topic/p p"><em class="+ topic/ph hi-d/i ph i">lowercase</em> 参数用于设置是否忽略大小写。此参数在 <em class="+ topic/ph hi-d/i ph i">parser</em> 为 english、chinese 或 mixed 时有效：</p>
+            <ul class="- topic/ul ul" id="topic_wz3_pp2_l2c__ul_thj_zp2_l2c" data-ofbid="topic_wz3_pp2_l2c__ul_thj_zp2_l2c">
+                <li class="- topic/li li">
+                    <p class="- topic/p p">true：默认值，适用于需要忽略英文大小写的场景。</p>
+                </li>
+                <li class="- topic/li li">
+                    <p class="- topic/p p">false：适用于需要大小写敏感的场景。</p>
+                </li>
+            </ul>
+            <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">中文分词模式</strong></p>
+            <p class="- topic/p p"><em class="+ topic/ph hi-d/i ph i">full</em> 参数用于设置中文分词的模式。该属性仅在 <em class="+ topic/ph hi-d/i ph i">parser</em>=chinese 时有效：</p>
+            <ul class="- topic/ul ul" id="topic_wz3_pp2_l2c__ul_vml_1q2_l2c" data-ofbid="topic_wz3_pp2_l2c__ul_vml_1q2_l2c">
+                <li class="- topic/li li">
+                    <p class="- topic/p p">false：默认模式。词语之间不会重叠和包含。比如 '武汉市长江大桥' 会分成 '武汉市' 和 '长江大桥'。</p>
+                </li>
+                <li class="- topic/li li">
+                    <p class="- topic/p p">true：全分词模式。该模式会尽可能多的分析句子中包含的词语。比如 '武汉市长江大桥' 会分成 '武汉', '武汉市', '市长', '长江',
+                        '长江大桥', '大桥'。</p>
+                </li>
+            </ul>
+            <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">英文词干匹配</strong></p>
+            <p class="- topic/p p"><em class="+ topic/ph hi-d/i ph i">stem</em> 参数指定是否将英文单词作为词干匹配。该属性仅在 parser=english 且 lowercase=true 时生效。</p>
+            <ul class="- topic/ul ul" id="topic_wz3_pp2_l2c__ul_nmv_bq2_l2c" data-ofbid="topic_wz3_pp2_l2c__ul_nmv_bq2_l2c">
+                <li class="- topic/li li">
+                    <p class="- topic/p p">true：将英文单词作为词干。此时可能会匹配到相应的派生词，例如查询单词'dark'，可能会搜到含 'darkness' 的结果。</p>
+                </li>
+                <li class="- topic/li li">
+                    <p class="- topic/p p">false：默认值，只能精确查询结果。</p>
+                </li>
+            </ul>
+        </div>
+    </article>
+    <article class="- topic/topic topic nested1" aria-labelledby="ariaid-title8" id="topic_dxy_5dn_cdc">
+        <h2 class="- topic/title title topictitle2" id="ariaid-title8">文本索引查询函数</h2>
+        <div class="- topic/body body">
+            <p class="- topic/p p">TextDB 提供以下查询函数用于文本索引查询。请注意，这些函数仅适用于已创建文本索引的列，且只能在查询语句的 <code class="+ topic/ph pr-d/codeph ph codeph">where</code>
+                子句中使用，无法单独调用。</p>
+            <div class="- topic/p p">下列函数的用法示例，请参见 <a class="- topic/xref xref" href="#textdb_example">简单示例</a>。<div class="table-container"><table class="- topic/table table" id="topic_dxy_5dn_cdc__table_b5z_wdn_cdc" data-ofbid="topic_dxy_5dn_cdc__table_b5z_wdn_cdc" data-cols="2"><caption></caption><colgroup><col/><col/></colgroup><thead class="- topic/thead thead">
+                            <tr class="- topic/row">
+                                <th class="- topic/entry entry colsep-0 rowsep-0" id="topic_dxy_5dn_cdc__table_b5z_wdn_cdc__entry__1">
+                                    <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">函数</strong></p>
+                                </th>
+                                <th class="- topic/entry entry colsep-0 rowsep-0" id="topic_dxy_5dn_cdc__table_b5z_wdn_cdc__entry__2">
+                                    <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">功能</strong></p>
+                                </th>
+                            </tr>
+                        </thead><tbody class="- topic/tbody tbody">
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-0 rowsep-0" headers="topic_dxy_5dn_cdc__table_b5z_wdn_cdc__entry__1">matchAny </td>
+                                <td class="- topic/entry entry colsep-0 rowsep-0" headers="topic_dxy_5dn_cdc__table_b5z_wdn_cdc__entry__2">查询包含任意给定词语的行</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-0 rowsep-0" headers="topic_dxy_5dn_cdc__table_b5z_wdn_cdc__entry__1">matchAll </td>
+                                <td class="- topic/entry entry colsep-0 rowsep-0" headers="topic_dxy_5dn_cdc__table_b5z_wdn_cdc__entry__2">查询包含所有给定词语的行</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-0 rowsep-0" headers="topic_dxy_5dn_cdc__table_b5z_wdn_cdc__entry__1">matchPhrase </td>
+                                <td class="- topic/entry entry colsep-0 rowsep-0" headers="topic_dxy_5dn_cdc__table_b5z_wdn_cdc__entry__2">查询包含指定短语的行</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-0 rowsep-0" headers="topic_dxy_5dn_cdc__table_b5z_wdn_cdc__entry__1">matchPrefix </td>
+                                <td class="- topic/entry entry colsep-0 rowsep-0" headers="topic_dxy_5dn_cdc__table_b5z_wdn_cdc__entry__2">查询包含指定词语前缀的行</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-0 rowsep-0" headers="topic_dxy_5dn_cdc__table_b5z_wdn_cdc__entry__1">matchSuffix </td>
+                                <td class="- topic/entry entry colsep-0 rowsep-0" headers="topic_dxy_5dn_cdc__table_b5z_wdn_cdc__entry__2">查询包含指定词语后缀的行</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-0 rowsep-0" headers="topic_dxy_5dn_cdc__table_b5z_wdn_cdc__entry__1">matchPrefixSuffix </td>
+                                <td class="- topic/entry entry colsep-0 rowsep-0" headers="topic_dxy_5dn_cdc__table_b5z_wdn_cdc__entry__2">查询同时包含指定前缀和后缀的词语所在的行</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-0 rowsep-0" headers="topic_dxy_5dn_cdc__table_b5z_wdn_cdc__entry__1">matchPhrasePrefix </td>
+                                <td class="- topic/entry entry colsep-0 rowsep-0" headers="topic_dxy_5dn_cdc__table_b5z_wdn_cdc__entry__2">查询包含指定短语前缀的行</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-0 rowsep-0" headers="topic_dxy_5dn_cdc__table_b5z_wdn_cdc__entry__1">matchPhraseSuffix </td>
+                                <td class="- topic/entry entry colsep-0 rowsep-0" headers="topic_dxy_5dn_cdc__table_b5z_wdn_cdc__entry__2">查询包含指定短语后缀的行</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-0 rowsep-0" headers="topic_dxy_5dn_cdc__table_b5z_wdn_cdc__entry__1">matchPhraseInfix </td>
+                                <td class="- topic/entry entry colsep-0 rowsep-0" headers="topic_dxy_5dn_cdc__table_b5z_wdn_cdc__entry__2">查询包含指定短语中缀的行</td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-0 rowsep-0" headers="topic_dxy_5dn_cdc__table_b5z_wdn_cdc__entry__1">matchSpan </td>
+                                <td class="- topic/entry entry colsep-0 rowsep-0" headers="topic_dxy_5dn_cdc__table_b5z_wdn_cdc__entry__2">给定一个短语和词距 <em class="+ topic/ph hi-d/i ph i">slop</em>，查询包含该短语的行，允许目标短语中单词的词距小于等于
+                                    <em class="+ topic/ph hi-d/i ph i">slop</em></td>
+                            </tr>
+                            <tr class="- topic/row">
+                                <td class="- topic/entry entry colsep-0 rowsep-0" headers="topic_dxy_5dn_cdc__table_b5z_wdn_cdc__entry__1">matchUnorderedSpan </td>
+                                <td class="- topic/entry entry colsep-0 rowsep-0" headers="topic_dxy_5dn_cdc__table_b5z_wdn_cdc__entry__2">给定一个短语和词距 <em class="+ topic/ph hi-d/i ph i">slop</em>，查询包含该短语的行，允许目标短语中单词的词距小于等于
+                                    <em class="+ topic/ph hi-d/i ph i">slop</em>，允许目标短语中单词的顺序与给定短语不同</td>
+                            </tr>
+                        </tbody></table></div></div>
+        </div>
+    </article>
+    <article class="- topic/topic topic nested1" aria-labelledby="ariaid-title9" id="topic_bzt_ydn_cdc">
+        <h2 class="- topic/title title topictitle2" id="ariaid-title9">等值查询加速</h2>
+        <div class="- topic/body body">
+            <p class="- topic/p p">若不使用文本索引查询函数，而是直接在文本索引列上使用 <code class="+ topic/ph pr-d/codeph ph codeph">=</code> 或 <code class="+ topic/ph pr-d/codeph ph codeph">in</code>
+                查询，将自动使用文本索引，从而加速查询。触发查询加速需同时满足以下条件：</p>
+            <ul class="- topic/ul ul" id="topic_bzt_ydn_cdc__ul_s43_zdn_cdc" data-ofbid="topic_bzt_ydn_cdc__ul_s43_zdn_cdc">
+                <li class="- topic/li li">
+                    <p class="- topic/p p">建立文本索引时设置分词器为 none 分词器。</p>
+                </li>
+                <li class="- topic/li li">
+                    <p class="- topic/p p"><code class="+ topic/ph pr-d/codeph ph codeph">=</code> 或 <code class="+ topic/ph pr-d/codeph ph codeph">in</code> 查询的另一侧为常量。</p>
+                </li>
+            </ul>
+            <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_bzt_ydn_cdc__codeblock_t43_zdn_cdc" data-ofbid="topic_bzt_ydn_cdc__codeblock_t43_zdn_cdc"><code>select textCol from pt where textCol = "apple";
+select textCol from pt where textCol in ("apple","banana");</code></pre>
+        </div>
+    </article>
+    <article class="- topic/topic topic nested1" aria-labelledby="ariaid-title10" id="topic_bgb_12n_cdc">
+        <h2 class="- topic/title title topictitle2" id="ariaid-title10">使用限制</h2>
+        <div class="- topic/body body">
+            <div class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">建库建表</strong><ul class="- topic/ul ul" id="topic_bgb_12n_cdc__ul_pnw_g2n_cdc" data-ofbid="topic_bgb_12n_cdc__ul_pnw_g2n_cdc">
+                    <li class="- topic/li li">
+                        <p class="- topic/p p">只能创建 PKEY 引擎下的数据库，因此在使用 <code class="+ topic/ph pr-d/codeph ph codeph">database</code> 函数创建数据库时，必须设置
+                                <em class="+ topic/ph hi-d/i ph i">engine</em>="PKEY"。</p>
+                    </li>
+                    <li class="- topic/li li">
+                        <p class="- topic/p p">只能在 STRING 类型的列上面建立文本索引。</p>
+                    </li>
+                    <li class="- topic/li li">
+                        <p class="- topic/p p">支持单个表上创建多个索引，但不支持多列组合索引。</p>
+                    </li>
+                </ul><strong class="+ topic/ph hi-d/b ph b">数据写入</strong><ul class="- topic/ul ul" id="topic_bgb_12n_cdc__ul_qnw_g2n_cdc" data-ofbid="topic_bgb_12n_cdc__ul_qnw_g2n_cdc">
+                    <li class="- topic/li li">
+                        <p class="- topic/p p">TextDB 仅支持在 STRING 列上建立文本索引，而 STRING 有 65535 字节的长度限制，因此超出长度限制的文本会被截断。</p>
+                    </li>
+                    <li class="- topic/li li">
+                        <p class="- topic/p p">只支持 UTF-8 编码的字符串。遇到非法 UTF-8 字符（乱码）时，字符串会截断至乱码处。</p>
+                    </li>
+                </ul><strong class="+ topic/ph hi-d/b ph b">查询</strong><ul class="- topic/ul ul" id="topic_bgb_12n_cdc__ul_rnw_g2n_cdc" data-ofbid="topic_bgb_12n_cdc__ul_rnw_g2n_cdc">
+                    <li class="- topic/li li">
+                        <p class="- topic/p p">TextDB 只支持在建立了文本索引的列上进行查询加速。</p>
+                    </li>
+                    <li class="- topic/li li">
+                        <p class="- topic/p p">查询需直接作用于带索引的表，不能在表连接等操作后再使用 TextDB 的查询加速函数。</p>
+                    </li>
+                    <li class="- topic/li li">
+                        <p class="- topic/p p">查询加速函数必须位于 where 子句中，不能位于 select、group by、order by 等其它子句。</p>
+                    </li>
+                    <li class="- topic/li li">
+                        <p class="- topic/p p">查询加速函数必须位于 where 子句的顶层，不能嵌套于其他复合条件中。</p>
+                    </li>
+                    <li class="- topic/li li">
+                        <p class="- topic/p p">只能使用 and 连接查询加速函数和其它普通查询条件，不能用 or。</p>
+                    </li>
+                </ul></div>
+        </div>
+    </article>
+    <article class="- topic/topic topic nested1" aria-labelledby="ariaid-title11" id="textdb_example">
+        <h2 class="- topic/title title topictitle2" id="ariaid-title11">简单示例</h2>
+        <div class="- topic/body body">
+            <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">例1</strong></p>
+            <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">建库建表</strong></p>
+            <p class="- topic/p p">目前 TextDB 只支持基于 PKEY 引擎使用，因此建库时需要指定 engine="PKEY"。</p>
+            <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="textdb_example__codeblock_it3_32n_cdc" data-ofbid="textdb_example__codeblock_it3_32n_cdc"><code>// 创建 PKEY 引擎中的数据库
+dbName = "dfs://test"
+if (existsDatabase(dbName)){
+        dropDatabase(dbName)
+}
+
+// 通过函数创建数据库
+db = database(dbName, HASH, [INT, 3], engine=`PKEY)
+
+// 通过SQL语句创建数据库
+create database "dfs://test" 
+partitioned by HASH([INT, 3]),engine="PKEY"
+
+// 通过函数创建表，并通过indexes参数指定文本索引，其中textCol列为索引列
+schematb = table(5:5, `col0`col1`textCol, [INT,INT,STRING])
+pt = createPartitionedTable(dbHandle=db,table=schematb,tableName=`pt, partitionColumns=`col0, primaryKey=`col0`col1, indexes={"textCol":"textindex(parser=english,full=false,lowercase=true,stem=false)"})
+
+// 通过SQL语句创建表，并通过indexes参数指定文本索引，其中textCol列为索引列
+CREATE TABLE "dfs://test"."pt"(
+    col0 INT,
+    col1 INT,
+    textCol STRING [indexes="textIndex(parser=english,full=true,lowercase=true,stem=false)"]
+)
+PARTITIONED BY col0,
+primaryKey=`col0`col1</code></pre>
+            <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">索引查询</strong></p>
+            <p class="- topic/p p">本节展示如何通过 TextDB 提供的文本索引查询函数进行查询。</p>
+            <p class="- topic/p p">首先基于上一节建立的库表，插入一些数据用于后续查询：</p>
+            <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="textdb_example__codeblock_ohl_n2n_cdc" data-ofbid="textdb_example__codeblock_ohl_n2n_cdc"><code>textData = [
+        "The sun was shining brightly as I walked down the street, enjoying the warmth of the summer day.",
+        "I enjoy a refreshing smoothie made with apple every morning.",
+        "The sound of the waves crashing against the shore was a soothing melody that helped me relax after a long day.",
+        "The city skyline looked stunning from the top of the mountain, with the lights twinkling like stars in the night sky.",
+        "The picnic basket was filled with juicy apple slices and ripe banana for a healthy snack."
+    ]
+data = table(1..5 as col1, 1..5 as col2, textData)
+
+//分区表中写入数据后，强制将数据写入磁盘
+pt.append!(data)</code></pre>
+            <p class="- topic/p p">执行查询：</p>
+            <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="textdb_example__codeblock_hb2_42n_cdc" data-ofbid="textdb_example__codeblock_hb2_42n_cdc"><code>//查询数据
+// 查询含"apple"或"banana"的行
+select textCol from pt where matchAny(textCol, "apple banana");
+
+// 查询同时包含"apple"和"banana"的行
+select textCol from pt where matchAll(textCol, "apple banana");
+
+// 查询所有包含短语"juicy apple"的行
+select textCol from pt where matchPhrase(textCol, "juicy apple");
+
+// 查询所有包含以"ap"为前缀的单词的行
+select textCol from pt where matchPrefix(textCol, "ap");
+
+// 查询所有包含以"ana"为后缀的单词的行
+select textCol from pt where matchSuffix(textCol, "ana");
+
+// 查询所有包含以"a"为前缀，且以"le"为后缀的单词的行
+select textCol from pt where matchPrefixSuffix(textCol, "ap", "le");
+
+// 查询包含以"filled with juicy ap" 为前缀的短语所在的行
+select textCol from pt where matchPhrasePrefix(textCol, "filled with juicy", "ap");
+
+// 查询包含以"th of the summer day"为后缀的短语所在的行
+select textCol from pt where matchPhraseSuffix(textCol, "th", "of the summer day");
+
+// 查询包含以"hts twinkling like sta"为中缀的短语所在的行
+select textCol from pt where matchPhraseInfix(textCol, "hts", "twinkling like", "sta");
+
+/**
+  查询包含了 "enjoying the summer day"的短语的行，且如果短语内部有小于等于2个无关词汇，也可以被匹配到
+  如 "enjoying the summer day", "enjoying xxx the yyy summer day"都会被匹配，其中xxx,yyy为无关词汇
+  注：如果查询字段或目标字符串中包含停止词，停止词会被预先过滤掉，因此均不计入"无关词汇个数"
+*/
+select textCol from pt where matchSpan(textCol, "enjoying the summer day", 2)
+
+/**
+  查询包含了 "day summer the enjoying"的短语的行，且如果短语内部有小于等于2个无关词汇，也可以被匹配到。
+  且忽略目标文本中 day summer the enjoying之间的相对顺序
+  如 "enjoying the xxx summer day", "day xxx summer the yyy enjoying"都会被匹配，其中xxx,yyy为无关词汇
+*/
+select textCol from pt where matchUnorderedSpan(textCol, "day summer the enjoying", 2)</code></pre>
+            <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">例2</strong></p>
+            <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="textdb_example__codeblock_vyh_2q2_l2c" data-ofbid="textdb_example__codeblock_vyh_2q2_l2c"><code>// 创建 PKEY 引擎中的数据库
+dbName = "dfs://test"
+if (existsDatabase(dbName)){
+        dropDatabase(dbName)
+}
+create database "dfs://test" 
+partitioned by HASH([INT, 3]),engine="PKEY"
+
+// 通过SQL语句创建表，并通过indexes参数指定文本索引，其中textCol列为索引列
+CREATE TABLE "dfs://test"."pt"(
+    col0 INT,
+    col1 INT,
+    textCol STRING [indexes="textIndex(parser=chinese,full=true,lowercase=true)"]
+)
+PARTITIONED BY col0,
+primaryKey=`col0`col1
+
+// 模拟数据并写入
+textData = [
+    "金融市场的波动性对投资者的心理预期产生重要影响。",
+    "投资者需要关注通货膨胀率的变化，通胀预期往往影响股市和债市的表现。",
+    "关税提高通过增加进口商品价格和生产成本，从而推动物价上涨，进而加剧通货膨胀。",
+    "提高关税可能导致进口商品价格上涨，从而影响国内消费水平。",
+    "经济学家警告，持续的高通货膨胀可能引发恶性通货膨胀，而关税可能是其中的一个因素。"
+]
+data = table(1..5 as col1, 1..5 as col2, textData)
+loadTable("dfs://test","pt").append!(data)
+
+// 查询包含 "关税" 的行
+select * from loadTable("dfs://test","pt") where matchAll(textCol,"关税")
+
+// 查询包含 "关税" 或 "通货膨胀" 的行
+select * from loadTable("dfs://test","pt") where matchAny(textCol,"关税通货膨胀")
+
+// 查询包含 "关税" 和 "通货膨胀" 的行
+select * from loadTable("dfs://test","pt") where matchAll(textCol,"关税通货膨胀")</code></pre>
+        </div>
+    </article>
+</article></main></div>
+                        
+                        
+                        
+                        
+                        
+                        
+                    </div>
+                    
+                        <nav role="navigation" id="wh_topic_toc" aria-label="On this page" class="col-lg-2 d-none d-lg-block navbar d-print-none"> 
+                            <div id="wh_topic_toc_content">
+		                        
+	                            <div class=" wh_topic_toc "><div class="wh_topic_label">在本页上</div><ul><li class="topic-item"><a href="#topic_r55_gcn_cdc" data-tocid="topic_r55_gcn_cdc">实现原理</a><ul><li class="topic-item"><a href="#topic_gjs_hcn_cdc" data-tocid="topic_gjs_hcn_cdc">文本数据存储</a></li><li class="topic-item"><a href="#topic_mdt_wcn_cdc" data-tocid="topic_mdt_wcn_cdc">文本索引构建</a></li><li class="topic-item"><a href="#topic_ebq_pdn_cdc" data-tocid="topic_ebq_pdn_cdc">文本索引存储</a></li><li class="topic-item"><a href="#topic_skq_rdn_cdc" data-tocid="topic_skq_rdn_cdc">文本数据检索</a></li></ul></li><li class="topic-item"><a href="#topic_wz3_pp2_l2c" data-tocid="topic_wz3_pp2_l2c">文本索引分析器</a></li><li class="topic-item"><a href="#topic_dxy_5dn_cdc" data-tocid="topic_dxy_5dn_cdc">文本索引查询函数</a></li><li class="topic-item"><a href="#topic_bzt_ydn_cdc" data-tocid="topic_bzt_ydn_cdc">等值查询加速</a></li><li class="topic-item"><a href="#topic_bgb_12n_cdc" data-tocid="topic_bgb_12n_cdc">使用限制</a></li><li class="topic-item"><a href="#textdb_example" data-tocid="textdb_example">简单示例</a></li></ul></div>
+	                        	
+                        	</div>
+                        </nav>
+                    
+                </div>
+            </div>
+            
+            
+            
+        </div> 
+        <footer class="navbar navbar-default wh_footer">
+  <div class=" footer-container mx-auto ">
+<title>Copyright</title><p><b> ©2025 浙江智臾科技有限公司 浙ICP备18048711号-3</b></p>
+  </div>
+</footer>
+        
+        <div id="go2top" class="d-print-none">
+            <span class="oxy-icon oxy-icon-up"></span>
+        </div>
+        
+        <div id="modal_img_large" class="modal">
+            <span class="close oxy-icon oxy-icon-remove"></span>
+            <div id="modal_img_container"></div>
+            <div id="caption"></div>
+        </div>
+        
+        
+        
+    </body>
+</html>

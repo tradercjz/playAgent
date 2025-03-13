@@ -1,0 +1,796 @@
+<!DOCTYPE html><html xmlns="http://www.w3.org/1999/xhtml" xml:lang="zh" lang="zh" data-whc_version="26.0">
+    <head><link rel="shortcut icon" href="../favicon.ico"/><link rel="icon" href="../favicon.ico"/><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><meta name="description" content="综合交易平台（Comprehensive Transaction Platform），简称 CTP，是上海期货信息技术有限公司专门为期货公司开发的一套期货经纪业务管理系统，系统支持国内商品期货和股指期货的交易结算业务，并能自动生成、报送保证金监控文件和反洗钱监控文件。关于 CTP 插件的接口介绍详见 CTP 文档说明 。注意， CTP 插件基于上海期货交易所官方提供的 CTP C++ API ..."/><meta name="DC.rights.owner" content="(C) 版权 2025"/><meta name="copyright" content="(C) 版权 2025"/><meta name="generator" content="DITA-OT"/><meta name="DC.type" content="topic"/><meta name="DC.coverage" content=""/><meta name="DC.relation" content="../plugins/ctp_2.md"/><meta name="prodname" content="DolphinDB"/><meta name="brand" content="DolphinDB"/><meta name="DC.creator" content="DolphinDB"/><meta name="DC.publisher" content="DDB N/A DDB 200"/><meta name="DC.format" content="HTML5"/><meta name="DC.identifier" content="ctp_best_practice"/><title>DolphinDB CTP 行情插件最佳实践指南</title><!--  Generated with Oxygen version 26.0, build number 2024012323.  --><meta name="wh-path2root" content="../"/><meta name="wh-toc-id" content="ctp_best_practice-d9713e95184"/><meta name="wh-source-relpath" content="plugins/ctp_best_practice.dita"/><meta name="wh-out-relpath" content="plugins/ctp_best_practice.html"/>
+
+    <link rel="stylesheet" type="text/css" href="../oxygen-webhelp/app/commons.css?buildId=2024012323"/>
+    <link rel="stylesheet" type="text/css" href="../oxygen-webhelp/app/topic.css?buildId=2024012323"/>
+
+    <script src="../oxygen-webhelp/app/options/properties.js?buildId=20250305183303"></script>
+    <script src="../oxygen-webhelp/app/localization/strings.js?buildId=2024012323"></script>
+    <script src="../oxygen-webhelp/app/search/index/keywords.js?buildId=20250305183303"></script>
+    <script defer="defer" src="../oxygen-webhelp/app/commons.js?buildId=2024012323"></script>
+    <script defer="defer" src="../oxygen-webhelp/app/topic.js?buildId=2024012323"></script>
+<link rel="stylesheet" type="text/css" href="../oxygen-webhelp/template/styles.css?buildId=2024012323"/><script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script><script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script></head>
+
+    <body id="ctp_best_practice" class="wh_topic_page frmBody">
+        <a href="#wh_topic_body" class="sr-only sr-only-focusable">
+            跳转到主要内容
+        </a>
+        
+        
+        
+        
+        <header class="navbar navbar-default wh_header">
+    <div class="container-fluid">
+        <div xmlns:whc="http://www.oxygenxml.com/webhelp/components" class="wh_header_flex_container navbar-nav navbar-expand-md navbar-dark">
+            <div class="wh_logo_and_publication_title_container">
+                <div class="wh_logo_and_publication_title">
+                    
+                    <a href="https://docs.dolphindb.cn/zh/index.html" class=" wh_logo d-none d-sm-block "><img src="../logo.png" alt="  DolphinDB 文档中心  "/></a>
+                    <div class=" wh_publication_title "><a href="../index.html"><span class="booktitle">  <span class="ph mainbooktitle">DolphinDB 文档中心</span>  </span></a></div>
+                    
+                </div>
+                
+                
+            </div>
+
+            <div class="wh_top_menu_and_indexterms_link collapse navbar-collapse" id="wh_top_menu_and_indexterms_link">
+                
+                
+                
+                
+            </div>
+        <div class=" wh_search_input navbar-form wh_topic_page_search search " role="form">
+            
+            
+            
+            <form id="searchForm" method="get" role="search" action="../search.html"><div><input type="search" placeholder="搜索 " class="wh_search_textfield" id="textToSearch" name="searchQuery" aria-label="搜索查询" required="required"/><button type="submit" class="wh_search_button" aria-label="搜索"><span class="search_input_text">搜索</span></button></div></form>
+            
+            <script src="/vendors/react/umd/react.production.min.js" defer="defer"></script>
+<script src="/vendors/react-dom/umd/react-dom.production.min.js" defer="defer"></script>
+<script src="/vendors/dayjs/dayjs.min.js" defer="defer"></script>
+<script src="/vendors/antd/dist/antd.min.js" defer="defer"></script>
+<script src="/vendors/@ant-design/icons/dist/index.umd.min.js" defer="defer"></script>
+<script src="/zh/index.js" type="module"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" defer="defer"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML" defer="defer"><!--
+
+
+--></script>
+<script defer="defer"><!--
+
+// 从主页重定向
+const currentUrl = window.location.href;
+
+// 判断当前URL是否包含index.html并且路径最后部分是index.html
+if (currentUrl.endsWith('index.html')) {
+    // 处理根目录下的index.html跳转
+    const baseUrl = currentUrl.split('/index.html')[0]; // 获取index.html之前的部分
+    const redirectUrl = `${baseUrl}/about/ddb_intro.html`; // 构建跳转路径
+    window.location.href = redirectUrl; // 执行跳转
+}
+
+--></script>
+            
+        </div></div>
+    </div>
+</header>
+        
+        
+         
+        
+        
+        
+        <div class="container-fluid" id="wh_topic_container">
+            <div class="row">
+
+                <nav class="wh_tools d-print-none navbar-expand-md" aria-label="Tools">
+                    
+                    <div data-tooltip-position="bottom" class=" wh_breadcrumb "><ol class="d-print-none"><li><span class="home"><a href="../index.html"><span>主页</span></a></span></li><li><div class="topicref" data-id="chap6_plugin"><div class="title"><a href="../plugins/plg_intro.html"><span class="keyword label">插件</span></a><div class="wh-tooltip"><p class="shortdesc">多个应用场景的插件使用说明和插件开发指导</p></div></div></div></li><li><div class="topicref" data-id="ctp"><div class="title"><a href="../plugins/ctp_2.html">CTP</a></div></div></li><li class="active"><div class="topicref" data-id="ctp_best_practice"><div class="title"><a href="../plugins/ctp_best_practice.html">DolphinDB CTP 行情插件最佳实践指南</a></div></div></li></ol></div>
+                    
+                    
+                    
+                    <div class="wh_right_tools">
+                        <button class="wh_hide_highlight" aria-label="切换搜索突出显示" title="切换搜索突出显示"></button>
+                        <button class="webhelp_expand_collapse_sections" data-next-state="collapsed" aria-label="折叠截面" title="折叠截面"></button>
+                        
+                        
+                        
+                        
+                        <div class=" wh_print_link print d-none d-md-inline-block "><button onClick="window.print()" title="打印此页" aria-label="打印此页"></button></div>
+                        
+                        <button type="button" id="wh_toc_button" class="custom-toggler navbar-toggler collapsed wh_toggle_button navbar-light" aria-expanded="false" aria-label="Toggle publishing table of content" aria-controls="wh_publication_toc">
+                            <span class="navbar-toggler-icon"></span>
+                        </button>
+                    </div>
+                    
+                </nav>
+            </div>
+            
+            
+            
+            
+            <div class="wh_content_area">
+                <div class="row">
+                    
+                        <nav id="wh_publication_toc" class="col-lg-3 col-md-3 col-sm-12 d-md-block d-none d-print-none" aria-label="Table of Contents Container">
+                            <div id="wh_publication_toc_content">
+		                        
+                            	<div class=" wh_publication_toc " data-tooltip-position="right"><span class="expand-button-action-labels"><span id="button-expand-action" role="button" aria-label="Expand"></span><span id="button-collapse-action" role="button" aria-label="Collapse"></span><span id="button-pending-action" role="button" aria-label="Pending"></span></span><ul role="tree" aria-label="Table of Contents"><li role="treeitem"><div data-tocid="ddb_intro-d9713e87" class="topicref" data-id="ddb_intro" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../about/ddb_intro.html" id="ddb_intro-d9713e87-link">关于DolphinDB</a></div></div></li><li role="treeitem"><div data-tocid="chap1_getstarted-d9713e136" class="topicref" data-id="chap1_getstarted" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../getstarted/chap1_getstarted.html" id="chap1_getstarted-d9713e136-link">快速上手</a><div class="wh-tooltip"><p class="shortdesc">如何快速部署 DolphinDB、建库建表、写入和查询数据</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="sectionddb_deployment-d9713e189" class="topicref" data-id="sectionddb_deployment" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action sectionddb_deployment-d9713e189-link" class="wh-expand-btn"></span><div class="title"><a href="../deploy/deploy_intro.html" id="sectionddb_deployment-d9713e189-link"><span class="keyword label">部署</span></a><div class="wh-tooltip"><p class="shortdesc">如何在不同的场景中部署 DolphinDB</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="new_chap_database_manage_new_chap_dbmanage_landing_page-d9713e2259" class="topicref" data-id="new_chap_database_manage_new_chap_dbmanage_landing_page" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action new_chap_database_manage_new_chap_dbmanage_landing_page-d9713e2259-link" class="wh-expand-btn"></span><div class="title"><a href="../db_distr_comp/cfg/db_intro.html" id="new_chap_database_manage_new_chap_dbmanage_landing_page-d9713e2259-link"><span class="keyword label">数据库</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 数据库的基本概念</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="chap7_tutorials_streaming-d9713e3760" class="topicref" data-id="chap7_tutorials_streaming" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action chap7_tutorials_streaming-d9713e3760-link" class="wh-expand-btn"></span><div class="title"><a href="../stream/str_intro.html" id="chap7_tutorials_streaming-d9713e3760-link"><span class="keyword label">流数据</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 流数据引擎及流数据计算的基本概念</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e7513" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e7513-link" class="wh-expand-btn"></span><div class="title"><a href="../db_distr_comp/db_oper/import_data.html" id="tocId-d9713e7513-link">数据迁移</a><div class="wh-tooltip"><p class="shortdesc">如何从不同数据源向 DolphinDB 迁移数据</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="chap7_tutorials_system_management-d9713e7940" class="topicref" data-id="chap7_tutorials_system_management" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action chap7_tutorials_system_management-d9713e7940-link" class="wh-expand-btn"></span><div class="title"><a href="../sys_man/om_intro.html" id="chap7_tutorials_system_management-d9713e7940-link"><span class="keyword label">系统运维</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 的系统运维功能及方法</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="troubleshooting-d9713e8780" class="topicref" data-id="troubleshooting" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action troubleshooting-d9713e8780-link" class="wh-expand-btn"></span><div class="title"><a href="../error_codes/troubleshooting.html" id="troubleshooting-d9713e8780-link">故障排查</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="about_language_resources-d9713e20911" class="topicref" data-id="about_language_resources" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action about_language_resources-d9713e20911-link" class="wh-expand-btn"></span><div class="title"><a href="../progr/progr_intro.html" id="about_language_resources-d9713e20911-link"><span class="keyword label">编程语言</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 编程基本概念与方法、SQL 在 DolphinDB 的应用</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="functions_references-d9713e30925" class="topicref" data-id="functions_references" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action functions_references-d9713e30925-link" class="wh-expand-btn"></span><div class="title"><a href="../funcs/funcs_intro.html" id="functions_references-d9713e30925-link"><span class="keyword label">函数参考</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 函数分类、语法、详解及示例</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="api_protocol-d9713e94064" class="topicref" data-id="api_protocol" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action api_protocol-d9713e94064-link" class="wh-expand-btn"></span><div class="title"><a href="../api/connapi_intro.html" id="api_protocol-d9713e94064-link"><span class="keyword label">连接器 &amp; API</span></a><div class="wh-tooltip"><p class="shortdesc">面向不同编程语言的 DolphinDB API 及连接器，相关协议和用法</p></div></div></div></li><li role="treeitem" aria-expanded="true"><div data-tocid="chap6_plugin-d9713e94210" class="topicref" data-id="chap6_plugin" data-state="expanded"><span role="button" tabindex="0" aria-labelledby="button-collapse-action chap6_plugin-d9713e94210-link" class="wh-expand-btn"></span><div class="title"><a href="../plugins/plg_intro.html" id="chap6_plugin-d9713e94210-link"><span class="keyword label">插件</span></a><div class="wh-tooltip"><p class="shortdesc">多个应用场景的插件使用说明和插件开发指导</p></div></div></div><ul role="group" class="navbar-nav nav-list"><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e94263" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e94263-link" class="wh-expand-btn"></span><div class="title"><a href="../plugins/plg_howtos.html" id="tocId-d9713e94263-link">插件使用与开发</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="amdquote-d9713e94448" class="topicref" data-id="amdquote" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action amdquote-d9713e94448-link" class="wh-expand-btn"></span><div class="title"><a href="../plugins/amdquote/amdquote_2.html" id="amdquote-d9713e94448-link">amdQuote</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="arrow-d9713e94540" class="topicref" data-id="arrow" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action arrow-d9713e94540-link" class="wh-expand-btn"></span><div class="title"><a href="../plugins/Arrow/arrow.html" id="arrow-d9713e94540-link">Arrow</a></div></div></li><li role="treeitem"><div data-tocid="awss3-d9713e94632" class="topicref" data-id="awss3" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../plugins/aws/aws.html" id="awss3-d9713e94632-link">AWSS3</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="backtest-d9713e94678" class="topicref" data-id="backtest" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action backtest-d9713e94678-link" class="wh-expand-btn"></span><div class="title"><a href="../plugins/backtest.html" id="backtest-d9713e94678-link">Backtest</a></div></div></li><li role="treeitem" aria-expanded="true"><div data-tocid="ctp-d9713e95138" class="topicref" data-id="ctp" data-state="expanded"><span role="button" tabindex="0" aria-labelledby="button-collapse-action ctp-d9713e95138-link" class="wh-expand-btn"></span><div class="title"><a href="../plugins/ctp_2.html" id="ctp-d9713e95138-link">CTP</a></div></div><ul role="group" class="navbar-nav nav-list"><li role="treeitem" class="active"><div data-tocid="ctp_best_practice-d9713e95184" class="topicref" data-id="ctp_best_practice" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../plugins/ctp_best_practice.html" id="ctp_best_practice-d9713e95184-link">DolphinDB CTP 行情插件最佳实践指南</a></div></div></li></ul></li><li role="treeitem"><div data-tocid="datafeed-d9713e95230" class="topicref" data-id="datafeed" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../plugins/datafeed.html" id="datafeed-d9713e95230-link">DataFeed</a></div></div></li><li role="treeitem"><div data-tocid="efh-d9713e95276" class="topicref" data-id="efh" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../plugins/efh.html" id="efh-d9713e95276-link">EFH</a></div></div></li><li role="treeitem"><div data-tocid="encoderdecoder-d9713e95322" class="topicref" data-id="encoderdecoder" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../plugins/EncoderDecoder.html" id="encoderdecoder-d9713e95322-link">EncoderDecoder</a></div></div></li><li role="treeitem"><div data-tocid="excel_add_in-d9713e95368" class="topicref" data-id="excel_add_in" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../plugins/excel_add_in.html" id="excel_add_in-d9713e95368-link">Excel Add-In</a></div></div></li><li role="treeitem"><div data-tocid="feather-d9713e95415" class="topicref" data-id="feather" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../plugins/feather/feather.html" id="feather-d9713e95415-link">Feather</a></div></div></li><li role="treeitem"><div data-tocid="gp-d9713e95461" class="topicref" data-id="gp" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../plugins/gp/gp.html" id="gp-d9713e95461-link">GP</a></div></div></li><li role="treeitem"><div data-tocid="gurobi-d9713e95507" class="topicref" data-id="gurobi" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../plugins/gurobi.html" id="gurobi-d9713e95507-link">gurobi</a></div></div></li><li role="treeitem"><div data-tocid="hbase-d9713e95553" class="topicref" data-id="hbase" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../plugins/hbase/hbase.html" id="hbase-d9713e95553-link">HBase</a></div></div></li><li role="treeitem"><div data-tocid="hdf5-d9713e95599" class="topicref" data-id="hdf5" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../plugins/hdf5/hdf5.html" id="hdf5-d9713e95599-link">HDF5</a></div></div></li><li role="treeitem"><div data-tocid="hdfs-d9713e95645" class="topicref" data-id="hdfs" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../plugins/hdfs/hdfs.html" id="hdfs-d9713e95645-link">HDFS</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="httpclient-d9713e95691" class="topicref" data-id="httpclient" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action httpclient-d9713e95691-link" class="wh-expand-btn"></span><div class="title"><a href="../plugins/httpClient/httpclient.html" id="httpclient-d9713e95691-link">HttpClient</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="insight-d9713e95783" class="topicref" data-id="insight" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action insight-d9713e95783-link" class="wh-expand-btn"></span><div class="title"><a href="../plugins/insight/insight_2.html" id="insight-d9713e95783-link">INSIGHT</a></div></div></li><li role="treeitem"><div data-tocid="kafka-d9713e95875" class="topicref" data-id="kafka" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../plugins/kafka/kafka.html" id="kafka-d9713e95875-link">Kafka</a></div></div></li><li role="treeitem"><div data-tocid="kdb-d9713e95921" class="topicref" data-id="kdb" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../plugins/kdb/kdb.html" id="kdb-d9713e95921-link">Kdb+</a></div></div></li><li role="treeitem"><div data-tocid="ldap-d9713e95967" class="topicref" data-id="ldap" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../plugins/LDAP.html" id="ldap-d9713e95967-link">LDAP</a></div></div></li><li role="treeitem"><div data-tocid="lgmb-d9713e96014" class="topicref" data-id="lgmb" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../plugins/lgbm.html" id="lgmb-d9713e96014-link">lgbm</a></div></div></li><li role="treeitem"><div data-tocid="libtorch-d9713e96060" class="topicref" data-id="libtorch" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../plugins/libtorch/libtorch.html" id="libtorch-d9713e96060-link">LibTorch</a></div></div></li><li role="treeitem"><div data-tocid="mat-d9713e96106" class="topicref" data-id="mat" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../plugins/mat/mat.html" id="mat-d9713e96106-link">mat</a></div></div></li><li role="treeitem"><div data-tocid="matchingengine-d9713e96152" class="topicref" data-id="matchingengine" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../plugins/MatchingEngine/me.html" id="matchingengine-d9713e96152-link">MatchingEngine</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="mes-d9713e96198" class="topicref" data-id="mes" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action mes-d9713e96198-link" class="wh-expand-btn"></span><div class="title"><a href="../plugins/matchingEngineSimulator/mes.html" id="mes-d9713e96198-link">MatchingEngineSimulator</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="mdl-d9713e96336" class="topicref" data-id="mdl" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action mdl-d9713e96336-link" class="wh-expand-btn"></span><div class="title"><a href="../plugins/MDL.html" id="mdl-d9713e96336-link">MDL</a></div></div></li><li role="treeitem"><div data-tocid="mongodb-d9713e96428" class="topicref" data-id="mongodb" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../plugins/mongodb/mongodb.html" id="mongodb-d9713e96428-link">MongoDB</a></div></div></li><li role="treeitem"><div data-tocid="mqtt-d9713e96474" class="topicref" data-id="mqtt" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../plugins/mqtt/mqtt.html" id="mqtt-d9713e96474-link">mqtt</a></div></div></li><li role="treeitem"><div data-tocid="mseed-d9713e96520" class="topicref" data-id="mseed" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../plugins/mseed/mseed.html" id="mseed-d9713e96520-link">mseed</a></div></div></li><li role="treeitem"><div data-tocid="mysql-d9713e96566" class="topicref" data-id="mysql" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../plugins/mysql/mysql.html" id="mysql-d9713e96566-link">MySQL</a></div></div></li><li role="treeitem"><div data-tocid="nsq-d9713e96612" class="topicref" data-id="nsq" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../plugins/nsq/nsq_2.html" id="nsq-d9713e96612-link">NSQ</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="odbc-d9713e96659" class="topicref" data-id="odbc" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action odbc-d9713e96659-link" class="wh-expand-btn"></span><div class="title"><a href="../plugins/odbc/odbc.html" id="odbc-d9713e96659-link">ODBC</a></div></div></li><li role="treeitem"><div data-tocid="opcua-d9713e96751" class="topicref" data-id="opcua" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../plugins/opcua/opcua.html" id="opcua-d9713e96751-link">OPCUA</a></div></div></li><li role="treeitem"><div data-tocid="opc-d9713e96797" class="topicref" data-id="opc" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../plugins/opc/opc.html" id="opc-d9713e96797-link">OPC</a></div></div></li><li role="treeitem"><div data-tocid="orc-d9713e96843" class="topicref" data-id="orc" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../plugins/orc.html" id="orc-d9713e96843-link">ORC</a></div></div></li><li role="treeitem"><div data-tocid="parquet-d9713e96889" class="topicref" data-id="parquet" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../plugins/parquet/parquet.html" id="parquet-d9713e96889-link">Parquet</a></div></div></li><li role="treeitem"><div data-tocid="py-d9713e96935" class="topicref" data-id="py" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../plugins/py/py.html" id="py-d9713e96935-link">Py</a></div></div></li><li role="treeitem"><div data-tocid="rabbitmq-d9713e96981" class="topicref" data-id="rabbitmq" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../plugins/rabbitMQ.html" id="rabbitmq-d9713e96981-link">RabbitMQ</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="redis-d9713e97027" class="topicref" data-id="redis" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action redis-d9713e97027-link" class="wh-expand-btn"></span><div class="title"><a href="../plugins/redis.html" id="redis-d9713e97027-link">Redis</a></div></div></li><li role="treeitem"><div data-tocid="quantlib-d9713e97119" class="topicref" data-id="quantlib" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../plugins/quantlib/quantlib.html" id="quantlib-d9713e97119-link">QuantLib</a></div></div></li><li role="treeitem"><div data-tocid="rocketmq-d9713e97165" class="topicref" data-id="rocketmq" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../plugins/rocketMQ.html" id="rocketmq-d9713e97165-link">RocketMQ</a></div></div></li><li role="treeitem"><div data-tocid="sevenzip-d9713e97211" class="topicref" data-id="sevenzip" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../plugins/sevenzip.html" id="sevenzip-d9713e97211-link">SevenZip</a></div></div></li><li role="treeitem"><div data-tocid="schemalesswriter-d9713e97258" class="topicref" data-id="schemalesswriter" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../plugins/slwriter.html" id="schemalesswriter-d9713e97258-link">SchemalessWriter</a></div></div></li><li role="treeitem"><div data-tocid="signal-d9713e97304" class="topicref" data-id="signal" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../plugins/signal/signal.html" id="signal-d9713e97304-link">signal</a></div></div></li><li role="treeitem"><div data-tocid="ssequotationfile-d9713e97350" class="topicref" data-id="ssequotationfile" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../plugins/SSEQuotationFile.html" id="ssequotationfile-d9713e97350-link">SSEQuotationFile</a></div></div></li><li role="treeitem"><div data-tocid="svm-d9713e97396" class="topicref" data-id="svm" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../plugins/svm/svm.html" id="svm-d9713e97396-link">SVM</a></div></div></li><li role="treeitem"><div data-tocid="tcpsocket-d9713e97442" class="topicref" data-id="tcpsocket" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../plugins/tcpsocket.html" id="tcpsocket-d9713e97442-link">TCPSocket</a></div></div></li><li role="treeitem"><div data-tocid="websocket-d9713e97488" class="topicref" data-id="websocket" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../plugins/websocket.html" id="websocket-d9713e97488-link">WebSocket</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="windtdf-d9713e97534" class="topicref" data-id="windtdf" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action windtdf-d9713e97534-link" class="wh-expand-btn"></span><div class="title"><a href="../plugins/windtdf.html" id="windtdf-d9713e97534-link">WindTDF</a></div></div></li><li role="treeitem"><div data-tocid="xgboost-d9713e97626" class="topicref" data-id="xgboost" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../plugins/xgboost/xgboost.html" id="xgboost-d9713e97626-link">xgboost</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="xtp-d9713e97672" class="topicref" data-id="xtp" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action xtp-d9713e97672-link" class="wh-expand-btn"></span><div class="title"><a href="../plugins/xtp.html" id="xtp-d9713e97672-link">XTP</a></div></div></li><li role="treeitem"><div data-tocid="zip-d9713e97764" class="topicref" data-id="zip" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../plugins/zip/zip.html" id="zip-d9713e97764-link">zip</a></div></div></li><li role="treeitem"><div data-tocid="zlib-d9713e97810" class="topicref" data-id="zlib" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../plugins/zlib/zlib.html" id="zlib-d9713e97810-link">Zlib</a></div></div></li><li role="treeitem"><div data-tocid="zmq-d9713e97857" class="topicref" data-id="zmq" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../plugins/zmq/zmq.html" id="zmq-d9713e97857-link">zmq</a></div></div></li></ul></li><li role="treeitem" aria-expanded="false"><div data-tocid="third_party-d9713e97904" class="topicref" data-id="third_party" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action third_party-d9713e97904-link" class="wh-expand-btn"></span><div class="title"><a href="../third_party.html" id="third_party-d9713e97904-link">第三方工具</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="about_tutorials-d9713e98227" class="topicref" data-id="about_tutorials" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action about_tutorials-d9713e98227-link" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/about_tutorials.html" id="about_tutorials-d9713e98227-link"><span class="keyword label">教程</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 产品使用教程</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e105982" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e105982-link" class="wh-expand-btn"></span><div class="title"><a href="../rn/server/3_00_2.html" id="tocId-d9713e105982-link">版本说明</a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 版本发布历史</p></div></div></div></li></ul></div>
+		                        
+                            </div>
+                        </nav>
+                    
+                    
+                    <div class="col-lg-7 col-md-9 col-sm-12" id="wh_topic_body">
+                        <button id="wh_close_publication_toc_button" class="close-toc-button d-none" aria-label="Toggle publishing table of content" aria-controls="wh_publication_toc" aria-expanded="true">
+                            <span class="close-toc-icon-container">
+                                <span class="close-toc-icon"></span>     
+                            </span>
+                        </button>
+                        <button id="wh_close_topic_toc_button" class="close-toc-button d-none" aria-label="Toggle topic table of content" aria-controls="wh_topic_toc" aria-expanded="true">
+                            <span class="close-toc-icon-container">
+                                <span class="close-toc-icon"></span>     
+                            </span>
+                        </button>
+                        
+                        <div class=" wh_topic_content body "><main role="main"><article class="- topic/topic topic" role="article" aria-labelledby="ariaid-title1">
+    <h1 class="- topic/title title topictitle1" id="ariaid-title1">DolphinDB CTP 行情插件最佳实践指南</h1>
+    <div class="- topic/body body">
+        <p class="- topic/p p">综合交易平台（Comprehensive Transaction Platform），简称
+            CTP，是上海期货信息技术有限公司专门为期货公司开发的一套期货经纪业务管理系统，系统支持国内商品期货和股指期货的交易结算业务，并能自动生成、报送保证金监控文件和反洗钱监控文件。关于
+            CTP 插件的接口介绍详见 <a class="- topic/xref xref" href="ctp.html">CTP 文档说明</a>。注意， CTP
+            插件基于上海期货交易所官方提供的 CTP C++ API 实现， 推荐的版本号为 v6.6.8 和 v6.6.9。</p>
+        <p class="- topic/p p">DolphinDB 提供了对接 CTP 系统的 CTP 行情插件，可以订阅期货市场的实时行情数据和查询商品信息数据。插件基于多种 CTP SDK 进行开发，目前支持 CTP 与
+            CTPMini 两种。</p>
+        <p class="- topic/p p">本文主要介绍如何通过 CTP 插件将实时行情数据写入分布式数据库，以及如何实现节点启动时自动订阅 CTP 实时行情。本文全部代码需要运行在 2.00.11 或者更高版本的
+            DolphinDB server 以及插件上，目前仅支持 Linux 系统。</p>
+    </div>
+    <article class="- topic/topic topic nested1" aria-labelledby="ariaid-title2" id="topic_vx3_vff_h2c">
+        <h2 class="- topic/title title topictitle2" id="ariaid-title2">1. 基本使用介绍</h2>
+        <div class="- topic/body body">
+            <p class="- topic/p p">节点启动后，可以使用 GUI, VS Code, Web UI 等 <a class="- topic/xref xref" href="../db_distr_comp/clients.html">DolphinDB 客户端</a> 连接相应节点并执行示例代码。</p>
+        </div>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title3" id="topic_t4w_vff_h2c">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title3">1.1 安装插件</h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p">安装插件前，需要登录有创建权限的账号。执行如下代码登录默认的管理员账号：</p>
+                <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_t4w_vff_h2c__codeblock_dvr_bgf_h2c" data-ofbid="topic_t4w_vff_h2c__codeblock_dvr_bgf_h2c"><code>login("admin", "123456")</code></pre>
+                <p class="- topic/p p">执行 <code class="+ topic/ph pr-d/codeph ph codeph">listRemotePlugins</code> 函数，即可查看当前 DolphinDB 所支持的插件版本信息。</p>
+                <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_t4w_vff_h2c__codeblock_nl4_dgf_h2c" data-ofbid="topic_t4w_vff_h2c__codeblock_nl4_dgf_h2c"><code>listRemotePlugins();          // 所有插件的版本信息
+listRemotePlugins("ctp");     // ctp 插件的版本信息</code></pre>
+                <p class="- topic/p p">返回值为1行2列的表格，分别是插件名及其对应的版本信息，如图1-1：</p>
+                <figure class="- topic/fig fig fignone" id="topic_t4w_vff_h2c__fig_a4k_sbf_h2c" data-ofbid="topic_t4w_vff_h2c__fig_a4k_sbf_h2c"><figcaption data-caption-side="top" class="- topic/title title figcap"><span class="figtitleprefix fig--title-label">图<span class="fig--title-label-number"> 1</span><span class="fig--title-label-punctuation">. </span></span><span class="fig--title">图 1-1 插件名及版本信息</span></figcaption>
+                    
+                    <img class="- topic/image image" id="topic_t4w_vff_h2c__image_nym_lgf_h2c" src="images/ctp_best_practice/1-1.png"/>
+                </figure>
+                <p class="- topic/p p">执行 <code class="+ topic/ph pr-d/codeph ph codeph">installPlugin</code> 函数，则可以下载到与当前 server 版本适配的 CTP
+                    插件文件，插件文件包括插件描述文件及插件的二进制文件：</p>
+                <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_t4w_vff_h2c__codeblock_vyf_ngf_h2c" data-ofbid="topic_t4w_vff_h2c__codeblock_vyf_ngf_h2c"><code>installPlugin("ctp")</code></pre>
+                <p class="- topic/p p"><code class="+ topic/ph pr-d/codeph ph codeph">installPlugin</code>
+                    函数若正常返回，则代表下载成功，其返回值为插件描述文件（<em class="+ topic/ph hi-d/i ph i">PluginCtp.txt</em>）的安装路径，如：</p>
+                <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_t4w_vff_h2c__codeblock_qly_ngf_h2c" data-ofbid="topic_t4w_vff_h2c__codeblock_qly_ngf_h2c"><code>/path_to_dolphindb_server/server/plugins/ctp/PluginCtp.txt</code></pre>
+                <p class="- topic/p p"><code class="+ topic/ph pr-d/codeph ph codeph">installPlugin</code> 函数实际上是完成从远程文件服务器拉取插件文件到 DolphinDB server
+                    所在的服务器，因此需要一定的时间，请耐心等待大约一分钟。</p>
+            </div>
+        </article>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title4" id="topic_s5w_vff_h2c">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title4">1.2 加载插件</h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p">在脚本中调用插件相关的接口前，需要先加载插件。</p>
+                <p class="- topic/p p">在 GUI（或 VS Code、Web UI）等<a class="- topic/xref xref" href="../db_distr_comp/clients.html">客户端</a>中执行
+                        <code class="+ topic/ph pr-d/codeph ph codeph">loadPlugin</code> 函数加载插件。以下示例中直接使用了插件名，也可以使用相对路径
+                        <em class="+ topic/ph hi-d/i ph i">./plugins/ctp/PluginCtp.txt </em>及 1.1
+                        中返回的绝对路径<em class="+ topic/ph hi-d/i ph i">/path_to_dolphindb_server/server/plugins/ctp/PluginCtp.txt</em>。</p>
+                <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_s5w_vff_h2c__codeblock_ndy_qgf_h2c" data-ofbid="topic_s5w_vff_h2c__codeblock_ndy_qgf_h2c"><code>loadPlugin("ctp")</code></pre>
+                <p class="- topic/p p"><code class="+ topic/ph pr-d/codeph ph codeph">loadPlugin</code> 函数正常返回则插件加载成功，以 VS Code 为例，首次加载成功后返回的部分信息如图1-2，返回值是
+                    CTP 插件提供的所有函数，至此插件安装与加载已全部完成。</p>
+                <figure class="- topic/fig fig fignone" id="topic_s5w_vff_h2c__fig_isr_rgf_h2c" data-ofbid="topic_s5w_vff_h2c__fig_isr_rgf_h2c"><figcaption data-caption-side="top" class="- topic/title title figcap"><span class="figtitleprefix fig--title-label">图<span class="fig--title-label-number"> 2</span><span class="fig--title-label-punctuation">. </span></span><span class="fig--title">图 1-2 CTP插件函数预览</span></figcaption>
+                    
+                    <img class="- topic/image image" id="topic_s5w_vff_h2c__image_jsr_rgf_h2c" src="images/ctp_best_practice/1-2.png"/>
+                </figure>
+                <p class="- topic/p p">此外，需要注意，如果重复执行 <code class="+ topic/ph pr-d/codeph ph codeph">loadPlugin</code> 加载插件，会抛出模块已经被使用的错误提示，因为节点启动后，只需加载一次
+                    CTP 插件，即可在任意会话中调用该插件提供的函数。错误提示如下：</p>
+                <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_s5w_vff_h2c__codeblock_usr_5gf_h2c" data-ofbid="topic_s5w_vff_h2c__codeblock_usr_5gf_h2c"><code>The module [ctp] is already in use.</code></pre>
+                <p class="- topic/p p">可以通过 <a class="- topic/xref xref" href="../progr/statements/tryCatch.html">try-catch</a>
+                    语句捕获这个错误，避免因为插件已加载而中断后续脚本代码的执行：</p>
+                <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_s5w_vff_h2c__codeblock_lwq_wgf_h2c" data-ofbid="topic_s5w_vff_h2c__codeblock_lwq_wgf_h2c"><code>try{ loadPlugin("ctp") } catch(ex){print ex}</code></pre>
+                <p class="- topic/p p">此外，若节点重启，则需要重新加载插件。</p>
+            </div>
+        </article>
+    </article>
+    <article class="- topic/topic topic nested1" aria-labelledby="ariaid-title5" id="topic_xtp_vff_h2c">
+        <h2 class="- topic/title title topictitle2" id="ariaid-title5">2. 通过 CTP 行情插件将实时行情数据写入分布式数据库</h2>
+        <div class="- topic/body body">
+            <p class="- topic/p p">本章以订阅中国金融期货交易所、上海期货交易所、广州期货交易所、郑州商品交易所、大连商品交易所及上海国际能源交易中心的期货期权交易数据实时写入 DolphinDB
+                分布式数据库为例，对 CTP 插件的使用进行说明，大致的流程如图2-1：</p>
+            <figure class="- topic/fig fig fignone" id="topic_xtp_vff_h2c__fig_u3w_ygf_h2c" data-ofbid="topic_xtp_vff_h2c__fig_u3w_ygf_h2c"><figcaption data-caption-side="top" class="- topic/title title figcap"><span class="figtitleprefix fig--title-label">图<span class="fig--title-label-number"> 3</span><span class="fig--title-label-punctuation">. </span></span><span class="fig--title">图 2-1 CTP插件接入实时行情数据</span></figcaption>
+                
+                <img class="- topic/image image" id="topic_xtp_vff_h2c__image_v3w_ygf_h2c" src="images/ctp_best_practice/2-1.png" width="680"/>
+            </figure>
+            <ul class="- topic/ul ul" id="topic_xtp_vff_h2c__ul_dv2_bhf_h2c" data-ofbid="topic_xtp_vff_h2c__ul_dv2_bhf_h2c">
+                <li class="- topic/li li">通过 CTP 插件订阅实时交易数据写入 DolphinDB <em class="+ topic/ph hi-d/i ph i">ctpMarketDataStream
+                    </em>持久化流数据表中。流数据表是具备发布订阅功能的内存表。</li>
+                <li class="- topic/li li">订阅<em class="+ topic/ph hi-d/i ph i"> ctpMarketDataStream</em> 后对原始数据进行一些自定义的标准化处理，将标准化交易数据写入 DolphinDB
+                        <em class="+ topic/ph hi-d/i ph i">ctpMarketStream </em>持久化流数据表中。</li>
+                <li class="- topic/li li">订阅 <em class="+ topic/ph hi-d/i ph i">ctpMarketStream</em> 持久化流数据表写入 DolphinDB 分布式数据库。分布式数据库将数据存储到磁盘上。</li>
+            </ul>
+            <div class="- topic/note note note note_note" id="topic_xtp_vff_h2c__note_a1f_chf_h2c" data-ofbid="topic_xtp_vff_h2c__note_a1f_chf_h2c"><span class="note__title">注：</span> 
+                <p class="- topic/p p">CTP 与 CTPMini 的 API 与后台系统并不相互兼容，可能会导致 crash。请避免使用 CTP 版本插件连接 CTPMini 后台，或者使用
+                    CTPMini 版本插件连接 CTP 后台。</p>
+            </div>
+            <p class="- topic/p p">下面分步骤介绍关键的 DolphinDB 代码实现，完整脚本见附录。</p>
+        </div>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title6" id="topic_qnd_wff_h2c">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title6">2.1 参数配置</h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">CTP 连接配置</strong></p>
+                <p class="- topic/p p">用户需要根据实际情况配置 CTP 账户信息。</p>
+                <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_qnd_wff_h2c__codeblock_dbb_jrw_32c" data-ofbid="topic_qnd_wff_h2c__codeblock_dbb_jrw_32c"><code>// 配置账户信息
+ip = "111.111.111.11"
+port = 11111
+config = {
+    "OutputElapsed": true,
+    "ReceivedTime": true,
+    "ConcatTime": true
+}
+
+// 获取需要订阅的合约范围,路径信息需自行定义
+ids = exec distinct trade_code from loadText("./future_basic.csv")</code></pre>
+                <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">变量说明：</strong></p>
+                <ul class="- topic/ul ul" id="topic_qnd_wff_h2c__ul_ebb_jrw_32c" data-ofbid="topic_qnd_wff_h2c__ul_ebb_jrw_32c">
+                    <li class="- topic/li li"><em class="+ topic/ph hi-d/i ph i">ip</em> 参数为 STRING 类型标量或向量，表示 CTP 行情服务器的 IP 地址。</li>
+                    <li class="- topic/li li"><em class="+ topic/ph hi-d/i ph i">port 参数</em>为 INT 类型标量或向量，表示 CTP 行情服务器的端口。如果为向量，其长度应与向量 <em class="+ topic/ph hi-d/i ph i">ip</em>
+                        的长度相等。</li>
+                    <li class="- topic/li li"><em class="+ topic/ph hi-d/i ph i">config</em> 为一个字典，key 是 STRING 类型标量，value 为 BOOL 标量。<ul class="- topic/ul ul" id="topic_qnd_wff_h2c__ul_fbb_jrw_32c" data-ofbid="topic_qnd_wff_h2c__ul_fbb_jrw_32c">
+                            <li class="- topic/li li">如果 <em class="+ topic/ph hi-d/i ph i">ConcatTime</em> 为 true，则会将 UpdateTime 和 UpdateMillisec 字段合并为一个
+                                tradeTime 字段置于表末尾，类型为 TIME。</li>
+                            <li class="- topic/li li">如果 <em class="+ topic/ph hi-d/i ph i">ReceivedTime</em> 为 true，则会将接收到数据的时间作为一个字段置于表末尾，类型为
+                                NANOTIMESTAMP。</li>
+                            <li class="- topic/li li">如果 <em class="+ topic/ph hi-d/i ph i">OutputElapsed </em>为 true，则会将数据进入插件，到插入流表前的时间间隔作为一个字段置于表末尾，类型为
+                                LONG，单位为纳秒。</li>
+                        </ul></li>
+                    <li class="- topic/li li"><em class="+ topic/ph hi-d/i ph i">ids</em> 参数为 STRING 类型向量，是由合约 ID 组成的数组，表示需要订阅的合约范围。<ul class="- topic/ul ul" id="topic_qnd_wff_h2c__ul_gbb_jrw_32c" data-ofbid="topic_qnd_wff_h2c__ul_gbb_jrw_32c">
+                            <li class="- topic/li li">./future_basic.csv 是相对于节点主目录的路径，可以通过 <a class="- topic/xref xref" href="../funcs/g/getHomeDir.html">getHomeDir</a>
+                                函数获取节点主目录。</li>
+                        </ul></li>
+                </ul>
+                <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">原始数据流数据表配置</strong></p>
+                <p class="- topic/p p"><em class="+ topic/ph hi-d/i ph i">marketTBCapacity</em> 参数是行情数据的流表预分配容量大小，表示流数据表在内存中最多保留多少行。可以根据机器的内存大小进行配置。</p>
+                <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_qnd_wff_h2c__codeblock_ygx_krw_32c" data-ofbid="topic_qnd_wff_h2c__codeblock_ygx_krw_32c"><code>marketTBCapacity = 2000000
+// 原始数据进入的流数据表表名及类型
+ctpSubTBName = "ctpMarketDataStream"
+ctpSubType = "marketData"
+// 原始数据标准化后进入的流数据表表名
+stdStreamTBName = "ctpMarketStream"</code></pre>
+                <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">原始数据入库配置</strong></p>
+                <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_qnd_wff_h2c__codeblock_e2x_lrw_32c" data-ofbid="topic_qnd_wff_h2c__codeblock_e2x_lrw_32c"><code>// 标准化数据入库的数据库名
+stdDestDBName = "dfs://ctp_market_data"
+// 标准化数据入库的数据表名
+stdDestTBName = "ctp_market"</code></pre>
+            </div>
+        </article>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title7" id="topic_dwd_wff_h2c">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title7">2.2 清理环境（可选）</h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p">为保证本文的示例脚本能够反复执行，特提供了以下流环境清理脚本。</p>
+                <p class="- topic/p p">由于相同的流数据表名和订阅无法进行重复定义，因此先取消相关订阅并清除需要用到的流数据表。</p>
+                <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_dwd_wff_h2c__codeblock_chf_4hf_h2c" data-ofbid="topic_dwd_wff_h2c__codeblock_chf_4hf_h2c"><code>use ops
+
+// 清理原始数据环境
+unsubscribeAll(tbName=ctpSubTBName)
+dropStreamTable(ctpSubTBName, force=true)
+// 清理标准化数据环境
+unsubscribeAll(tbName=stdStreamTBName)
+dropStreamTable(stdStreamTBName, force=true)</code></pre>
+            </div>
+        </article>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title8" id="topic_ad2_wff_h2c">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title8">2.3 建立 CTP 连接 </h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p">用户配置 CTP 账户信息，使用 <a class="- topic/xref xref" href="ctp.html#ctpconnect">ctp::connect</a> 函数创建一个和 CTP 行情服务器之间的连接，返回一个句柄。</p>
+                <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_ad2_wff_h2c__codeblock_zpk_rhf_h2c" data-ofbid="topic_ad2_wff_h2c__codeblock_zpk_rhf_h2c"><code>conn = ctp::connect(ip, port, config)</code></pre>
+            </div>
+        </article>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title9" id="topic_ik2_wff_h2c">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title9">2.4 创建库表 </h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">创建持久化原始行情流数据表</strong></p>
+                <p class="- topic/p p">首先调用 <a class="- topic/xref xref" href="ctp.html#ctpgetschema">ctp::getSchema
+                    </a>函数获取 CTP 原始行情数据表的表结构，再调用 <a class="- topic/xref xref" href="../funcs/e/enableTableShareAndPersistence.html">enableTableShareAndPersistence</a> 函数将流数据表共享，创建持久化流数据表。</p>
+                <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_ik2_wff_h2c__codeblock_lmq_nrw_32c" data-ofbid="topic_ik2_wff_h2c__codeblock_lmq_nrw_32c"><code>tb = ctp::getSchema(conn, ctpSubType)
+enableTableShareAndPersistence(
+  table=streamTable(marketTBCapacity:0, tb.name, tb.typeString),
+  tableName=ctpSubTBName,
+  cacheSize=marketTBCapacity,
+  preCache=0)</code></pre>
+                <div class="- topic/p p">
+                    <ul class="- topic/ul ul" id="topic_ik2_wff_h2c__ul_mmq_nrw_32c" data-ofbid="topic_ik2_wff_h2c__ul_mmq_nrw_32c">
+                        <li class="- topic/li li">为保证 <code class="+ topic/ph pr-d/codeph ph codeph">enableTableShareAndPersistence</code>
+                                函数能够正常执行，需要节点启动之前在配置文件中（单节点：<em class="+ topic/ph hi-d/i ph i">dolohindb.cfg</em>，集群：<em class="+ topic/ph hi-d/i ph i">cluster.cfg</em>）指定配置参数
+                                <em class="+ topic/ph hi-d/i ph i">persistenceDir</em> ，配置参考<a class="- topic/xref xref" href="../db_distr_comp/cfg/function_configuration.html">功能配置</a>。</li>
+                        <li class="- topic/li li">函数中的 <code class="+ topic/ph pr-d/codeph ph codeph">cacheSize</code> 变量控制了在建表时预分配内存的大小以及流数据表在内存里的最大行数。设置较大的
+                                <code class="+ topic/ph pr-d/codeph ph codeph">cacheSize</code> 可以降低出现峰值时延的频率。此处引用了在 2.1
+                                中配置好的参数<em class="+ topic/ph hi-d/i ph i">marketTBCapacity</em>，具体大小可以根据实际的可使用的内存大小决定。具体优化原理可参考 <a class="- topic/xref xref" href="../tutorials/streaming_timer.html">DolphinDB
+                                流计算时延统计与性能优化</a>。</li>
+                    </ul>
+                </div>
+                <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">创建分布式数据库</strong></p>
+                <p class="- topic/p p">为将行情数据存入分布式数据库，需要提前创建存储 CTP
+                    行情数据的分布式库表。以下提供了一个示例，本例将期货和期权数据存储在同一数据库中，为了控制每个分区数据大小，选择对数据库采用按天分区和按期权期货代码 HASH
+                    40 分区。具体分区规则参考自 <a class="- topic/xref xref" href="../tutorials/best_practices_for_partitioned_storage.html">基于 DolphinDB 存储金融数据的分区方案最佳实践</a>。</p>
+                <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_ik2_wff_h2c__codeblock_x1w_4rw_32c" data-ofbid="topic_ik2_wff_h2c__codeblock_x1w_4rw_32c"><code>if(existsDatabase(stdDestDBName)){
+    dropDatabase(stdDestDBName)
+}
+// 创建数据库
+create database "dfs://ctp_market_data"
+partitioned by VALUE(2024.01.01..2024.01.31), HASH([SYMBOL, 40])
+engine='TSDB'
+atomic='CHUNK'
+
+// 构建分区表
+// 按时间和代码分区，分区列：trade_date, unified_code
+// 分区内排序字段（索引功能）sortColumns的设置： `unified_code`action_date`data_time
+create table "dfs://ctp_market_data"."ctp_market"(
+    trade_date              DATE
+    exchange_id             SYMBOL
+    unified_code            SYMBOL
+    last_price              DOUBLE
+    pre_settlement_price    DOUBLE
+    pre_close_price         DOUBLE
+    pre_open_price          DOUBLE
+    open_price              DOUBLE
+    high_price              DOUBLE
+    low_price               DOUBLE
+    volume                  LONG
+    turnover                DOUBLE
+    open_interest           DOUBLE
+    close_price             DOUBLE
+    settlement_price        DOUBLE
+    change_rate             DOUBLE
+    upper_limit_price       DOUBLE
+    lower_limit_price       DOUBLE
+    pre_delta               DOUBLE
+    current_delta           DOUBLE
+    update_time             SECOND
+    update_ms               LONG
+    bid_price               DOUBLE[]
+    bid_volume              LONG[]
+    ask_price               DOUBLE[]
+    ask_volume              LONG[]
+    avgerage_price          DOUBLE
+    action_date             DATE
+    ticker                  SYMBOL
+    exchange_inst_id        SYMBOL
+    banding_upper_price     DOUBLE
+    banding_lower_price     DOUBLE
+    data_time               TIME
+)
+partitioned by trade_date, unified_code,
+sortColumns=[`unified_code,`action_date, `data_time],
+keepDuplicates=ALL</code></pre>
+                <div class="- topic/note note note note_note" id="topic_ik2_wff_h2c__note_y1w_4rw_32c" data-ofbid="topic_ik2_wff_h2c__note_y1w_4rw_32c"><span class="note__title">注：</span> 
+                    <p class="- topic/p p">为方便后续对 CTP 行情数据的使用，本例选择将 5 档量价数据转化为 ArrayVector 类型进行存储，即将 bid_price ,
+                        bid_volume, ask_price, ask_volume 列分别设置为 DOUBLE[]，LONG[]，DOUBLE[]，LONG[]
+                        类型。用户可根据实际情况进行修改。</p>
+                </div>
+                <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">创建持久化标准化行情流数据表</strong></p>
+                <p class="- topic/p p">调用 <a class="- topic/xref xref" href="../funcs/s/schema.html">schema</a> 函数获取存储 CTP
+                    行情数据的分布式表的表结构，然后创建结构一致的持久化流数据表。</p>
+                <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_ik2_wff_h2c__codeblock_r2d_rrw_32c" data-ofbid="topic_ik2_wff_h2c__codeblock_r2d_rrw_32c"><code>colNames = loadTable(stdDestDBName, stdDestTBName).schema().colDefs.name
+colTypes = loadTable(stdDestDBName, stdDestTBName).schema().colDefs.typeString
+tb = streamTable(marketTBCapacity:0, colNames, colTypes)
+enableTableShareAndPersistence(
+      table=tb,
+      tableName=stdStreamTBName,
+      cacheSize=marketTBCapacity,
+      preCache=0)
+setStreamTableFilterColumn(objByName(stdStreamTBName), `unified_code)</code></pre>
+                <p class="- topic/p p">其中，<code class="+ topic/ph pr-d/codeph ph codeph">setStreamTableFilterColumn</code>
+                    为可选步骤，其作用是给标准化流表设置过滤列。当下游对标准化流表有订阅时，可以指定 <em class="+ topic/ph hi-d/i ph i">filter</em> 参数，选择只接收指定标的范围的数据。</p>
+            </div>
+        </article>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title10" id="topic_jr2_wff_h2c">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title10">2.5 订阅流数据表并写入分布式数据库 </h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p">首先订阅 2.4 节中的持久化原始行情流数据表进行数据预处理，再订阅持久化标准化行情流数据表，将增量数据实时写入分布式数据库。调用 <a class="- topic/xref xref" href="../funcs/s/subscribeTable.html">subscribeTable</a>
+                    函数从客户端节点订阅本地或远程服务器的流数据表。</p>
+                <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_jr2_wff_h2c__codeblock_by5_33f_h2c" data-ofbid="topic_jr2_wff_h2c__codeblock_by5_33f_h2c"><code>// 订阅持久化原始行情流数据表
+subscribeTable(
+  tableName=ctpSubTBName,
+  actionName=ctpSubTBName + "Std",
+  offset=-1,
+  handler=ctpMarketHandler{, stdStreamTBName},
+  msgAsTable=true,
+  batchSize=10000,
+  throttle=0.001,
+  hash=0,
+  reconnect=true)
+// 订阅持久化标准化行情流数据表
+subscribeTable(
+  tableName=stdStreamTBName,
+  actionName=stdStreamTBName + "ToDfs",
+  offset=-1,
+  handler=loadTable(stdDestDBName, stdDestTBName),
+  msgAsTable=true,
+  batchSize=5000,
+  throttle=1,
+  hash=1,
+  reconnect=true)						</code></pre>
+                <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">参数说明： </strong></p>
+                <ul class="- topic/ul ul" id="topic_jr2_wff_h2c__ul_ss3_j3f_h2c" data-ofbid="topic_jr2_wff_h2c__ul_ss3_j3f_h2c">
+                    <li class="- topic/li li"><em class="+ topic/ph hi-d/i ph i">batchSize</em> 参数为可选参数，是一个整数。若为正数，表示未处理消息的数量达到 <em class="+ topic/ph hi-d/i ph i">batchSize</em>
+                            时，<em class="+ topic/ph hi-d/i ph i">handler</em> 才会处理消息。若未指定或为非正数，每一批次的消息到达之后，<em class="+ topic/ph hi-d/i ph i">handler</em>
+                        就会马上处理。</li>
+                    <li class="- topic/li li"><em class="+ topic/ph hi-d/i ph i">throttle</em> 参数为可选参数，是一个浮点数，单位为秒，默认值为1。表示继上次 handler 处理消息之后，若
+                            <em class="+ topic/ph hi-d/i ph i">batchSize</em> 条件一直未达到，多久后再次处理消息。如果没有指定
+                            <em class="+ topic/ph hi-d/i ph i">batchSize</em>，<em class="+ topic/ph hi-d/i ph i">throttle</em> 即使指定，也不起作用。 因此，达到 <em class="+ topic/ph hi-d/i ph i">batchSize
+                        </em>设置的条件或者达到 <em class="+ topic/ph hi-d/i ph i">throttle </em>设置的条件，才会向分布式数据库写入一次。</li>
+                    <li class="- topic/li li"><em class="+ topic/ph hi-d/i ph i">handler</em>
+                        参数为必选参数，是一元函数、二元函数或数据表，用于处理订阅的数据。以下示例提供了一种标准化原始行情数据的函数，用户可根据实际情况进行修改。</li>
+                </ul>
+                <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_jr2_wff_h2c__codeblock_jdh_k3f_h2c" data-ofbid="topic_jr2_wff_h2c__codeblock_jdh_k3f_h2c"><code>// 数据标准化函数
+def ctpMarketHandler(msg, stdStreamTBName) {
+    ctpProcess = select  
+                    TradingDay as trade_date,
+                    ExchangeID as exchange_id,
+                    InstrumentID as unified_code,
+                    LastPrice as LastPrice,
+                    PreSettlementPrice as PreSettlementPrice,
+                    PreClosePrice as PreClosePrice,
+                    PreOpenInterest as PreOpenInterest,
+                    OpenPrice as OpenPrice,
+                    HighestPrice as HighestPrice,
+                    LowestPrice as LowestPrice,
+                    Volume as Volume,
+                    Turnover as Turnover,
+                    OpenInterest as OpenInterest,
+                    ClosePrice as ClosePrice,
+                    SettlementPrice as SettlementPrice,
+                    (LastPrice-PreSettlementPrice)\PreSettlementPrice as  
+change_rate,
+                    UpperLimitPrice as UpperLimitPrice,
+                    LowerLimitPrice as LowerLimitPrice,
+                    PreDelta as PreDelta,
+                    CurrDelta as CurrDelta,
+                    UpdateTime as UpdateTime,
+                    UpdateMillisec as UpdateMillisec,
+                    fixedLengthArrayVector(BidPrice1, BidPrice2, BidPrice3, 
+BidPrice4, BidPrice5) as BidPrice,
+                    fixedLengthArrayVector(BidVolume1, BidVolume2, BidVolume3, 
+BidVolume4, BidVolume5) as BidVolume,
+                    fixedLengthArrayVector(AskPrice1, AskPrice2, AskPrice3, 
+AskPrice4, AskPrice5) as AskPrice,
+                    fixedLengthArrayVector(AskVolume1, AskVolume2, AskVolume3, 
+AskVolume4, AskVolume5) as AskVolume,
+                    AveragePrice as AveragePrice,
+                    ActionDay as action_date,
+                    InstrumentID as InstrumentID,
+                    ExchangeInstID as ExchangeInstID,
+                    BandingUpperPrice as BandingUpperPrice,
+                    BandingLowerPrice as BandingLowerPrice,
+                    tradeTime as tradeTime
+                from msg
+   objByName(stdStreamTBName).append!(ctpProcess)
+}</code></pre>
+                <div class="- topic/note note note note_note" id="topic_jr2_wff_h2c__note_qts_m3f_h2c" data-ofbid="topic_jr2_wff_h2c__note_qts_m3f_h2c"><span class="note__title">注：</span> 
+                    <p class="- topic/p p">在原始行情数据标准化处理过程中，调用 <a class="- topic/xref xref" href="../funcs/f/fixedLengthArrayVector.html">fixedLengthArrayVector</a> 函数，将原始行情表中的 <code class="+ topic/ph pr-d/codeph ph codeph">BidPrice1</code> ，
+                            <code class="+ topic/ph pr-d/codeph ph codeph">BidPrice2</code> ，<code class="+ topic/ph pr-d/codeph ph codeph">BidPrice3</code> ，
+                            <code class="+ topic/ph pr-d/codeph ph codeph">BidPrice4</code> ， <code class="+ topic/ph pr-d/codeph ph codeph">BidPrice5</code> 五档买方价格，合并为一个
+                        DOUBLE[] 类型的 <code class="+ topic/ph pr-d/codeph ph codeph">bid price</code> 列进行存储。<code class="+ topic/ph pr-d/codeph ph codeph">bid
+                            volume</code>、<code class="+ topic/ph pr-d/codeph ph codeph">ask price</code>、<code class="+ topic/ph pr-d/codeph ph codeph">ask
+                        volume</code>处理同上。</p>
+                </div>
+            </div>
+        </article>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title11" id="topic_hy2_wff_h2c">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title11">2.6 订阅 CTP 行情并写入流数据表</h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p">使用 <a class="- topic/xref xref" href="ctp.html#ctpsubscribe">ctp::subscribe</a>
+                    函数订阅指定范围的合约数据，行情数据将进入流数据表。</p>
+                <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_hy2_wff_h2c__codeblock_ucn_q3f_h2c" data-ofbid="topic_hy2_wff_h2c__codeblock_ucn_q3f_h2c"><code>ctp::subscribe(conn, ctpSubType, objByName(ctpSubTBName), ids)</code></pre>
+            </div>
+        </article>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title12" id="topic_v2f_wff_h2c">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title12">2.7 查询 CTP 行情接收情况</h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p">运行过程中，可以调用 <a class="- topic/xref xref" href="ctp.html#ctpgetstatus">ctp::getStatus(conn)</a> 函数查询 CTP 行情的接收情况。</p>
+                <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_v2f_wff_h2c__codeblock_amx_s3f_h2c" data-ofbid="topic_v2f_wff_h2c__codeblock_amx_s3f_h2c"><code>ctp::getStatus(conn)</code></pre>
+                <p class="- topic/p p">返回结果如图2-2：</p>
+                <figure class="- topic/fig fig fignone" id="topic_v2f_wff_h2c__fig_nf2_53f_h2c" data-ofbid="topic_v2f_wff_h2c__fig_nf2_53f_h2c"><figcaption data-caption-side="top" class="- topic/title title figcap"><span class="figtitleprefix fig--title-label">图<span class="fig--title-label-number"> 4</span><span class="fig--title-label-punctuation">. </span></span><span class="fig--title">图 2-2 CTP行情接收情况</span></figcaption>
+                    
+                    <img class="- topic/image image" id="topic_v2f_wff_h2c__image_of2_53f_h2c" src="images/ctp_best_practice/2-2.png"/>
+                </figure>
+                <p class="- topic/p p">当在盘中启动时，可以看到 firstMsgTime 与 lastMsgTime 均不为空，lastMsgTime
+                    表示收到最后一条数据的系统时刻。processedMsgCount 表示已处理的数据量。</p>
+            </div>
+        </article>
+    </article>
+    <article class="- topic/topic topic nested1" aria-labelledby="ariaid-title13" id="topic_vfq_vff_h2c">
+        <h2 class="- topic/title title topictitle2" id="ariaid-title13">3. 节点启动时自动订阅 CTP 实时行情数据入库 </h2>
+        <div class="- topic/body body">
+            <p class="- topic/p p">DolphinDB 系统的启动流程如图3-1所示：</p>
+            <figure class="- topic/fig fig fignone" id="topic_vfq_vff_h2c__fig_cpx_x3f_h2c" data-ofbid="topic_vfq_vff_h2c__fig_cpx_x3f_h2c"><figcaption data-caption-side="top" class="- topic/title title figcap"><span class="figtitleprefix fig--title-label">图<span class="fig--title-label-number"> 5</span><span class="fig--title-label-punctuation">. </span></span><span class="fig--title">图 3-1 DolphinDB 启动流程</span></figcaption>
+                
+                <img class="- topic/image image" id="topic_vfq_vff_h2c__image_dpx_x3f_h2c" src="images/ctp_best_practice/3-1.png"/>
+            </figure>
+            <ul class="- topic/ul ul" id="topic_vfq_vff_h2c__ul_kqt_z3f_h2c" data-ofbid="topic_vfq_vff_h2c__ul_kqt_z3f_h2c">
+                <li class="- topic/li li">用户启动脚本（<em class="+ topic/ph hi-d/i ph i">startup.dos</em>）<p class="- topic/p p">用户启动脚本是通过配置参数 <em class="+ topic/ph hi-d/i ph i">startup</em> 后才会执行，单节点模式在
+                            <em class="+ topic/ph hi-d/i ph i">dolphindb.cfg</em> 中配置，集群模式在 <em class="+ topic/ph hi-d/i ph i">cluster.cfg</em>
+                        中配置，可配置绝对路径或相对路径。若配置了相对路径或者没有指定目录，系统会依次搜索本地节点的 home
+                        目录、工作目录和可执行文件所在目录。</p><p class="- topic/p p">配置举例如下:</p><pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_vfq_vff_h2c__codeblock_gyk_1jf_h2c" data-ofbid="topic_vfq_vff_h2c__codeblock_gyk_1jf_h2c"><code>startup=/DolphinDB/server/startup.dos</code></pre></li>
+            </ul>
+            <p class="- topic/p p">将上述业务代码添加到 <em class="+ topic/ph hi-d/i ph i">/DolphinDB/server</em> 目录的 <em class="+ topic/ph hi-d/i ph i">startup.dos</em> 文件中，并在对应的配置文件中配置参数
+                    <em class="+ topic/ph hi-d/i ph i">startup</em>，即可完成节点启动时的自动订阅部署。</p>
+            <div class="- topic/note note note note_note" id="topic_vfq_vff_h2c__note_unz_1jf_h2c" data-ofbid="topic_vfq_vff_h2c__note_unz_1jf_h2c"><span class="note__title">注：</span> CTP 的账户信息需要根据实际环境进行修改。</div>
+        </div>
+    </article>
+    <article class="- topic/topic topic nested1" aria-labelledby="ariaid-title14" id="topic_glq_vff_h2c">
+        <h2 class="- topic/title title topictitle2" id="ariaid-title14">4. 常见问题解答（FAQ）</h2>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title15" id="topic_pdy_xff_h2c">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title15">4.1 如何获取合约代码信息？</h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">方案一：</strong></p>
+                <p class="- topic/p p">通过登录交易端账号，调用 <a class="- topic/xref xref" href="ctp.html#ctpqueryinstrument--ctpminiqueryinstrument">ctp::queryInstrument()</a> 或 <a class="- topic/xref xref" href="ctp.html#ctpqueryinstrument--ctpminiqueryinstrument">ctpMini::queryInstrument()</a> 函数查询并返回包含所有合约代码的信息表。</p>
+                <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_pdy_xff_h2c__codeblock_lcr_2jf_h2c" data-ofbid="topic_pdy_xff_h2c__codeblock_lcr_2jf_h2c"><code>// 在 ctp 中调用
+ids = 
+  exec instrumentID
+  from ctp::queryInstrument(ip, port, userID, password, brokerID, appID, authCode, 
+  [exchangeID], [waitTimes])
+// 在 ctpMini 中调用
+ids =
+  exec instrumentID
+  from ctpMini::queryInstrument(ip, port, userID, password, brokerID, appID, 
+  authCode, [exchangeID], [waitTimes])</code></pre>
+                <div class="- topic/note note note note_note" id="topic_pdy_xff_h2c__note_xkt_fjf_h2c" data-ofbid="topic_pdy_xff_h2c__note_xkt_fjf_h2c"><span class="note__title">注：</span> 本函数需要有效的 CTP 交易端账号，行情端的账号将无法获取结果。目前 CTPMini
+                    中只有此函数。</div>
+                <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">方案二：</strong></p>
+                <p class="- topic/p p">若无法通过函数获取到合约代码信息表，可自行构建合约信息表。</p>
+                <ul class="- topic/ul ul" id="topic_pdy_xff_h2c__ul_gqd_fjf_h2c" data-ofbid="topic_pdy_xff_h2c__ul_gqd_fjf_h2c">
+                    <li class="- topic/li li">将需要订阅的合约信息存储成文本文件，通过读取 csv 获得。如 2.1 章节中 CTP 参数配置部分。</li>
+                    <li class="- topic/li li">将需要订阅的合约信息存在分布式表里，通过查询分布式表获得。</li>
+                </ul>
+                <p class="- topic/p p">用户可根据实际需求创建期货期权合约代码的静态信息表，以下示例基于最基础的数据创建信息表。</p>
+                <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_pdy_xff_h2c__codeblock_us3_hjf_h2c" data-ofbid="topic_pdy_xff_h2c__codeblock_us3_hjf_h2c"><code>// 构建合约代码存储的数据库
+dbName = "dfs://future_basic"
+db = database(dbName, VALUE, 2024.01.01..2024.12.31)
+// 构建合约代码存储的分布式表
+create table "dfs://future_basic"."future_basic"(
+    trade_date DATE
+    trade_code SYMBOL
+    exchange SYMBOL
+)
+// 加载合约信息表并存储在创建好的分布式表中
+t = loadText("./future_basic.csv")
+loadTable("dfs://future_basic", "future_basic").append!(t)</code></pre>
+                <p class="- topic/p p">静态信息表结构参考如图4-1：</p>
+                <figure class="- topic/fig fig fignone" id="topic_pdy_xff_h2c__fig_zcj_3jf_h2c" data-ofbid="topic_pdy_xff_h2c__fig_zcj_3jf_h2c"><figcaption data-caption-side="top" class="- topic/title title figcap"><span class="figtitleprefix fig--title-label">图<span class="fig--title-label-number"> 6</span><span class="fig--title-label-punctuation">. </span></span><span class="fig--title">图 4-1 静态信息表结构</span></figcaption>
+                    
+                    <img class="- topic/image image" id="topic_pdy_xff_h2c__image_adj_3jf_h2c" src="images/ctp_best_practice/4-1.png"/>
+                </figure>
+                <p class="- topic/p p">从合约信息表中获取需要订阅的合约范围，代码示例如下：</p>
+                <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_pdy_xff_h2c__codeblock_wn5_jjf_h2c" data-ofbid="topic_pdy_xff_h2c__codeblock_wn5_jjf_h2c"><code>ids =
+  exec trade_code
+  from loadTable("dfs://future_basic", "future_basic")
+  where trade_date=today()</code></pre>
+            </div>
+        </article>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title16" id="topic_b4y_xff_h2c">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title16">4.2 如何对原始 CTP 数据做处理？</h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">如何处理 <code class="+ topic/ph pr-d/codeph ph codeph">exchange_id</code> ？</strong></p>
+                <p class="- topic/p p">原始行情数据中的 <code class="+ topic/ph pr-d/codeph ph codeph">ExchangeID</code> 都是空值。如果需要补充该字段信息，则需要依赖静态信息表。</p>
+                <p class="- topic/p p">可以在创建订阅之前，先将需要的静态信息存为一个共享内存表，然后在订阅的回调函数里，通过 <code class="+ topic/ph pr-d/codeph ph codeph">InstrumentID</code> 和
+                        <code class="+ topic/ph pr-d/codeph ph codeph">trade_code</code> 字段进行关联，获取静态信息表中的
+                    <code class="+ topic/ph pr-d/codeph ph codeph">exchange</code>信息。</p>
+                <p class="- topic/p p">注意：静态信息表可以用 4.1 中创建的 <em class="+ topic/ph hi-d/i ph i">future_basic</em> 信息表。</p>
+                <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_b4y_xff_h2c__codeblock_qvd_trw_32c" data-ofbid="topic_b4y_xff_h2c__codeblock_qvd_trw_32c"><code>// 将静态信息存为一个共享内存表
+tmp = select trade_code, exchange from loadTable("dfs://future_basic", 
+"future_basic") where trade_date=today()
+share(tmp, "basicInfoTable")</code></pre>
+                <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">如何处理 <code class="+ topic/ph pr-d/codeph ph codeph">trade_date</code> 和 <code class="+ topic/ph pr-d/codeph ph codeph">action_date</code> ？</strong></p>
+                <ul class="- topic/ul ul" id="topic_b4y_xff_h2c__ul_qvn_5rw_32c" data-ofbid="topic_b4y_xff_h2c__ul_qvn_5rw_32c">
+                    <li class="- topic/li li"><code class="+ topic/ph pr-d/codeph ph codeph">trade_date</code>
+                            ：交易日期，前一天夜盘和当天日盘属于一个完整交易日。即前一天夜盘收到的数据和当天日盘收到的数据，属于同一个<code class="+ topic/ph pr-d/codeph ph codeph">trade_date</code>
+                        。</li>
+                    <li class="- topic/li li"><code class="+ topic/ph pr-d/codeph ph codeph">action_date</code>
+                        ：实际日期，数据生成的真实日期。前一天夜盘数据使用前一天的日期，当天日盘数据使用当天日期。</li>
+                    <li class="- topic/li li">由于不同交易所的原始行情中 <code class="+ topic/ph pr-d/codeph ph codeph">ActionDay</code> 和
+                        <code class="+ topic/ph pr-d/codeph ph codeph">TradingDay</code>的规则不太一样 ，所以需要用户自行对日期进行处理。以 2024.08.08
+                        晚上21点开始的夜盘交易数据，即交易日期为 2024.08.09，实际日期为 2024.08.08 的数据，不同交易所里的
+                            <code class="+ topic/ph pr-d/codeph ph codeph">ActionDay</code> 和 <code class="+ topic/ph pr-d/codeph ph codeph">TradingDay</code> 的值见表4-1：</li>
+                </ul>
+                <figure class="- topic/fig fig fignone" id="topic_b4y_xff_h2c__fig_mdt_t5w_32c" data-ofbid="topic_b4y_xff_h2c__fig_mdt_t5w_32c"><figcaption data-caption-side="top" class="- topic/title title figcap"><span class="figtitleprefix fig--title-label">图<span class="fig--title-label-number"> 7</span><span class="fig--title-label-punctuation">. </span></span><span class="fig--title">表4-1 不同交易所日期表</span></figcaption>
+                    
+                    <div class="- topic/p p">
+                        <div class="table-container"><table class="- topic/table table frame-all" id="topic_b4y_xff_h2c__table_fwl_55w_32c" data-ofbid="topic_b4y_xff_h2c__table_fwl_55w_32c" data-cols="3"><caption></caption><colgroup><col/><col/><col/></colgroup><thead class="- topic/thead thead">
+                                    <tr class="- topic/row">
+                                        <th class="- topic/entry entry align-left colsep-1 rowsep-1" id="topic_b4y_xff_h2c__table_fwl_55w_32c__entry__1"><strong class="+ topic/ph hi-d/b ph b">交易所</strong></th>
+                                        <th class="- topic/entry entry align-left colsep-1 rowsep-1" id="topic_b4y_xff_h2c__table_fwl_55w_32c__entry__2"><strong class="+ topic/ph hi-d/b ph b">交易日期（TradingDay）</strong></th>
+                                        <th class="- topic/entry entry align-left colsep-0 rowsep-1" id="topic_b4y_xff_h2c__table_fwl_55w_32c__entry__3"><strong class="+ topic/ph hi-d/b ph b">实际日期（ActionDay）</strong></th>
+                                    </tr>
+                                </thead><tbody class="- topic/tbody tbody">
+                                    <tr class="- topic/row">
+                                        <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_b4y_xff_h2c__table_fwl_55w_32c__entry__1">上期所/上期能源</td>
+                                        <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_b4y_xff_h2c__table_fwl_55w_32c__entry__2">2024.08.09</td>
+                                        <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_b4y_xff_h2c__table_fwl_55w_32c__entry__3">2024.08.08</td>
+                                    </tr>
+                                    <tr class="- topic/row">
+                                        <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_b4y_xff_h2c__table_fwl_55w_32c__entry__1">大商所</td>
+                                        <td class="- topic/entry entry align-left colsep-1 rowsep-1" headers="topic_b4y_xff_h2c__table_fwl_55w_32c__entry__2">2024.08.09</td>
+                                        <td class="- topic/entry entry align-left colsep-0 rowsep-1" headers="topic_b4y_xff_h2c__table_fwl_55w_32c__entry__3">2024.08.09</td>
+                                    </tr>
+                                    <tr class="- topic/row">
+                                        <td class="- topic/entry entry align-left colsep-1 rowsep-0" headers="topic_b4y_xff_h2c__table_fwl_55w_32c__entry__1">郑商所</td>
+                                        <td class="- topic/entry entry align-left colsep-1 rowsep-0" headers="topic_b4y_xff_h2c__table_fwl_55w_32c__entry__2">2024.08.08</td>
+                                        <td class="- topic/entry entry align-left colsep-0 rowsep-0" headers="topic_b4y_xff_h2c__table_fwl_55w_32c__entry__3">2024.08.08</td>
+                                    </tr>
+                                </tbody></table></div>
+                    </div>
+                </figure>
+                <ul class="- topic/ul ul" id="topic_b4y_xff_h2c__ul_svn_5rw_32c" data-ofbid="topic_b4y_xff_h2c__ul_svn_5rw_32c">
+                    <li class="- topic/li li">为了能将同一天的交易数据存在同一个日期的分区里，需要对 <code class="+ topic/ph pr-d/codeph ph codeph">ActionDay</code> 和
+                            <code class="+ topic/ph pr-d/codeph ph codeph">TradingDay</code>进行处理。可以调用 <a class="- topic/xref xref" href="../funcs/t/temporalAdd.html">temporalAdd</a>
+                            函数对日期进行按照交易日的加减计算。<code class="+ topic/ph pr-d/codeph ph codeph">temporalAdd(trade_date, -1, `DCE)</code>
+                        就是按照 <em class="+ topic/ph hi-d/i ph i">DCE</em>（大商所）的交易日历找 <code class="+ topic/ph pr-d/codeph ph codeph">trade_date</code> 的前一个交易日期。</li>
+                </ul>
+                <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">如何处理重复数据?</strong></p>
+                <p class="- topic/p p">一般每天早上6-8点，CTP服务器会重复发送前一天夜盘的行情。为了避免重复写入数据，可以将数据里的 <code class="+ topic/ph pr-d/codeph ph codeph">tradeTime</code> 和
+                        <code class="+ topic/ph pr-d/codeph ph codeph">receivedTime</code> 作为过滤条件对数据进行过滤。比如设置两个时间段 20:40~03:00 和
+                    08:40~15:30，只有 <code class="+ topic/ph pr-d/codeph ph codeph">tradeTime</code> 和
+                    <code class="+ topic/ph pr-d/codeph ph codeph">receivedTime</code>都在设置的时间段内，才将数据落库。</p>
+                <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">注意</strong>：<code class="+ topic/ph pr-d/codeph ph codeph">tradeTime</code> 和
+                    <code class="+ topic/ph pr-d/codeph ph codeph">receivedTime</code>为插件新增的处理字段，需要建立连接时，设置 <code class="+ topic/ph pr-d/codeph ph codeph">"ConcatTime":
+                        true</code> 和 <code class="+ topic/ph pr-d/codeph ph codeph">"ReceivedTime": true</code>。（参考 2.1 章节）</p>
+                <p class="- topic/p p">以下示例为完整版原始行情数据标准化处理过程，用户可根据实际情况进行修改。</p>
+                <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_b4y_xff_h2c__codeblock_wk1_wrw_32c" data-ofbid="topic_b4y_xff_h2c__codeblock_wk1_wrw_32c"><code>// 数据标准化函数
+def ctpMarketHandler(msg, stdStreamTBName, 
+                    startTime1=20:40:00.000, endTime1=03:00:00.000, 
+                    startTime2=08:40:00.000, endTime2=15:30:00.000) {
+    tmp = select * from objByName("basicInfoTable")
+    // 按照数据时间和接收时间过滤数据
+    temp = select * from msg
+                where ((tradeTime&gt;=startTime1 or tradeTime&lt;=endTime1) and 
+                (time(receivedTime)&gt;=startTime1 or time(receivedTime)&lt;=endTime1))
+                or ((tradeTime&gt;=startTime2 and tradeTime&lt;=endTime2) and 
+                (time(receivedTime)&gt;=startTime2 and time(receivedTime)&lt;=endTime2))
+    // 关联交易所信息，并处理数据格式
+    ctpProcess = select
+                    TradingDay as trade_date,
+                    tmp.exchange as exchange_id,
+                    iif(tmp.exchange!=NULL, temp.InstrumentID + "." + tmp.exchange, 
+                    temp.InstrumentID) as unified_code,
+                    LastPrice as last_price,
+                    PreSettlementPrice as pre_settlement_price,
+                    PreClosePrice as pre_close_price,
+                    PreOpenInterest as pre_open_price,
+                    OpenPrice as open_price,
+                    HighestPrice as high_price,
+                    LowestPrice as low_price,
+                    Volume as volume,
+                    Turnover as turnover,
+                    OpenInterest as open_interest,
+                    ClosePrice as close_price,
+                    SettlementPrice as settlement_price,
+                    (LastPrice-PreSettlementPrice)\PreSettlementPrice as 
+                    change_rate,
+                    UpperLimitPrice as upper_limit_price,
+                    LowerLimitPrice as lower_limit_price,
+                    PreDelta as pre_delta,
+                    CurrDelta as current_delta,
+                    UpdateTime as update_time,
+                    UpdateMillisec as update_ms,
+                    fixedLengthArrayVector(BidPrice1, BidPrice2, BidPrice3, 
+                    BidPrice4, BidPrice5)as bid_price,
+                    fixedLengthArrayVector(BidVolume1, BidVolume2, BidVolume3, 
+                    BidVolume4, BidVolume5) as bid_volume,
+                    fixedLengthArrayVector(AskPrice1, AskPrice2, AskPrice3, 
+                    AskPrice4, AskPrice5) as ask_price,
+                    fixedLengthArrayVector(AskVolume1, AskVolume2, AskVolume3, 
+                    AskVolume4, AskVolume5) as ask_volume,
+                    AveragePrice as avgerage_price,
+                    ActionDay as action_date,
+                    InstrumentID as ticker,
+                    ExchangeInstID as exchange_inst_id,
+                    BandingUpperPrice as banding_upper_price,
+                    BandingLowerPrice as banding_lower_price,
+                    tradeTime as data_time
+                from lj(temp, tmp, `InstrumentID, `trade_code)
+    // 更新交易日期和实际日期
+    update ctpProcess set action_date=temporalAdd(trade_date, -1, `DCE) where 
+    data_time&gt;=startTime1 and exchange_id="DCE"
+    update ctpProcess set action_date=temporalAdd(trade_date, -1, `DCE)+1 where 
+    data_time&lt;=endTime1 and exchange_id="DCE" 
+    update ctpProcess set trade_date=temporalAdd(trade_date, 1, `CZCE) where 
+    data_time&gt;=startTime1 and exchange_id="CZC" 
+    objByName(stdStreamTBName).append!(ctpProcess)
+}</code></pre>
+            </div>
+        </article>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title17" id="topic_uzy_xff_h2c">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title17">4.3 如何设置定时任务？</h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p">由于每日收盘后 CTP 插件仍会接收一些测试数据，用户可以调用 <a class="- topic/xref xref" href="../funcs/s/scheduleJob.html">scheduleJob</a> 函数设定 CTP 连接和关闭的定时任务，参考代码如下：</p>
+                <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_uzy_xff_h2c__codeblock_ymj_5jf_h2c" data-ofbid="topic_uzy_xff_h2c__codeblock_ymj_5jf_h2c"><code>// 由于 scheduleJob 中的 jobFunc 必须是没有参数的函数，所以首先定义关闭 CTP 连接函数
+def ctp_dailyclose(){
+    ip = "111.111.111.11"
+    port = 11111
+    config={
+        "OutputElapsed": true,
+        "ReceivedTime": true,
+        "ConcatTime": true
+    }
+    conn = ctp::connect(ip, port, config)
+    try{ ctp::close(conn) }catch(ex){print ex}
+}
+
+scheduleJob(jobId=`daily_open, jobDesc="Daily open job", 
+jobFunc=run{"startup.dos"}, scheduleTime=[08:55m, 20:55m], startDate=2024.08.27, 
+endDate=2025.08.27, frequency='D')
+scheduleJob(jobId=`daily_close, jobDesc="Daily close job", jobFunc=ctp_dailyclose, 
+scheduleTime=[03:00m, 17:00m], startDate=2024.08.27, endDate=2025.08.27, 
+frequency='D')</code></pre>
+                <div class="- topic/note note note note_note" id="topic_uzy_xff_h2c__note_hqd_wjf_h2c" data-ofbid="topic_uzy_xff_h2c__note_hqd_wjf_h2c"><span class="note__title">注：</span> 
+                    <p class="- topic/p p">因为定时任务初始化时，会用到 CTP 插件里的函数，所以需要在启动时自动加载 CTP 插件。</p>
+                    <p class="- topic/p p">可以通过配置参数 <code class="+ topic/ph pr-d/codeph ph codeph">preloadModules=plugins::ctp</code> 让节点启动时自动加载 CTP
+                        插件。对于单节点，在 dolphindb.cfg 中配置 <em class="+ topic/ph hi-d/i ph i">preloadModules</em> 参数。对集群，在 controller.cfg 和
+                        cluster.cfg 中配置 <em class="+ topic/ph hi-d/i ph i">preloadModules</em> 参数。</p>
+                </div>
+            </div>
+        </article>
+    </article>
+    <article class="- topic/topic topic nested1" aria-labelledby="ariaid-title18" id="topic_jrq_vff_h2c">
+        <h2 class="- topic/title title topictitle2" id="ariaid-title18">5. 附录</h2>
+        <div class="- topic/body body">
+            <ul class="- topic/ul ul" id="topic_jrq_vff_h2c__ul_qv3_xjf_h2c" data-ofbid="topic_jrq_vff_h2c__ul_qv3_xjf_h2c">
+                <li class="- topic/li li">详细启动脚本配置可以参考官网文档教程：<a class="- topic/xref xref" href="../tutorials/Startup.html">启动脚本教程</a>。</li>
+                <li class="- topic/li li">关于节点启动时自动订阅处理业务的部署可以参考官网文档教程：<a class="- topic/xref xref" href="../tutorials/streaming_auto_sub.html">节点启动时的流计算自动订阅教程</a>。</li>
+                <li class="- topic/li li"><em class="+ topic/ph hi-d/i ph i"><a class="- topic/xref xref" href="script/ctp_best_practice/startup.dos">startup.dos</a></em> 启动脚本（账户信息需要根据用户实际情况进行修改） 。</li>
+                <li class="- topic/li li"><a class="- topic/xref xref" href="script/ctp_best_practice/future_basic.csv">future_basic.csv</a></li>
+            </ul>
+        </div>
+    </article>
+</article></main></div>
+                        
+                        
+                        
+                        
+                        
+                        
+                    </div>
+                    
+                        <nav role="navigation" id="wh_topic_toc" aria-label="On this page" class="col-lg-2 d-none d-lg-block navbar d-print-none"> 
+                            <div id="wh_topic_toc_content">
+		                        
+	                            <div class=" wh_topic_toc "><div class="wh_topic_label">在本页上</div><ul><li class="topic-item"><a href="#topic_vx3_vff_h2c" data-tocid="topic_vx3_vff_h2c">1. 基本使用介绍</a><ul><li class="topic-item"><a href="#topic_t4w_vff_h2c" data-tocid="topic_t4w_vff_h2c">1.1 安装插件</a></li><li class="topic-item"><a href="#topic_s5w_vff_h2c" data-tocid="topic_s5w_vff_h2c">1.2 加载插件</a></li></ul></li><li class="topic-item"><a href="#topic_xtp_vff_h2c" data-tocid="topic_xtp_vff_h2c">2. 通过 CTP 行情插件将实时行情数据写入分布式数据库</a><ul><li class="topic-item"><a href="#topic_qnd_wff_h2c" data-tocid="topic_qnd_wff_h2c">2.1 参数配置</a></li><li class="topic-item"><a href="#topic_dwd_wff_h2c" data-tocid="topic_dwd_wff_h2c">2.2 清理环境（可选）</a></li><li class="topic-item"><a href="#topic_ad2_wff_h2c" data-tocid="topic_ad2_wff_h2c">2.3 建立 CTP 连接 </a></li><li class="topic-item"><a href="#topic_ik2_wff_h2c" data-tocid="topic_ik2_wff_h2c">2.4 创建库表 </a></li><li class="topic-item"><a href="#topic_jr2_wff_h2c" data-tocid="topic_jr2_wff_h2c">2.5 订阅流数据表并写入分布式数据库 </a></li><li class="topic-item"><a href="#topic_hy2_wff_h2c" data-tocid="topic_hy2_wff_h2c">2.6 订阅 CTP 行情并写入流数据表</a></li><li class="topic-item"><a href="#topic_v2f_wff_h2c" data-tocid="topic_v2f_wff_h2c">2.7 查询 CTP 行情接收情况</a></li></ul></li><li class="topic-item"><a href="#topic_vfq_vff_h2c" data-tocid="topic_vfq_vff_h2c">3. 节点启动时自动订阅 CTP 实时行情数据入库 </a></li><li class="topic-item"><a href="#topic_glq_vff_h2c" data-tocid="topic_glq_vff_h2c">4. 常见问题解答（FAQ）</a><ul><li class="topic-item"><a href="#topic_pdy_xff_h2c" data-tocid="topic_pdy_xff_h2c">4.1 如何获取合约代码信息？</a></li><li class="topic-item"><a href="#topic_b4y_xff_h2c" data-tocid="topic_b4y_xff_h2c">4.2 如何对原始 CTP 数据做处理？</a></li><li class="topic-item"><a href="#topic_uzy_xff_h2c" data-tocid="topic_uzy_xff_h2c">4.3 如何设置定时任务？</a></li></ul></li><li class="topic-item"><a href="#topic_jrq_vff_h2c" data-tocid="topic_jrq_vff_h2c">5. 附录</a></li></ul></div>
+	                        	
+                        	</div>
+                        </nav>
+                    
+                </div>
+            </div>
+            
+            
+            
+        </div> 
+        <footer class="navbar navbar-default wh_footer">
+  <div class=" footer-container mx-auto ">
+<title>Copyright</title><p><b> ©2025 浙江智臾科技有限公司 浙ICP备18048711号-3</b></p>
+  </div>
+</footer>
+        
+        <div id="go2top" class="d-print-none">
+            <span class="oxy-icon oxy-icon-up"></span>
+        </div>
+        
+        <div id="modal_img_large" class="modal">
+            <span class="close oxy-icon oxy-icon-remove"></span>
+            <div id="modal_img_container"></div>
+            <div id="caption"></div>
+        </div>
+        
+        
+        
+    </body>
+</html>

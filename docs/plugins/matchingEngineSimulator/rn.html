@@ -1,0 +1,314 @@
+<!DOCTYPE html><html xmlns="http://www.w3.org/1999/xhtml" xml:lang="zh" lang="zh" data-whc_version="26.0">
+    <head><link rel="shortcut icon" href="../../favicon.ico"/><link rel="icon" href="../../favicon.ico"/><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><meta name="description" content="新增支持 MatchingEngineSimulator::version() 函数，用于获取当前模拟撮合插件的版本号。（ 3.00.2.4 ） 新增支持上交所债券。（ 3.00.2.3 ） 银行间现券支持 FAK 和 FOK 订单类型。（ 3.00.2.3 ） 银行间现券快照支持配置项 ..."/><meta name="DC.rights.owner" content="(C) 版权 2025"/><meta name="copyright" content="(C) 版权 2025"/><meta name="generator" content="DITA-OT"/><meta name="DC.type" content="topic"/><meta name="DC.coverage" content=""/><meta name="DC.relation" content="../../plugins/matchingEngineSimulator/mes.html"/><meta name="prodname" content="DolphinDB"/><meta name="brand" content="DolphinDB"/><meta name="DC.creator" content="DolphinDB"/><meta name="DC.publisher" content="DDB N/A DDB 200"/><meta name="DC.format" content="HTML5"/><meta name="DC.identifier" content="rn"/><title>版本说明</title><!--  Generated with Oxygen version 26.0, build number 2024012323.  --><meta name="wh-path2root" content="../../"/><meta name="wh-toc-id" content="rn-d9713e96290"/><meta name="wh-source-relpath" content="plugins/matchingEngineSimulator/rn.dita"/><meta name="wh-out-relpath" content="plugins/matchingEngineSimulator/rn.html"/>
+
+    <link rel="stylesheet" type="text/css" href="../../oxygen-webhelp/app/commons.css?buildId=2024012323"/>
+    <link rel="stylesheet" type="text/css" href="../../oxygen-webhelp/app/topic.css?buildId=2024012323"/>
+
+    <script src="../../oxygen-webhelp/app/options/properties.js?buildId=20250305183303"></script>
+    <script src="../../oxygen-webhelp/app/localization/strings.js?buildId=2024012323"></script>
+    <script src="../../oxygen-webhelp/app/search/index/keywords.js?buildId=20250305183303"></script>
+    <script defer="defer" src="../../oxygen-webhelp/app/commons.js?buildId=2024012323"></script>
+    <script defer="defer" src="../../oxygen-webhelp/app/topic.js?buildId=2024012323"></script>
+<link rel="stylesheet" type="text/css" href="../../oxygen-webhelp/template/styles.css?buildId=2024012323"/><script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script><script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script></head>
+
+    <body id="rn" class="wh_topic_page frmBody">
+        <a href="#wh_topic_body" class="sr-only sr-only-focusable">
+            跳转到主要内容
+        </a>
+        
+        
+        
+        
+        <header class="navbar navbar-default wh_header">
+    <div class="container-fluid">
+        <div xmlns:whc="http://www.oxygenxml.com/webhelp/components" class="wh_header_flex_container navbar-nav navbar-expand-md navbar-dark">
+            <div class="wh_logo_and_publication_title_container">
+                <div class="wh_logo_and_publication_title">
+                    
+                    <a href="https://docs.dolphindb.cn/zh/index.html" class=" wh_logo d-none d-sm-block "><img src="../../logo.png" alt="  DolphinDB 文档中心  "/></a>
+                    <div class=" wh_publication_title "><a href="../../index.html"><span class="booktitle">  <span class="ph mainbooktitle">DolphinDB 文档中心</span>  </span></a></div>
+                    
+                </div>
+                
+                
+            </div>
+
+            <div class="wh_top_menu_and_indexterms_link collapse navbar-collapse" id="wh_top_menu_and_indexterms_link">
+                
+                
+                
+                
+            </div>
+        <div class=" wh_search_input navbar-form wh_topic_page_search search " role="form">
+            
+            
+            
+            <form id="searchForm" method="get" role="search" action="../../search.html"><div><input type="search" placeholder="搜索 " class="wh_search_textfield" id="textToSearch" name="searchQuery" aria-label="搜索查询" required="required"/><button type="submit" class="wh_search_button" aria-label="搜索"><span class="search_input_text">搜索</span></button></div></form>
+            
+            <script src="/vendors/react/umd/react.production.min.js" defer="defer"></script>
+<script src="/vendors/react-dom/umd/react-dom.production.min.js" defer="defer"></script>
+<script src="/vendors/dayjs/dayjs.min.js" defer="defer"></script>
+<script src="/vendors/antd/dist/antd.min.js" defer="defer"></script>
+<script src="/vendors/@ant-design/icons/dist/index.umd.min.js" defer="defer"></script>
+<script src="/zh/index.js" type="module"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" defer="defer"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML" defer="defer"><!--
+
+
+--></script>
+<script defer="defer"><!--
+
+// 从主页重定向
+const currentUrl = window.location.href;
+
+// 判断当前URL是否包含index.html并且路径最后部分是index.html
+if (currentUrl.endsWith('index.html')) {
+    // 处理根目录下的index.html跳转
+    const baseUrl = currentUrl.split('/index.html')[0]; // 获取index.html之前的部分
+    const redirectUrl = `${baseUrl}/about/ddb_intro.html`; // 构建跳转路径
+    window.location.href = redirectUrl; // 执行跳转
+}
+
+--></script>
+            
+        </div></div>
+    </div>
+</header>
+        
+        
+         
+        
+        
+        
+        <div class="container-fluid" id="wh_topic_container">
+            <div class="row">
+
+                <nav class="wh_tools d-print-none navbar-expand-md" aria-label="Tools">
+                    
+                    <div data-tooltip-position="bottom" class=" wh_breadcrumb "><ol class="d-print-none"><li><span class="home"><a href="../../index.html"><span>主页</span></a></span></li><li><div class="topicref" data-id="chap6_plugin"><div class="title"><a href="../../plugins/plg_intro.html"><span class="keyword label">插件</span></a><div class="wh-tooltip"><p class="shortdesc">多个应用场景的插件使用说明和插件开发指导</p></div></div></div></li><li><div class="topicref" data-id="mes"><div class="title"><a href="../../plugins/matchingEngineSimulator/mes.html">MatchingEngineSimulator</a></div></div></li><li class="active"><div class="topicref" data-id="rn"><div class="title"><a href="../../plugins/matchingEngineSimulator/rn.html">版本说明</a></div></div></li></ol></div>
+                    
+                    
+                    
+                    <div class="wh_right_tools">
+                        <button class="wh_hide_highlight" aria-label="切换搜索突出显示" title="切换搜索突出显示"></button>
+                        <button class="webhelp_expand_collapse_sections" data-next-state="collapsed" aria-label="折叠截面" title="折叠截面"></button>
+                        
+                        
+                        
+                        
+                        <div class=" wh_print_link print d-none d-md-inline-block "><button onClick="window.print()" title="打印此页" aria-label="打印此页"></button></div>
+                        
+                        <button type="button" id="wh_toc_button" class="custom-toggler navbar-toggler collapsed wh_toggle_button navbar-light" aria-expanded="false" aria-label="Toggle publishing table of content" aria-controls="wh_publication_toc">
+                            <span class="navbar-toggler-icon"></span>
+                        </button>
+                    </div>
+                    
+                </nav>
+            </div>
+            
+            
+            
+            
+            <div class="wh_content_area">
+                <div class="row">
+                    
+                        <nav id="wh_publication_toc" class="col-lg-3 col-md-3 col-sm-12 d-md-block d-none d-print-none" aria-label="Table of Contents Container">
+                            <div id="wh_publication_toc_content">
+		                        
+                            	<div class=" wh_publication_toc " data-tooltip-position="right"><span class="expand-button-action-labels"><span id="button-expand-action" role="button" aria-label="Expand"></span><span id="button-collapse-action" role="button" aria-label="Collapse"></span><span id="button-pending-action" role="button" aria-label="Pending"></span></span><ul role="tree" aria-label="Table of Contents"><li role="treeitem"><div data-tocid="ddb_intro-d9713e87" class="topicref" data-id="ddb_intro" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../about/ddb_intro.html" id="ddb_intro-d9713e87-link">关于DolphinDB</a></div></div></li><li role="treeitem"><div data-tocid="chap1_getstarted-d9713e136" class="topicref" data-id="chap1_getstarted" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../getstarted/chap1_getstarted.html" id="chap1_getstarted-d9713e136-link">快速上手</a><div class="wh-tooltip"><p class="shortdesc">如何快速部署 DolphinDB、建库建表、写入和查询数据</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="sectionddb_deployment-d9713e189" class="topicref" data-id="sectionddb_deployment" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action sectionddb_deployment-d9713e189-link" class="wh-expand-btn"></span><div class="title"><a href="../../deploy/deploy_intro.html" id="sectionddb_deployment-d9713e189-link"><span class="keyword label">部署</span></a><div class="wh-tooltip"><p class="shortdesc">如何在不同的场景中部署 DolphinDB</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="new_chap_database_manage_new_chap_dbmanage_landing_page-d9713e2259" class="topicref" data-id="new_chap_database_manage_new_chap_dbmanage_landing_page" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action new_chap_database_manage_new_chap_dbmanage_landing_page-d9713e2259-link" class="wh-expand-btn"></span><div class="title"><a href="../../db_distr_comp/cfg/db_intro.html" id="new_chap_database_manage_new_chap_dbmanage_landing_page-d9713e2259-link"><span class="keyword label">数据库</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 数据库的基本概念</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="chap7_tutorials_streaming-d9713e3760" class="topicref" data-id="chap7_tutorials_streaming" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action chap7_tutorials_streaming-d9713e3760-link" class="wh-expand-btn"></span><div class="title"><a href="../../stream/str_intro.html" id="chap7_tutorials_streaming-d9713e3760-link"><span class="keyword label">流数据</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 流数据引擎及流数据计算的基本概念</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e7513" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e7513-link" class="wh-expand-btn"></span><div class="title"><a href="../../db_distr_comp/db_oper/import_data.html" id="tocId-d9713e7513-link">数据迁移</a><div class="wh-tooltip"><p class="shortdesc">如何从不同数据源向 DolphinDB 迁移数据</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="chap7_tutorials_system_management-d9713e7940" class="topicref" data-id="chap7_tutorials_system_management" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action chap7_tutorials_system_management-d9713e7940-link" class="wh-expand-btn"></span><div class="title"><a href="../../sys_man/om_intro.html" id="chap7_tutorials_system_management-d9713e7940-link"><span class="keyword label">系统运维</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 的系统运维功能及方法</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="troubleshooting-d9713e8780" class="topicref" data-id="troubleshooting" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action troubleshooting-d9713e8780-link" class="wh-expand-btn"></span><div class="title"><a href="../../error_codes/troubleshooting.html" id="troubleshooting-d9713e8780-link">故障排查</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="about_language_resources-d9713e20911" class="topicref" data-id="about_language_resources" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action about_language_resources-d9713e20911-link" class="wh-expand-btn"></span><div class="title"><a href="../../progr/progr_intro.html" id="about_language_resources-d9713e20911-link"><span class="keyword label">编程语言</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 编程基本概念与方法、SQL 在 DolphinDB 的应用</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="functions_references-d9713e30925" class="topicref" data-id="functions_references" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action functions_references-d9713e30925-link" class="wh-expand-btn"></span><div class="title"><a href="../../funcs/funcs_intro.html" id="functions_references-d9713e30925-link"><span class="keyword label">函数参考</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 函数分类、语法、详解及示例</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="api_protocol-d9713e94064" class="topicref" data-id="api_protocol" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action api_protocol-d9713e94064-link" class="wh-expand-btn"></span><div class="title"><a href="../../api/connapi_intro.html" id="api_protocol-d9713e94064-link"><span class="keyword label">连接器 &amp; API</span></a><div class="wh-tooltip"><p class="shortdesc">面向不同编程语言的 DolphinDB API 及连接器，相关协议和用法</p></div></div></div></li><li role="treeitem" aria-expanded="true"><div data-tocid="chap6_plugin-d9713e94210" class="topicref" data-id="chap6_plugin" data-state="expanded"><span role="button" tabindex="0" aria-labelledby="button-collapse-action chap6_plugin-d9713e94210-link" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/plg_intro.html" id="chap6_plugin-d9713e94210-link"><span class="keyword label">插件</span></a><div class="wh-tooltip"><p class="shortdesc">多个应用场景的插件使用说明和插件开发指导</p></div></div></div><ul role="group" class="navbar-nav nav-list"><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e94263" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e94263-link" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/plg_howtos.html" id="tocId-d9713e94263-link">插件使用与开发</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="amdquote-d9713e94448" class="topicref" data-id="amdquote" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action amdquote-d9713e94448-link" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/amdquote/amdquote_2.html" id="amdquote-d9713e94448-link">amdQuote</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="arrow-d9713e94540" class="topicref" data-id="arrow" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action arrow-d9713e94540-link" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/Arrow/arrow.html" id="arrow-d9713e94540-link">Arrow</a></div></div></li><li role="treeitem"><div data-tocid="awss3-d9713e94632" class="topicref" data-id="awss3" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/aws/aws.html" id="awss3-d9713e94632-link">AWSS3</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="backtest-d9713e94678" class="topicref" data-id="backtest" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action backtest-d9713e94678-link" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/backtest.html" id="backtest-d9713e94678-link">Backtest</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="ctp-d9713e95138" class="topicref" data-id="ctp" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action ctp-d9713e95138-link" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/ctp_2.html" id="ctp-d9713e95138-link">CTP</a></div></div></li><li role="treeitem"><div data-tocid="datafeed-d9713e95230" class="topicref" data-id="datafeed" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/datafeed.html" id="datafeed-d9713e95230-link">DataFeed</a></div></div></li><li role="treeitem"><div data-tocid="efh-d9713e95276" class="topicref" data-id="efh" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/efh.html" id="efh-d9713e95276-link">EFH</a></div></div></li><li role="treeitem"><div data-tocid="encoderdecoder-d9713e95322" class="topicref" data-id="encoderdecoder" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/EncoderDecoder.html" id="encoderdecoder-d9713e95322-link">EncoderDecoder</a></div></div></li><li role="treeitem"><div data-tocid="excel_add_in-d9713e95368" class="topicref" data-id="excel_add_in" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/excel_add_in.html" id="excel_add_in-d9713e95368-link">Excel Add-In</a></div></div></li><li role="treeitem"><div data-tocid="feather-d9713e95415" class="topicref" data-id="feather" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/feather/feather.html" id="feather-d9713e95415-link">Feather</a></div></div></li><li role="treeitem"><div data-tocid="gp-d9713e95461" class="topicref" data-id="gp" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/gp/gp.html" id="gp-d9713e95461-link">GP</a></div></div></li><li role="treeitem"><div data-tocid="gurobi-d9713e95507" class="topicref" data-id="gurobi" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/gurobi.html" id="gurobi-d9713e95507-link">gurobi</a></div></div></li><li role="treeitem"><div data-tocid="hbase-d9713e95553" class="topicref" data-id="hbase" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/hbase/hbase.html" id="hbase-d9713e95553-link">HBase</a></div></div></li><li role="treeitem"><div data-tocid="hdf5-d9713e95599" class="topicref" data-id="hdf5" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/hdf5/hdf5.html" id="hdf5-d9713e95599-link">HDF5</a></div></div></li><li role="treeitem"><div data-tocid="hdfs-d9713e95645" class="topicref" data-id="hdfs" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/hdfs/hdfs.html" id="hdfs-d9713e95645-link">HDFS</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="httpclient-d9713e95691" class="topicref" data-id="httpclient" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action httpclient-d9713e95691-link" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/httpClient/httpclient.html" id="httpclient-d9713e95691-link">HttpClient</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="insight-d9713e95783" class="topicref" data-id="insight" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action insight-d9713e95783-link" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/insight/insight_2.html" id="insight-d9713e95783-link">INSIGHT</a></div></div></li><li role="treeitem"><div data-tocid="kafka-d9713e95875" class="topicref" data-id="kafka" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/kafka/kafka.html" id="kafka-d9713e95875-link">Kafka</a></div></div></li><li role="treeitem"><div data-tocid="kdb-d9713e95921" class="topicref" data-id="kdb" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/kdb/kdb.html" id="kdb-d9713e95921-link">Kdb+</a></div></div></li><li role="treeitem"><div data-tocid="ldap-d9713e95967" class="topicref" data-id="ldap" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/LDAP.html" id="ldap-d9713e95967-link">LDAP</a></div></div></li><li role="treeitem"><div data-tocid="lgmb-d9713e96014" class="topicref" data-id="lgmb" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/lgbm.html" id="lgmb-d9713e96014-link">lgbm</a></div></div></li><li role="treeitem"><div data-tocid="libtorch-d9713e96060" class="topicref" data-id="libtorch" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/libtorch/libtorch.html" id="libtorch-d9713e96060-link">LibTorch</a></div></div></li><li role="treeitem"><div data-tocid="mat-d9713e96106" class="topicref" data-id="mat" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/mat/mat.html" id="mat-d9713e96106-link">mat</a></div></div></li><li role="treeitem"><div data-tocid="matchingengine-d9713e96152" class="topicref" data-id="matchingengine" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/MatchingEngine/me.html" id="matchingengine-d9713e96152-link">MatchingEngine</a></div></div></li><li role="treeitem" aria-expanded="true"><div data-tocid="mes-d9713e96198" class="topicref" data-id="mes" data-state="expanded"><span role="button" tabindex="0" aria-labelledby="button-collapse-action mes-d9713e96198-link" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/matchingEngineSimulator/mes.html" id="mes-d9713e96198-link">MatchingEngineSimulator</a></div></div><ul role="group" class="navbar-nav nav-list"><li role="treeitem"><div data-tocid="模拟撮合引擎使用教程-d9713e96244" class="topicref" data-id="模拟撮合引擎使用教程" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../tutorials/matching_engine_simulator.html" id="模拟撮合引擎使用教程-d9713e96244-link">模拟撮合引擎使用教程</a></div></div></li><li role="treeitem" class="active"><div data-tocid="rn-d9713e96290" class="topicref" data-id="rn" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/matchingEngineSimulator/rn.html" id="rn-d9713e96290-link">版本说明</a></div></div></li></ul></li><li role="treeitem" aria-expanded="false"><div data-tocid="mdl-d9713e96336" class="topicref" data-id="mdl" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action mdl-d9713e96336-link" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/MDL.html" id="mdl-d9713e96336-link">MDL</a></div></div></li><li role="treeitem"><div data-tocid="mongodb-d9713e96428" class="topicref" data-id="mongodb" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/mongodb/mongodb.html" id="mongodb-d9713e96428-link">MongoDB</a></div></div></li><li role="treeitem"><div data-tocid="mqtt-d9713e96474" class="topicref" data-id="mqtt" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/mqtt/mqtt.html" id="mqtt-d9713e96474-link">mqtt</a></div></div></li><li role="treeitem"><div data-tocid="mseed-d9713e96520" class="topicref" data-id="mseed" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/mseed/mseed.html" id="mseed-d9713e96520-link">mseed</a></div></div></li><li role="treeitem"><div data-tocid="mysql-d9713e96566" class="topicref" data-id="mysql" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/mysql/mysql.html" id="mysql-d9713e96566-link">MySQL</a></div></div></li><li role="treeitem"><div data-tocid="nsq-d9713e96612" class="topicref" data-id="nsq" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/nsq/nsq_2.html" id="nsq-d9713e96612-link">NSQ</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="odbc-d9713e96659" class="topicref" data-id="odbc" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action odbc-d9713e96659-link" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/odbc/odbc.html" id="odbc-d9713e96659-link">ODBC</a></div></div></li><li role="treeitem"><div data-tocid="opcua-d9713e96751" class="topicref" data-id="opcua" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/opcua/opcua.html" id="opcua-d9713e96751-link">OPCUA</a></div></div></li><li role="treeitem"><div data-tocid="opc-d9713e96797" class="topicref" data-id="opc" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/opc/opc.html" id="opc-d9713e96797-link">OPC</a></div></div></li><li role="treeitem"><div data-tocid="orc-d9713e96843" class="topicref" data-id="orc" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/orc.html" id="orc-d9713e96843-link">ORC</a></div></div></li><li role="treeitem"><div data-tocid="parquet-d9713e96889" class="topicref" data-id="parquet" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/parquet/parquet.html" id="parquet-d9713e96889-link">Parquet</a></div></div></li><li role="treeitem"><div data-tocid="py-d9713e96935" class="topicref" data-id="py" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/py/py.html" id="py-d9713e96935-link">Py</a></div></div></li><li role="treeitem"><div data-tocid="rabbitmq-d9713e96981" class="topicref" data-id="rabbitmq" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/rabbitMQ.html" id="rabbitmq-d9713e96981-link">RabbitMQ</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="redis-d9713e97027" class="topicref" data-id="redis" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action redis-d9713e97027-link" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/redis.html" id="redis-d9713e97027-link">Redis</a></div></div></li><li role="treeitem"><div data-tocid="quantlib-d9713e97119" class="topicref" data-id="quantlib" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/quantlib/quantlib.html" id="quantlib-d9713e97119-link">QuantLib</a></div></div></li><li role="treeitem"><div data-tocid="rocketmq-d9713e97165" class="topicref" data-id="rocketmq" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/rocketMQ.html" id="rocketmq-d9713e97165-link">RocketMQ</a></div></div></li><li role="treeitem"><div data-tocid="sevenzip-d9713e97211" class="topicref" data-id="sevenzip" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/sevenzip.html" id="sevenzip-d9713e97211-link">SevenZip</a></div></div></li><li role="treeitem"><div data-tocid="schemalesswriter-d9713e97258" class="topicref" data-id="schemalesswriter" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/slwriter.html" id="schemalesswriter-d9713e97258-link">SchemalessWriter</a></div></div></li><li role="treeitem"><div data-tocid="signal-d9713e97304" class="topicref" data-id="signal" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/signal/signal.html" id="signal-d9713e97304-link">signal</a></div></div></li><li role="treeitem"><div data-tocid="ssequotationfile-d9713e97350" class="topicref" data-id="ssequotationfile" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/SSEQuotationFile.html" id="ssequotationfile-d9713e97350-link">SSEQuotationFile</a></div></div></li><li role="treeitem"><div data-tocid="svm-d9713e97396" class="topicref" data-id="svm" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/svm/svm.html" id="svm-d9713e97396-link">SVM</a></div></div></li><li role="treeitem"><div data-tocid="tcpsocket-d9713e97442" class="topicref" data-id="tcpsocket" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/tcpsocket.html" id="tcpsocket-d9713e97442-link">TCPSocket</a></div></div></li><li role="treeitem"><div data-tocid="websocket-d9713e97488" class="topicref" data-id="websocket" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/websocket.html" id="websocket-d9713e97488-link">WebSocket</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="windtdf-d9713e97534" class="topicref" data-id="windtdf" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action windtdf-d9713e97534-link" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/windtdf.html" id="windtdf-d9713e97534-link">WindTDF</a></div></div></li><li role="treeitem"><div data-tocid="xgboost-d9713e97626" class="topicref" data-id="xgboost" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/xgboost/xgboost.html" id="xgboost-d9713e97626-link">xgboost</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="xtp-d9713e97672" class="topicref" data-id="xtp" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action xtp-d9713e97672-link" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/xtp.html" id="xtp-d9713e97672-link">XTP</a></div></div></li><li role="treeitem"><div data-tocid="zip-d9713e97764" class="topicref" data-id="zip" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/zip/zip.html" id="zip-d9713e97764-link">zip</a></div></div></li><li role="treeitem"><div data-tocid="zlib-d9713e97810" class="topicref" data-id="zlib" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/zlib/zlib.html" id="zlib-d9713e97810-link">Zlib</a></div></div></li><li role="treeitem"><div data-tocid="zmq-d9713e97857" class="topicref" data-id="zmq" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/zmq/zmq.html" id="zmq-d9713e97857-link">zmq</a></div></div></li></ul></li><li role="treeitem" aria-expanded="false"><div data-tocid="third_party-d9713e97904" class="topicref" data-id="third_party" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action third_party-d9713e97904-link" class="wh-expand-btn"></span><div class="title"><a href="../../third_party.html" id="third_party-d9713e97904-link">第三方工具</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="about_tutorials-d9713e98227" class="topicref" data-id="about_tutorials" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action about_tutorials-d9713e98227-link" class="wh-expand-btn"></span><div class="title"><a href="../../tutorials/about_tutorials.html" id="about_tutorials-d9713e98227-link"><span class="keyword label">教程</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 产品使用教程</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e105982" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e105982-link" class="wh-expand-btn"></span><div class="title"><a href="../../rn/server/3_00_2.html" id="tocId-d9713e105982-link">版本说明</a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 版本发布历史</p></div></div></div></li></ul></div>
+		                        
+                            </div>
+                        </nav>
+                    
+                    
+                    <div class="col-lg-7 col-md-9 col-sm-12" id="wh_topic_body">
+                        <button id="wh_close_publication_toc_button" class="close-toc-button d-none" aria-label="Toggle publishing table of content" aria-controls="wh_publication_toc" aria-expanded="true">
+                            <span class="close-toc-icon-container">
+                                <span class="close-toc-icon"></span>     
+                            </span>
+                        </button>
+                        <button id="wh_close_topic_toc_button" class="close-toc-button d-none" aria-label="Toggle topic table of content" aria-controls="wh_topic_toc" aria-expanded="true">
+                            <span class="close-toc-icon-container">
+                                <span class="close-toc-icon"></span>     
+                            </span>
+                        </button>
+                        
+                        <div class=" wh_topic_content body "><main role="main"><article class="- topic/topic topic" role="article" aria-labelledby="ariaid-title1">
+    <h1 class="- topic/title title topictitle1" id="ariaid-title1">版本说明</h1>
+    
+    <article class="- topic/topic topic nested1" aria-labelledby="ariaid-title2" id="topic_xh4_xyl_ldc">
+        <h2 class="- topic/title title topictitle2" id="ariaid-title2"><span class="- topic/ph ph">3.00.2</span></h2>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title3" id="topic_yh4_xyl_ldc">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title3">新功能</h3>
+            <div class="- topic/body body">
+                <ul class="- topic/ul ul" id="topic_yh4_xyl_ldc__ul_orj_mt5_fdc" data-ofbid="topic_yh4_xyl_ldc__ul_orj_mt5_fdc">
+                    <li class="- topic/li li">新增支持 <code class="+ topic/ph pr-d/codeph ph codeph">MatchingEngineSimulator::version()</code>
+                                函数，用于获取当前模拟撮合插件的版本号。（<strong class="+ topic/ph hi-d/b ph b"><span class="- topic/ph ph">3.00.2.4</span></strong>）</li>
+                    <li class="- topic/li li">新增支持上交所债券。（<strong class="+ topic/ph hi-d/b ph b"><span class="- topic/ph ph">3.00.2.3</span></strong>）</li>
+                    <li class="- topic/li li">银行间现券支持 FAK 和 FOK 订单类型。（<strong class="+ topic/ph hi-d/b ph b"><span class="- topic/ph ph">3.00.2.3</span></strong>）</li>
+                    <li class="- topic/li li">银行间现券快照支持配置项
+                                immediateOrderConfirmation、immediateCancel，用来设置是否立即返回委托回报和撤单。（<strong class="+ topic/ph hi-d/b ph b"><span class="- topic/ph ph">3.00.2.2</span></strong>）</li>
+                    <li class="- topic/li li">新增方法 <code class="+ topic/ph pr-d/codeph ph codeph">dropMatchingEngine</code>，用于停止模拟撮合引擎。（<strong class="+ topic/ph hi-d/b ph b"><span class="- topic/ph ph">3.00.2.1</span></strong>）</li>
+                    <li class="- topic/li li">新增配置项 outputOrderTradeFlag，支持输出吃单、挂单标志。（<strong class="+ topic/ph hi-d/b ph b"><span class="- topic/ph ph">3.00.2.1</span></strong>）</li>
+                    <li class="- topic/li li">新增数据类别，支持对数字货币分钟频、日频数据进行模拟撮合。</li>
+                    <li class="- topic/li li">接口 <code class="+ topic/ph pr-d/codeph ph codeph">createMatchEngine</code> 新增配置项
+                        <em class="+ topic/ph hi-d/i ph i">orderByPrice</em>，支持在银行间现券模式下基于 XBond 的 tick 行情模拟撮合到期收益率。</li>
+                    <li class="- topic/li li">接口 <code class="+ topic/ph pr-d/codeph ph codeph">createMatchEngine</code> 新增配置项
+                        <em class="+ topic/ph hi-d/i ph i">userDefinedOrderId</em>，支持在订单详情结果输出表中输出用户自定义的委托订单号（userOrderId）。</li>
+                    <li class="- topic/li li">当模拟撮合期货数据时，若 <code class="+ topic/ph pr-d/codeph ph codeph">exchange="universal"</code>
+                            （开启通用模式），输入的行情和用户订单、<code class="+ topic/ph pr-d/codeph ph codeph">getOpenOrders</code>
+                        返回表、订单详情结果输出表中的价格类数据精确到小数点后 5 位。</li>
+                </ul>
+            </div>
+        </article>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title4" id="topic_a34_xyl_ldc">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title4">功能优化</h3>
+            <div class="- topic/body body">
+                <ul class="- topic/ul ul" id="topic_a34_xyl_ldc__ul_vyn_vcn_jdc" data-ofbid="topic_a34_xyl_ldc__ul_vyn_vcn_jdc">
+                    <li class="- topic/li li">银行间现券和上交所债券增加限制委托数量和成交数量的规则。（<strong class="+ topic/ph hi-d/b ph b"><span class="- topic/ph ph">3.00.2.7</span></strong>）</li>
+                    <li class="- topic/li li">创建模拟撮合引擎时，当 <em class="+ topic/ph hi-d/i ph i">config</em> 的 dataType 设置为股票逐笔（0）时，支持设置 latency=-1。（<strong class="+ topic/ph hi-d/b ph b"><span class="- topic/ph ph">3.00.2.5</span></strong>）</li>
+                    <li class="- topic/li li">优化即时撮合逻辑。（<strong class="+ topic/ph hi-d/b ph b"><span class="- topic/ph ph">3.00.2.3</span></strong>）</li>
+                    <li class="- topic/li li">银行间现券快照的 DOUBLE 类型数据支持精确到小数点后 5 位。（<strong class="+ topic/ph hi-d/b ph b"><span class="- topic/ph ph">3.00.2.2</span></strong>）</li>
+                    <li class="- topic/li li">数字货币快照支持插入不同长度的快照行情。（<strong class="+ topic/ph hi-d/b ph b"><span class="- topic/ph ph">3.00.2.2</span></strong>）</li>
+                    <li class="- topic/li li">支持在行情数据里的 array vector 类型的档位里填入空值，表示该档位为空。（<strong class="+ topic/ph hi-d/b ph b"><span class="- topic/ph ph">3.00.2.2</span></strong>）</li>
+                    <li class="- topic/li li">调用 <code class="+ topic/ph pr-d/codeph ph codeph">setLimitPrice</code> 时，若设置 upLimitPrice 为 0，则表示涨停价无限制。 （<strong class="+ topic/ph hi-d/b ph b"><span class="- topic/ph ph">3.00.2.2</span></strong>）</li>
+                </ul>
+            </div>
+        </article>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title5" id="topic_c34_xyl_ldc">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title5">故障修复</h3>
+            <div class="- topic/body body">
+                <ul class="- topic/ul ul" id="topic_c34_xyl_ldc__ul_kpv_hkh_ddc" data-ofbid="topic_c34_xyl_ldc__ul_kpv_hkh_ddc">
+                    <li class="- topic/li li">在处理银行间现券和上交所债券的双边订单时，系统显示的成交状态不正确。（<strong class="+ topic/ph hi-d/b ph b"><span class="- topic/ph ph">3.00.2.6</span></strong>）</li>
+                    <li class="- topic/li li">对模拟撮合引擎进行并发操作导致 server 崩溃。（<strong class="+ topic/ph hi-d/b ph b"><span class="- topic/ph ph">3.00.2.4</span></strong>）</li>
+                    <li class="- topic/li li">当设置 latency=-1 时，如果插入用户限价单时没有行情数据，该订单会被直接拒单。（<strong class="+ topic/ph hi-d/b ph b"><span class="- topic/ph ph">3.00.2.4</span></strong>）</li>
+                    <li class="- topic/li li">在模拟撮合中，仅插入行情数据且没有用户订单时，调用 <code class="+ topic/ph pr-d/codeph ph codeph">getOpenOrders</code> 函数并指定
+                            <em class="+ topic/ph hi-d/i ph i">symbolList</em> 会导致服务器崩溃。（<strong class="+ topic/ph hi-d/b ph b"><span class="- topic/ph ph">3.00.2.4</span></strong>）</li>
+                    <li class="- topic/li li">分钟频和日频填入错误订单类型的订单（包含 0：市价单、5：限价单、6：撤单）未如预期执行拒单。</li>
+                    <li class="- topic/li li">股票快照模式二和银行间现券模式中，若当前成交列表数量超过 20000 个时会报错。现已取消上限。</li>
+                </ul>
+            </div>
+        </article>
+    </article>
+    <article class="- topic/topic topic nested1" aria-labelledby="ariaid-title6" id="topic_aj2_pyl_ldc">
+        <h2 class="- topic/title title topictitle2" id="ariaid-title6"><span class="- topic/ph ph">3.00.1</span></h2>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title7" id="topic_bj2_pyl_ldc">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title7">新功能</h3>
+            <div class="- topic/body body">
+                <ul class="- topic/ul ul" id="topic_bj2_pyl_ldc__ul_qts_ql2_xbc" data-ofbid="topic_bj2_pyl_ldc__ul_qts_ql2_xbc">
+                    <li class="- topic/li li">模拟撮合银行间现券模式中，订单详情结果输出表增加字段 yield（到期收益率）。（<strong class="+ topic/ph hi-d/b ph b"><span class="- topic/ph ph">3.00.1.5</span></strong>）</li>
+                    <li class="- topic/li li"><code class="+ topic/ph pr-d/codeph ph codeph">createMatchEngine</code> 接口中参数 <em class="+ topic/ph hi-d/i ph i">config</em> 的键值
+                        orderBookMatchingRtio 取消上限。</li>
+                </ul>
+            </div>
+        </article>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title8" id="topic_dj2_pyl_ldc">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title8">功能优化</h3>
+            <div class="- topic/body body">
+                <ul class="- topic/ul ul" id="topic_dj2_pyl_ldc__ul_zqv_nd4_fcc" data-ofbid="topic_dj2_pyl_ldc__ul_zqv_nd4_fcc">
+                    <li class="- topic/li li">期货期权类型新增支持撮合 universal 类型数据（无交易时间限制）。（<strong class="+ topic/ph hi-d/b ph b"><span class="- topic/ph ph">3.00.1.2</span></strong>）</li>
+                    <li class="- topic/li li">行情涨停价为 0 时，期货期权的市价单会以 10 倍的最新价进行委托。（<strong class="+ topic/ph hi-d/b ph b"><span class="- topic/ph ph">3.00.1.2</span></strong>）</li>
+                </ul>
+            </div>
+        </article>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title9" id="topic_fj2_pyl_ldc">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title9">故障修复</h3>
+            <div class="- topic/body body">
+                <ul class="- topic/ul ul" id="topic_fj2_pyl_ldc__ul_cjt_c54_ybc" data-ofbid="topic_fj2_pyl_ldc__ul_cjt_c54_ybc">
+                    <li class="- topic/li li">可转债未规定成交量须为 10 的倍数的限制。（<strong class="+ topic/ph hi-d/b ph b"><span class="- topic/ph ph">3.00.1.1</span></strong>）</li>
+                    <li class="- topic/li li">填入空字符串的标的用户订单时没有拒单。（<strong class="+ topic/ph hi-d/b ph b"><span class="- topic/ph ph">3.00.1.1</span></strong>）</li>
+                    <li class="- topic/li li">使用模拟撮合模式二时预分配了过多的内存。（<strong class="+ topic/ph hi-d/b ph b"><span class="- topic/ph ph">3.00.1.1</span></strong>）</li>
+                </ul>
+            </div>
+        </article>
+    </article>
+    <article class="- topic/topic topic nested1" aria-labelledby="ariaid-title10" id="topic_e2l_5y5_x1c">
+        <h2 class="- topic/title title topictitle2" id="ariaid-title10"><span class="- topic/ph ph">3.00.0</span></h2>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title11" id="topic_mqg_3xl_ldc">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title11">新功能</h3>
+            <div class="- topic/body body">
+                <ul class="- topic/ul ul" id="topic_mqg_3xl_ldc__ul_zvy_ypg_y1c" data-ofbid="topic_mqg_3xl_ldc__ul_zvy_ypg_y1c">
+                    <li class="- topic/li li">在对科创版股票进行模拟撮合的日频模式中，取消对用户订单的委托数量的上限。（<strong class="+ topic/ph hi-d/b ph b"><span class="- topic/ph ph">3.00.0.3</span></strong>）</li>
+                    <li class="- topic/li li">支持对期货类型数据进行模拟撮合。（<strong class="+ topic/ph hi-d/b ph b"><span class="- topic/ph ph">3.00.0.2</span></strong>）</li>
+                    <li class="- topic/li li">支持股票上交所保护限价的市价单。（<strong class="+ topic/ph hi-d/b ph b"><span class="- topic/ph ph">3.00.0.2</span></strong>）</li>
+                    <li class="- topic/li li">新增配置项 <em class="+ topic/ph hi-d/i ph i">outputRejectDetails</em>，支持获取用户订单的拒单信息。（<strong class="+ topic/ph hi-d/b ph b"><span class="- topic/ph ph">3.00.0.2</span></strong>）</li>
+                    <li class="- topic/li li">支持配置参数 <em class="+ topic/ph hi-d/i ph i">latency </em>为 -1 时，即时撮合用户订单。（<strong class="+ topic/ph hi-d/b ph b"><span class="- topic/ph ph">3.00.0.2</span></strong>）</li>
+                    <li class="- topic/li li"><code class="+ topic/ph pr-d/codeph ph codeph">resetMatchingEngine</code> 增加可选参数
+                                <em class="+ topic/ph hi-d/i ph i">cancelOrder</em>，支持撤销用户订单并将撤单信息写入到订单输入列表。（<strong class="+ topic/ph hi-d/b ph b"><span class="- topic/ph ph">3.00.0.2</span></strong>）</li>
+                    <li class="- topic/li li">增加了股票数据（逐笔和快照）的集合竞价逻辑。</li>
+                    <li class="- topic/li li">接口 <code class="+ topic/ph pr-d/codeph ph codeph">createMatchEngine</code> 新增参数
+                        <em class="+ topic/ph hi-d/i ph i">outputOrderConfirmation</em>，用于输出委托回报。</li>
+                    <li class="- topic/li li">支持判断上交科创版股票的用户订单类型。</li>
+                    <li class="- topic/li li">支持判断可转债的用户订单类型。</li>
+                </ul>
+            </div>
+        </article>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title12" id="topic_r3h_lxl_ldc">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title12">功能优化</h3>
+            <div class="- topic/body body">
+                <ul class="- topic/ul ul" id="topic_r3h_lxl_ldc__ul_khs_zpg_y1c" data-ofbid="topic_r3h_lxl_ldc__ul_khs_zpg_y1c">
+                    <li class="- topic/li li">股票和期货在中低频的模拟撮合中，涨停卖出、跌停买入被拒单。（<strong class="+ topic/ph hi-d/b ph b"><span class="- topic/ph ph">3.00.0.3</span></strong>）</li>
+                    <li class="- topic/li li">修改股票的开盘竞价逻辑。（<strong class="+ topic/ph hi-d/b ph b"><span class="- topic/ph ph">3.00.0.2</span></strong>）</li>
+                    <li class="- topic/li li">参考沪深行情的最新数据字段修订了相关的接口命名。</li>
+                    <li class="- topic/li li">行情为股票逐笔类型时，提升了单行数据写入的性能和用户订单的撮合性能。</li>
+                    <li class="- topic/li li">修改 <em class="+ topic/ph hi-d/i ph i">latency</em>（延时）大于 0 时用户委托订单的撮合时间条件的计算规则。</li>
+                    <li class="- topic/li li">将用户实际撤单时间调整为撤单请求时间与延迟时间之和 。</li>
+                    <li class="- topic/li li">将实际的拒单时间调整为行情时间之后。</li>
+                </ul>
+            </div>
+        </article>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title13" id="topic_kxy_mxl_ldc">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title13">故障修复</h3>
+            <div class="- topic/body body">
+                <ul class="- topic/ul ul" id="topic_kxy_mxl_ldc__ul_gk3_zpg_y1c" data-ofbid="topic_kxy_mxl_ldc__ul_gk3_zpg_y1c">
+                    <li class="- topic/li li">逐笔撮合多条用户订单时撮合结果错误。</li>
+                    <li class="- topic/li li">逐笔撮合时计算逐笔数据的全额成交没有包含全部行情数据。</li>
+                </ul>
+            </div>
+        </article>
+    </article>
+</article></main></div>
+                        
+                        
+                        
+                        
+                        
+                        
+                    </div>
+                    
+                        <nav role="navigation" id="wh_topic_toc" aria-label="On this page" class="col-lg-2 d-none d-lg-block navbar d-print-none"> 
+                            <div id="wh_topic_toc_content">
+		                        
+	                            <div class=" wh_topic_toc "><div class="wh_topic_label">在本页上</div><ul><li class="topic-item"><a href="#topic_xh4_xyl_ldc" data-tocid="topic_xh4_xyl_ldc"><span class="- topic/ph ph">3.00.2</span></a><ul><li class="topic-item"><a href="#topic_yh4_xyl_ldc" data-tocid="topic_yh4_xyl_ldc">新功能</a></li><li class="topic-item"><a href="#topic_a34_xyl_ldc" data-tocid="topic_a34_xyl_ldc">功能优化</a></li><li class="topic-item"><a href="#topic_c34_xyl_ldc" data-tocid="topic_c34_xyl_ldc">故障修复</a></li></ul></li><li class="topic-item"><a href="#topic_aj2_pyl_ldc" data-tocid="topic_aj2_pyl_ldc"><span class="- topic/ph ph">3.00.1</span></a><ul><li class="topic-item"><a href="#topic_bj2_pyl_ldc" data-tocid="topic_bj2_pyl_ldc">新功能</a></li><li class="topic-item"><a href="#topic_dj2_pyl_ldc" data-tocid="topic_dj2_pyl_ldc">功能优化</a></li><li class="topic-item"><a href="#topic_fj2_pyl_ldc" data-tocid="topic_fj2_pyl_ldc">故障修复</a></li></ul></li><li class="topic-item"><a href="#topic_e2l_5y5_x1c" data-tocid="topic_e2l_5y5_x1c"><span class="- topic/ph ph">3.00.0</span></a><ul><li class="topic-item"><a href="#topic_mqg_3xl_ldc" data-tocid="topic_mqg_3xl_ldc">新功能</a></li><li class="topic-item"><a href="#topic_r3h_lxl_ldc" data-tocid="topic_r3h_lxl_ldc">功能优化</a></li><li class="topic-item"><a href="#topic_kxy_mxl_ldc" data-tocid="topic_kxy_mxl_ldc">故障修复</a></li></ul></li></ul></div>
+	                        	
+                        	</div>
+                        </nav>
+                    
+                </div>
+            </div>
+            
+            
+            
+        </div> 
+        <footer class="navbar navbar-default wh_footer">
+  <div class=" footer-container mx-auto ">
+<title>Copyright</title><p><b> ©2025 浙江智臾科技有限公司 浙ICP备18048711号-3</b></p>
+  </div>
+</footer>
+        
+        <div id="go2top" class="d-print-none">
+            <span class="oxy-icon oxy-icon-up"></span>
+        </div>
+        
+        <div id="modal_img_large" class="modal">
+            <span class="close oxy-icon oxy-icon-remove"></span>
+            <div id="modal_img_container"></div>
+            <div id="caption"></div>
+        </div>
+        
+        
+        
+    </body>
+</html>

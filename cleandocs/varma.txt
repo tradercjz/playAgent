@@ -1,0 +1,54 @@
+
+
+### 语法
+```DolphinDB
+varma(ds, endogColNames, order, [exog], [trend='c'], [errorCovType='unstructured'], [measurementError=false], [enforceStationarity=true], [enforceInvertibility=true], [trendOffset=1], [maxIter=50])
+```
+
+### 详情
+使用向量自回归移动平均模型（VARMA）分析多变量时间序列，返回包含分析结果的字典。
+
+### 参数
+- **ds**: 内存表或DataSource向量（不可为空）
+- **endogColNames**: 字符串向量，指定分析的多变量时间序列列名
+- **order**: [p, q]格式的非负整数向量，分别表示AR和MA阶数
+- **exog**: 数值矩阵（可选，外生变量数据）
+- **trend**: 趋势项设置（默认"c"，可选"ct"/"ctt"/"n"） (注意要双引号包裹的字符串)
+- **errorCovType**: 误差协方差矩阵结构（默认'unstructured'，可选'diagonal'）
+- **measurementError**: 是否包含测量误差（默认false）
+- **enforceStationarity**: 强制平稳性（默认true）
+- **enforceInvertibility**: 强制可逆性（默认true）
+- **trendOffset**: 时间序列起始偏移量（默认1）
+- **maxIter**: 最大迭代次数（默认50）
+
+### 返回值
+返回包含以下键的字典：
+- `params`: 拟合参数矩阵
+- `kAr`: AR阶数
+- `kMa`: MA阶数
+- `kTrend`: 趋势项数量
+- `nobs`: 观测值数量
+- `aic`: Akaike信息准则
+- `bic`: Bayesian信息准则
+- `hqic`: Hannan-Quinn信息准则
+- `llf`: 对数似然值
+
+### 示例
+```DolphinDB
+data = loadText("macrodata.csv")
+my_exog = matrix(DOUBLE, size(data), 1,, 1)
+result = varma(data, [`realgdp, `realcons, `realinv], [1,1], trend="c", exog=my_exog)
+print(result)
+
+/* 输出：
+params->[0.001792375138657,0.003160556421415,-0.007883363910928,-0.339419264165185,0.755250482937653,0.058642159539323,-0.133526968617148,0.32767138782651,0.042514529460363,-2.212343999390979,4.610354288385349,0.302449619489419,0.056726965953926,-0.069554043921028,-0.024169855056237,0.03072738358672,-0.056571376624308,-0.015977637956917,0.249792348549773,-0.171657812582861,-0.075503097693781,0.001792375138657,0.003160556421415,-0.007883363910928,0.007685902441147,0.003916408996852,0.005142039118261,0.030338334390003,-0.016066874864259,0.020322423082551]
+llf->1974.199528289279214
+kAr->1
+kMa->1
+kTrend->1
+nobs->202
+aic->-3888.399056578558429
+bic->-3789.151025656522506
+hqic->-3848.243123697545343
+*/
+```

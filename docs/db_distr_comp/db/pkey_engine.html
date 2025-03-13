@@ -1,0 +1,659 @@
+<!DOCTYPE html><html xmlns="http://www.w3.org/1999/xhtml" xml:lang="zh" lang="zh" data-whc_version="26.0">
+    <head><link rel="shortcut icon" href="../../favicon.ico"/><link rel="icon" href="../../favicon.ico"/><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><meta name="description" content="主键存储引擎（PKEY）是提供主键唯一性保证的，支持实时更新和高效查询的存储引擎。该引擎的设计目标是，满足从 OLTP 数据库的主键表 CDC 到 DolphinDB 中进行数据分析的需求。该需求需要存储引擎能够在保持主键唯一性的同时，做到近似实时的、类似 OLTP 的数据插入和更新负载，以及不固定的查询模式（Ad Hoc 查询）。 目前 DolphinDB 的 TSDB 存储引擎在去重策略为 ..."/><meta name="DC.rights.owner" content="(C) 版权 2025"/><meta name="copyright" content="(C) 版权 2025"/><meta name="generator" content="DITA-OT"/><meta name="DC.type" content="topic"/><meta name="DC.coverage" content=""/><meta name="DC.relation" content="../../db_distr_comp/cfg/db_intro.html"/><meta name="prodname" content="DolphinDB"/><meta name="brand" content="DolphinDB"/><meta name="DC.creator" content="DolphinDB"/><meta name="DC.publisher" content="DDB N/A DDB 200"/><meta name="DC.format" content="HTML5"/><meta name="DC.identifier" content="pkey_engine"/><title>主键存储引擎</title><!--  Generated with Oxygen version 26.0, build number 2024012323.  --><meta name="wh-path2root" content="../../"/><meta name="wh-toc-id" content="pkey_engine-d9713e3481"/><meta name="wh-source-relpath" content="db_distr_comp/db/pkey_engine.dita"/><meta name="wh-out-relpath" content="db_distr_comp/db/pkey_engine.html"/>
+
+    <link rel="stylesheet" type="text/css" href="../../oxygen-webhelp/app/commons.css?buildId=2024012323"/>
+    <link rel="stylesheet" type="text/css" href="../../oxygen-webhelp/app/topic.css?buildId=2024012323"/>
+
+    <script src="../../oxygen-webhelp/app/options/properties.js?buildId=20250305183303"></script>
+    <script src="../../oxygen-webhelp/app/localization/strings.js?buildId=2024012323"></script>
+    <script src="../../oxygen-webhelp/app/search/index/keywords.js?buildId=20250305183303"></script>
+    <script defer="defer" src="../../oxygen-webhelp/app/commons.js?buildId=2024012323"></script>
+    <script defer="defer" src="../../oxygen-webhelp/app/topic.js?buildId=2024012323"></script>
+<link rel="stylesheet" type="text/css" href="../../oxygen-webhelp/template/styles.css?buildId=2024012323"/><script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script><script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script></head>
+
+    <body id="pkey_engine" class="wh_topic_page frmBody">
+        <a href="#wh_topic_body" class="sr-only sr-only-focusable">
+            跳转到主要内容
+        </a>
+        
+        
+        
+        
+        <header class="navbar navbar-default wh_header">
+    <div class="container-fluid">
+        <div xmlns:whc="http://www.oxygenxml.com/webhelp/components" class="wh_header_flex_container navbar-nav navbar-expand-md navbar-dark">
+            <div class="wh_logo_and_publication_title_container">
+                <div class="wh_logo_and_publication_title">
+                    
+                    <a href="https://docs.dolphindb.cn/zh/index.html" class=" wh_logo d-none d-sm-block "><img src="../../logo.png" alt="  DolphinDB 文档中心  "/></a>
+                    <div class=" wh_publication_title "><a href="../../index.html"><span class="booktitle">  <span class="ph mainbooktitle">DolphinDB 文档中心</span>  </span></a></div>
+                    
+                </div>
+                
+                
+            </div>
+
+            <div class="wh_top_menu_and_indexterms_link collapse navbar-collapse" id="wh_top_menu_and_indexterms_link">
+                
+                
+                
+                
+            </div>
+        <div class=" wh_search_input navbar-form wh_topic_page_search search " role="form">
+            
+            
+            
+            <form id="searchForm" method="get" role="search" action="../../search.html"><div><input type="search" placeholder="搜索 " class="wh_search_textfield" id="textToSearch" name="searchQuery" aria-label="搜索查询" required="required"/><button type="submit" class="wh_search_button" aria-label="搜索"><span class="search_input_text">搜索</span></button></div></form>
+            
+            <script src="/vendors/react/umd/react.production.min.js" defer="defer"></script>
+<script src="/vendors/react-dom/umd/react-dom.production.min.js" defer="defer"></script>
+<script src="/vendors/dayjs/dayjs.min.js" defer="defer"></script>
+<script src="/vendors/antd/dist/antd.min.js" defer="defer"></script>
+<script src="/vendors/@ant-design/icons/dist/index.umd.min.js" defer="defer"></script>
+<script src="/zh/index.js" type="module"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" defer="defer"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML" defer="defer"><!--
+
+
+--></script>
+<script defer="defer"><!--
+
+// 从主页重定向
+const currentUrl = window.location.href;
+
+// 判断当前URL是否包含index.html并且路径最后部分是index.html
+if (currentUrl.endsWith('index.html')) {
+    // 处理根目录下的index.html跳转
+    const baseUrl = currentUrl.split('/index.html')[0]; // 获取index.html之前的部分
+    const redirectUrl = `${baseUrl}/about/ddb_intro.html`; // 构建跳转路径
+    window.location.href = redirectUrl; // 执行跳转
+}
+
+--></script>
+            
+        </div></div>
+    </div>
+</header>
+        
+        
+         
+        
+        
+        
+        <div class="container-fluid" id="wh_topic_container">
+            <div class="row">
+
+                <nav class="wh_tools d-print-none navbar-expand-md" aria-label="Tools">
+                    
+                    <div data-tooltip-position="bottom" class=" wh_breadcrumb "><ol class="d-print-none"><li><span class="home"><a href="../../index.html"><span>主页</span></a></span></li><li><div class="topicref" data-id="new_chap_database_manage_new_chap_dbmanage_landing_page"><div class="title"><a href="../../db_distr_comp/cfg/db_intro.html"><span class="keyword label">数据库</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 数据库的基本概念</p></div></div></div></li><li class="active"><div class="topicref" data-id="pkey_engine"><div class="title"><a href="../../db_distr_comp/db/pkey_engine.html"><span class="keyword">主键存储引擎</span>  </a></div></div></li></ol></div>
+                    
+                    
+                    
+                    <div class="wh_right_tools">
+                        <button class="wh_hide_highlight" aria-label="切换搜索突出显示" title="切换搜索突出显示"></button>
+                        <button class="webhelp_expand_collapse_sections" data-next-state="collapsed" aria-label="折叠截面" title="折叠截面"></button>
+                        
+                        
+                        
+                        
+                        <div class=" wh_print_link print d-none d-md-inline-block "><button onClick="window.print()" title="打印此页" aria-label="打印此页"></button></div>
+                        
+                        <button type="button" id="wh_toc_button" class="custom-toggler navbar-toggler collapsed wh_toggle_button navbar-light" aria-expanded="false" aria-label="Toggle publishing table of content" aria-controls="wh_publication_toc">
+                            <span class="navbar-toggler-icon"></span>
+                        </button>
+                    </div>
+                    
+                </nav>
+            </div>
+            
+            
+            
+            
+            <div class="wh_content_area">
+                <div class="row">
+                    
+                        <nav id="wh_publication_toc" class="col-lg-3 col-md-3 col-sm-12 d-md-block d-none d-print-none" aria-label="Table of Contents Container">
+                            <div id="wh_publication_toc_content">
+		                        
+                            	<div class=" wh_publication_toc " data-tooltip-position="right"><span class="expand-button-action-labels"><span id="button-expand-action" role="button" aria-label="Expand"></span><span id="button-collapse-action" role="button" aria-label="Collapse"></span><span id="button-pending-action" role="button" aria-label="Pending"></span></span><ul role="tree" aria-label="Table of Contents"><li role="treeitem"><div data-tocid="ddb_intro-d9713e87" class="topicref" data-id="ddb_intro" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../about/ddb_intro.html" id="ddb_intro-d9713e87-link">关于DolphinDB</a></div></div></li><li role="treeitem"><div data-tocid="chap1_getstarted-d9713e136" class="topicref" data-id="chap1_getstarted" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../getstarted/chap1_getstarted.html" id="chap1_getstarted-d9713e136-link">快速上手</a><div class="wh-tooltip"><p class="shortdesc">如何快速部署 DolphinDB、建库建表、写入和查询数据</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="sectionddb_deployment-d9713e189" class="topicref" data-id="sectionddb_deployment" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action sectionddb_deployment-d9713e189-link" class="wh-expand-btn"></span><div class="title"><a href="../../deploy/deploy_intro.html" id="sectionddb_deployment-d9713e189-link"><span class="keyword label">部署</span></a><div class="wh-tooltip"><p class="shortdesc">如何在不同的场景中部署 DolphinDB</p></div></div></div></li><li role="treeitem" aria-expanded="true"><div data-tocid="new_chap_database_manage_new_chap_dbmanage_landing_page-d9713e2259" class="topicref" data-id="new_chap_database_manage_new_chap_dbmanage_landing_page" data-state="expanded"><span role="button" tabindex="0" aria-labelledby="button-collapse-action new_chap_database_manage_new_chap_dbmanage_landing_page-d9713e2259-link" class="wh-expand-btn"></span><div class="title"><a href="../../db_distr_comp/cfg/db_intro.html" id="new_chap_database_manage_new_chap_dbmanage_landing_page-d9713e2259-link"><span class="keyword label">数据库</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 数据库的基本概念</p></div></div></div><ul role="group" class="navbar-nav nav-list"><li role="treeitem" aria-expanded="false"><div data-tocid="chap3_sect_database_distributed_computing-d9713e2312" class="topicref" data-id="chap3_sect_database_distributed_computing" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action chap3_sect_database_distributed_computing-d9713e2312-link" class="wh-expand-btn"></span><div class="title"><a href="../../db_distr_comp/db_distr_comp.html" id="chap3_sect_database_distributed_computing-d9713e2312-link"><span class="keyword label">数据库操作</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 数据库的基本操作，例如创建数据库、表，增加列、分区，数据查询，表连接等。</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="topic_pg3_22w_ryb-d9713e2880" class="topicref" data-id="topic_pg3_22w_ryb" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action topic_pg3_22w_ryb-d9713e2880-link" class="wh-expand-btn"></span><div class="title"><a href="../../db_distr_comp/db/db_architecture.html" id="topic_pg3_22w_ryb-d9713e2880-link"><span class="keyword label">分布式架构</span></a></div></div></li><li role="treeitem"><div data-tocid="tsdb-d9713e3387" class="topicref" data-id="tsdb" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../db_distr_comp/db/tsdb.html" id="tsdb-d9713e3387-link"><span class="keyword label">TSDB 存储引擎</span></a></div></div></li><li role="treeitem"><div data-tocid="olap-d9713e3434" class="topicref" data-id="olap" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../db_distr_comp/db/olap.html" id="olap-d9713e3434-link"><span class="keyword label">OLAP 存储引擎</span></a></div></div></li><li role="treeitem" class="active"><div data-tocid="pkey_engine-d9713e3481" class="topicref" data-id="pkey_engine" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../db_distr_comp/db/pkey_engine.html" id="pkey_engine-d9713e3481-link"><span class="keyword">主键存储引擎</span>  </a></div></div></li><li role="treeitem"><div data-tocid="imoltp-d9713e3529" class="topicref" data-id="imoltp" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../db_distr_comp/db/imoltp.html" id="imoltp-d9713e3529-link">内存在线事务处理引擎</a></div></div></li><li role="treeitem"><div data-tocid="vectordb-d9713e3575" class="topicref" data-id="vectordb" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../db_distr_comp/db/vectordb.html" id="vectordb-d9713e3575-link">向量存储引擎</a></div></div></li><li role="treeitem"><div data-tocid="textdb-d9713e3621" class="topicref" data-id="textdb" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../db_distr_comp/db/textdb.html" id="textdb-d9713e3621-link">文本存储引擎</a></div></div></li><li role="treeitem"><div data-tocid="catalog-d9713e3667" class="topicref" data-id="catalog" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../db_distr_comp/db/catalog.html" id="catalog-d9713e3667-link">数据目录</a></div></div></li><li role="treeitem"><div data-tocid="iotdb-d9713e3713" class="topicref" data-id="iotdb" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../db_distr_comp/db/iotdb.html" id="iotdb-d9713e3713-link">物联网点位管理引擎</a></div></div></li></ul></li><li role="treeitem" aria-expanded="false"><div data-tocid="chap7_tutorials_streaming-d9713e3760" class="topicref" data-id="chap7_tutorials_streaming" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action chap7_tutorials_streaming-d9713e3760-link" class="wh-expand-btn"></span><div class="title"><a href="../../stream/str_intro.html" id="chap7_tutorials_streaming-d9713e3760-link"><span class="keyword label">流数据</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 流数据引擎及流数据计算的基本概念</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e7513" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e7513-link" class="wh-expand-btn"></span><div class="title"><a href="../../db_distr_comp/db_oper/import_data.html" id="tocId-d9713e7513-link">数据迁移</a><div class="wh-tooltip"><p class="shortdesc">如何从不同数据源向 DolphinDB 迁移数据</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="chap7_tutorials_system_management-d9713e7940" class="topicref" data-id="chap7_tutorials_system_management" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action chap7_tutorials_system_management-d9713e7940-link" class="wh-expand-btn"></span><div class="title"><a href="../../sys_man/om_intro.html" id="chap7_tutorials_system_management-d9713e7940-link"><span class="keyword label">系统运维</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 的系统运维功能及方法</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="troubleshooting-d9713e8780" class="topicref" data-id="troubleshooting" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action troubleshooting-d9713e8780-link" class="wh-expand-btn"></span><div class="title"><a href="../../error_codes/troubleshooting.html" id="troubleshooting-d9713e8780-link">故障排查</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="about_language_resources-d9713e20911" class="topicref" data-id="about_language_resources" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action about_language_resources-d9713e20911-link" class="wh-expand-btn"></span><div class="title"><a href="../../progr/progr_intro.html" id="about_language_resources-d9713e20911-link"><span class="keyword label">编程语言</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 编程基本概念与方法、SQL 在 DolphinDB 的应用</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="functions_references-d9713e30925" class="topicref" data-id="functions_references" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action functions_references-d9713e30925-link" class="wh-expand-btn"></span><div class="title"><a href="../../funcs/funcs_intro.html" id="functions_references-d9713e30925-link"><span class="keyword label">函数参考</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 函数分类、语法、详解及示例</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="api_protocol-d9713e94064" class="topicref" data-id="api_protocol" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action api_protocol-d9713e94064-link" class="wh-expand-btn"></span><div class="title"><a href="../../api/connapi_intro.html" id="api_protocol-d9713e94064-link"><span class="keyword label">连接器 &amp; API</span></a><div class="wh-tooltip"><p class="shortdesc">面向不同编程语言的 DolphinDB API 及连接器，相关协议和用法</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="chap6_plugin-d9713e94210" class="topicref" data-id="chap6_plugin" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action chap6_plugin-d9713e94210-link" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/plg_intro.html" id="chap6_plugin-d9713e94210-link"><span class="keyword label">插件</span></a><div class="wh-tooltip"><p class="shortdesc">多个应用场景的插件使用说明和插件开发指导</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="third_party-d9713e97904" class="topicref" data-id="third_party" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action third_party-d9713e97904-link" class="wh-expand-btn"></span><div class="title"><a href="../../third_party.html" id="third_party-d9713e97904-link">第三方工具</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="about_tutorials-d9713e98227" class="topicref" data-id="about_tutorials" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action about_tutorials-d9713e98227-link" class="wh-expand-btn"></span><div class="title"><a href="../../tutorials/about_tutorials.html" id="about_tutorials-d9713e98227-link"><span class="keyword label">教程</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 产品使用教程</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e105982" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e105982-link" class="wh-expand-btn"></span><div class="title"><a href="../../rn/server/3_00_2.html" id="tocId-d9713e105982-link">版本说明</a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 版本发布历史</p></div></div></div></li></ul></div>
+		                        
+                            </div>
+                        </nav>
+                    
+                    
+                    <div class="col-lg-7 col-md-9 col-sm-12" id="wh_topic_body">
+                        <button id="wh_close_publication_toc_button" class="close-toc-button d-none" aria-label="Toggle publishing table of content" aria-controls="wh_publication_toc" aria-expanded="true">
+                            <span class="close-toc-icon-container">
+                                <span class="close-toc-icon"></span>     
+                            </span>
+                        </button>
+                        <button id="wh_close_topic_toc_button" class="close-toc-button d-none" aria-label="Toggle topic table of content" aria-controls="wh_topic_toc" aria-expanded="true">
+                            <span class="close-toc-icon-container">
+                                <span class="close-toc-icon"></span>     
+                            </span>
+                        </button>
+                        
+                        <div class=" wh_topic_content body "><main role="main"><article class="- topic/topic topic" role="article" aria-labelledby="ariaid-title1">
+    <h1 class="- topic/title title topictitle1" id="ariaid-title1"><span class="- topic/keyword keyword">主键存储引擎</span>
+    </h1>
+    <div class="- topic/body body">
+        <p class="- topic/p p">主键存储引擎（PKEY）是提供主键唯一性保证的，支持实时更新和高效查询的存储引擎。该引擎的设计目标是，满足从 OLTP 数据库的主键表 CDC 到 DolphinDB
+            中进行数据分析的需求。该需求需要存储引擎能够在保持主键唯一性的同时，做到近似实时的、类似 OLTP 的数据插入和更新负载，以及不固定的查询模式（Ad Hoc 查询）。</p>
+    </div>
+    <article class="- topic/topic topic nested1" aria-labelledby="ariaid-title2" id="topic_sys_2nh_ybc">
+        <h2 class="- topic/title title topictitle2" id="ariaid-title2">主键唯一性</h2>
+        <div class="- topic/body body">
+            <p class="- topic/p p">目前 DolphinDB 的 TSDB 存储引擎在去重策略为 LAST
+                的情况下，能满足唯一性的要求。但由于查询时的去重代价较高，且无法使用非主键列的索引，所以不适合需要多种索引结合的 Ad Hoc 查询模式。而 OLAP
+                存储引擎虽然能最大化查询性能，但由于每次写入都要合并数据，难以做到实时更新。</p>
+            <section class="- topic/section section" id="topic_sys_2nh_ybc__section_d5q_hnh_ybc" data-ofbid="topic_sys_2nh_ybc__section_d5q_hnh_ybc"><h3 class="- topic/title title sectiontitle">主流方案介绍</h3>
+                
+                <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">Copy-on-Write</strong></p>
+                <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">原理</strong>：当数据写入时，将原数据冲突的部分从磁盘读出并合并，然后将合并结果写入磁盘。</p>
+                <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">优点</strong>：最大化查询性能，查询过程中不需要考虑保证主键唯一性。</p>
+                <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">缺点</strong>：每次写入都要合并冲突数据，使得更新代价高，不适合频繁更新的场景。</p>
+                <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">代表系统</strong>：Hudi、Delta Lake、DolphinDB OLAP 存储引擎。</p>
+                <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">Merge-on-Read</strong></p>
+                <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">原理</strong>：数据写入时不严格考虑唯一性，不检查新文件是否覆盖旧文件的数据行，采用盲写方式落盘。在数据查询时，再根据查询结果合并可能冲突的新文件，并保留最新主键数据，从而保证主键唯一性。</p>
+                <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">优点</strong>：写入性能极佳。</p>
+                <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">缺点</strong>：查询时需要读新文件做去重合并，查询性能优化存在上限，例如无法结合非主键列的索引过滤数据。</p>
+                <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">代表系统</strong>：ClickHouse、StarRocks 更新表、DolphinDB TSDB 存储引擎。</p>
+                <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">Merge-on-Write</strong></p>
+                <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">原理</strong>：引入 delete bitmap 的概念，在数据写入时更新各文件的行删除标记，查询时根据 delete bitmap
+                    直接过滤掉被删除或覆盖的行。</p>
+                <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">优点</strong>：查询时不需要读取文件做去重，能够有效利用非主键索引来过滤查询结果。支持实时更新的场景。</p>
+                <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">缺点</strong>：需要更新各个文件的 delete bitmap，牺牲了写入性能。</p>
+                <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">代表系统</strong>：Hologres、ByteHouse、Doris 主键模型、StarRocks 主键表。</p>
+            </section>
+            <section class="- topic/section section" id="topic_sys_2nh_ybc__section_cds_qph_ybc" data-ofbid="topic_sys_2nh_ybc__section_cds_qph_ybc"><h3 class="- topic/title title sectiontitle">主键引擎方案选择</h3>
+                
+                <p class="- topic/p p">为实现实时插入和更新，PKEY 存储引擎采用 LSM-Tree 的设计，通过顺序写来保证写入性能。</p>
+                <p class="- topic/p p">为实现 Ad Hoc 查询模式，采用 Merge-on-Write 方案，在不影响写入速度的同时，使查询不需要读文件进行去重合并。此外，PKEY
+                    引擎能够利用各种索引来加速查询。</p>
+            </section>
+        </div>
+    </article>
+    <article class="- topic/topic topic nested1" aria-labelledby="ariaid-title3" id="topic_iq4_sph_ybc">
+        <h2 class="- topic/title title topictitle2" id="ariaid-title3">存储结构</h2>
+        <div class="- topic/body body">
+            <p class="- topic/p p">PKEY 存储引擎中的数据分别存储在内存和磁盘中。新写入的数据会保存在内存的 Cache Engine 中。当内存数据量达到阈值时，会将数据落盘保存为只读的层文件（称为
+                Level File）。内存和磁盘上的数据均采用列式存储方式。为了支持高效的主键点查、数据压缩（compaction）以及 delete bitmap （关于
+                delete bitmap 的详细内容将在”文件结构”一节介绍）更新，内存中的 immutable memtable 和磁盘上的每个 Level File
+                内部都按照主键顺序排序。存储引擎在新数据写入后，会在后台持续更新 delete bitmap，从而在查询时避免读文件去重的开销。</p>
+            <section class="- topic/section section" id="topic_iq4_sph_ybc__section_zr5_5ph_ybc" data-ofbid="topic_iq4_sph_ybc__section_zr5_5ph_ybc"><h3 class="- topic/title title sectiontitle">存储布局</h3><img class="- topic/image image" id="topic_iq4_sph_ybc__image_cnd_fqh_ybc" src="../../images/db_distr_comp/pkey_engine_storage_layout.png"/><div class="- topic/p p">PKEY 存储引擎数据分为内存和磁盘两部分，并由以下几个主要组件构成：<ul class="- topic/ul ul" id="topic_iq4_sph_ybc__ul_k2b_qqh_ybc" data-ofbid="topic_iq4_sph_ybc__ul_k2b_qqh_ybc">
+                        <li class="- topic/li li">
+                            MemTable：新写入的数据会插入到内存表中，内存表分为一个可变内存表和多个不可变内存表。
+                        </li>
+                        <li class="- topic/li li">
+                            Stashed Primary Key：当内存中数据达到最大容量时，数据将会落盘。此时引擎会暂存部分数据，用于后续的 delete
+                                bitmap 更新和查询去重。
+                        </li>
+                        <li class="- topic/li li">
+                           REDO：预写日志，用于保证事务的原子性和持久性。用户的写入操作会首先将数据写入 redo log 中，然后进入内存表。
+                        </li>
+                        <li class="- topic/li li">
+                            META：存储引擎的元数据，包括元信息的 meta.log 和多版本的 delete bitmap 文件。
+                        </li>
+                        <li class="- topic/li li">
+                            STORAGE：存储引擎的数据，分为四层，每层存储多个层文件（Level File）。
+                        </li>
+                    </ul></div><p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">MemTable</strong></p><p class="- topic/p p">LSM-Tree
+                    的顺序写特性简单来说是将写入和更新操作分为两部分进行：内存插入和文件顺序写。其中内存插入就是写入存储引擎的可变内存表。当可变内存表的数据量达到容量后，会根据主键排序从而形成一个不可变内存表。在
+                    PKEY 引擎中，由 Cache Engine
+                        来维护这两种内存表。由于不可变内存表是有序的，所以主键点查可以通过二分检索来降低复杂度。</p><p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">Stashed Primary
+                        Key</strong></p><p class="- topic/p p">当内存数据落盘后，引擎会暂存该数据的主键和 CID（commit ID）列，用于 delete bitmap
+                    的后台更新以及查询去重。Stashed Primary Key 采用双缓冲设计，其底层由两个 buffer 组成，每个 buffer 包括两个向量，即主键列和
+                    CID 列。双缓冲设计用于处理后台的 delete bitmap 更新、数据落盘以及查询去重的并发控制，能够消除查询去重的拷贝开销。</p><p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">Meta
+                        Log</strong></p><p class="- topic/p p">Meta Log 主要存储 PKEY 引擎的文件元信息和 delete bitmap
+                    信息，它的作用是给查询提供某时刻的元信息快照：</p><ul class="- topic/ul ul" id="topic_iq4_sph_ybc__ul_xnk_xqh_ybc" data-ofbid="topic_iq4_sph_ybc__ul_xnk_xqh_ybc">
+                    <li class="- topic/li li">
+                       文件元信息，包括文件路径、索引信息、各列类型等信息，用于保存分区恢复、事务、数据落盘等文件更改操作。
+                    </li>
+                    <li class="- topic/li li">
+                        delete bitmap 信息，包括路径和版本号。
+                    </li>
+                </ul><p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">Delete Bitmap</strong></p><p class="- topic/p p">在 PKEY 引擎中，每一个层文件都存在对应的 delete
+                    bitmap，用于指定该文件中某行数据是否被删除或覆盖。delete bitmap 的特点是大小很小，120KB 左右可以存储 100 万行数据的标记。所以
+                    PKEY 存储引擎的一个 delete bitmap 文件可以存储该分区下所有层文件的 delete bitmap。delete bitmap
+                    文件采用多版本方式存储，用于避免查询和写入过程的冲突。具体而言，每一次 delete bitmap 文件的落盘都会以本次数据最大的 flushID
+                    作为快照版本，并由 Meta Log 指定当前最新的 delete bitmap 文件。</p><p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">Level File</strong></p><p class="- topic/p p">Level
+                    File 在概念上等同于 LevelDB 中的 SSTable。在 Compaction 策略上，PKEY 存储引擎采用 lazy leveling
+                    的设计，即前三层的多个 Level File 之间可能重叠，最后一层的多个 Level File
+                    之间不会重叠。其目的是减少最后一层的读放大以及空间放大。</p></section>
+            <section class="- topic/section section" id="topic_iq4_sph_ybc__section_rzd_crh_ybc" data-ofbid="topic_iq4_sph_ybc__section_rzd_crh_ybc"><h3 class="- topic/title title sectiontitle">文件结构</h3><p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">Level
+                    File文件</strong></p><p class="- topic/p p">为了更好地管理 Level File 以及识别 Level File 之间数据的新旧顺序，引擎将每个 Level File
+                    的文件名设计为由三部分组成，分别是 level ID、flush ID 和 sequence number。其中 level ID
+                    指示该文件在逻辑上属于哪一层，flush ID 表示该文件包含的最新数据是来自哪一次落盘，sequence number 则表示该 level file 在所属
+                    sorted run 中的序号。sorted run 是指一组 level file，这些文件之间没有数据重叠，是 flush 或 compaction
+                    的输出。一个文件名的例子比如 1-000000014-001，表示该 level file 存在于第二层，包含 flushID 为 14 的数据，是该
+                    sorted run 中的第二个文件。</p><p class="- topic/p p">Level file内部由六部分组成，如下图所示：</p><img class="- topic/image image" id="topic_iq4_sph_ybc__image_f1m_hrh_ybc" src="../../images/db_distr_comp/pkey_engine_level_file.png" width="600"/><ul class="- topic/ul ul" id="topic_iq4_sph_ybc__ul_nb1_nrh_ybc" data-ofbid="topic_iq4_sph_ybc__ul_nb1_nrh_ybc">
+                    <li class="- topic/li li">
+                        Header：存储该文件的信息，例如最大和最小 CID、各列的类型信息、主键列信息等。
+                    </li>
+                    <li class="- topic/li li">
+                        Data Block：数据块，每个数据块最多存储 8192 行数据。文件的每个数据块之间以及数据块内部按主键顺序排序。
+                    </li>
+                    <li class="- topic/li li">
+                        Index Block：索引块，目前支持 Bloom Filter 和 Zone Map。
+                    </li>
+                    <li class="- topic/li li">
+                        Data Block Index：数据块的索引结构，存储所有数据块的所属列序号、文件偏移量、行数等信息。
+                    </li>
+                    <li class="- topic/li li">
+                        Index Block Index：索引块的索引结构，存储所有索引块的类型、列序号、文件偏移量等信息。
+                    </li>
+                    <li class="- topic/li li">
+                        Footer：存储 Data Block Index 和 Index Block Index 的文件偏移量。
+                    </li>
+                </ul><p class="- topic/p p">上述六部分都按照 4KB 对齐，以提高操作系统访问文件块的效率。</p><p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">Delete Bitmap文件</strong></p><p class="- topic/p p">Delete
+                    bitmap 文件包含了该分区下所有 Level File 的 delete bitmap，其结构如下：</p><img class="- topic/image image" id="topic_iq4_sph_ybc__image_gwr_zrh_ybc" src="../../images/db_distr_comp/pkey_engine_delete_bitmap.png" width="600"/><ul class="- topic/ul ul" id="topic_iq4_sph_ybc__ul_p22_1sh_ybc" data-ofbid="topic_iq4_sph_ybc__ul_p22_1sh_ybc">
+                    <li class="- topic/li li">
+                        Bitmap：存储某文件的 delete bitmap，内部是一个 01 序列，表示某行是否被删除或覆盖。例如，上图中第一个 bitmap
+                            表示对应 Level File 的第二行、第六行等已被删除或覆盖。
+                    </li>
+                    <li class="- topic/li li">
+                        Footer：存储各 bitmap 对应的 Level File 信息以及文件偏移量，包括 Level File 的 level ID、flush
+                            ID 和 sequence number。
+                    </li>
+                </ul><p class="- topic/p p">存储引擎按照多版本的方式存储 Delete bitmap 文件，从而为查询提供一致的数据快照，其中每个版本由文件名中的 flushID
+                    做区分。Delete bitmap 文件是多版本存储的，每个文件由文件名中的 flush ID 区分。例如 delmap-000000014 是以 flush
+                    ID 为 14 的刷盘数据作为最新数据的各 Level File 的 delete bitmap。meta.log 会记录当前分区最新 delete
+                    bitmap 的 flush ID，每次查询会从元信息中获取最新 delete bitmap 进行去重。</p></section>
+        </div>
+    </article>
+    <article class="- topic/topic topic nested1" aria-labelledby="ariaid-title4" id="topic_by1_2sh_ybc">
+        <h2 class="- topic/title title topictitle2" id="ariaid-title4">读写流程</h2>
+        <div class="- topic/body body">
+            <img class="- topic/image image" id="topic_by1_2sh_ybc__image_pkm_3sh_ybc" src="../../images/db_distr_comp/pkey_engine_read_write_flowchart.png"/>
+            <section class="- topic/section section" id="topic_by1_2sh_ybc__section_vnj_jsh_ybc" data-ofbid="topic_by1_2sh_ybc__section_vnj_jsh_ybc"><h3 class="- topic/title title sectiontitle">数据写入</h3>
+                
+                <p class="- topic/p p">结合上图从数据传递的视角介绍 PKEY 引擎的写入流程：</p><ol class="- topic/ol ol" id="topic_by1_2sh_ybc__ol_mnk_ksh_ybc" data-ofbid="topic_by1_2sh_ybc__ol_mnk_ksh_ybc">
+                        <li class="- topic/li li">
+                            <strong class="+ topic/ph hi-d/b ph b">写 redo</strong>：写入预写日志，保证事务原子性。
+                        </li>
+                        <li class="- topic/li li"><strong class="+ topic/ph hi-d/b ph b">写 cache engine</strong>：当 redo log 写入成功后，写入 cache engine 的 mutable
+                            memtable。</li>
+                        <li class="- topic/li li">
+                            <strong class="+ topic/ph hi-d/b ph b">形成 immutable memtable</strong>：当 mutable memtable 中的数据量达到容量（8MB）时，该
+                                memtable 会按主键排序并形成一个 immutable memtable。
+                        </li>
+                        <li class="- topic/li li">
+                            <strong class="+ topic/ph hi-d/b ph b">后台刷盘</strong>：当 cache engine 中的数据量达到 PKEYCacheEngineSize （默认 1GB）时，PKEY
+                                引擎会触发后台刷盘逻辑，将内存中的所有数据写入磁盘，作为第一层的 Level File。同时，本次刷盘的数据将会存储在 stashed
+                                primary key 中，作为下次 delete bitmap 更新和查询去重的依据。
+                        </li>
+                        <li class="- topic/li li">
+                            <strong class="+ topic/ph hi-d/b ph b">后台 compaction</strong>：在每次刷盘和 compaction 结束后，后台线程会根据触发条件判断各层是否需要进行
+                                compaction，然后根据文件选取策略进行 compaction
+                            <ol class="- topic/ol ol" type="a" id="topic_by1_2sh_ybc__ol_szk_rsh_ybc" data-ofbid="topic_by1_2sh_ybc__ol_szk_rsh_ybc">
+                                <li class="- topic/li li">
+                                    触发条件：检查每层的数据量是否超过阈值，以及每层中被删除或覆盖的行数占总大小的比例。当存在多个层满足触发条件时，会对各层按照一定规则进行评分，进而选择一个分数最高的层进行下一步逻辑。
+                                </li>
+                                <li class="- topic/li li">
+                                    文件选取策略：从该层中最旧的文件开始，选取互相重叠的 sorted
+                                        run，并计算分数做出最优选择。根据触发条件的不同，选取策略的目的倾向也不同：或是倾向于垃圾数据最多的选择，或是倾向于
+                                        sorted run 个数最多的选择。
+                                </li>
+                            </ol>
+                        </li>
+                    </ol>
+                <p class="- topic/p p">根据文件数量和大小，delete bitmap 更新过程通常比一次 flush 耗时更长。为了在一次 delete bitmap
+                    更新中标记尽可能多的失效行，系统在第 4 步刷盘结束后，会检查 stashed primary key 数据量是否达到阈值
+                    PKEYDeleteBitmapUpdateThreshold（默认值为 100MB），从而触发 delete bitmap 的后台更新。delete
+                    bitmap 后台更新的流程如下：</p><ol class="- topic/ol ol" id="topic_by1_2sh_ybc__ol_gr2_vsh_ybc" data-ofbid="topic_by1_2sh_ybc__ol_gr2_vsh_ybc">
+                        <li class="- topic/li li">
+                            对每个文件，根据该文件的 zone map 确定需要合并的数据块。
+                        </li>
+                        <li class="- topic/li li">
+                            对每个数据块，通过二分法检查并更新 delete bitmap。如果相同主键在 stashed primary key 中 CID
+                                更大，说明该文件的这行需要被标记为删除。
+                        </li>
+                        <li class="- topic/li li">
+                            将所有文件的 delete bitmap 写入一个 delete bitmap 文件，并使用 stashed primary key
+                                中最大 flush ID 作为 delete bitmap 的版本号。
+                        </li>
+                    </ol>
+            </section>
+            <section class="- topic/section section" id="topic_by1_2sh_ybc__section_fbp_dth_ybc" data-ofbid="topic_by1_2sh_ybc__section_fbp_dth_ybc"><h3 class="- topic/title title sectiontitle">数据查询</h3>
+                
+                <p class="- topic/p p">PKEY 存储引擎的查询过程类似 TSDB KeepLast，区别在于 PKEY 引擎会将谓词条件下推到去重之前，并且能够利用 bloom filter
+                    等索引加速查询。具体的查询流程如下：</p>
+                <ol class="- topic/ol ol" id="topic_by1_2sh_ybc__ol_lb3_2th_ybc" data-ofbid="topic_by1_2sh_ybc__ol_lb3_2th_ybc">
+                    <li class="- topic/li li">
+                        <strong class="+ topic/ph hi-d/b ph b">获取内存数据</strong>：从 cache engine 中取出所需的列。如果是主键点查，会采用二分查找的方式搜索各个 memtable。
+                    </li>
+                    <li class="- topic/li li">
+                        <strong class="+ topic/ph hi-d/b ph b">获取元数据版本快照</strong>：从 meta version 中获取 Level File 信息、delete bitmap 信息以及
+                            stashed primary key。
+                    </li>
+                    <li class="- topic/li li">
+                        <strong class="+ topic/ph hi-d/b ph b">获取磁盘数据</strong>：通过各种索引进行粗过滤，构建各文件的 bitmap 来访问所需的 data block。
+                        <ol class="- topic/ol ol" type="a" id="topic_by1_2sh_ybc__ol_gh3_gth_ybc" data-ofbid="topic_by1_2sh_ybc__ol_gh3_gth_ybc">
+                            <li class="- topic/li li">
+                                使用 bloom filter 过滤：当进行主键点查，或者对存在 bloom filter 索引的列进行等值查询时，会对各个
+                                    Level File 进行文件级别的 bloom filter 过滤，找出所有可能存在结果的文件。
+                            </li>
+                            <li class="- topic/li li">
+                                使用 zone map 过滤：当进行等值或范围查询时，会对每个 Level File 进行 block
+                                    级别的过滤，找出所有满足条件的 block。
+                            </li>
+                            <li class="- topic/li li">
+                                使用 delete bitmap 过滤：在上述过滤完成后，将该文件的 delete bitmap 和记录行号的 bitmap
+                                    取交集，过滤掉已被删除和覆盖的行。
+                            </li>
+                        </ol>
+                    </li>
+                    <li class="- topic/li li">
+                        <strong class="+ topic/ph hi-d/b ph b">计算谓词条件结果</strong>：过滤掉不需要的行。
+                    </li>
+                    <li class="- topic/li li">
+                        <strong class="+ topic/ph hi-d/b ph b">去重</strong>：将查询结果与内存中的 cache engine 和 stashed primary key 进行去重。如果 cache
+                            engine 和 stashed primary key 皆为空，则不需要去重。
+                    </li>
+                    <li class="- topic/li li">
+                        <strong class="+ topic/ph hi-d/b ph b">返回查询结果</strong>。
+                    </li>
+                </ol>
+            </section>
+            <section class="- topic/section section" id="topic_by1_2sh_ybc__section_ay3_lth_ybc" data-ofbid="topic_by1_2sh_ybc__section_ay3_lth_ybc"><h3 class="- topic/title title sectiontitle">数据更新</h3>
+                
+                <p class="- topic/p p">在 PKEY 引擎中，更新可被视为一次数据查询和写入，具体分为以下步骤：</p>
+                <ol class="- topic/ol ol" id="topic_by1_2sh_ybc__ol_pbz_lth_ybc" data-ofbid="topic_by1_2sh_ybc__ol_pbz_lth_ybc">
+                    <li class="- topic/li li">
+                        <strong class="+ topic/ph hi-d/b ph b">查询</strong>：根据谓词条件进行一次查询。
+                    </li>
+                    <li class="- topic/li li">
+                        <strong class="+ topic/ph hi-d/b ph b">修改</strong>：对上述查询结果进行修改。
+                    </li>
+                    <li class="- topic/li li">
+                        <strong class="+ topic/ph hi-d/b ph b">写入</strong>：按照写入流程插入数据。
+                    </li>
+                </ol>
+            </section>
+            <section class="- topic/section section" id="topic_by1_2sh_ybc__section_ztn_4th_ybc" data-ofbid="topic_by1_2sh_ybc__section_ztn_4th_ybc"><h3 class="- topic/title title sectiontitle">数据删除</h3>
+                
+                <p class="- topic/p p">在 PKEY 引擎中，删除也可被视为一次数据查询和写入，具体分为以下步骤：</p>
+                <ol class="- topic/ol ol" id="topic_by1_2sh_ybc__ol_a5n_4th_ybc" data-ofbid="topic_by1_2sh_ybc__ol_a5n_4th_ybc">
+                    <li class="- topic/li li">
+                        <strong class="+ topic/ph hi-d/b ph b">查询</strong>：根据谓词条件进行一次查询。
+                    </li>
+                    <li class="- topic/li li">
+                        <strong class="+ topic/ph hi-d/b ph b">写入</strong>：按照写入流程插入数据，但 CID 将会写入为负数作为删除标记。
+                    </li>
+                </ol>
+            </section>
+        </div>
+    </article>
+    <article class="- topic/topic topic nested1" aria-labelledby="ariaid-title5" id="topic_fkx_rth_ybc">
+        <h2 class="- topic/title title topictitle2" id="ariaid-title5">PKEY 引擎特点</h2>
+        <div class="- topic/body body">
+            <p class="- topic/p p">PKEY 存储引擎在写入和查询性能之间寻求平衡，其特点为：</p>
+            <ul class="- topic/ul ul" id="topic_fkx_rth_ybc__ul_uq3_tth_ybc" data-ofbid="topic_fkx_rth_ybc__ul_uq3_tth_ybc">
+                <li class="- topic/li li">
+                    保证主键唯一性，能做到近实时的更新。
+                </li>
+                <li class="- topic/li li">
+                    使用主键列进行谓词条件的点查非常高效。
+                </li>
+                <li class="- topic/li li">
+                    使用非主键列索引的查询效率高。其中 zonemap 能够按块过滤数据，适合时间相关列的过滤查询；bloomfilter
+                        能够按文件过滤数据，适合大基数列的点查询。
+                </li>
+                <li class="- topic/li li">
+                    当写入数据的吞吐量在一定范围内时，其写入性能接近 TSDB。随吞吐量的增长，主键引擎的写入耗时增长速度高于 TSDB 存储引擎。
+                </li>
+            </ul>
+        </div>
+    </article>
+    <article class="- topic/topic topic nested1" aria-labelledby="ariaid-title6" id="topic_ozj_5th_ybc">
+        <h2 class="- topic/title title topictitle2" id="ariaid-title6">PKEY 引擎使用示例</h2>
+        <div class="- topic/body body">
+            <section class="- topic/section section" id="topic_ozj_5th_ybc__section_gnr_wth_ybc" data-ofbid="topic_ozj_5th_ybc__section_gnr_wth_ybc"><h3 class="- topic/title title sectiontitle">数据库部署</h3>
+                
+                <p class="- topic/p p">在使用 PKEY 引擎前，可以按需调整系统的配置项，以充分发挥系统的性能。本节主要介绍其中几个重点参数：</p>
+                <ul class="- topic/ul ul" id="topic_ozj_5th_ybc__ul_szk_xth_ybc" data-ofbid="topic_ozj_5th_ybc__ul_szk_xth_ybc">
+                    <li class="- topic/li li">
+                        <strong class="+ topic/ph hi-d/b ph b">PKEYRedoLogDir 和 PKEYMetaLogDir</strong>：为了提高写入效率，建议将 redo log 以及元数据配置在 SSD
+                            盘上。
+                    </li>
+                    <li class="- topic/li li">
+                        <strong class="+ topic/ph hi-d/b ph b">PKEYCacheEngineSize</strong>：默认是
+                            1G。对于写入压力较大的场景，可以适当调大该值；对于查询性能要求严格的场景，可以调小该值。
+                        <ul class="- topic/ul ul" id="topic_ozj_5th_ybc__ul_tzk_xth_ybc" data-ofbid="topic_ozj_5th_ybc__ul_tzk_xth_ybc">
+                            <li class="- topic/li li">
+                                若设置过小，写入时可能导致 cache engine 频繁刷盘，影响系统性能。
+                            </li>
+                            <li class="- topic/li li">
+                                若设置过大，查询时需要读取 cache engine 数据，但其内部并没有索引信息，且会引入去重开销。
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="- topic/li li">
+                       <strong class="+ topic/ph hi-d/b ph b">PKEYBlockCacheSize</strong>：PKEY 存储引擎的块缓存容量，默认 1G。查询性能要求严格的场景可以调大该值。
+                    </li>
+                    <li class="- topic/li li">
+                        <strong class="+ topic/ph hi-d/b ph b">PKEYDeleteBitmapUpdateThreshold</strong>：触发后台 delete bitmap 更新的数据量阈值，默认
+                            100MB。
+                        <ul class="- topic/ul ul" id="topic_ozj_5th_ybc__ul_uzk_xth_ybc" data-ofbid="topic_ozj_5th_ybc__ul_uzk_xth_ybc">
+                            <li class="- topic/li li">
+                                若设置过小，将导致 delete bitmap 频繁更新，占用磁盘带宽，进而影响查询、cache engine 刷盘及后台
+                                    compaction 任务。
+                            </li>
+                            <li class="- topic/li li">
+                                若设置过大，则查询的去重开销增加，查询时间延长。过大的设置还会导致重启后的恢复过程变慢。
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="- topic/li li">
+                        <strong class="+ topic/ph hi-d/b ph b">PKEYStashedPrimaryKeyBufferSize</strong>：设置 PKEY 存储引擎的暂存主键缓冲区的容量，默认
+                            1024MB。该参数在系统面对高写入压力时，能够限制刷盘，从而防止暂存缓冲区无限增长导致 OOM（Out of Memory）的问题。
+                    </li>
+                    <li class="- topic/li li">
+                       <strong class="+ topic/ph hi-d/b ph b">PKEYBackgroundWorkerPerVolume</strong>：配置每个 Volume 的 PKEY 后台工作线程数。后台工作包括
+                            compaction 和 delete bitmap 更新，默认值为 1。
+                    </li>
+                    <li class="- topic/li li">
+                       <strong class="+ topic/ph hi-d/b ph b">PKEYCacheFlushWorkerNumPerVolume</strong>：配置每个 Volume 的 PKEY Cache Engine
+                            刷盘工作线程数，默认值为 1。
+                    </li>
+                </ul>
+            </section>
+            <section class="- topic/section section" id="topic_ozj_5th_ybc__section_unc_b5h_ybc" data-ofbid="topic_ozj_5th_ybc__section_unc_b5h_ybc"><h3 class="- topic/title title sectiontitle">创建数据库</h3>
+                
+                <p class="- topic/p p">下述脚本以创建一个组合分区的数据库为例，和其他存储引擎建库时的区别仅在于 engine 设置不同，将 engine 设置为 "PKEY" 表示创建主键引擎数据库
+                    ：</p>
+                <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_ozj_5th_ybc__codeblock_eqt_c5h_ybc" data-ofbid="topic_ozj_5th_ybc__codeblock_eqt_c5h_ybc"><code>dbName="dfs://test_pkey"
+db1 = database(, VALUE, 2020.01.01..2021.01.01)
+db2 = database(, HASH, [SYMBOL, 100])
+db = database(directory=dbName, partitionType=COMPO, partitionScheme=[db1, db2], engine="PKEY")</code></pre>
+            </section>
+            <section class="- topic/section section" id="topic_ozj_5th_ybc__section_vdl_d5h_ybc" data-ofbid="topic_ozj_5th_ybc__section_vdl_d5h_ybc"><h3 class="- topic/title title sectiontitle">创建数据表</h3>
+                
+                <p class="- topic/p p">创建分布式表/维度表时， PKEY 需要设置 primaryKey 这个必选参数。</p>
+                <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_ozj_5th_ybc__codeblock_sxr_25h_ybc" data-ofbid="topic_ozj_5th_ybc__codeblock_sxr_25h_ybc"><code>// 通过函数创建主键引擎表
+createPartitionedTable(dbHandle, table, tableName, [partitionColumns],
+ [compressMethods], [primaryKey], [indexes])
+  
+// 通过 SQL 语句创建主键引擎表
+create table dbPath.tableName (
+    schema[columnDescription]
+)
+[partitioned by partitionColumns],
+[primaryKey]</code></pre>
+                <p class="- topic/p p">这里以创建一个 PKEY 下的分布式表为例：</p>
+                <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_ozj_5th_ybc__codeblock_srn_g5h_ybc" data-ofbid="topic_ozj_5th_ybc__codeblock_srn_g5h_ybc"><code>tbName = "pt1"
+colName = `SecurityID`TradeDate`TradeTime`TradePrice`TradeQty`TradeAmount`BuyNo`SellNo
+colType = `SYMBOL`DATE`TIME`DOUBLE`INT`DOUBLE`INT`INT 
+tbSchema = table(1:0, colName, colType) 
+
+// 通过函数创建主键引擎表
+db.createPartitionedTable(table=tbSchema, tableName=tbName, 
+  partitionColumns=`TradeDate`SecurityID, primaryKey=`SecurityID`TradeDate`TradeTime, 
+  indexes={"BuyNo": "bloomfilter"})
+
+// 通过 SQL 语句创建主键引擎表
+create table "dfs://test_pkey"."pt1"(
+  SecurityID SYMBOL,
+  TradeDate DATE,
+  TradeTime TIME,
+  TradePrice DOUBLE,
+  TradeQty INT,
+  TradeAmount DOUBLE,
+  BuyNo INT [indexes="bloomfilter"],
+  SellNo INT
+)
+partitioned by TradeDate,SecurityID
+primaryKey=`SecurityID`TradeDate`TradeTime</code></pre>
+                <p class="- topic/p p">其中参数 partitionColumns 表示分区字段，primaryKey 表示该表的主键字段，indexes
+                    表示表中列的索引类型。为提高写入性能和查询效率，应根据数据和业务场景合理设置这几个参数：</p>
+                <ul class="- topic/ul ul" id="topic_ozj_5th_ybc__ul_ab4_h5h_ybc" data-ofbid="topic_ozj_5th_ybc__ul_ab4_h5h_ybc">
+                    <li class="- topic/li li">
+                       合理设置分区字段：
+                        <ul class="- topic/ul ul" id="topic_ozj_5th_ybc__ul_bb4_h5h_ybc" data-ofbid="topic_ozj_5th_ybc__ul_bb4_h5h_ybc">
+                            <li class="- topic/li li">
+                               为了确保主键引擎的高效写入，每次批量写入或更新的记录应尽可能集中在少量分区内。有些场景下，分区字段可能是一个递增 id
+                                    ，或是包含日期等信息的唯一 id。直接以此作为分区列将极大影响写入性能。为了解决这个问题，DolphinDB
+                                    特意引入了分区字段上的转换函数，将转换函数的输出作为数据分区的依据。
+                            </li>
+                            <li class="- topic/li li">
+                              以包含日期的 id 为例，id 列的格式为<code class="+ topic/ph pr-d/codeph ph codeph">id1_date_id2</code>，通过自定义函数
+                                    myPartitionFunc，提取 id 中的 date ，以此作为分区依据将数据按日期进行分区：
+                            </li>
+                        </ul>
+                        <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_ozj_5th_ybc__codeblock_e1q_35h_ybc" data-ofbid="topic_ozj_5th_ybc__codeblock_e1q_35h_ybc"><code>// 定义处理分区列 DateId （形如"475b4_20240101_6d9b2"）的函数
+def myPartitionFunc(str,a,b) {
+	return temporalParse(substr(str, a, b),"yyyyMMdd")
+}
+// partitionColumns 中指定 myPartitionFunc 函数对 DateId 列的数据进行处理
+pt = db.createPartitionedTable(table=tb, tableName=`pt, 
+  partitionColumns=["myPartitionFunc(DateId, 6, 8)","SecurityID"],
+  primaryKey=`SecurityID`DateId`TradeTime, 
+  indexes={"BuyNo": "bloomfilter"})</code></pre>
+                    </li>
+                    <li class="- topic/li li">
+                        合理设置主键字段：
+                        <ul class="- topic/ul ul" id="topic_ozj_5th_ybc__ul_rj2_45h_ybc" data-ofbid="topic_ozj_5th_ybc__ul_rj2_45h_ybc">
+                            <li class="- topic/li li">
+                                包含所有分区字段。
+                            </li>
+                            <li class="- topic/li li">
+                               建议有序的主键列优先放在前面，如时间、自增ID等。这些数据在存储上会存放在一起，如果数据相关那么查询效率会比较高。
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="- topic/li li">
+                        合理设置索引：
+                        <ul class="- topic/ul ul" id="topic_ozj_5th_ybc__ul_ydc_q5h_ybc" data-ofbid="topic_ozj_5th_ybc__ul_ydc_q5h_ybc">
+                            <li class="- topic/li li">
+                               该参数是一个字典，其键和值都是 STRING 类型，分别代表列名和索引类型。例如
+                                        <code class="+ topic/ph pr-d/codeph ph codeph">indexes={"BuyNo": "bloomfilter"} </code>表示为 BuyNo
+                                    列设置 bloomfilter 索引。
+                            </li>
+                            <li class="- topic/li li">
+                               目前支持自定义的 bloomfilter 索引（zonemap
+                                    索引每列会自动创建），能在不同场景下加速查询。用户需要合理设置索引，当某种查询真正需要索引时再指定。下表列出了不同索引适用什么场景，以及对应的例子：
+                                <div class="table-container"><table class="- topic/table table frame-all" id="topic_ozj_5th_ybc__table_sjj_s5h_ybc" data-ofbid="topic_ozj_5th_ybc__table_sjj_s5h_ybc" data-cols="4"><caption></caption><colgroup><col style="width:15.57632398753894%"/><col style="width:18.69158878504673%"/><col style="width:21.33956386292835%"/><col style="width:44.39252336448598%"/></colgroup><thead class="- topic/thead thead">
+                                            <tr class="- topic/row">
+                                                <th class="- topic/entry entry colsep-1 rowsep-1" id="topic_ozj_5th_ybc__table_sjj_s5h_ybc__entry__1">
+                                                  <p class="- topic/p p">索引类型</p>
+                                                </th>
+                                                <th class="- topic/entry entry colsep-1 rowsep-1" id="topic_ozj_5th_ybc__table_sjj_s5h_ybc__entry__2">
+                                                  <p class="- topic/p p">适用数据</p>
+                                                </th>
+                                                <th class="- topic/entry entry colsep-1 rowsep-1" id="topic_ozj_5th_ybc__table_sjj_s5h_ybc__entry__3">
+                                                  <p class="- topic/p p">适用负载</p>
+                                                </th>
+                                                <th class="- topic/entry entry colsep-0 rowsep-1" id="topic_ozj_5th_ybc__table_sjj_s5h_ybc__entry__4">
+                                                  <p class="- topic/p p">举例</p>
+                                                </th>
+                                            </tr>
+                                        </thead><tbody class="- topic/tbody tbody">
+                                            <tr class="- topic/row">
+                                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_ozj_5th_ybc__table_sjj_s5h_ybc__entry__1">
+                                                  <p class="- topic/p p">BloomFilter</p>
+                                                </td>
+                                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_ozj_5th_ybc__table_sjj_s5h_ybc__entry__2">
+                                                  <p class="- topic/p p">大基数列</p>
+                                                </td>
+                                                <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_ozj_5th_ybc__table_sjj_s5h_ybc__entry__3">
+                                                  <p class="- topic/p p">点查</p>
+                                                </td>
+                                                <td class="- topic/entry entry colsep-0 rowsep-1" headers="topic_ozj_5th_ybc__table_sjj_s5h_ybc__entry__4"><code class="+ topic/ph pr-d/codeph ph codeph">select * from pt where id =
+                                                  "28c9d88b6f67"</code></td>
+                                            </tr>
+                                            <tr class="- topic/row">
+                                                <td class="- topic/entry entry colsep-1 rowsep-0" headers="topic_ozj_5th_ybc__table_sjj_s5h_ybc__entry__1">
+                                                  <p class="- topic/p p">ZoneMap</p>
+                                                </td>
+                                                <td class="- topic/entry entry colsep-1 rowsep-0" headers="topic_ozj_5th_ybc__table_sjj_s5h_ybc__entry__2">
+                                                  <p class="- topic/p p">时间相关列</p>
+                                                </td>
+                                                <td class="- topic/entry entry colsep-1 rowsep-0" headers="topic_ozj_5th_ybc__table_sjj_s5h_ybc__entry__3">
+                                                  <p class="- topic/p p">点查和范围查</p>
+                                                </td>
+                                                <td class="- topic/entry entry colsep-0 rowsep-0" headers="topic_ozj_5th_ybc__table_sjj_s5h_ybc__entry__4"><code class="+ topic/ph pr-d/codeph ph codeph">select * from pt where time &gt;
+                                                  2024.05.13</code></td>
+                                            </tr>
+                                        </tbody></table></div>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+                <p class="- topic/p p">下面进一步说明索引的适用场景和效果：</p>
+                <ul class="- topic/ul ul" id="topic_ozj_5th_ybc__ul_vpb_1vh_ybc" data-ofbid="topic_ozj_5th_ybc__ul_vpb_1vh_ybc">
+                    <li class="- topic/li li">
+                        BloomFilter 适合应用于大基数列。数据基数越大，索引效果越好。适合的数据比如身份证ID、订单号、从业务上游同步的外键等。
+                    </li>
+                    <li class="- topic/li li">
+                        ZoneMap 适合应用于时间相关列。一批写入的数据越集中，查询效果越好。适合的数据比如订单时间、埋点时间等。因为 ZoneMap
+                            的存储占用很小，所以引擎会自动创建所有列的 ZoneMap。
+                    </li>
+                </ul>
+            </section>
+        </div>
+    </article>
+</article></main></div>
+                        
+                        
+                        
+                        
+                        
+                        
+                    </div>
+                    
+                        <nav role="navigation" id="wh_topic_toc" aria-label="On this page" class="col-lg-2 d-none d-lg-block navbar d-print-none"> 
+                            <div id="wh_topic_toc_content">
+		                        
+	                            <div class=" wh_topic_toc "><div class="wh_topic_label">在本页上</div><ul><li class="topic-item"><a href="#topic_sys_2nh_ybc" data-tocid="topic_sys_2nh_ybc">主键唯一性</a><ul><li class="section-item"><div class="section-title"><a href="#topic_sys_2nh_ybc__section_d5q_hnh_ybc" data-tocid="topic_sys_2nh_ybc__section_d5q_hnh_ybc">主流方案介绍</a></div></li><li class="section-item"><div class="section-title"><a href="#topic_sys_2nh_ybc__section_cds_qph_ybc" data-tocid="topic_sys_2nh_ybc__section_cds_qph_ybc">主键引擎方案选择</a></div></li></ul></li><li class="topic-item"><a href="#topic_iq4_sph_ybc" data-tocid="topic_iq4_sph_ybc">存储结构</a><ul><li class="section-item"><div class="section-title"><a href="#topic_iq4_sph_ybc__section_zr5_5ph_ybc" data-tocid="topic_iq4_sph_ybc__section_zr5_5ph_ybc">存储布局</a></div></li><li class="section-item"><div class="section-title"><a href="#topic_iq4_sph_ybc__section_rzd_crh_ybc" data-tocid="topic_iq4_sph_ybc__section_rzd_crh_ybc">文件结构</a></div></li></ul></li><li class="topic-item"><a href="#topic_by1_2sh_ybc" data-tocid="topic_by1_2sh_ybc">读写流程</a><ul><li class="section-item"><div class="section-title"><a href="#topic_by1_2sh_ybc__section_vnj_jsh_ybc" data-tocid="topic_by1_2sh_ybc__section_vnj_jsh_ybc">数据写入</a></div></li><li class="section-item"><div class="section-title"><a href="#topic_by1_2sh_ybc__section_fbp_dth_ybc" data-tocid="topic_by1_2sh_ybc__section_fbp_dth_ybc">数据查询</a></div></li><li class="section-item"><div class="section-title"><a href="#topic_by1_2sh_ybc__section_ay3_lth_ybc" data-tocid="topic_by1_2sh_ybc__section_ay3_lth_ybc">数据更新</a></div></li><li class="section-item"><div class="section-title"><a href="#topic_by1_2sh_ybc__section_ztn_4th_ybc" data-tocid="topic_by1_2sh_ybc__section_ztn_4th_ybc">数据删除</a></div></li></ul></li><li class="topic-item"><a href="#topic_fkx_rth_ybc" data-tocid="topic_fkx_rth_ybc">PKEY 引擎特点</a></li><li class="topic-item"><a href="#topic_ozj_5th_ybc" data-tocid="topic_ozj_5th_ybc">PKEY 引擎使用示例</a><ul><li class="section-item"><div class="section-title"><a href="#topic_ozj_5th_ybc__section_gnr_wth_ybc" data-tocid="topic_ozj_5th_ybc__section_gnr_wth_ybc">数据库部署</a></div></li><li class="section-item"><div class="section-title"><a href="#topic_ozj_5th_ybc__section_unc_b5h_ybc" data-tocid="topic_ozj_5th_ybc__section_unc_b5h_ybc">创建数据库</a></div></li><li class="section-item"><div class="section-title"><a href="#topic_ozj_5th_ybc__section_vdl_d5h_ybc" data-tocid="topic_ozj_5th_ybc__section_vdl_d5h_ybc">创建数据表</a></div></li></ul></li></ul></div>
+	                        	
+                        	</div>
+                        </nav>
+                    
+                </div>
+            </div>
+            
+            
+            
+        </div> 
+        <footer class="navbar navbar-default wh_footer">
+  <div class=" footer-container mx-auto ">
+<title>Copyright</title><p><b> ©2025 浙江智臾科技有限公司 浙ICP备18048711号-3</b></p>
+  </div>
+</footer>
+        
+        <div id="go2top" class="d-print-none">
+            <span class="oxy-icon oxy-icon-up"></span>
+        </div>
+        
+        <div id="modal_img_large" class="modal">
+            <span class="close oxy-icon oxy-icon-remove"></span>
+            <div id="modal_img_container"></div>
+            <div id="caption"></div>
+        </div>
+        
+        
+        
+    </body>
+</html>

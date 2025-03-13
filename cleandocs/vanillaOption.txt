@@ -1,0 +1,138 @@
+
+
+## vanillaOption 函数文档
+
+### 语法
+
+```DolphinDB
+vanillaOption(settlement, maturity, evalDate, spot, strike, riskFree, divYield, volatility, isCall, style, basis, calendar, [method="BS"], [kwargs], [mode=0])
+```
+
+### 详情
+
+对香草期权（Vanilla Option）进行估值计算。
+
+### 参数
+
+| 参数名        | 类型               | 描述                                                                 |
+|---------------|--------------------|----------------------------------------------------------------------|
+| settlement    | DATE 标量/向量     | 期权交易日                                                           |
+| maturity      | DATE 标量/向量     | 期权到期日                                                           |
+| evalDate      | DATE 标量/向量     | 估值日                                                              |
+| spot          | 数值标量/向量      | 标的资产当前价格                                                     |
+| strike        | 数值标量/向量      | 行权价格                                                            |
+| riskFree      | 数值标量/向量      | 无风险利率                                                          |
+| divYield      | 数值标量/向量      | 分红利率                                                            |
+| volatility    | 数值标量/向量      | 波动率                                                              |
+| isCall        | BOOL 标量/向量     | 期权类型：`true` 为看涨期权，`false` 为看跌期权                     |
+| style         | 字符串标量/向量    | 行权类型：`'european'` (欧式) 或 `'american'` (美式)                |
+| basis         | 整型/STRING 标量/向量 | 日计数基准类型 (0-4 或对应字符串)                                    |
+| calendar      | 字符串标量/向量    | 市场日历类型 (参考交易日历文档)                                     |
+| method        | 字符串标量         | 估值方法：`'BS'`, `'FDBS'`, `'heston'`, `'FDHeston'`, `'PTDHeston'` |
+| kwargs        | 字典标量           | 不同方法需要的扩展参数 (详见下文)                                   |
+| mode          | 整型标量/向量      | 输出模式：0 (仅净现值), 1 (元组形式), 2 (字典形式)                  |
+
+#### kwargs 参数说明
+不同方法需传入的扩展参数：
+
+**FDBS 方法**
+```DolphinDB
+kwargs = dict(
+    `xGrid,          // 空间网格数 (>1)
+    `tGrid,          // 时间网格数 (>0)
+    `dampingSteps    // 阻尼步骤数 (>=0)
+)
+```
+
+**Heston 方法**
+```DolphinDB
+kwargs = dict(
+    `theta,          // 波动率平方的长期均值
+    `kappa,          // 均值回归速度
+    `rho,            // 资产价格与波动率的相关系数
+    `sigma           // 波动率的波动率
+)
+```
+
+**FDHeston 方法**
+```DolphinDB
+kwargs = dict(
+    `theta,          // Heston参数
+    `kappa,
+    `rho,
+    `sigma,
+    `xGrid,          // 空间网格数 (>1)
+    `vGrid,          // 波动率网格数 (>1)
+    `tGrid,          // 时间网格数 (>=0)
+    `dampingSteps    // 阻尼步骤数 (>=0)
+)
+```
+
+**PTDHeston 方法**
+```DolphinDB
+kwargs = dict(
+    `times,          // 时间变化点数组
+    `theta,          // 各时间点对应的Heston参数
+    `kappa,
+    `rho,
+    `sigma          // 注意所有数组长度需一致
+)
+```
+
+### 返回值
+
+| 模式 | 输出形式                                      |
+|------|---------------------------------------------|
+| 0    | DOUBLE 标量/向量 (净现值)                   |
+| 1    | 元组 (npv, delta, gamma, theta, vega, rho) |
+| 2    | 字典 (包含所有希腊字母指标)                 |
+
+### 示例
+
+#### 示例1：BS 方法估值
+```DolphinDB
+settlement = 1998.05.17
+maturity = 1999.05.17
+valDay = 1998.05.15
+spot = 36
+strike = 40
+riskFree = 0.06
+dividend = 0
+volatility = 0.2
+isCall = false
+style = 'european'
+basis = 3
+calendar = 'CCFX'
+
+vanillaOption(settlement, maturity, valDay, spot, strike, riskFree, dividend, 
+    volatility, isCall, style, basis, calendar, mode=2)
+```
+
+#### 示例2：PTDHeston 方法估值
+```DolphinDB
+settlement = 1998.05.17
+maturity = 1999.05.17
+valDay = 1998.05.15
+spot = 36
+strike = 40
+riskFree = 0.06
+dividend = 0
+isCall = false
+style = 'european'
+basis = 3
+calendar = ['CCFX', 'XSHG']
+
+// 构建PTDHeston参数
+times = array(DOUBLE[], 0).append!([1.0 2.0 3.0, 1.0 2.0 3.0])
+theta = [0.010, 0.015, 0.02]
+kappa = [0.600, 0.500, 0.400]
+sigma = [0.400, 0.350, 0.300]
+rho = [-0.15, -0.10, -0.00]
+
+kwargs = dict(
+    `times, theta, kappa, sigma, rho
+)
+
+vanillaOption(settlement, maturity, valDay, spot, strike, riskFree, dividend, 
+    volatility, isCall, style, basis, calendar, 'PTDHeston', kwargs)
+```

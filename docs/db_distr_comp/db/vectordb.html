@@ -1,0 +1,434 @@
+<!DOCTYPE html><html xmlns="http://www.w3.org/1999/xhtml" xml:lang="zh" lang="zh" data-whc_version="26.0">
+    <head><link rel="shortcut icon" href="../../favicon.ico"/><link rel="icon" href="../../favicon.ico"/><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><meta name="description" content="DolphinDB 在 3.00.1 版本中，基于 TSDB 存储引擎，开发并实现了支持向量检索的向量存储引擎（VectorDB）。VectorDB 针对 TSDB 中以数组向量（Array Vector）形式存储的向量数据，引入了向量检索技术。它支持对向量数据创建索引，并实现了快速的近似最近邻搜索，满足现代应用场景下对海量数据高效检索和响应的需求。DolphinDB VectorDB ..."/><meta name="DC.rights.owner" content="(C) 版权 2025"/><meta name="copyright" content="(C) 版权 2025"/><meta name="generator" content="DITA-OT"/><meta name="DC.type" content="topic"/><meta name="DC.coverage" content=""/><meta name="DC.relation" content="../../db_distr_comp/cfg/db_intro.html"/><meta name="prodname" content="DolphinDB"/><meta name="brand" content="DolphinDB"/><meta name="DC.creator" content="DolphinDB"/><meta name="DC.publisher" content="DDB N/A DDB 200"/><meta name="DC.format" content="HTML5"/><meta name="DC.identifier" content="vectordb"/><title>向量存储引擎</title><!--  Generated with Oxygen version 26.0, build number 2024012323.  --><meta name="wh-path2root" content="../../"/><meta name="wh-toc-id" content="vectordb-d9713e3575"/><meta name="wh-source-relpath" content="db_distr_comp/db/vectordb.dita"/><meta name="wh-out-relpath" content="db_distr_comp/db/vectordb.html"/>
+
+    <link rel="stylesheet" type="text/css" href="../../oxygen-webhelp/app/commons.css?buildId=2024012323"/>
+    <link rel="stylesheet" type="text/css" href="../../oxygen-webhelp/app/topic.css?buildId=2024012323"/>
+
+    <script src="../../oxygen-webhelp/app/options/properties.js?buildId=20250305183303"></script>
+    <script src="../../oxygen-webhelp/app/localization/strings.js?buildId=2024012323"></script>
+    <script src="../../oxygen-webhelp/app/search/index/keywords.js?buildId=20250305183303"></script>
+    <script defer="defer" src="../../oxygen-webhelp/app/commons.js?buildId=2024012323"></script>
+    <script defer="defer" src="../../oxygen-webhelp/app/topic.js?buildId=2024012323"></script>
+<link rel="stylesheet" type="text/css" href="../../oxygen-webhelp/template/styles.css?buildId=2024012323"/><script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script><script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script></head>
+
+    <body id="vectordb" class="wh_topic_page frmBody">
+        <a href="#wh_topic_body" class="sr-only sr-only-focusable">
+            跳转到主要内容
+        </a>
+        
+        
+        
+        
+        <header class="navbar navbar-default wh_header">
+    <div class="container-fluid">
+        <div xmlns:whc="http://www.oxygenxml.com/webhelp/components" class="wh_header_flex_container navbar-nav navbar-expand-md navbar-dark">
+            <div class="wh_logo_and_publication_title_container">
+                <div class="wh_logo_and_publication_title">
+                    
+                    <a href="https://docs.dolphindb.cn/zh/index.html" class=" wh_logo d-none d-sm-block "><img src="../../logo.png" alt="  DolphinDB 文档中心  "/></a>
+                    <div class=" wh_publication_title "><a href="../../index.html"><span class="booktitle">  <span class="ph mainbooktitle">DolphinDB 文档中心</span>  </span></a></div>
+                    
+                </div>
+                
+                
+            </div>
+
+            <div class="wh_top_menu_and_indexterms_link collapse navbar-collapse" id="wh_top_menu_and_indexterms_link">
+                
+                
+                
+                
+            </div>
+        <div class=" wh_search_input navbar-form wh_topic_page_search search " role="form">
+            
+            
+            
+            <form id="searchForm" method="get" role="search" action="../../search.html"><div><input type="search" placeholder="搜索 " class="wh_search_textfield" id="textToSearch" name="searchQuery" aria-label="搜索查询" required="required"/><button type="submit" class="wh_search_button" aria-label="搜索"><span class="search_input_text">搜索</span></button></div></form>
+            
+            <script src="/vendors/react/umd/react.production.min.js" defer="defer"></script>
+<script src="/vendors/react-dom/umd/react-dom.production.min.js" defer="defer"></script>
+<script src="/vendors/dayjs/dayjs.min.js" defer="defer"></script>
+<script src="/vendors/antd/dist/antd.min.js" defer="defer"></script>
+<script src="/vendors/@ant-design/icons/dist/index.umd.min.js" defer="defer"></script>
+<script src="/zh/index.js" type="module"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" defer="defer"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML" defer="defer"><!--
+
+
+--></script>
+<script defer="defer"><!--
+
+// 从主页重定向
+const currentUrl = window.location.href;
+
+// 判断当前URL是否包含index.html并且路径最后部分是index.html
+if (currentUrl.endsWith('index.html')) {
+    // 处理根目录下的index.html跳转
+    const baseUrl = currentUrl.split('/index.html')[0]; // 获取index.html之前的部分
+    const redirectUrl = `${baseUrl}/about/ddb_intro.html`; // 构建跳转路径
+    window.location.href = redirectUrl; // 执行跳转
+}
+
+--></script>
+            
+        </div></div>
+    </div>
+</header>
+        
+        
+         
+        
+        
+        
+        <div class="container-fluid" id="wh_topic_container">
+            <div class="row">
+
+                <nav class="wh_tools d-print-none navbar-expand-md" aria-label="Tools">
+                    
+                    <div data-tooltip-position="bottom" class=" wh_breadcrumb "><ol class="d-print-none"><li><span class="home"><a href="../../index.html"><span>主页</span></a></span></li><li><div class="topicref" data-id="new_chap_database_manage_new_chap_dbmanage_landing_page"><div class="title"><a href="../../db_distr_comp/cfg/db_intro.html"><span class="keyword label">数据库</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 数据库的基本概念</p></div></div></div></li><li class="active"><div class="topicref" data-id="vectordb"><div class="title"><a href="../../db_distr_comp/db/vectordb.html">向量存储引擎</a></div></div></li></ol></div>
+                    
+                    
+                    
+                    <div class="wh_right_tools">
+                        <button class="wh_hide_highlight" aria-label="切换搜索突出显示" title="切换搜索突出显示"></button>
+                        <button class="webhelp_expand_collapse_sections" data-next-state="collapsed" aria-label="折叠截面" title="折叠截面"></button>
+                        
+                        
+                        
+                        
+                        <div class=" wh_print_link print d-none d-md-inline-block "><button onClick="window.print()" title="打印此页" aria-label="打印此页"></button></div>
+                        
+                        <button type="button" id="wh_toc_button" class="custom-toggler navbar-toggler collapsed wh_toggle_button navbar-light" aria-expanded="false" aria-label="Toggle publishing table of content" aria-controls="wh_publication_toc">
+                            <span class="navbar-toggler-icon"></span>
+                        </button>
+                    </div>
+                    
+                </nav>
+            </div>
+            
+            
+            
+            
+            <div class="wh_content_area">
+                <div class="row">
+                    
+                        <nav id="wh_publication_toc" class="col-lg-3 col-md-3 col-sm-12 d-md-block d-none d-print-none" aria-label="Table of Contents Container">
+                            <div id="wh_publication_toc_content">
+		                        
+                            	<div class=" wh_publication_toc " data-tooltip-position="right"><span class="expand-button-action-labels"><span id="button-expand-action" role="button" aria-label="Expand"></span><span id="button-collapse-action" role="button" aria-label="Collapse"></span><span id="button-pending-action" role="button" aria-label="Pending"></span></span><ul role="tree" aria-label="Table of Contents"><li role="treeitem"><div data-tocid="ddb_intro-d9713e87" class="topicref" data-id="ddb_intro" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../about/ddb_intro.html" id="ddb_intro-d9713e87-link">关于DolphinDB</a></div></div></li><li role="treeitem"><div data-tocid="chap1_getstarted-d9713e136" class="topicref" data-id="chap1_getstarted" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../getstarted/chap1_getstarted.html" id="chap1_getstarted-d9713e136-link">快速上手</a><div class="wh-tooltip"><p class="shortdesc">如何快速部署 DolphinDB、建库建表、写入和查询数据</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="sectionddb_deployment-d9713e189" class="topicref" data-id="sectionddb_deployment" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action sectionddb_deployment-d9713e189-link" class="wh-expand-btn"></span><div class="title"><a href="../../deploy/deploy_intro.html" id="sectionddb_deployment-d9713e189-link"><span class="keyword label">部署</span></a><div class="wh-tooltip"><p class="shortdesc">如何在不同的场景中部署 DolphinDB</p></div></div></div></li><li role="treeitem" aria-expanded="true"><div data-tocid="new_chap_database_manage_new_chap_dbmanage_landing_page-d9713e2259" class="topicref" data-id="new_chap_database_manage_new_chap_dbmanage_landing_page" data-state="expanded"><span role="button" tabindex="0" aria-labelledby="button-collapse-action new_chap_database_manage_new_chap_dbmanage_landing_page-d9713e2259-link" class="wh-expand-btn"></span><div class="title"><a href="../../db_distr_comp/cfg/db_intro.html" id="new_chap_database_manage_new_chap_dbmanage_landing_page-d9713e2259-link"><span class="keyword label">数据库</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 数据库的基本概念</p></div></div></div><ul role="group" class="navbar-nav nav-list"><li role="treeitem" aria-expanded="false"><div data-tocid="chap3_sect_database_distributed_computing-d9713e2312" class="topicref" data-id="chap3_sect_database_distributed_computing" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action chap3_sect_database_distributed_computing-d9713e2312-link" class="wh-expand-btn"></span><div class="title"><a href="../../db_distr_comp/db_distr_comp.html" id="chap3_sect_database_distributed_computing-d9713e2312-link"><span class="keyword label">数据库操作</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 数据库的基本操作，例如创建数据库、表，增加列、分区，数据查询，表连接等。</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="topic_pg3_22w_ryb-d9713e2880" class="topicref" data-id="topic_pg3_22w_ryb" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action topic_pg3_22w_ryb-d9713e2880-link" class="wh-expand-btn"></span><div class="title"><a href="../../db_distr_comp/db/db_architecture.html" id="topic_pg3_22w_ryb-d9713e2880-link"><span class="keyword label">分布式架构</span></a></div></div></li><li role="treeitem"><div data-tocid="tsdb-d9713e3387" class="topicref" data-id="tsdb" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../db_distr_comp/db/tsdb.html" id="tsdb-d9713e3387-link"><span class="keyword label">TSDB 存储引擎</span></a></div></div></li><li role="treeitem"><div data-tocid="olap-d9713e3434" class="topicref" data-id="olap" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../db_distr_comp/db/olap.html" id="olap-d9713e3434-link"><span class="keyword label">OLAP 存储引擎</span></a></div></div></li><li role="treeitem"><div data-tocid="pkey_engine-d9713e3481" class="topicref" data-id="pkey_engine" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../db_distr_comp/db/pkey_engine.html" id="pkey_engine-d9713e3481-link"><span class="keyword">主键存储引擎</span>  </a></div></div></li><li role="treeitem"><div data-tocid="imoltp-d9713e3529" class="topicref" data-id="imoltp" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../db_distr_comp/db/imoltp.html" id="imoltp-d9713e3529-link">内存在线事务处理引擎</a></div></div></li><li role="treeitem" class="active"><div data-tocid="vectordb-d9713e3575" class="topicref" data-id="vectordb" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../db_distr_comp/db/vectordb.html" id="vectordb-d9713e3575-link">向量存储引擎</a></div></div></li><li role="treeitem"><div data-tocid="textdb-d9713e3621" class="topicref" data-id="textdb" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../db_distr_comp/db/textdb.html" id="textdb-d9713e3621-link">文本存储引擎</a></div></div></li><li role="treeitem"><div data-tocid="catalog-d9713e3667" class="topicref" data-id="catalog" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../db_distr_comp/db/catalog.html" id="catalog-d9713e3667-link">数据目录</a></div></div></li><li role="treeitem"><div data-tocid="iotdb-d9713e3713" class="topicref" data-id="iotdb" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../../db_distr_comp/db/iotdb.html" id="iotdb-d9713e3713-link">物联网点位管理引擎</a></div></div></li></ul></li><li role="treeitem" aria-expanded="false"><div data-tocid="chap7_tutorials_streaming-d9713e3760" class="topicref" data-id="chap7_tutorials_streaming" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action chap7_tutorials_streaming-d9713e3760-link" class="wh-expand-btn"></span><div class="title"><a href="../../stream/str_intro.html" id="chap7_tutorials_streaming-d9713e3760-link"><span class="keyword label">流数据</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 流数据引擎及流数据计算的基本概念</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e7513" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e7513-link" class="wh-expand-btn"></span><div class="title"><a href="../../db_distr_comp/db_oper/import_data.html" id="tocId-d9713e7513-link">数据迁移</a><div class="wh-tooltip"><p class="shortdesc">如何从不同数据源向 DolphinDB 迁移数据</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="chap7_tutorials_system_management-d9713e7940" class="topicref" data-id="chap7_tutorials_system_management" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action chap7_tutorials_system_management-d9713e7940-link" class="wh-expand-btn"></span><div class="title"><a href="../../sys_man/om_intro.html" id="chap7_tutorials_system_management-d9713e7940-link"><span class="keyword label">系统运维</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 的系统运维功能及方法</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="troubleshooting-d9713e8780" class="topicref" data-id="troubleshooting" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action troubleshooting-d9713e8780-link" class="wh-expand-btn"></span><div class="title"><a href="../../error_codes/troubleshooting.html" id="troubleshooting-d9713e8780-link">故障排查</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="about_language_resources-d9713e20911" class="topicref" data-id="about_language_resources" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action about_language_resources-d9713e20911-link" class="wh-expand-btn"></span><div class="title"><a href="../../progr/progr_intro.html" id="about_language_resources-d9713e20911-link"><span class="keyword label">编程语言</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 编程基本概念与方法、SQL 在 DolphinDB 的应用</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="functions_references-d9713e30925" class="topicref" data-id="functions_references" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action functions_references-d9713e30925-link" class="wh-expand-btn"></span><div class="title"><a href="../../funcs/funcs_intro.html" id="functions_references-d9713e30925-link"><span class="keyword label">函数参考</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 函数分类、语法、详解及示例</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="api_protocol-d9713e94064" class="topicref" data-id="api_protocol" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action api_protocol-d9713e94064-link" class="wh-expand-btn"></span><div class="title"><a href="../../api/connapi_intro.html" id="api_protocol-d9713e94064-link"><span class="keyword label">连接器 &amp; API</span></a><div class="wh-tooltip"><p class="shortdesc">面向不同编程语言的 DolphinDB API 及连接器，相关协议和用法</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="chap6_plugin-d9713e94210" class="topicref" data-id="chap6_plugin" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action chap6_plugin-d9713e94210-link" class="wh-expand-btn"></span><div class="title"><a href="../../plugins/plg_intro.html" id="chap6_plugin-d9713e94210-link"><span class="keyword label">插件</span></a><div class="wh-tooltip"><p class="shortdesc">多个应用场景的插件使用说明和插件开发指导</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="third_party-d9713e97904" class="topicref" data-id="third_party" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action third_party-d9713e97904-link" class="wh-expand-btn"></span><div class="title"><a href="../../third_party.html" id="third_party-d9713e97904-link">第三方工具</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="about_tutorials-d9713e98227" class="topicref" data-id="about_tutorials" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action about_tutorials-d9713e98227-link" class="wh-expand-btn"></span><div class="title"><a href="../../tutorials/about_tutorials.html" id="about_tutorials-d9713e98227-link"><span class="keyword label">教程</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 产品使用教程</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e105982" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e105982-link" class="wh-expand-btn"></span><div class="title"><a href="../../rn/server/3_00_2.html" id="tocId-d9713e105982-link">版本说明</a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 版本发布历史</p></div></div></div></li></ul></div>
+		                        
+                            </div>
+                        </nav>
+                    
+                    
+                    <div class="col-lg-7 col-md-9 col-sm-12" id="wh_topic_body">
+                        <button id="wh_close_publication_toc_button" class="close-toc-button d-none" aria-label="Toggle publishing table of content" aria-controls="wh_publication_toc" aria-expanded="true">
+                            <span class="close-toc-icon-container">
+                                <span class="close-toc-icon"></span>     
+                            </span>
+                        </button>
+                        <button id="wh_close_topic_toc_button" class="close-toc-button d-none" aria-label="Toggle topic table of content" aria-controls="wh_topic_toc" aria-expanded="true">
+                            <span class="close-toc-icon-container">
+                                <span class="close-toc-icon"></span>     
+                            </span>
+                        </button>
+                        
+                        <div class=" wh_topic_content body "><main role="main"><article class="- topic/topic topic" role="article" aria-labelledby="ariaid-title1">
+    <h1 class="- topic/title title topictitle1" id="ariaid-title1">向量存储引擎</h1>
+    <div class="- topic/body body">
+        <p class="- topic/p p">DolphinDB 在 3.00.1 版本中，基于 TSDB 存储引擎，开发并实现了支持向量检索的向量存储引擎（VectorDB）。VectorDB 针对 TSDB
+            中以数组向量（Array
+            Vector）形式存储的向量数据，引入了向量检索技术。它支持对向量数据创建索引，并实现了快速的近似最近邻搜索，满足现代应用场景下对海量数据高效检索和响应的需求。DolphinDB
+            VectorDB 具有以下特点：</p>
+        <ul class="- topic/ul ul" id="vectordb__ul_zp1_jsh_ybc" data-ofbid="vectordb__ul_zp1_jsh_ybc">
+            <li class="- topic/li li">支持向量索引的持久化存储，可以从磁盘读取预先构建好的向量索引，无需在每次查询时重复构建索引。</li>
+            <li class="- topic/li li">提供了高效的向量相似度检索能力，可以快速地对海量向量数据进行近似最近邻搜索。</li>
+            <li class="- topic/li li">支持混合搜索，可以结合关键词搜索和向量特征搜索，使得搜索更加全面和精准。</li>
+        </ul>
+    </div>
+    <article class="- topic/topic topic nested1" aria-labelledby="ariaid-title2" id="topic_eyk_jsh_ybc">
+        <h2 class="- topic/title title topictitle2" id="ariaid-title2">实现原理</h2>
+        <div class="- topic/body body">
+            <p class="- topic/p p">VectorDB 的实现主要考虑以下三个方面：向量数据存储、向量索引构建和向量数据检索。</p>
+            <section class="- topic/section section" id="topic_eyk_jsh_ybc__section_dcy_ksh_ybc" data-ofbid="topic_eyk_jsh_ybc__section_dcy_ksh_ybc"><h3 class="- topic/title title sectiontitle">向量数据存储</h3>
+                
+                <p class="- topic/p p">在 DolphinDB 中，向量数据以数组向量的形式存储。DolphinDB 的 TSDB 引擎本身就支持数组向量的存储，因此 VectorDB
+                    无需自行实现向量数据的存储，只需要基于 TSDB 引擎进行构建即可。关于 TSDB 数据存储原理介绍，请参考 <a class="- topic/xref xref" href="tsdb.html">TSDB 存储引擎</a>。</p>
+            </section>
+            <section class="- topic/section section" id="topic_eyk_jsh_ybc__section_fmb_nsh_ybc" data-ofbid="topic_eyk_jsh_ybc__section_fmb_nsh_ybc"><h3 class="- topic/title title sectiontitle"><strong class="+ topic/ph hi-d/b ph b">向量索引构建</strong></h3>
+                
+                <p class="- topic/p p">DolphinDB 采用 Facebook 开源的向量检索库 <a class="- topic/xref xref" href="https://github.com/facebookresearch/faiss" target="_blank" rel="external noopener">Faiss</a>，为 VectorDB 的向量索引构建提供支持。</p>
+                <p class="- topic/p p">在创建分区表时，如果为表中的某列指定了索引信息，系统会为该列构建并存储向量索引。VectorDB 以 Level File
+                    为单位进行向量索引的构建和存储。也就是说，VectorDB 不会在全局仅保存一个向量索引，而是在每个 Level File
+                    文件存储一个独立的向量索引。每次生成新的 Level File 文件时，VectorDB 会根据指定的索引类型，为该 Level File
+                    中的向量数据建立向量索引。</p>
+            </section>
+            <section class="- topic/section section" id="topic_eyk_jsh_ybc__section_rd1_4sh_ybc" data-ofbid="topic_eyk_jsh_ybc__section_rd1_4sh_ybc"><h3 class="- topic/title title sectiontitle">向量数据检索</h3>
+                
+                <p class="- topic/p p">相似度计算和检索方法是向量数据检索中的关键技术。VectorDB 利用欧式距离（L2, Euclidean distance）计算向量数据之间的相似度。L2
+                    是最常用的距离度量，计算所得的值越小，越与搜索值相似。L2 在低维空间中表现良好，但是在高维空间中，由于维度灾难的影响，L2 的效果会逐渐变差。</p>
+                <div class="- topic/p p">如下代码展示了在 VectorDB 进行向量检索的查询语句。在查询时，VectorDB 会根据所使用的向量索引的类型来搜索并获取与查询向量最相似的 K
+                    个向量。<pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_eyk_jsh_ybc__codeblock_pmj_3nj_bcc" data-ofbid="topic_eyk_jsh_ybc__codeblock_pmj_3nj_bcc"><code>SELECT {col1,...,colx} 
+FROM table [where] 
+ORDER BY rowEuclidean(&lt;vectorCol&gt;, queryVector)
+LIMIT &lt;TOPK&gt;</code></pre></div>
+                <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">普通向量检索</strong></p>
+                <p class="- topic/p p">普通向量检索即在查询语句中没有指定 where 语句进行条件过滤。由于只有存储在磁盘 Level File 中的数据拥有向量索引，而 Cache Engine
+                    中的数据并没有建立向量索引，因此普通向量检索的流程如下：</p>
+                <ol class="- topic/ol ol" id="topic_eyk_jsh_ybc__ol_gtk_qsh_ybc" data-ofbid="topic_eyk_jsh_ybc__ol_gtk_qsh_ybc">
+                    <li class="- topic/li li">首先，遍历磁盘上所有 Level File，读取每个 Level File 中存储的向量索引。通过索引搜索得到 N * K
+                            个初步查询结果。</li>
+                    <li class="- topic/li li">其次，对 Cache Engine 中的数据（若有）进行穷举搜索，得到共（N + 1）* K 个查询结果。</li>
+                    <li class="- topic/li li">最后，将这<em class="+ topic/ph hi-d/i ph i">（N + 1）* K </em>个查询结果根据与查询向量的 L2 距离从小到大进行归并排序，取出并返回与查询向量最相近的
+                            K条数据。</li>
+                </ol>
+                <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">混合检索</strong></p>
+                <p class="- topic/p p">VectorDB 支持在查询语句中使用 where
+                    条件过滤数据，以充分利用向量数据库的优势，提高检索的准确性和灵活性。这种检索方式适用于综合多个属性进行查询的场景。此时的向量检索流程为：</p>
+                <ol class="- topic/ol ol" id="topic_eyk_jsh_ybc__ol_lgw_rsh_ybc" data-ofbid="topic_eyk_jsh_ybc__ol_lgw_rsh_ybc">
+                    <li class="- topic/li li">根据 where 条件对数据进行初步过滤。</li>
+                    <li class="- topic/li li">将过滤后的数据按照 Level File 进行划分，确保同一 Level File 中的数据被划分在一起。</li>
+                    <li class="- topic/li li">对每个 Level File 中的数据使用其对应的索引进行相似性搜索。</li>
+                    <li class="- topic/li li">合并各 Level File 的搜索结果，并从中选出与查询向量最相近的 K 条数据作为最终返回结果。</li>
+                </ol>
+            </section>
+        </div>
+    </article>
+    <article class="- topic/topic topic nested1" aria-labelledby="ariaid-title3" id="topic_c2c_ssh_ybc">
+        <h2 class="- topic/title title topictitle2" id="ariaid-title3">索引类型</h2>
+        <div class="- topic/body body">
+                <p class="- topic/p p">向量索引（Vector
+                    Index）是一种针对向量数据构建的高效数据结构。它帮助在时间和空间上提供更高效的向量相似性查询能力。通过向量索引，可以快速地查询出与目标向量最相似的若干个向量。
+                    当前 VectorDB 支持以下索引类型：Flat, PQ, IVF, IVFPQ, HNSW。</p>
+            <div class="table-container"><table class="- topic/table table frame-all" id="topic_c2c_ssh_ybc__table_ic3_pth_ybc" data-ofbid="topic_c2c_ssh_ybc__table_ic3_pth_ybc" data-cols="3"><caption></caption><colgroup><col style="width:33.33333333333333%"/><col style="width:33.33333333333333%"/><col style="width:33.33333333333333%"/></colgroup><thead class="- topic/thead thead">
+                        <tr class="- topic/row">
+                            <th class="- topic/entry entry colsep-1 rowsep-1" id="topic_c2c_ssh_ybc__table_ic3_pth_ybc__entry__1">
+                                <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">索引类型</strong></p>
+                            </th>
+                            <th class="- topic/entry entry colsep-1 rowsep-1" id="topic_c2c_ssh_ybc__table_ic3_pth_ybc__entry__2">
+                                <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">索引说明</strong></p>
+                            </th>
+                            <th class="- topic/entry entry colsep-0 rowsep-1" id="topic_c2c_ssh_ybc__table_ic3_pth_ybc__entry__3">
+                                <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">索引构建复杂度</strong></p>
+                            </th>
+                        </tr>
+                    </thead><tbody class="- topic/tbody tbody">
+                        <tr class="- topic/row">
+                            <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_c2c_ssh_ybc__table_ic3_pth_ybc__entry__1">Flat</td>
+                            <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_c2c_ssh_ybc__table_ic3_pth_ybc__entry__2">Flat 索引提供精确的向量最近邻检索。它在构建索引时无需进行训练，而是直接对系统中存储的所有向量进行穷举搜索。在查询时，Flat
+                                索引会计算查询向量与所有存储向量的相似度，从而找出与查询向量最相似的向量。</td>
+                            <td class="- topic/entry entry colsep-0 rowsep-1" headers="topic_c2c_ssh_ybc__table_ic3_pth_ybc__entry__3">无需复杂的索引构建过程。</td>
+                        </tr>
+                        <tr class="- topic/row">
+                            <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_c2c_ssh_ybc__table_ic3_pth_ybc__entry__1">PQ</td>
+                            <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_c2c_ssh_ybc__table_ic3_pth_ybc__entry__2">PQ（Product Quantization）索引通过对向量数据进行训练来构建向量索引。在训练过程中，PQ
+                                会将每个向量划分为多个子向量，并对每个子向量进行乘积量化（Product
+                                Quantization）处理。这样可以大幅压缩每个向量的存储空间。</td>
+                            <td class="- topic/entry entry colsep-0 rowsep-1" headers="topic_c2c_ssh_ybc__table_ic3_pth_ybc__entry__3">构建 PQ 索引时需要训练乘积量化器。与除 Flat 索引之外的其他索引相比，PQ 索引在内存占用方面更小。</td>
+                        </tr>
+                        <tr class="- topic/row">
+                            <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_c2c_ssh_ybc__table_ic3_pth_ybc__entry__1">IVF</td>
+                            <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_c2c_ssh_ybc__table_ic3_pth_ybc__entry__2">
+                                <ul class="- topic/ul ul" id="topic_c2c_ssh_ybc__ul_mc3_pth_ybc" data-ofbid="topic_c2c_ssh_ybc__ul_mc3_pth_ybc">
+                                    <li class="- topic/li li">IVF（Inverted File Index）索引在构建时需要对向量数据进行训练。训练过程中，IVF 会采用
+                                        k-means
+                                        聚类算法将向量数据划分为多个簇（cluster）。然后为每个簇建立一个倒排索引，记录该簇中包含的所有向量数据。</li>
+                                    <li class="- topic/li li">在查询时，IVF
+                                        会先计算查询向量与各个簇的距离，找出与查询向量距离较近的几个簇。然后仅对这些相关簇中的向量进行相似度计算，而不需要计算全部向量，从而大幅降低了计算量,提高了搜索效率。</li>
+                                </ul>
+                            </td>
+                            <td class="- topic/entry entry colsep-0 rowsep-1" headers="topic_c2c_ssh_ybc__table_ic3_pth_ybc__entry__3">构建 IVF 索引需要对向量数据进行聚类训练，并为每个聚类簇建立倒排索引。相比其他索引方式，IVF
+                                索引的构建过程较为复杂。</td>
+                        </tr>
+                        <tr class="- topic/row">
+                            <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_c2c_ssh_ybc__table_ic3_pth_ybc__entry__1">IVFPQ</td>
+                            <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_c2c_ssh_ybc__table_ic3_pth_ybc__entry__2">IVFPQ（Inverted File Index with Product Quantization）是 IVF 和 PQ
+                                两种索引技术的结合。在构建 IVFPQ 索引时，需要对向量数据进行训练。训练过程中，IVFPQ
+                                会将向量数据划分为多个簇，并对每个簇的向量数据采用 PQ 的乘积量化方式进行压缩处理。</td>
+                            <td class="- topic/entry entry colsep-0 rowsep-1" headers="topic_c2c_ssh_ybc__table_ic3_pth_ybc__entry__3">构建 IVFPQ 索引需要同时进行向量数据聚类训练和乘积量化器训练。因此，与单独使用 IVF 或 PQ 相比,IVFPQ
+                                索引的构建和维护过程更为复杂。</td>
+                        </tr>
+                        <tr class="- topic/row">
+                            <td class="- topic/entry entry colsep-1 rowsep-0" headers="topic_c2c_ssh_ybc__table_ic3_pth_ybc__entry__1">HNSW</td>
+                            <td class="- topic/entry entry colsep-1 rowsep-0" headers="topic_c2c_ssh_ybc__table_ic3_pth_ybc__entry__2">HNSW（Hierarchical Navigable Small
+                                World）基于图算法为向量数据构建多层次的导航图结构，实现高精度和高速度的近似最近领搜索。在查询过程中HNSW会根据查询向量从导航图的顶层开始查找最近的向量，然后在更低的层次中进一步搜索，逐渐逼近目标向量。每一层的搜索都是局部的，从而大幅提高了搜索效率。</td>
+                            <td class="- topic/entry entry colsep-0 rowsep-0" headers="topic_c2c_ssh_ybc__table_ic3_pth_ybc__entry__3">构建索引时不需要进行训练，但是需要在构建索引时动态地构建和维护多层次导航图，构建多层次的图结构复杂度高耗时长。且相比其他索引，HNSW对内存的占用最高。</td>
+                        </tr>
+                    </tbody></table></div>
+        </div>
+    </article>
+    <article class="- topic/topic topic nested1" aria-labelledby="ariaid-title4" id="topic_klz_znj_bcc">
+        <h2 class="- topic/title title topictitle2" id="ariaid-title4">选择索引类型</h2>
+        <div class="- topic/body body">
+            <div class="table-container"><table class="- topic/table table frame-all" id="topic_klz_znj_bcc__table_lch_b4j_bcc" data-ofbid="topic_klz_znj_bcc__table_lch_b4j_bcc" data-cols="5"><caption></caption><colgroup><col/><col/><col/><col/><col/></colgroup><thead class="- topic/thead thead">
+                        <tr class="- topic/row">
+                            <th class="- topic/entry entry colsep-1 rowsep-1" id="topic_klz_znj_bcc__table_lch_b4j_bcc__entry__1">
+                                <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">索引类型</strong></p>
+                            </th>
+                            <th class="- topic/entry entry colsep-1 rowsep-1" id="topic_klz_znj_bcc__table_lch_b4j_bcc__entry__2">
+                                <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">使用场景</strong></p>
+                            </th>
+                            <th class="- topic/entry entry colsep-1 rowsep-1" id="topic_klz_znj_bcc__table_lch_b4j_bcc__entry__3">
+                                <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">适用向量规模</strong></p>
+                            </th>
+                            <th class="- topic/entry entry colsep-1 rowsep-1" id="topic_klz_znj_bcc__table_lch_b4j_bcc__entry__4">
+                                <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">检索速度</strong></p>
+                            </th>
+                            <th class="- topic/entry entry colsep-0 rowsep-1" id="topic_klz_znj_bcc__table_lch_b4j_bcc__entry__5">
+                                <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">检索精度</strong></p>
+                            </th>
+                        </tr>
+                    </thead><tbody class="- topic/tbody tbody">
+                        <tr class="- topic/row">
+                            <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_klz_znj_bcc__table_lch_b4j_bcc__entry__1">Flat</td>
+                            <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_klz_znj_bcc__table_lch_b4j_bcc__entry__2">需要最高精度的场景</td>
+                            <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_klz_znj_bcc__table_lch_b4j_bcc__entry__3">10万以内</td>
+                            <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_klz_znj_bcc__table_lch_b4j_bcc__entry__4">慢</td>
+                            <td class="- topic/entry entry colsep-0 rowsep-1" headers="topic_klz_znj_bcc__table_lch_b4j_bcc__entry__5">高</td>
+                        </tr>
+                        <tr class="- topic/row">
+                            <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_klz_znj_bcc__table_lch_b4j_bcc__entry__1">PQ</td>
+                            <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_klz_znj_bcc__table_lch_b4j_bcc__entry__2">对搜索精度要求不高的场景。例如：大型数据库、视频库等。</td>
+                            <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_klz_znj_bcc__table_lch_b4j_bcc__entry__3">数十万至数千万级别</td>
+                            <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_klz_znj_bcc__table_lch_b4j_bcc__entry__4">较 Flat 快</td>
+                            <td class="- topic/entry entry colsep-0 rowsep-1" headers="topic_klz_znj_bcc__table_lch_b4j_bcc__entry__5">最低</td>
+                        </tr>
+                        <tr class="- topic/row">
+                            <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_klz_znj_bcc__table_lch_b4j_bcc__entry__1">IVF</td>
+                            <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_klz_znj_bcc__table_lch_b4j_bcc__entry__2">图片检索、文本检索等。</td>
+                            <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_klz_znj_bcc__table_lch_b4j_bcc__entry__3">数万至数百万级别</td>
+                            <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_klz_znj_bcc__table_lch_b4j_bcc__entry__4">较 PQ 快</td>
+                            <td class="- topic/entry entry colsep-0 rowsep-1" headers="topic_klz_znj_bcc__table_lch_b4j_bcc__entry__5">较 Flat 低</td>
+                        </tr>
+                        <tr class="- topic/row">
+                            <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_klz_znj_bcc__table_lch_b4j_bcc__entry__1">IVFPQ</td>
+                            <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_klz_znj_bcc__table_lch_b4j_bcc__entry__2">在检索速度和精度之间找到最佳平衡的场景。例如：大型推荐系统、社交网络中的用户匹配等。</td>
+                            <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_klz_znj_bcc__table_lch_b4j_bcc__entry__3">数百万至数千万级别</td>
+                            <td class="- topic/entry entry colsep-1 rowsep-1" headers="topic_klz_znj_bcc__table_lch_b4j_bcc__entry__4">比单独使用 IVF 或 PQ 更快</td>
+                            <td class="- topic/entry entry colsep-0 rowsep-1" headers="topic_klz_znj_bcc__table_lch_b4j_bcc__entry__5">比单独使用 PQ 高，但比单独使用 IVF 低</td>
+                        </tr>
+                        <tr class="- topic/row">
+                            <td class="- topic/entry entry colsep-1 rowsep-0" headers="topic_klz_znj_bcc__table_lch_b4j_bcc__entry__1">HNSW</td>
+                            <td class="- topic/entry entry colsep-1 rowsep-0" headers="topic_klz_znj_bcc__table_lch_b4j_bcc__entry__2">对检索速度，精度和动态更新有高要求的场景，例如：实时推荐系统、在线搜索、RAG 等。</td>
+                            <td class="- topic/entry entry colsep-1 rowsep-0" headers="topic_klz_znj_bcc__table_lch_b4j_bcc__entry__3">数亿至数十亿级别</td>
+                            <td class="- topic/entry entry colsep-1 rowsep-0" headers="topic_klz_znj_bcc__table_lch_b4j_bcc__entry__4">最快</td>
+                            <td class="- topic/entry entry colsep-0 rowsep-0" headers="topic_klz_znj_bcc__table_lch_b4j_bcc__entry__5">与 IVF 相近</td>
+                        </tr>
+                    </tbody></table></div>
+        </div>
+    </article>
+    <article class="- topic/topic topic nested1" aria-labelledby="ariaid-title5" id="topic_l4c_fth_ybc">
+        <h2 class="- topic/title title topictitle2" id="ariaid-title5">创建 VectorDB 中的数据表</h2>
+        <div class="- topic/body body">
+            <section class="- topic/section section" id="topic_l4c_fth_ybc__section_agy_fth_ybc" data-ofbid="topic_l4c_fth_ybc__section_agy_fth_ybc">
+                <p class="- topic/p p">在 DolphinDB 中，创建分布式分区表有两种方式：一种是使用 <a class="- topic/xref xref" href="../../funcs/c/createPartitionedTable.html">createPartitionedTable</a> 函数，另一种是使用 <a class="- topic/xref xref" href="../../progr/sql/create.html">create</a> 语句。这两个函数中的
+                        <em class="+ topic/ph hi-d/i ph i">indexes</em> 参数用于指定需要建立向量索引的列、向量索引的类型以及向量数据的维度。在创建数据表时，必须指定该参数，才能创建
+                    VectorDB 中分布式分区表。</p>
+                <p class="- topic/p p">关于数据表的创建方法，请参考函数页面。本文仅说明 VectorDB 的使用限制。</p>
+            </section>
+            <section class="- topic/section section" id="topic_l4c_fth_ybc__section_ctw_gth_ybc" data-ofbid="topic_l4c_fth_ybc__section_ctw_gth_ybc">
+                <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">建库限制：</strong></p>
+                <p class="- topic/p p">只能创建 TSDB 引擎下的数据库，因此在使用 <code class="+ topic/ph pr-d/codeph ph codeph">database</code> 函数创建数据库时，必须设置
+                    <em class="+ topic/ph hi-d/i ph i">engine</em>="TSDB"。</p>
+                <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">建表限制:</strong></p>
+                <ul class="- topic/ul ul" id="topic_l4c_fth_ybc__ul_hkf_jth_ybc" data-ofbid="topic_l4c_fth_ybc__ul_hkf_jth_ybc">
+                    <li class="- topic/li li">仅支持为分布式分区表设置向量索引，且建表时必须指定 <em class="+ topic/ph hi-d/i ph i">keepDuplicate</em>s=ALL。</li>
+                    <li class="- topic/li li">
+                        <p class="- topic/p p">最多只能为一个 FLOAT[] 类型的列建立向量索引。该列中的每一行代表一个向量，且所有向量必须具有相同的维度。维度表示每个向量中的元素数量，由
+                                <em class="+ topic/ph hi-d/i ph i">indexes</em> 参数中的 dim 指定。</p>
+                    </li>
+                    <li class="- topic/li li">插入向量索引列的数据维度必须与维度（dim）一致。</li>
+                </ul>
+                <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">搜索限制:</strong></p>
+                <p class="- topic/p p">只有在满足如下条件时，才会使用向量索引加速检索：</p>
+                <ul class="- topic/ul ul" id="topic_l4c_fth_ybc__ul_ikf_jth_ybc" data-ofbid="topic_l4c_fth_ybc__ul_ikf_jth_ybc">
+                    <li class="- topic/li li">不能使用表连接查询。</li>
+                    <li class="- topic/li li">查询语句中 <code class="+ topic/ph pr-d/codeph ph codeph">order by</code> 必须按升序排序，且仅支持使用
+                                <code class="+ topic/ph pr-d/codeph ph codeph">rowEuclidean</code>计算距离。</li>
+                    <li class="- topic/li li">传入 <code class="+ topic/ph pr-d/codeph ph codeph">rowEuclidean</code> 的第一个参数必须是已指定了向量索引的列，即
+                                <code class="+ topic/ph pr-d/codeph ph codeph">rowEuclidean(&lt;vectorCol&gt;, queryVec)</code> 。</li>
+                    <li class="- topic/li li">必须指定 <code class="+ topic/ph pr-d/codeph ph codeph">limit</code> 子句。</li>
+                    <li class="- topic/li li">若指定了 <code class="+ topic/ph pr-d/codeph ph codeph">where</code>，则 <code class="+ topic/ph pr-d/codeph ph codeph">where</code> 条件中不能包含
+                                <em class="+ topic/ph hi-d/i ph i">sortColumns</em> 中的任意列。</li>
+                    <li class="- topic/li li">查询语句中不能指定 <code class="+ topic/ph pr-d/codeph ph codeph">group by</code>, <code class="+ topic/ph pr-d/codeph ph codeph">having</code> 等其他子句。</li>
+                </ul>
+                <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">其它说明：</strong></p>
+                <ul class="- topic/ul ul" id="topic_l4c_fth_ybc__ul_jkf_jth_ybc" data-ofbid="topic_l4c_fth_ybc__ul_jkf_jth_ybc">
+                    <li class="- topic/li li">内存 Cache Engine 中的向量数据没有索引，无法对其通过向量索引加速检索。若需要检索这部分数据，可以通过
+                            <code class="+ topic/ph pr-d/codeph ph codeph">flushTSDBCache</code> 强制将缓存中的数据写入磁盘后，再进行查询。</li>
+                </ul>
+            </section>
+        </div>
+    </article>
+    <article class="- topic/topic topic nested1" aria-labelledby="ariaid-title6" id="topic_dl4_jth_ybc">
+        <h2 class="- topic/title title topictitle2" id="ariaid-title6">简单示例</h2>
+        <div class="- topic/body body">
+            <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_dl4_jth_ybc__codeblock_zld_mth_ybc" data-ofbid="topic_dl4_jth_ybc__codeblock_zld_mth_ybc"><code>// 创建 TSDB 引擎中的数据库
+db = database(directory="dfs://indexesTest", partitionType=VALUE, partitionScheme=1..10, engine="TSDB")
+// 创建表结构，其中 col3 列的类型是 FLOAT[]
+schematb = table(1:0,`col0`col1`col2`col3,[INT,INT,TIMESTAMP,FLOAT[]])
+// 通过 indexes 参数，为 col3 指定向量索引
+pt = createPartitionedTable(dbHandle=db, table=schematb, tableName=`pt, partitionColumns=`col0, sortColumns=`col1`col2, indexes={"col3":"vectorindex(type=flat, dim=5)"})
+
+tmp = cj(table(1..10 as col0),cj(table(1..10 as col1),table(now()+1..10 as col2))) join table(arrayVector(1..1000*5,1..5000) as col3)
+
+//分区表中写入数据后，强制将数据写入磁盘
+pt.tableInsert(tmp)
+flushTSDBCache()
+
+select * from pt where col2&lt;now() order by rowEuclidean(col3,[1339,252,105,105,829]) limit 10</code></pre>
+        </div>
+    </article>
+    <article class="- topic/topic topic nested1" aria-labelledby="ariaid-title7" id="topic_b4y_kth_ybc">
+        <h2 class="- topic/title title topictitle2" id="ariaid-title7">应用场景</h2>
+        <div class="- topic/body body">
+            <p class="- topic/p p">向量检索技术在检索增强生成（RAG）系统中扮演着至关重要的角色，其能够有效地从知识库中找到与查询相关的信息，为生成模型提供丰富的上下文支持。将 VectorDB 与
+                RAG 结合，可以进一步扩展系统知识库，并利用向量检索提供的上下文信息提高生成结果的质量和准确性。VectorDB 还可以改进推荐系统、实现高效图像和视频搜索、提升
+                AI 生成模型的准确性以及多样性等。</p>
+        </div>
+    </article>
+</article></main></div>
+                        
+                        
+                        
+                        
+                        
+                        
+                    </div>
+                    
+                        <nav role="navigation" id="wh_topic_toc" aria-label="On this page" class="col-lg-2 d-none d-lg-block navbar d-print-none"> 
+                            <div id="wh_topic_toc_content">
+		                        
+	                            <div class=" wh_topic_toc "><div class="wh_topic_label">在本页上</div><ul><li class="topic-item"><a href="#topic_eyk_jsh_ybc" data-tocid="topic_eyk_jsh_ybc">实现原理</a><ul><li class="section-item"><div class="section-title"><a href="#topic_eyk_jsh_ybc__section_dcy_ksh_ybc" data-tocid="topic_eyk_jsh_ybc__section_dcy_ksh_ybc">向量数据存储</a></div></li><li class="section-item"><div class="section-title"><a href="#topic_eyk_jsh_ybc__section_fmb_nsh_ybc" data-tocid="topic_eyk_jsh_ybc__section_fmb_nsh_ybc"><strong class="+ topic/ph hi-d/b ph b">向量索引构建</strong></a></div></li><li class="section-item"><div class="section-title"><a href="#topic_eyk_jsh_ybc__section_rd1_4sh_ybc" data-tocid="topic_eyk_jsh_ybc__section_rd1_4sh_ybc">向量数据检索</a></div></li></ul></li><li class="topic-item"><a href="#topic_c2c_ssh_ybc" data-tocid="topic_c2c_ssh_ybc">索引类型</a></li><li class="topic-item"><a href="#topic_klz_znj_bcc" data-tocid="topic_klz_znj_bcc">选择索引类型</a></li><li class="topic-item"><a href="#topic_l4c_fth_ybc" data-tocid="topic_l4c_fth_ybc">创建 VectorDB 中的数据表</a></li><li class="topic-item"><a href="#topic_dl4_jth_ybc" data-tocid="topic_dl4_jth_ybc">简单示例</a></li><li class="topic-item"><a href="#topic_b4y_kth_ybc" data-tocid="topic_b4y_kth_ybc">应用场景</a></li></ul></div>
+	                        	
+                        	</div>
+                        </nav>
+                    
+                </div>
+            </div>
+            
+            
+            
+        </div> 
+        <footer class="navbar navbar-default wh_footer">
+  <div class=" footer-container mx-auto ">
+<title>Copyright</title><p><b> ©2025 浙江智臾科技有限公司 浙ICP备18048711号-3</b></p>
+  </div>
+</footer>
+        
+        <div id="go2top" class="d-print-none">
+            <span class="oxy-icon oxy-icon-up"></span>
+        </div>
+        
+        <div id="modal_img_large" class="modal">
+            <span class="close oxy-icon oxy-icon-remove"></span>
+            <div id="modal_img_container"></div>
+            <div id="caption"></div>
+        </div>
+        
+        
+        
+    </body>
+</html>

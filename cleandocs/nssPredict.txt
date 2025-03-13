@@ -1,0 +1,40 @@
+
+
+# nsspredict
+
+## 语法
+
+```DolphinDB
+nssPredict(model, maturity)
+```
+
+## 参数
+
+- **model**  
+  字典类型，表示 Nelson-Siegel（NS）模型或 Nelson-Siegel-Svensson（NSS）模型，必须包含以下成员：
+  - `modelName`：字符串类型，取值必须为 `"ns"` 或 `"nss"`
+  - `params`：数值型向量，参数结构：
+    - NS 模型：4 个参数 [β0, β1, β2, λ]
+    - NSS 模型：6 个参数 [β0, β1, β2, β3, λ0, λ1]
+
+- **maturity**  
+  数值型向量（值需大于 0），表示债券的到期时间（单位：年）
+
+## 详情
+
+根据指定的 NS 模型或 NSS 模型，预测债券的收益率。
+
+## 示例
+
+```DolphinDB
+model = dict(STRING, ANY)
+model[`modelName] = `nss
+model[`params] = [0.038184469794996, -0.048575389082029, -0.022287414169806, 0.047523360012739, 1.873046195772644, 0.161159907274023]
+maturity = [3, 1]
+nssPredict(model, maturity)
+
+// 输出结果
+[0.009904201306, 0.003891991292041]
+```
+
+**相关函数**：[nss](nss.html)

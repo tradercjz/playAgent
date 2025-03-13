@@ -1,0 +1,931 @@
+<!DOCTYPE html><html xmlns="http://www.w3.org/1999/xhtml" xml:lang="zh" lang="zh" data-whc_version="26.0">
+    <head><link rel="shortcut icon" href="../favicon.ico"/><link rel="icon" href="../favicon.ico"/><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><meta name="description" content="在量化交易中，中低频交易策略因其相对稳健的收益特性和较低的技术门槛，受到广大投资者的青睐。中低频策略通常基于日频或分钟级别的数据，通过分析市场趋势、估值指标、风险因子等，捕捉更长时间尺度上的投资机会。策略的核心在于设计一套科学有效的选股与仓位管理机制，从而实现收益最大化与风险控制。相比高频交易的短线博弈，中低频交易更关注策略在复杂市场条件下的适应性与风险控制，追求更高的资金利用效率和更稳定的回报。 ..."/><meta name="DC.rights.owner" content="(C) 版权 2025"/><meta name="copyright" content="(C) 版权 2025"/><meta name="generator" content="DITA-OT"/><meta name="DC.type" content="topic"/><meta name="DC.coverage" content=""/><meta name="DC.relation" content="../tutorials/about_tutorials.html"/><meta name="prodname" content="DolphinDB"/><meta name="brand" content="DolphinDB"/><meta name="DC.creator" content="DolphinDB"/><meta name="DC.publisher" content="DDB N/A DDB 200"/><meta name="DC.format" content="HTML5"/><meta name="DC.identifier" content="stock_backtest"/><title>股票中低频投资组合回测案例实现</title><!--  Generated with Oxygen version 26.0, build number 2024012323.  --><meta name="wh-path2root" content="../"/><meta name="wh-toc-id" content="stock_backtest-d9713e104781"/><meta name="wh-source-relpath" content="tutorials/stock_backtest.dita"/><meta name="wh-out-relpath" content="tutorials/stock_backtest.html"/>
+
+    <link rel="stylesheet" type="text/css" href="../oxygen-webhelp/app/commons.css?buildId=2024012323"/>
+    <link rel="stylesheet" type="text/css" href="../oxygen-webhelp/app/topic.css?buildId=2024012323"/>
+
+    <script src="../oxygen-webhelp/app/options/properties.js?buildId=20250305183303"></script>
+    <script src="../oxygen-webhelp/app/localization/strings.js?buildId=2024012323"></script>
+    <script src="../oxygen-webhelp/app/search/index/keywords.js?buildId=20250305183303"></script>
+    <script defer="defer" src="../oxygen-webhelp/app/commons.js?buildId=2024012323"></script>
+    <script defer="defer" src="../oxygen-webhelp/app/topic.js?buildId=2024012323"></script>
+<link rel="stylesheet" type="text/css" href="../oxygen-webhelp/template/styles.css?buildId=2024012323"/><script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script><script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script></head>
+
+    <body id="stock_backtest" class="wh_topic_page frmBody">
+        <a href="#wh_topic_body" class="sr-only sr-only-focusable">
+            跳转到主要内容
+        </a>
+        
+        
+        
+        
+        <header class="navbar navbar-default wh_header">
+    <div class="container-fluid">
+        <div xmlns:whc="http://www.oxygenxml.com/webhelp/components" class="wh_header_flex_container navbar-nav navbar-expand-md navbar-dark">
+            <div class="wh_logo_and_publication_title_container">
+                <div class="wh_logo_and_publication_title">
+                    
+                    <a href="https://docs.dolphindb.cn/zh/index.html" class=" wh_logo d-none d-sm-block "><img src="../logo.png" alt="  DolphinDB 文档中心  "/></a>
+                    <div class=" wh_publication_title "><a href="../index.html"><span class="booktitle">  <span class="ph mainbooktitle">DolphinDB 文档中心</span>  </span></a></div>
+                    
+                </div>
+                
+                
+            </div>
+
+            <div class="wh_top_menu_and_indexterms_link collapse navbar-collapse" id="wh_top_menu_and_indexterms_link">
+                
+                
+                
+                
+            </div>
+        <div class=" wh_search_input navbar-form wh_topic_page_search search " role="form">
+            
+            
+            
+            <form id="searchForm" method="get" role="search" action="../search.html"><div><input type="search" placeholder="搜索 " class="wh_search_textfield" id="textToSearch" name="searchQuery" aria-label="搜索查询" required="required"/><button type="submit" class="wh_search_button" aria-label="搜索"><span class="search_input_text">搜索</span></button></div></form>
+            
+            <script src="/vendors/react/umd/react.production.min.js" defer="defer"></script>
+<script src="/vendors/react-dom/umd/react-dom.production.min.js" defer="defer"></script>
+<script src="/vendors/dayjs/dayjs.min.js" defer="defer"></script>
+<script src="/vendors/antd/dist/antd.min.js" defer="defer"></script>
+<script src="/vendors/@ant-design/icons/dist/index.umd.min.js" defer="defer"></script>
+<script src="/zh/index.js" type="module"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" defer="defer"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML" defer="defer"><!--
+
+
+--></script>
+<script defer="defer"><!--
+
+// 从主页重定向
+const currentUrl = window.location.href;
+
+// 判断当前URL是否包含index.html并且路径最后部分是index.html
+if (currentUrl.endsWith('index.html')) {
+    // 处理根目录下的index.html跳转
+    const baseUrl = currentUrl.split('/index.html')[0]; // 获取index.html之前的部分
+    const redirectUrl = `${baseUrl}/about/ddb_intro.html`; // 构建跳转路径
+    window.location.href = redirectUrl; // 执行跳转
+}
+
+--></script>
+            
+        </div></div>
+    </div>
+</header>
+        
+        
+         
+        
+        
+        
+        <div class="container-fluid" id="wh_topic_container">
+            <div class="row">
+
+                <nav class="wh_tools d-print-none navbar-expand-md" aria-label="Tools">
+                    
+                    <div data-tooltip-position="bottom" class=" wh_breadcrumb "><ol class="d-print-none"><li><span class="home"><a href="../index.html"><span>主页</span></a></span></li><li><div class="topicref" data-id="about_tutorials"><div class="title"><a href="../tutorials/about_tutorials.html"><span class="keyword label">教程</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 产品使用教程</p></div></div></div></li><li><div class="topicref"><div class="title"><a href="../tutorials/OHLC_2.html">金融场景案例</a></div></div></li><li class="active"><div class="topicref" data-id="stock_backtest"><div class="title"><a href="../tutorials/stock_backtest.html">股票中低频投资组合回测案例实现</a></div></div></li></ol></div>
+                    
+                    
+                    
+                    <div class="wh_right_tools">
+                        <button class="wh_hide_highlight" aria-label="切换搜索突出显示" title="切换搜索突出显示"></button>
+                        <button class="webhelp_expand_collapse_sections" data-next-state="collapsed" aria-label="折叠截面" title="折叠截面"></button>
+                        
+                        
+                        
+                        
+                        <div class=" wh_print_link print d-none d-md-inline-block "><button onClick="window.print()" title="打印此页" aria-label="打印此页"></button></div>
+                        
+                        <button type="button" id="wh_toc_button" class="custom-toggler navbar-toggler collapsed wh_toggle_button navbar-light" aria-expanded="false" aria-label="Toggle publishing table of content" aria-controls="wh_publication_toc">
+                            <span class="navbar-toggler-icon"></span>
+                        </button>
+                    </div>
+                    
+                </nav>
+            </div>
+            
+            
+            
+            
+            <div class="wh_content_area">
+                <div class="row">
+                    
+                        <nav id="wh_publication_toc" class="col-lg-3 col-md-3 col-sm-12 d-md-block d-none d-print-none" aria-label="Table of Contents Container">
+                            <div id="wh_publication_toc_content">
+		                        
+                            	<div class=" wh_publication_toc " data-tooltip-position="right"><span class="expand-button-action-labels"><span id="button-expand-action" role="button" aria-label="Expand"></span><span id="button-collapse-action" role="button" aria-label="Collapse"></span><span id="button-pending-action" role="button" aria-label="Pending"></span></span><ul role="tree" aria-label="Table of Contents"><li role="treeitem"><div data-tocid="ddb_intro-d9713e87" class="topicref" data-id="ddb_intro" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../about/ddb_intro.html" id="ddb_intro-d9713e87-link">关于DolphinDB</a></div></div></li><li role="treeitem"><div data-tocid="chap1_getstarted-d9713e136" class="topicref" data-id="chap1_getstarted" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../getstarted/chap1_getstarted.html" id="chap1_getstarted-d9713e136-link">快速上手</a><div class="wh-tooltip"><p class="shortdesc">如何快速部署 DolphinDB、建库建表、写入和查询数据</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="sectionddb_deployment-d9713e189" class="topicref" data-id="sectionddb_deployment" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action sectionddb_deployment-d9713e189-link" class="wh-expand-btn"></span><div class="title"><a href="../deploy/deploy_intro.html" id="sectionddb_deployment-d9713e189-link"><span class="keyword label">部署</span></a><div class="wh-tooltip"><p class="shortdesc">如何在不同的场景中部署 DolphinDB</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="new_chap_database_manage_new_chap_dbmanage_landing_page-d9713e2259" class="topicref" data-id="new_chap_database_manage_new_chap_dbmanage_landing_page" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action new_chap_database_manage_new_chap_dbmanage_landing_page-d9713e2259-link" class="wh-expand-btn"></span><div class="title"><a href="../db_distr_comp/cfg/db_intro.html" id="new_chap_database_manage_new_chap_dbmanage_landing_page-d9713e2259-link"><span class="keyword label">数据库</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 数据库的基本概念</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="chap7_tutorials_streaming-d9713e3760" class="topicref" data-id="chap7_tutorials_streaming" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action chap7_tutorials_streaming-d9713e3760-link" class="wh-expand-btn"></span><div class="title"><a href="../stream/str_intro.html" id="chap7_tutorials_streaming-d9713e3760-link"><span class="keyword label">流数据</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 流数据引擎及流数据计算的基本概念</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e7513" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e7513-link" class="wh-expand-btn"></span><div class="title"><a href="../db_distr_comp/db_oper/import_data.html" id="tocId-d9713e7513-link">数据迁移</a><div class="wh-tooltip"><p class="shortdesc">如何从不同数据源向 DolphinDB 迁移数据</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="chap7_tutorials_system_management-d9713e7940" class="topicref" data-id="chap7_tutorials_system_management" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action chap7_tutorials_system_management-d9713e7940-link" class="wh-expand-btn"></span><div class="title"><a href="../sys_man/om_intro.html" id="chap7_tutorials_system_management-d9713e7940-link"><span class="keyword label">系统运维</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 的系统运维功能及方法</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="troubleshooting-d9713e8780" class="topicref" data-id="troubleshooting" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action troubleshooting-d9713e8780-link" class="wh-expand-btn"></span><div class="title"><a href="../error_codes/troubleshooting.html" id="troubleshooting-d9713e8780-link">故障排查</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="about_language_resources-d9713e20911" class="topicref" data-id="about_language_resources" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action about_language_resources-d9713e20911-link" class="wh-expand-btn"></span><div class="title"><a href="../progr/progr_intro.html" id="about_language_resources-d9713e20911-link"><span class="keyword label">编程语言</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 编程基本概念与方法、SQL 在 DolphinDB 的应用</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="functions_references-d9713e30925" class="topicref" data-id="functions_references" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action functions_references-d9713e30925-link" class="wh-expand-btn"></span><div class="title"><a href="../funcs/funcs_intro.html" id="functions_references-d9713e30925-link"><span class="keyword label">函数参考</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 函数分类、语法、详解及示例</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="api_protocol-d9713e94064" class="topicref" data-id="api_protocol" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action api_protocol-d9713e94064-link" class="wh-expand-btn"></span><div class="title"><a href="../api/connapi_intro.html" id="api_protocol-d9713e94064-link"><span class="keyword label">连接器 &amp; API</span></a><div class="wh-tooltip"><p class="shortdesc">面向不同编程语言的 DolphinDB API 及连接器，相关协议和用法</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="chap6_plugin-d9713e94210" class="topicref" data-id="chap6_plugin" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action chap6_plugin-d9713e94210-link" class="wh-expand-btn"></span><div class="title"><a href="../plugins/plg_intro.html" id="chap6_plugin-d9713e94210-link"><span class="keyword label">插件</span></a><div class="wh-tooltip"><p class="shortdesc">多个应用场景的插件使用说明和插件开发指导</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="third_party-d9713e97904" class="topicref" data-id="third_party" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action third_party-d9713e97904-link" class="wh-expand-btn"></span><div class="title"><a href="../third_party.html" id="third_party-d9713e97904-link">第三方工具</a></div></div></li><li role="treeitem" aria-expanded="true"><div data-tocid="about_tutorials-d9713e98227" class="topicref" data-id="about_tutorials" data-state="expanded"><span role="button" tabindex="0" aria-labelledby="button-collapse-action about_tutorials-d9713e98227-link" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/about_tutorials.html" id="about_tutorials-d9713e98227-link"><span class="keyword label">教程</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 产品使用教程</p></div></div></div><ul role="group" class="navbar-nav nav-list"><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e98280" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e98280-link" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/new_users_finance.html" id="tocId-d9713e98280-link">新用户入门</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e98327" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e98327-link" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/database.html" id="tocId-d9713e98327-link">数据库</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e99111" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e99111-link" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/std_sql_ddb.html" id="tocId-d9713e99111-link">编程</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e100448" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e100448-link" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/streaming-real-time-correlation-processing_2.html" id="tocId-d9713e100448-link">流数据</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e100955" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e100955-link" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/scheduledJob_2.html" id="tocId-d9713e100955-link">系统运维</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="模块概述-d9713e101923" class="topicref" data-id="模块概述" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action 模块概述-d9713e101923-link" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/tu_modules.html" id="模块概述-d9713e101923-link">模块</a></div></div></li><li role="treeitem" aria-expanded="true"><div data-tocid="tocId-d9713e102568" class="topicref" data-state="expanded"><span role="button" tabindex="0" aria-labelledby="button-collapse-action tocId-d9713e102568-link" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/OHLC_2.html" id="tocId-d9713e102568-link">金融场景案例</a></div></div><ul role="group" class="navbar-nav nav-list"><li role="treeitem"><div data-tocid="k-线计算-d9713e102569" class="topicref" data-id="k-线计算" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/OHLC_2.html" id="k-线计算-d9713e102569-link">K 线计算</a></div></div></li><li role="treeitem"><div data-tocid="使用-klinechart-展示-dolphindb-k-线-d9713e102615" class="topicref" data-id="使用-klinechart-展示-dolphindb-k-线" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/displaying_the_dolphindb_k-line_with_klinechart.html" id="使用-klinechart-展示-dolphindb-k-线-d9713e102615-link">使用 KLineChart 展示 DolphinDB K 线</a></div></div></li><li role="treeitem"><div data-tocid="python--hdf5-因子计算与-dolphindb-一体化因子计算方案对比-d9713e102661" class="topicref" data-id="python--hdf5-因子计算与-dolphindb-一体化因子计算方案对比" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/Python_HDF5_vs_DolphinDB.html" id="python--hdf5-因子计算与-dolphindb-一体化因子计算方案对比-d9713e102661-link">Python + HDF5 因子计算与 DolphinDB 一体化因子计算方案对比</a></div></div></li><li role="treeitem"><div data-tocid="python--文件存储与-dolphindb-因子计算性能比较-d9713e102707" class="topicref" data-id="python--文件存储与-dolphindb-因子计算性能比较" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/DolphinDB_VS_PythonFile_Storage.html" id="python--文件存储与-dolphindb-因子计算性能比较-d9713e102707-link">Python + 文件存储与 DolphinDB 因子计算性能比较</a></div></div></li><li role="treeitem"><div data-tocid="python-parser-在金融量化分析场景的应用入门-d9713e102753" class="topicref" data-id="python-parser-在金融量化分析场景的应用入门" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/py_parser__quant_fin.html" id="python-parser-在金融量化分析场景的应用入门-d9713e102753-link">Python Parser 在金融量化分析场景的应用入门</a></div></div></li><li role="treeitem"><div data-tocid="处理-level-2-行情数据实例-d9713e102799" class="topicref" data-id="处理-level-2-行情数据实例" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/l2_stk_data_proc_2.html" id="处理-level-2-行情数据实例-d9713e102799-link">处理 Level-2 行情数据实例</a></div></div></li><li role="treeitem"><div data-tocid="存储金融数据的分区方案最佳实践-d9713e102845" class="topicref" data-id="存储金融数据的分区方案最佳实践" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/best_practices_for_partitioned_storage.html" id="存储金融数据的分区方案最佳实践-d9713e102845-link">存储金融数据的分区方案最佳实践</a></div></div></li><li role="treeitem"><div data-tocid="公募基金历史数据基础分析教程-d9713e102891" class="topicref" data-id="公募基金历史数据基础分析教程" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/public_fund_basic_analysis.html" id="公募基金历史数据基础分析教程-d9713e102891-link">公募基金历史数据基础分析教程</a></div></div></li><li role="treeitem"><div data-tocid="股票行情回放-d9713e102937" class="topicref" data-id="股票行情回放" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/stock_market_replay_2.html" id="股票行情回放-d9713e102937-link">股票行情回放</a></div></div></li><li role="treeitem"><div data-tocid="搭建行情回放服务的最佳实践-d9713e102983" class="topicref" data-id="搭建行情回放服务的最佳实践" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/appendices_market_replay_bp.html" id="搭建行情回放服务的最佳实践-d9713e102983-link">搭建行情回放服务的最佳实践</a></div></div></li><li role="treeitem"><div data-tocid="国内股票行情数据导入实例-d9713e103029" class="topicref" data-id="国内股票行情数据导入实例" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/stockdata_csv_import_demo.html" id="国内股票行情数据导入实例-d9713e103029-link">国内股票行情数据导入实例</a></div></div></li><li role="treeitem"><div data-tocid="基金份额参考价值-iopv-计算-d9713e103076" class="topicref" data-id="基金份额参考价值-iopv-计算" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/streaming_IOPV_2.html" id="基金份额参考价值-iopv-计算-d9713e103076-link">基金份额参考价值 IOPV 计算</a></div></div></li><li role="treeitem"><div data-tocid="基于快照行情的股票和基金-k-线合成-d9713e103122" class="topicref" data-id="基于快照行情的股票和基金-k-线合成" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/k.html" id="基于快照行情的股票和基金-k-线合成-d9713e103122-link">基于快照行情的股票和基金 K 线合成</a></div></div></li><li role="treeitem"><div data-tocid="计算基金日频因子-d9713e103168" class="topicref" data-id="计算基金日频因子" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/fund_factor_contrasted_by_py.html" id="计算基金日频因子-d9713e103168-link">计算基金日频因子</a></div></div></li><li role="treeitem"><div data-tocid="基于逐笔数据合成高频-orderbookdolphindb-orderbook-引擎-d9713e103214" class="topicref" data-id="基于逐笔数据合成高频-orderbookdolphindb-orderbook-引擎" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/orderBookSnapshotEngine.html" id="基于逐笔数据合成高频-orderbookdolphindb-orderbook-引擎-d9713e103214-link">基于逐笔数据合成高频 Orderbook：DolphinDB Orderbook 引擎</a></div></div></li><li role="treeitem"><div data-tocid="金融-poc-用户历史数据导入指导手册之股票-level-2-逐笔篇-d9713e103260" class="topicref" data-id="金融-poc-用户历史数据导入指导手册之股票-level-2-逐笔篇" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/LoadDataForPoc.html" id="金融-poc-用户历史数据导入指导手册之股票-level-2-逐笔篇-d9713e103260-link">金融 PoC 用户历史数据导入指导手册之股票 Level-2 逐笔篇</a></div></div></li><li role="treeitem"><div data-tocid="金融实时实际波动率预测-d9713e103306" class="topicref" data-id="金融实时实际波动率预测" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/ml_volatility_2.html" id="金融实时实际波动率预测-d9713e103306-link">金融实时实际波动率预测</a></div></div></li><li role="treeitem"><div data-tocid="金融因子流式实现-d9713e103352" class="topicref" data-id="金融因子流式实现" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/str_comp_fin_quant_2.html" id="金融因子流式实现-d9713e103352-link">金融因子流式实现</a></div></div></li><li role="treeitem"><div data-tocid="开发股票波动率预测模型的-676-个输入特征-d9713e103398" class="topicref" data-id="开发股票波动率预测模型的-676-个输入特征" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/metacode_derived_features_2.html" id="开发股票波动率预测模型的-676-个输入特征-d9713e103398-link">开发股票波动率预测模型的 676 个输入特征</a></div></div></li><li role="treeitem"><div data-tocid="快速搭建-level-2-快照数据流批一体因子计算平台最佳实践-d9713e103444" class="topicref" data-id="快速搭建-level-2-快照数据流批一体因子计算平台最佳实践" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/l2_snapshot_factor_calc_2.html" id="快速搭建-level-2-快照数据流批一体因子计算平台最佳实践-d9713e103444-link">快速搭建 Level-2 快照数据流批一体因子计算平台最佳实践</a></div></div></li><li role="treeitem"><div data-tocid="量化金融范例-d9713e103490" class="topicref" data-id="量化金融范例" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/quant_finance_examples.html" id="量化金融范例-d9713e103490-link">量化金融范例</a></div></div></li><li role="treeitem"><div data-tocid="流式计算中证-1000-指数主买主卖交易量-d9713e103536" class="topicref" data-id="流式计算中证-1000-指数主买主卖交易量" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/CSI_1000_2.html" id="流式计算中证-1000-指数主买主卖交易量-d9713e103536-link">流式计算中证 1000 指数主买/主卖交易量</a></div></div></li><li role="treeitem"><div data-tocid="深度不平衡买卖压力指标波动率计算-d9713e103583" class="topicref" data-id="深度不平衡买卖压力指标波动率计算" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/sql_performance_optimization_wap_di_rv.html" id="深度不平衡买卖压力指标波动率计算-d9713e103583-link">深度不平衡、买卖压力指标、波动率计算</a></div></div></li><li role="treeitem"><div data-tocid="实时合成自定义频订单簿快照dolphindb-insight-行情插件与订单簿引擎应用-d9713e103629" class="topicref" data-id="实时合成自定义频订单簿快照dolphindb-insight-行情插件与订单簿引擎应用" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/insight_plugin_orderbook_engine_application.html" id="实时合成自定义频订单簿快照dolphindb-insight-行情插件与订单簿引擎应用-d9713e103629-link">实时合成自定义频订单簿快照：DolphinDB INSIGHT 行情插件与订单簿引擎应用</a></div></div></li><li role="treeitem"><div data-tocid="实时计算分钟资金流-d9713e103675" class="topicref" data-id="实时计算分钟资金流" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/streaming_capital_flow_order_by_order_2.html" id="实时计算分钟资金流-d9713e103675-link">实时计算分钟资金流</a></div></div></li><li role="treeitem"><div data-tocid="实时计算高频因子-d9713e103721" class="topicref" data-id="实时计算高频因子" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/hf_factor_streaming_2.html" id="实时计算高频因子-d9713e103721-link">实时计算高频因子</a></div></div></li><li role="treeitem"><div data-tocid="实时计算日累计逐单资金流-d9713e103767" class="topicref" data-id="实时计算日累计逐单资金流" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/streaming_capital_flow_daily_2.html" id="实时计算日累计逐单资金流-d9713e103767-link">实时计算日累计逐单资金流</a></div></div></li><li role="treeitem"><div data-tocid="实时计算涨幅榜-d9713e103813" class="topicref" data-id="实时计算涨幅榜" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/rt_stk_price_inc_calc_2.html" id="实时计算涨幅榜-d9713e103813-link">实时计算涨幅榜</a></div></div></li><li role="treeitem"><div data-tocid="实时选取外汇行情多价源最优价-d9713e103859" class="topicref" data-id="实时选取外汇行情多价源最优价" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/best_price_selection.html" id="实时选取外汇行情多价源最优价-d9713e103859-link">实时选取外汇行情多价源最优价</a></div></div></li><li role="treeitem"><div data-tocid="外汇掉期估值计算-d9713e103905" class="topicref" data-id="外汇掉期估值计算" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/FxSwapValuation.html" id="外汇掉期估值计算-d9713e103905-link">外汇掉期估值计算</a></div></div></li><li role="treeitem"><div data-tocid="因子计算平台构建-d9713e103951" class="topicref" data-id="因子计算平台构建" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/Python_Celery.html" id="因子计算平台构建-d9713e103951-link">因子计算平台构建</a></div></div></li><li role="treeitem"><div data-tocid="因子计算最佳实践-d9713e103997" class="topicref" data-id="因子计算最佳实践" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/best_practice_for_factor_calculation.html" id="因子计算最佳实践-d9713e103997-link">因子计算最佳实践</a></div></div></li><li role="treeitem"><div data-tocid="mvo_tutorial-d9713e104043" class="topicref" data-id="mvo_tutorial" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/MVO.html" id="mvo_tutorial-d9713e104043-link">优化投资组合：DolphinDB 最优化求解系列函数应用指南</a></div></div></li><li role="treeitem"><div data-tocid="中高频多因子库存储最佳实践-d9713e104090" class="topicref" data-id="中高频多因子库存储最佳实践" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/best_practices_for_multi_factor.html" id="中高频多因子库存储最佳实践-d9713e104090-link">中高频多因子库存储最佳实践</a></div></div></li><li role="treeitem"><div data-tocid="alphalens-在-dolphindb-中的应用因子分析建模实践-d9713e104136" class="topicref" data-id="alphalens-在-dolphindb-中的应用因子分析建模实践" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/Practical_Factor_Analysis_Modeling.html" id="alphalens-在-dolphindb-中的应用因子分析建模实践-d9713e104136-link">Alphalens 在 DolphinDB 中的应用：因子分析建模实践</a></div></div></li><li role="treeitem"><div data-tocid="dolphindb-与-dolphinscheduler-的集成-d9713e104182" class="topicref" data-id="dolphindb-与-dolphinscheduler-的集成" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/dolphinscheduler_integration.html" id="dolphindb-与-dolphinscheduler-的集成-d9713e104182-link">DolphinDB 与 DolphinScheduler 的集成</a></div></div></li><li role="treeitem"><div data-tocid="dolphindb-与-python-airflow-最佳实践-d9713e104228" class="topicref" data-id="dolphindb-与-python-airflow-最佳实践" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/ddb_airflow.html" id="dolphindb-与-python-airflow-最佳实践-d9713e104228-link">DolphinDB 与 Python AirFlow 最佳实践</a></div></div></li><li role="treeitem"><div data-tocid="gplearn-d9713e104274" class="topicref" data-id="gplearn" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/gplearn.html" id="gplearn-d9713e104274-link">Shark GPLearn 快速上手</a></div></div></li><li role="treeitem"><div data-tocid="利用jit加速计算-etf-期权隐含波动率和希腊值-d9713e104320" class="topicref" data-id="利用jit加速计算-etf-期权隐含波动率和希腊值" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/IV_Greeks_Calculation_for_ETF_Options_Using_JIT.html" id="利用jit加速计算-etf-期权隐含波动率和希腊值-d9713e104320-link">利用JIT加速计算 ETF 期权隐含波动率和希腊值</a></div></div></li><li role="treeitem"><div data-tocid="基于-dolphindb-的-brinson-绩效归因模型实践-d9713e104366" class="topicref" data-id="基于-dolphindb-的-brinson-绩效归因模型实践" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/brinson.html" id="基于-dolphindb-的-brinson-绩效归因模型实践-d9713e104366-link">基于 DolphinDB 的 Brinson 绩效归因模型实践</a></div></div></li><li role="treeitem"><div data-tocid="基于-dolphindb-的-campisi-绩效归因模型实践-d9713e104412" class="topicref" data-id="基于-dolphindb-的-campisi-绩效归因模型实践" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/campisi.html" id="基于-dolphindb-的-campisi-绩效归因模型实践-d9713e104412-link">基于 DolphinDB 的 Campisi 绩效归因模型实践</a></div></div></li><li role="treeitem"><div data-tocid="期货分钟频cta策略回测案例-d9713e104458" class="topicref" data-id="期货分钟频cta策略回测案例" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/futures_minute_frequency_cta_strategy_backtest_example.html" id="期货分钟频cta策略回测案例-d9713e104458-link">期货分钟频CTA策略回测案例</a></div></div></li><li role="treeitem"><div data-tocid="exchdata-交易所历史股票数据自动化导入功能模块使用教程-d9713e104504" class="topicref" data-id="exchdata-交易所历史股票数据自动化导入功能模块使用教程" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/exchdata_exchange_historical_stock_data_auto_import_module_tutorial.html" id="exchdata-交易所历史股票数据自动化导入功能模块使用教程-d9713e104504-link">ExchData 交易所历史股票数据自动化导入功能模块使用教程</a></div></div></li><li role="treeitem"><div data-tocid="ficc_func_uasge_and_performance-d9713e104550" class="topicref" data-id="ficc_func_uasge_and_performance" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/ficc_func_uasge_and_performance.html" id="ficc_func_uasge_and_performance-d9713e104550-link">FICC 固收系列函数使用示例及性能</a></div></div></li><li role="treeitem"><div data-tocid="title1-d9713e104597" class="topicref" data-id="title1" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/ficc_funcs_application.html" id="title1-d9713e104597-link">FICC 固收系列函数应用场景</a></div></div></li><li role="treeitem"><div data-tocid="最优化函数_socp_的使用及转化案例-d9713e104643" class="topicref" data-id="最优化函数_socp_的使用及转化案例" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/socp_usage_case.html" id="最优化函数_socp_的使用及转化案例-d9713e104643-link">最优化函数 socp 的使用及转化案例</a></div></div></li><li role="treeitem"><div data-tocid="k_line_calculation-d9713e104689" class="topicref" data-id="k_line_calculation" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/k_line_calculation%20.html" id="k_line_calculation-d9713e104689-link">基于期货快照行情数据计算合约 K 线以及主连行情</a></div></div></li><li role="treeitem"><div data-tocid="backtest_introduction_usage-d9713e104735" class="topicref" data-id="backtest_introduction_usage" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/backtest_introduction_usage.html" id="backtest_introduction_usage-d9713e104735-link">融资融券策略回测使用说明及回测案例</a></div></div></li><li role="treeitem" class="active"><div data-tocid="stock_backtest-d9713e104781" class="topicref" data-id="stock_backtest" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/stock_backtest.html" id="stock_backtest-d9713e104781-link">股票中低频投资组合回测案例实现</a></div></div></li></ul></li><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e104827" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e104827-link" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/streaming_engine_anomaly_alerts_2.html" id="tocId-d9713e104827-link">物联网场景案例</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e105795" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e105795-link" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/dolphindb_tensor_libtorch_tutorial.html" id="tocId-d9713e105795-link">机器学习</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e105842" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e105842-link" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/api_performance.html" id="tocId-d9713e105842-link">测试报告</a></div></div></li></ul></li><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e105982" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e105982-link" class="wh-expand-btn"></span><div class="title"><a href="../rn/server/3_00_2.html" id="tocId-d9713e105982-link">版本说明</a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 版本发布历史</p></div></div></div></li></ul></div>
+		                        
+                            </div>
+                        </nav>
+                    
+                    
+                    <div class="col-lg-7 col-md-9 col-sm-12" id="wh_topic_body">
+                        <button id="wh_close_publication_toc_button" class="close-toc-button d-none" aria-label="Toggle publishing table of content" aria-controls="wh_publication_toc" aria-expanded="true">
+                            <span class="close-toc-icon-container">
+                                <span class="close-toc-icon"></span>     
+                            </span>
+                        </button>
+                        <button id="wh_close_topic_toc_button" class="close-toc-button d-none" aria-label="Toggle topic table of content" aria-controls="wh_topic_toc" aria-expanded="true">
+                            <span class="close-toc-icon-container">
+                                <span class="close-toc-icon"></span>     
+                            </span>
+                        </button>
+                        
+                        <div class=" wh_topic_content body "><main role="main"><article class="- topic/topic topic" role="article" aria-labelledby="ariaid-title1">
+    <h1 class="- topic/title title topictitle1" id="ariaid-title1">股票中低频投资组合回测案例实现</h1>
+    <div class="- topic/body body">
+        <p class="- topic/p p">在量化交易中，中低频交易策略因其相对稳健的收益特性和较低的技术门槛，受到广大投资者的青睐。中低频策略通常基于日频或分钟级别的数据，通过分析市场趋势、估值指标、风险因子等，捕捉更长时间尺度上的投资机会。策略的核心在于设计一套科学有效的选股与仓位管理机制，从而实现收益最大化与风险控制。相比高频交易的短线博弈，中低频交易更关注策略在复杂市场条件下的适应性与风险控制，追求更高的资金利用效率和更稳定的回报。</p>
+        <p class="- topic/p p">在此背景下，本篇文档将以两个典型的中低频交易回测案例为核心内容：一个是基于指数信号的股票投资组合交易策略，另一个是基于成分股信号的股指期货交易策略。通过这些案例，我们将系统讲解如何利用
+            DolphinDB 的回测引擎构建策略框架、模拟交易过程并分析回测结果。</p>
+    </div>
+    <article class="- topic/topic topic nested1" aria-labelledby="ariaid-title2" id="topic_uzj_yqh_m2c">
+        <h2 class="- topic/title title topictitle2" id="ariaid-title2">1. 背景介绍</h2>
+        <div class="- topic/body body">
+            <p class="- topic/p p">本文将详细展示如何通过 DolphinDB 中低频回测引擎实现股票投资组合交易策略、股指期货交易策略。在展示如何使用 DolphinDB
+                脚本来编写案例策略之前，为使读者更好地理解，本章将简要介绍两种股票中低频策略。</p>
+        </div>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title3" id="topic_yms_yqh_m2c">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title3">1.1 基于指数信号的股票投资组合交易策略</h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p">近年来，金融市场的复杂性和不确定性显著增加，投资者面临着市场波动性增强、指数与个股联动性加剧以及多因子模型应用场景多样化的挑战。在此背景下，基于指数信号的股票投资组合交易策略应运而生，该策略通过结合指数信号的市场趋势分析和个股多因子筛选，旨在解决投资组合管理中仓位动态调整、个股筛选优化和风险控制的复杂难题。策略的核心逻辑分为选股、权重分配、整体持仓调整等主要步骤。</p>
+                <ol class="- topic/ol ol" id="topic_yms_yqh_m2c__ol_ph3_1rh_m2c" data-ofbid="topic_yms_yqh_m2c__ol_ph3_1rh_m2c">
+                    <li class="- topic/li li">选股：<ul class="- topic/ul ul" id="topic_yms_yqh_m2c__ul_qh3_1rh_m2c" data-ofbid="topic_yms_yqh_m2c__ul_qh3_1rh_m2c">
+                            <li class="- topic/li li">通过灵活配置的多因子模型和预设的买入、卖出条件筛选满足条件的投资组合。</li>
+                        </ul></li>
+                    <li class="- topic/li li">权重分配：<ul class="- topic/ul ul" id="topic_yms_yqh_m2c__ul_rh3_1rh_m2c" data-ofbid="topic_yms_yqh_m2c__ul_rh3_1rh_m2c">
+                            <li class="- topic/li li">根据个股的具体条件（如技术指标、风险因子等）分配预期权重。</li>
+                        </ul></li>
+                    <li class="- topic/li li">整体持仓调整：<ul class="- topic/ul ul" id="topic_yms_yqh_m2c__ul_sh3_1rh_m2c" data-ofbid="topic_yms_yqh_m2c__ul_sh3_1rh_m2c">
+                            <li class="- topic/li li">通过跟踪指数信号动态调整整体持仓，若实际持仓与预期持仓不一致，则立即执行买入或卖出操作，确保投资组合的结构始终符合预期。</li>
+                        </ul></li>
+                </ol>
+            </div>
+        </article>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title4" id="topic_nts_yqh_m2c">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title4">1.2 基于成分股信号的股指期货交易策略</h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p">基于成分股信号的股指期货交易策略是一种通过分析指数成分股的信号来预测指数走势，并据此进行股指期货交易的策略。该策略的核心思想是利用成分股的微观信号来捕捉指数的宏观趋势，从而在股指期货市场上实现收益。策略的核心逻辑分为个股信号生成、成分股信号合成、指数信号决策、风险管理等主要步骤。</p>
+                <ol class="- topic/ol ol" id="topic_nts_yqh_m2c__ol_bg2_crh_m2c" data-ofbid="topic_nts_yqh_m2c__ol_bg2_crh_m2c">
+                    <li class="- topic/li li">个股信号生成：<ul class="- topic/ul ul" id="topic_nts_yqh_m2c__ul_cg2_crh_m2c" data-ofbid="topic_nts_yqh_m2c__ul_cg2_crh_m2c">
+                            <li class="- topic/li li">对指数成分股进行技术分析和基本面分析，生成个股信号。</li>
+                            <li class="- topic/li li">每个成分股的信号可以是买入、卖出或持有。</li>
+                        </ul></li>
+                    <li class="- topic/li li">指数信号合成：<ul class="- topic/ul ul" id="topic_nts_yqh_m2c__ul_dg2_crh_m2c" data-ofbid="topic_nts_yqh_m2c__ul_dg2_crh_m2c">
+                            <li class="- topic/li li">在每一分钟的时间截面上，通过等权、市值加权、流动性加权等合成方法，将所有成分股的信号进行加权合成，生成指数的综合信号。</li>
+                        </ul></li>
+                    <li class="- topic/li li">指数信号决策：<ul class="- topic/ul ul" id="topic_nts_yqh_m2c__ul_eg2_crh_m2c" data-ofbid="topic_nts_yqh_m2c__ul_eg2_crh_m2c">
+                            <li class="- topic/li li">根据合成的指数信号，决定是否买入或卖出股指期货。常见的决策规则包括：<ul class="- topic/ul ul" id="topic_nts_yqh_m2c__ul_fg2_crh_m2c" data-ofbid="topic_nts_yqh_m2c__ul_fg2_crh_m2c">
+                                    <li class="- topic/li li">多头信号：当指数信号达到一定的买入阈值时，买入股指期货。</li>
+                                    <li class="- topic/li li">空头信号：当指数信号达到一定的卖出阈值时，卖出股指期货。</li>
+                                    <li class="- topic/li li">持有信号：当指数信号在买入和卖出阈值之间时，保持现有持仓。</li>
+                                </ul></li>
+                        </ul></li>
+                </ol>
+            </div>
+        </article>
+    </article>
+    <article class="- topic/topic topic nested1" aria-labelledby="ariaid-title5" id="topic_hym_yqh_m2c">
+        <h2 class="- topic/title title topictitle2" id="ariaid-title5">2. 基于 DolphinDB 的股票中低频组合交易策略实现</h2>
+        <div class="- topic/body body">
+            <p class="- topic/p p">在本章节中，我们将详细讲解如何利用 DolphinDB
+                内置脚本语言编写事件驱动函数，以实现股票中低频组合交易策略，内容包括策略逻辑介绍、策略实现过程、初始参数的配置、事件函数的定义等。</p>
+        </div>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title6" id="topic_ogx_yqh_m2c">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title6">2.1 策略逻辑介绍</h3>
+            <div class="- topic/body body">
+                <div class="- topic/p p">该策略通过结合技术指标信号和动态风控机制，进行股票投资组合的筛选与调整，以实现风险控制和收益优化。整体交易逻辑如图 2.1 所示。<figure class="- topic/fig fig fignone" id="topic_ogx_yqh_m2c__fig_n4l_vbf_h2c" data-ofbid="topic_ogx_yqh_m2c__fig_n4l_vbf_h2c"><figcaption data-caption-side="top" class="- topic/title title figcap"><span class="figtitleprefix fig--title-label">图<span class="fig--title-label-number"> 1</span><span class="fig--title-label-punctuation">. </span></span><span class="fig--title">图2.1 股票中低频组合交易策略流程图</span></figcaption>
+                        
+                        <img class="- topic/image image" id="topic_ogx_yqh_m2c__image_stw_ly1_k2c" src="images/stock_backtest/2-1.png" width="620"/>
+                    </figure></div>
+                <ol class="- topic/ol ol" id="topic_ogx_yqh_m2c__ol_pc5_frh_m2c" data-ofbid="topic_ogx_yqh_m2c__ol_pc5_frh_m2c">
+                    <li class="- topic/li li">计算技术指标：首先调用 mytt 模块计算所需技术指标，用于后续操作。mytt 模块的使用说明可参考文档 <a class="- topic/xref xref" href="../modules/mytt/mytt.html">MyTT 指标库</a></li>
+                    <li class="- topic/li li">初始建仓标的选择：遍历所有股票，根据一系列趋势指标和动量指标，对股票进行评分和排序，筛选符合买入条件且不符合剔除条件的股票，作为最终投资组合。在本策略中，选取
+                        RSI （Relative Strength Index，相对强弱指数，后文简称为 RSI）、长短期均线交叉两个指标构建投资组合。</li>
+                    <li class="- topic/li li">个股风控：根据股票波动率和 RSI 进行个股风险控制，限制波动率超标的股票权重、限制单只股票的最大和最小持仓比例；当检测到 RSI
+                        信号小于70时，解除风控。</li>
+                    <li class="- topic/li li">个股权重归一化：将风控后确定的最终权重进行归一化，作为各种建仓各个标的的权重。</li>
+                    <li class="- topic/li li">仓位调整：根据各个股票的预期权重算出预期市值，和现有持仓市值进行比较，当预期市值大于持仓市值时，执行买入操作；当预期市值小于持仓市值时，执行卖出操作。</li>
+                </ol>
+            </div>
+        </article>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title7" id="topic_zmx_yqh_m2c">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title7">2.2 策略实现流程</h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p">使用 DolphinDB 股票中低频投资组合回测引擎进行回测流程如图 2.2 所示，包括 6 个步骤。本节将以通用案例为例，分别介绍如何使用 DolphinDB
+                    股票中低频投资组合回测引擎实现以上两种回测模式。</p>
+                <figure class="- topic/fig fig fignone" id="topic_zmx_yqh_m2c__fig_gtn_k5h_m2c" data-ofbid="topic_zmx_yqh_m2c__fig_gtn_k5h_m2c"><figcaption data-caption-side="top" class="- topic/title title figcap"><span class="figtitleprefix fig--title-label">图<span class="fig--title-label-number"> 2</span><span class="fig--title-label-punctuation">. </span></span><span class="fig--title">图 2.2 股票中低频组合交易策略实现流程</span></figcaption>
+                    
+                    <img class="- topic/image image" id="topic_zmx_yqh_m2c__image_htn_k5h_m2c" src="images/stock_backtest/2-2.png" width="760"/>
+                </figure>
+            </div>
+            <article class="- topic/topic topic nested3" aria-labelledby="ariaid-title8" id="topic_xwm_krh_m2c">
+                <h4 class="- topic/title title topictitle4" id="ariaid-title8">2.2.1 加载行情数据并计算技术指标</h4>
+                <div class="- topic/body body">
+                    <p class="- topic/p p">首先在执行回测逻辑前采用 MyTT 模块预先计算如下指标，计算完毕后合并至分钟行数数据库表 <em class="+ topic/ph hi-d/i ph i">messageTable</em> 的
+                            <em class="+ topic/ph hi-d/i ph i">signal</em>列 （完整脚本可参考附件 loadData1.dos）。</p>
+                    <ol class="- topic/ol ol" id="topic_xwm_krh_m2c__ol_tnr_mrh_m2c" data-ofbid="topic_xwm_krh_m2c__ol_tnr_mrh_m2c">
+                        <li class="- topic/li li">计算个股的短期均线 <em class="+ topic/ph hi-d/i ph i">shortMA</em> 和长期均线 <em class="+ topic/ph hi-d/i ph i">longMA</em>
+                            用于判断趋势信号，通过均线交叉识别买入或卖出的时机。<pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_xwm_krh_m2c__codeblock_ddr_prh_m2c" data-ofbid="topic_xwm_krh_m2c__codeblock_ddr_prh_m2c"><code>use mytt
+// 短期均线
+def getShortTermMA(close, period=5){
+    return MA(close, period)
+}
+// 长期均线
+def getLongTermMA(close, period=20){
+    return MA(close, period)
+}</code></pre></li>
+                        <li class="- topic/li li">利用 <code class="+ topic/ph pr-d/codeph ph codeph">prev</code> 函数获取个股的前一期短期均线 <em class="+ topic/ph hi-d/i ph i">prevShortMA</em> 和长期均线
+                                <em class="+ topic/ph hi-d/i ph i">prevLongMA</em>，用于判断是否有均线交叉。<pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_xwm_krh_m2c__codeblock_q31_qrh_m2c" data-ofbid="topic_xwm_krh_m2c__codeblock_q31_qrh_m2c"><code>update facTable set prevShortMA = prev(shortMA).bfill(), 
+                    prevLongMA = prev(longMA).bfill()</code></pre></li>
+                        <li class="- topic/li li">计算个股的相对强弱指标<em class="+ topic/ph hi-d/i ph i">RSI</em>用于评估超买或超卖状态，帮助控制买卖时的市场情绪风险。<pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_xwm_krh_m2c__codeblock_jzj_qrh_m2c" data-ofbid="topic_xwm_krh_m2c__codeblock_jzj_qrh_m2c"><code>use mytt
+def getRSI(close, N = 24){
+    return RSI(close, N = 24) //直接调用mytt的 RSI 函数
+}</code></pre></li>
+                        <li class="- topic/li li">计算个股的波动率 <em class="+ topic/ph hi-d/i ph i">volatility</em>
+                            用于衡量价格的波动幅度，提供风控依据以避免高风险资产对组合的不利影响。<pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_xwm_krh_m2c__codeblock_n1w_qrh_m2c" data-ofbid="topic_xwm_krh_m2c__codeblock_n1w_qrh_m2c"><code>use mytt
+def getVolatility(close, period=10){
+    returns = DIFF(close) / REF(close, 1)
+    return STD(returns, period)
+}</code></pre></li>
+                        <li class="- topic/li li">交易状态判断。自定义 <code class="+ topic/ph pr-d/codeph ph codeph">checkTradingStatus</code>
+                            函数，在发送个股交易信号前，先通过该函数判断个股交易状态是否异常，若存在停牌、涨跌停等异常情况，则不进行交易。<pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_xwm_krh_m2c__codeblock_z4g_rrh_m2c" data-ofbid="topic_xwm_krh_m2c__codeblock_z4g_rrh_m2c"><code>def checkTradingStatus(
+    open, high, 
+    low, volume, 
+    turnover, close, 
+    upLimitPrice, downLimitPrice
+){
+    // 检查是否停牌
+    isHalted = (open==0 || high==0 || low==0 || volume==0 || turnover==0)
+    
+    // 检查是否涨跌停
+    isPriceLimited = (close&gt;=upLimitPrice || close&lt;=downLimitPrice)
+    
+    // 返回交易状态
+    return iif(isHalted || isPriceLimited, 0, 1)
+}</code></pre></li>
+                    </ol>
+                </div>
+            </article>
+            <article class="- topic/topic topic nested3" aria-labelledby="ariaid-title9" id="topic_kgp_krh_m2c">
+                <h4 class="- topic/title title topictitle4" id="ariaid-title9">2.2.2 配置回测参数</h4>
+                <div class="- topic/body body">
+                    <p class="- topic/p p">回测的开始与结束日期、初始资金、行情类型等均可以通过该参数进行配置。这些参数允许用户灵活地调整回测条件，以模拟不同的市场环境和交易策略的效果。具体的初始参数配置代码示例如下，其中详细回测参数配置要求可参考<a class="- topic/xref xref" href="../plugins/backtest/stock.html">引擎配置说明</a>文档。</p>
+                    <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_kgp_krh_m2c__codeblock_tcj_vrh_m2c" data-ofbid="topic_kgp_krh_m2c__codeblock_tcj_vrh_m2c"><code>config=dict(STRING,ANY) // 以字典形式存储回测参数     
+config["startDate"]= 2024.01.01 // 设置回测开始时间
+config["endDate"]= 2024.12.31 // 设置回测结束时间
+
+config["strategyGroup"] = "stock" // 选择回测模式，本案例中为股票模式
+config["frequency"] = 0 // 指定逐笔数据合成快照的频率
+config["cash"] = 10000000.        // 初始资金,1000万
+config["commission"] = 0.0005  // 交易佣金
+config["tax"] = 0.0      // 忽略税
+config["dataType"] = 3 // 分钟频
+config["matchingMode"] = 3 // 选择交易模式，本案例以委托价格成交
+config["msgAsTable"] = false // 以字典形式传入行情数据
+
+// 设置逻辑全局上下文
+config["context"] = dict(STRING,ANY)
+context = dict(STRING,ANY)
+context["activeTime"] = 14:30m // 设置每天交易时间
+context["maxPosition"] = 0.1 // 设置单只股票最大持仓比例
+context["minPosition"] = 0.001 // 设置单只股票最小持仓比例
+config["context"] = context</code></pre>
+                </div>
+            </article>
+            <article class="- topic/topic topic nested3" aria-labelledby="ariaid-title10" id="topic_crp_krh_m2c">
+                <h4 class="- topic/title title topictitle4" id="ariaid-title10">2.2.3 设置自定义策略回调函数</h4>
+                <div class="- topic/body body">
+                    <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">1. 设置辅助函数</strong></p>
+                    <p class="- topic/p p">辅助函数主要用于支持 <code class="+ topic/ph pr-d/codeph ph codeph">onBar</code>函数中的核心逻辑实现，处理买卖单生成、每日持仓更新等功能。</p>
+                    <ul class="- topic/ul ul" id="topic_crp_krh_m2c__ul_fdq_wrh_m2c" data-ofbid="topic_crp_krh_m2c__ul_fdq_wrh_m2c">
+                        <li class="- topic/li li"><code class="+ topic/ph pr-d/codeph ph codeph">getSellVolume</code>：计算卖出量，确保股数符合交易规则。<pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_crp_krh_m2c__codeblock_qxy_zrh_m2c" data-ofbid="topic_crp_krh_m2c__codeblock_qxy_zrh_m2c"><code>def getSellVolume(price, value, position){
+    // 若卖出=持仓,清仓;小于持仓,按照100的倍数卖出
+    // 此处/代表整除
+    vol = int(value/price)/100*100
+    // 确保卖出的股数为100倍
+    return int(iif(vol &lt; position, vol , position))
+}</code></pre></li>
+                        <li class="- topic/li li"><code class="+ topic/ph pr-d/codeph ph codeph">getBuyVolume</code>：计算买入量，确保符合不同股票交易规则（科创板需为 200 的倍数，其他为 100
+                            的倍数）。<pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_crp_krh_m2c__codeblock_t1h_1sh_m2c" data-ofbid="topic_crp_krh_m2c__codeblock_t1h_1sh_m2c"><code>def getBuyVolume(symbol, price, value){
+    // 若symbol以688开头,则需要是200的倍数;否则是100的倍数
+    vol = int(value/price)
+    return int(iif(symbol like "688%",vol/200*200, vol/100*100))
+}</code></pre></li>
+                        <li class="- topic/li li"><code class="+ topic/ph pr-d/codeph ph codeph">executeSellOrders</code>：根据策略逻辑提交卖单。<ul class="- topic/ul ul" id="topic_crp_krh_m2c__ul_ddr_xrh_m2c" data-ofbid="topic_crp_krh_m2c__ul_ddr_xrh_m2c">
+                                <li class="- topic/li li">首先判断标的是否停牌或涨跌停，若均没有则可交易。</li>
+                                <li class="- topic/li li">其次调用 <code class="+ topic/ph pr-d/codeph ph codeph">Backtest::getPosition</code> 接口获取标的现有持仓量，从 msg
+                                    行情字典提取标的收盘价，并从 <code class="+ topic/ph pr-d/codeph ph codeph">sellDeltaValueDict</code>
+                                    提取标的现有持仓市值和预期市值的差异。</li>
+                                <li class="- topic/li li">根据现有持仓市值和预期市值的差异计算需要卖出的数量，并提交卖单执行卖平操作。</li>
+                            </ul><pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_crp_krh_m2c__codeblock_m1j_bsh_m2c" data-ofbid="topic_crp_krh_m2c__codeblock_m1j_bsh_m2c"><code>def executeSellOrders(mutable context, msg, sellDeltaValueDict, 
+    sellSymbol, label="SellClose"){
+    /* 卖出函数
+    @Parameters
+    ---------------------
+    context: `DICT`
+        回测上下文
+    msg: `DICT`
+        行情数据
+    sellDeltaValueDict: `DICT`
+        待卖出股票的持仓变化值
+    sellSymbol: `STRING`
+        待卖出股票代码
+    label: `STRING`
+        卖出订单标识，用于区分不同卖出场景
+    */
+ 
+
+    // 判断是否停牌或涨跌停，若满足条件则跳过
+    &amp;tradeFlag = checkTradingStatus(
+        msg[sellSymbol]["open"],
+        msg[sellSymbol]["high"],
+        msg[sellSymbol]["low"],
+        msg[sellSymbol]["volume"],
+        msg[sellSymbol]["signal"][0],
+        msg[sellSymbol]["close"],
+        msg[sellSymbol]["upLimitPrice"],
+        msg[sellSymbol]["downLimitPrice"]
+    )
+    if (tradeFlag == 1){
+        // 获取持仓信息
+        &amp;pos = Backtest::getPosition(context["engine"], sellSymbol)["longPosition"]
+        if (pos == NULL){
+            pos = 0.0
+        }
+        &amp;price = msg[sellSymbol]["close"]
+        &amp;value = abs(sellDeltaValueDict[sellSymbol])
+        
+        // 计算需要卖出的股数
+        &amp;sellVolume = getSellVolume(price, value, pos)
+        if (pos &gt; 0 and sellVolume &gt; 0) {
+            Backtest::submitOrder(context["engine"], 
+               (sellSymbol, context["tradeTime"], 5, price, sellVolume, 3), label)
+        }
+
+    }
+     
+}</code></pre></li>
+                        <li class="- topic/li li"><code class="+ topic/ph pr-d/codeph ph codeph">executeBuyOrders</code>：根据策略逻辑提交买单。<ul class="- topic/ul ul" id="topic_crp_krh_m2c__ul_tsj_yrh_m2c" data-ofbid="topic_crp_krh_m2c__ul_tsj_yrh_m2c">
+                                <li class="- topic/li li">首先判断标的是否停牌或涨跌停，若均没有则可交易。</li>
+                                <li class="- topic/li li">其次调用 <code class="+ topic/ph pr-d/codeph ph codeph">Backtest::getPosition</code> 接口获取标的现有持仓量，从 msg
+                                    行情字典提取标的收盘价，并从 <code class="+ topic/ph pr-d/codeph ph codeph">buyDeltaValueDict</code>
+                                    提取标的现有预期市值和持仓市值的差异。</li>
+                                <li class="- topic/li li">根据现有预期市值和持仓市值的差异计算需要买入的数量，并提交买单执行买开操作。</li>
+                            </ul><pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_crp_krh_m2c__codeblock_bky_bsh_m2c" data-ofbid="topic_crp_krh_m2c__codeblock_bky_bsh_m2c"><code>def executeBuyOrders(mutable context, msg, buyDeltaValueDict, 
+    buySymbol, label="BuyOpen"){
+    /*买入函数
+        @Parameters
+        ---------------------
+        context: `DICT`
+            回测上下文
+        msg: `DICT`
+            行情数据
+        buyDeltaValueDict: `DICT`
+            待买入股票的持仓变化值
+        buySymbol: `STRING`
+            待买入股票代码
+        label: `STRING`
+            买入订单标识，用于区分不同买入场景
+    */
+    // 判断是否停牌或涨跌停，若满足条件则跳过
+    &amp;tradeFlag = checkTradingStatus(
+        msg[buySymbol]["open"],
+        msg[buySymbol]["high"],
+        msg[buySymbol]["low"],
+        msg[buySymbol]["volume"],
+        msg[buySymbol]["signal"][0],
+        msg[buySymbol]["close"],
+        msg[buySymbol]["upLimitPrice"],
+        msg[buySymbol]["downLimitPrice"]
+    )
+    if (tradeFlag == 1){
+        // 获取可用资金
+        &amp;cash = Backtest::getTotalPortfolios(context["engine"])["cash"][0]
+        &amp;price = msg[buySymbol]["close"]
+        &amp;value = buyDeltaValueDict[buySymbol]
+        
+        // 计算转换前的数量
+        &amp;buyVolume = getBuyVolume(buySymbol, price, min(cash, value))
+        
+        // 检查可用资金是否足够，若不足则退出函数
+        if (cash &lt; buyVolume * price * (1 + context["commission"])) return
+
+        if (buyVolume &gt; 0) {
+            Backtest::submitOrder(context["engine"], 
+            (buySymbol, context["tradeTime"], 5, price, buyVolume, 1), label)
+        }
+
+    }
+
+}
+</code></pre></li>
+                        <li class="- topic/li li"><code class="+ topic/ph pr-d/codeph ph codeph">sortDict</code>
+                            ：对字典根据value值进行排序<pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_crp_krh_m2c__codeblock_k14_csh_m2c" data-ofbid="topic_crp_krh_m2c__codeblock_k14_csh_m2c"><code>def sortDict(x, ascending=true){
+    // 对字典排序
+    x_idx = isort(x.values(), ascending)
+    res = dict(x.keys()[x_idx], x.values()[x_idx],true)
+    return res
+}</code></pre></li>
+                    </ul>
+                    <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">2. 设置策略回调函数</strong></p>
+                    <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">(1) 回测初始化函数 initialize</strong></p>
+                    <p class="- topic/p p"> 该函数在回测开始时触发调用，用户可在此函数中直接设置全局变量。</p>
+                    <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_crp_krh_m2c__codeblock_rf1_2sh_m2c" data-ofbid="topic_crp_krh_m2c__codeblock_rf1_2sh_m2c"><code>def initialize(mutable context){
+    //初始化回调函数
+    print("initialize")
+}</code></pre>
+                    <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">(2) 盘中回调交易函数 onBar</strong></p>
+                    <p class="- topic/p p">本策略根据市场条件和风控规则优化持仓结构。在每分钟触发的交易回调中，该模式首先判断当前时间是否为指定的交易分钟，若到了交易分钟，则进入交易逻辑，对当前市场数据和历史持仓状态进行全面分析，筛选出符合买入但不符合剔除条件的股票，并在回测过程中动态调整仓位权重，构建出最终的建仓投资组合。</p>
+                    <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">核心特点：</strong></p>
+                    <ul class="- topic/ul ul" id="topic_crp_krh_m2c__ul_omr_2sh_m2c" data-ofbid="topic_crp_krh_m2c__ul_omr_2sh_m2c">
+                        <li class="- topic/li li"><strong class="+ topic/ph hi-d/b ph b">集中建仓</strong>：用于初始建仓阶段，对未持仓的股票筛选和分配权重。</li>
+                        <li class="- topic/li li"><strong class="+ topic/ph hi-d/b ph b">买入逻辑</strong>：短期均线上穿长期均线或 <em class="+ topic/ph hi-d/i ph i">RSI</em> &lt; 70。</li>
+                        <li class="- topic/li li"><strong class="+ topic/ph hi-d/b ph b">剔除逻辑</strong>：短期均线下穿长期均线或 <em class="+ topic/ph hi-d/i ph i">RSI</em> &gt; 80。</li>
+                        <li class="- topic/li li"><strong class="+ topic/ph hi-d/b ph b">权重分配</strong>：根据筛选出的股票数量进行初始权重分配，权重设置为 1\股票数量。</li>
+                        <li class="- topic/li li"><strong class="+ topic/ph hi-d/b ph b">风控管理</strong>：<ul class="- topic/ul ul" id="topic_crp_krh_m2c__ul_pmr_2sh_m2c" data-ofbid="topic_crp_krh_m2c__ul_pmr_2sh_m2c">
+                                <li class="- topic/li li">降低波动率高的股票权重：<ul class="- topic/ul ul" id="topic_crp_krh_m2c__ul_qmr_2sh_m2c" data-ofbid="topic_crp_krh_m2c__ul_qmr_2sh_m2c">
+                                        <li class="- topic/li li">0.005 &lt; 波动率 &lt; 0.01 时权重变为原来的 0.5。</li>
+                                        <li class="- topic/li li">波动率 &gt; 0.01 时权重变为原来的 0.1。</li>
+                                    </ul></li>
+                                <li class="- topic/li li">限制单只股票的权重在最小和最大持仓比例之间。</li>
+                            </ul></li>
+                        <li class="- topic/li li"><strong class="+ topic/ph hi-d/b ph b">权重归一化</strong>：确保总权重为 1。</li>
+                        <li class="- topic/li li"><strong class="+ topic/ph hi-d/b ph b">持仓调整</strong>：<ul class="- topic/ul ul" id="topic_crp_krh_m2c__ul_rmr_2sh_m2c" data-ofbid="topic_crp_krh_m2c__ul_rmr_2sh_m2c">
+                                <li class="- topic/li li">根据当前持仓和预期市值的差异进行卖出或买入操作。</li>
+                                <li class="- topic/li li">优先处理卖出逻辑，再执行买入逻辑。</li>
+                            </ul></li>
+                    </ul>
+                    <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">交易逻辑：</strong></p>
+                    <ul class="- topic/ul ul" id="topic_crp_krh_m2c__ul_smr_2sh_m2c" data-ofbid="topic_crp_krh_m2c__ul_smr_2sh_m2c">
+                        <li class="- topic/li li"><strong class="+ topic/ph hi-d/b ph b">检查是否为交易时间。</strong>首先检查当前时间是否为预设的交易时间（<code class="+ topic/ph pr-d/codeph ph codeph">activeTime</code>），如果不是交易时间，直接返回，避免不必要的运算。<pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_crp_krh_m2c__codeblock_lfd_lsh_m2c" data-ofbid="topic_crp_krh_m2c__codeblock_lfd_lsh_m2c"><code>if (context["activeTime"] != minute(context["tradeTime"])) {// 非交易分钟直接返回
+    return
+}</code></pre></li>
+                        <li class="- topic/li li"><strong class="+ topic/ph hi-d/b ph b">初始化信号和列表。</strong>初始化两个列表，buyList（买入列表）和
+                            deleteList（剔除列表），分别用于存储符合买入条件的股票和符合剔除条件的股票。<pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_crp_krh_m2c__codeblock_oln_lsh_m2c" data-ofbid="topic_crp_krh_m2c__codeblock_oln_lsh_m2c"><code>// 初始化
+&amp;buyList = array(SYMBOL)
+&amp;deleteList = array(SYMBOL)</code></pre></li>
+                        <li class="- topic/li li"><strong class="+ topic/ph hi-d/b ph b">遍历每只股票，计算买卖信号，筛选出待买和待卖标的。</strong><ul class="- topic/ul ul" id="topic_crp_krh_m2c__ul_gvq_gsh_m2c" data-ofbid="topic_crp_krh_m2c__ul_gvq_gsh_m2c">
+                                <li class="- topic/li li">待买标的<code class="+ topic/ph pr-d/codeph ph codeph">buyList</code>：短期均线向上穿越长期均线（getCross 返回 [True,
+                                    False]）或 RSI &lt; 70，如果满足上述条件且交易状态正常，将该股票加入 buyList。</li>
+                                <li class="- topic/li li">待剔除标的<code class="+ topic/ph pr-d/codeph ph codeph">deleteList</code>：短期均线向下穿越长期均线（getCross 返回
+                                    [False, True]）或 RSI &gt; 80，如果满足上述条件且交易状态正常，将该股票加入 deleteList。</li>
+                            </ul><pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_crp_krh_m2c__codeblock_tpy_lsh_m2c" data-ofbid="topic_crp_krh_m2c__codeblock_tpy_lsh_m2c"><code>for (istock in msg.keys()){
+    &amp;istock = istock
+    &amp;pos = Backtest::getPosition(context["engine"], istock)["longPosition"]
+    &amp;price = msg[istock]["close"]
+    &amp;tradeFlag = checkTradingStatus(msg[istock]["open"], 
+                                    msg[istock]["high"], 
+                                    msg[istock]["low"], 
+                                    msg[istock]["volume"], 
+                                    msg[istock]["signal"][0], 
+                                    msg[istock]["close"], 
+                                    msg[istock]["upLimitPrice"], 
+                                    msg[istock]["downLimitPrice"])
+    
+    // 买入逻辑：短期均线上穿长期均线，或 RSI &lt; 70
+    if (getCross(msg[istock]["signal"][3], msg[istock]["signal"][2], 
+                 msg[istock]["signal"][6], msg[istock]["signal"][5])[0] 
+                 or msg[istock]["signal"][1] &lt; 70 
+                 and tradeFlag) {
+        buyList.append!(istock)
+    }
+
+    // 剔除逻辑：短期均线下穿长期均线，或 RSI &gt; 80
+    if (getCross(msg[istock]["signal"][3], msg[istock]["signal"][2], 
+                 msg[istock]["signal"][6], msg[istock]["signal"][5])[1] 
+                 or msg[istock]["signal"][1] &gt; 80 
+                 and tradeFlag) {
+        deleteList.append!(istock)
+    }
+}</code></pre></li>
+                        <li class="- topic/li li"><strong class="+ topic/ph hi-d/b ph b">筛选出最终投资组合列表并进行个股风控。</strong><ul class="- topic/ul ul" id="topic_crp_krh_m2c__ul_vgs_hsh_m2c" data-ofbid="topic_crp_krh_m2c__ul_vgs_hsh_m2c">
+                                <li class="- topic/li li">剔除满足剔除条件的股票，得到需要重点关注的股票列表 posList 为最终投资组合列表。</li>
+                                <li class="- topic/li li">初始化每只股票的权重为等权分配（1\股票数量）。</li>
+                                <li class="- topic/li li">根据波动率和 <em class="+ topic/ph hi-d/i ph i">RSI</em> 指标调整权重：0.005 &lt; 波动率 &lt; 0.01 时权重变为原来的
+                                    0.5，波动率 &gt; 0.01 时权重变为原来的 0.1，记录风控状态； <em class="+ topic/ph hi-d/i ph i">RSI</em>
+                                    指标&lt;70时，风控解除。</li>
+                                <li class="- topic/li li">个股权重限制在 maxPosition 和 minPosition 范围内。</li>
+                            </ul><pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_crp_krh_m2c__codeblock_fz3_msh_m2c" data-ofbid="topic_crp_krh_m2c__codeblock_fz3_msh_m2c"><code>// 筛选满足买入条件后没有满足剔除条件的股票，对该股票池进行操作
+&amp;posList = (set(buyList) - set(deleteList)).keys()
+
+if (count(posList) != 0) {
+    // 新建权重字典
+    weightDict = dict(SYMBOL,DOUBLE)
+    for (istock in posList) {
+        // 先初始化权重, 1\股票数量
+        weightDict[istock] = 1 \ posList.size()
+
+        // 个股风控
+        &amp;volatility = msg[istock]["signal"][4]
+        &amp;RSI = msg[istock]["signal"][1]
+        // 风控重置逻辑
+        if (context["riskDict"][istock] == 1 &amp;&amp; RSI &lt; 70) {
+            context["riskDict"][istock] = 0  // 风控状态置为 0
+        }
+        // 个股风控逻辑：限制波动率超标的权重
+        if (0.005 &lt; volatility &lt; 0.01) {
+            weightDict[istock] *=  0.5  // 降低波动率高的股票的权重
+            context["riskDict"][istock] = 1  // 风控状态置为 1
+        }
+        else if (volatility &gt; 0.01) {
+            weightDict[istock] *=  0.1  // 降低波动率高的股票的权重
+            context["riskDict"][istock] = 1  // 风控状态置为 1
+        }
+
+        // 限制单只股票的最大和最小持仓比例
+        weightDict[istock] = min(weightDict[istock], context["maxPosition"])
+        weightDict[istock] = max(weightDict[istock], context["minPosition"])
+
+    }</code></pre></li>
+                        <li class="- topic/li li"><strong class="+ topic/ph hi-d/b ph b">个股权重归一化。</strong><p class="- topic/p p">进行个股权重归一化，使所有个股权重的总和等于
+                            1，保证所有资金被合理分配到投资组合中的每只股票。</p><pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_crp_krh_m2c__codeblock_acw_msh_m2c" data-ofbid="topic_crp_krh_m2c__codeblock_acw_msh_m2c"><code>// 个股权重归一化
+weightSum = sum(weightDict.values())
+if (weightSum != 0) {
+    for (istock in posList) {
+        weightDict[istock] /= weightSum
+    }
+} </code></pre></li>
+                        <li class="- topic/li li"><strong class="+ topic/ph hi-d/b ph b">根据预期市值和现有持仓市值计算持仓市值变化。</strong><ul class="- topic/ul ul" id="topic_crp_krh_m2c__ul_jcx_3sh_m2c" data-ofbid="topic_crp_krh_m2c__ul_jcx_3sh_m2c">
+                                <li class="- topic/li li">创建预期市值、持仓市值、卖出差值字典、买入差值字典，分别用于存储各标的的预期市值、现有持仓市值、待卖股票持仓市值变化、待买股票持仓市值变化。</li>
+                                <li class="- topic/li li">首先调用 <code class="+ topic/ph pr-d/codeph ph codeph">Backtest::getTotalPortfolios</code>
+                                    接口，获取当前账户总权益，得到账户持仓总市值和可用资金，并结合各标的权重算出预期市值。</li>
+                                <li class="- topic/li li">其次调用 <code class="+ topic/ph pr-d/codeph ph codeph">Backtest::getPosition</code>
+                                    接口，获取各标的现有持仓量，结合收盘价计算出现有持仓市值。</li>
+                                <li class="- topic/li li">最后比较预期市值和持仓市值：<ul class="- topic/ul ul" id="topic_crp_krh_m2c__ul_kcx_3sh_m2c" data-ofbid="topic_crp_krh_m2c__ul_kcx_3sh_m2c">
+                                        <li class="- topic/li li">预期市值 &lt; 持仓市值，则加入待卖字典。</li>
+                                        <li class="- topic/li li">预期市值 &gt; 持仓市值，则加入待买字典。</li>
+                                    </ul></li>
+                            </ul><pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_crp_krh_m2c__codeblock_rgq_nsh_m2c" data-ofbid="topic_crp_krh_m2c__codeblock_rgq_nsh_m2c"><code>// 新建预期市值、持仓市值、deltaValue字典
+expectValueDict = dict(SYMBOL,DOUBLE)
+positionValueDict = dict(SYMBOL,DOUBLE)
+sellDeltaValueDict = dict(SYMBOL,DOUBLE)
+buyDeltaValueDict = dict(SYMBOL,DOUBLE)
+
+// 获取净资产
+&amp;equity = Backtest::getTotalPortfolios(context["engine"])["totalEquity"][0]
+
+// 计算预期市值和持仓市值
+for (istock in posList) {
+    ExpectValue = equity * weightDict[istock]
+    expectValueDict[istock] = ExpectValue
+    // 使用 Backtest::getPosition 获取每日持仓信息
+    longPosition = Backtest::getPosition(context["engine"], istock)["longPosition"]
+
+    if (longPosition == NULL) {
+        positionValue = 0.0
+    } else {
+        positionValue = longPosition * msg[istock]["close"]
+    }
+    positionValueDict[istock] = positionValue
+    deltaValue = ExpectValue - positionValue
+    if (deltaValue &gt; 0) {
+        buyDeltaValueDict[istock] = deltaValue
+    } else if (deltaValue &lt; 0) {
+        sellDeltaValueDict[istock] = deltaValue
+    }
+}</code></pre></li>
+                        <li class="- topic/li li"><strong class="+ topic/ph hi-d/b ph b">遍历待卖字典和待买字典，根据预期市值和现有持仓市值的差异绝对值从大到小卖出和买入。</strong><pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_crp_krh_m2c__codeblock_uwb_4sh_m2c" data-ofbid="topic_crp_krh_m2c__codeblock_uwb_4sh_m2c"><code>// 卖出逻辑
+sellSymbol = sellDeltaValueDict.keys()
+
+if (count(sellSymbol) != 0) {
+    sortedSellDeltaValueDict = sortDict(sellDeltaValueDict, true)//字典排序
+    sortedSellSymbol = sortedSellDeltaValueDict.keys()
+    // 遍历卖出列表，卖出股票
+    for (istock in sortedSellSymbol) {
+        executeSellOrders(context, msg, sortedSellDeltaValueDict, istock)
+        // 更新持仓信息
+        longPosition = Backtest::getPosition(context["engine"], 
+                                             istock)["longPosition"]
+        if (longPosition == NULL) {
+            positionValue = 0.0
+        } else {
+            positionValue = longPosition * msg[istock]["close"]
+        }
+        positionValueDict[istock] = positionValue
+    }
+
+}
+
+// 买入逻辑
+buySymbol = buyDeltaValueDict.keys()
+
+if (count(buySymbol) != 0) {
+    sortedBuyDeltaValueDict = sortDict(buyDeltaValueDict, false) // 字典排序
+    sortedBuySymbol = sortedBuyDeltaValueDict.keys()
+
+    // 遍历买入列表，买入股票
+    for (istock in sortedBuySymbol) {
+        executeBuyOrders(context, msg, sortedBuyDeltaValueDict, istock)
+        // 更新持仓信息
+        longPosition = Backtest::getPosition(context["engine"], 
+                                             istock)["longPosition"]
+        if (longPosition == NULL) {
+            positionValue = 0.0
+        } else {
+            positionValue = longPosition * msg[istock]["close"]
+        }
+        positionValueDict[istock] = positionValue
+    }
+    
+}</code></pre></li>
+                    </ul>
+                </div>
+            </article>
+            <article class="- topic/topic topic nested3" aria-labelledby="ariaid-title11" id="topic_syp_krh_m2c">
+                <h4 class="- topic/title title topictitle4" id="ariaid-title11">2.2.4 创建回测引擎</h4>
+                <div class="- topic/body body">
+                    <p class="- topic/p p">调用 <code class="+ topic/ph pr-d/codeph ph codeph">Backtest::createBacktester</code>
+                            创建回测引擎，参数为引擎名称和各事件函数。详情可参考文档<a class="- topic/xref xref" href="../plugins/backtest/interface_description.html">接口说明</a>。</p>
+                    <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_syp_krh_m2c__codeblock_nkz_qsh_m2c" data-ofbid="topic_syp_krh_m2c__codeblock_nkz_qsh_m2c"><code>strategyName="StockBackTest"
+callbacks = dict(STRING, ANY)
+callbacks["initialize"] = initialize
+callbacks["beforeTrading"] = beforeTrading
+callbacks["onBar"] = onBar
+callbacks["onTick"] = onTick
+callbacks["onOrder"] = onOrder
+callbacks["onTrade"] = onTrade
+callbacks["afterTrading"] = afterTrading
+callbacks["finalize"] = finalize
+try{Backtest::dropBacktestEngine(strategyName)}catch(ex){print ex}
+engine = Backtest::createBacktester(strategyName, config, callbacks,true, )</code></pre>
+                </div>
+            </article>
+            <article class="- topic/topic topic nested3" aria-labelledby="ariaid-title12" id="topic_ofq_krh_m2c">
+                <h4 class="- topic/title title topictitle4" id="ariaid-title12">2.2.5 运行回测</h4>
+                <div class="- topic/body body">
+                    <p class="- topic/p p">通过 <code class="+ topic/ph pr-d/codeph ph codeph">Backtest::createBacktester</code>
+                            创建回测引擎之后，可以通过以下方式将行情数据传入回测引擎，执行回测。<code class="+ topic/ph pr-d/codeph ph codeph">messageTable</code>
+                            为相应的行情数据，以字典格式传入，行情数据字段和类型说明可参考文档<a class="- topic/xref xref" href="../plugins/backtest.html">Backtest</a>。</p>
+                    <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_ofq_krh_m2c__codeblock_avh_vsh_m2c" data-ofbid="topic_ofq_krh_m2c__codeblock_avh_vsh_m2c"><code>timer Backtest::appendQuotationMsg(engine,messageTable)
+ 
+a = select * from messageTable where tradeTime=max(tradeTime) limit 1
+update a set symbol = "END"
+Backtest::appendQuotationMsg(engine, a) // 字典结构</code></pre>
+                </div>
+            </article>
+            <article class="- topic/topic topic nested3" aria-labelledby="ariaid-title13" id="topic_qkq_krh_m2c">
+                <h4 class="- topic/title title topictitle4" id="ariaid-title13">2.2.6 获取回测结果</h4>
+                <div class="- topic/body body">
+                    <p class="- topic/p p">调用<code class="+ topic/ph pr-d/codeph ph codeph">Backtest::getTradeDetails(engine)</code>、<code class="+ topic/ph pr-d/codeph ph codeph">Backtest::getDailyTotalPortfolios(engine)</code>、<code class="+ topic/ph pr-d/codeph ph codeph">getReturnSummary(long(engine))</code>
+                            等接口可以查看对应回测结果，如检查退单情况、查看投资组合总体情况、查看回报情况等。具体接口的返回结果可参考接口说明文档<a class="- topic/xref xref" href="../plugins/backtest/interface_description.html">接口说明</a>。</p>
+                    <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_qkq_krh_m2c__codeblock_yh4_xsh_m2c" data-ofbid="topic_qkq_krh_m2c__codeblock_yh4_xsh_m2c"><code>// 获取交易详情
+select * from Backtest::getTradeDetails(engine) where orderStatus==1 
+
+// 检查退单情况
+select * from Backtest::getTradeDetails(engine) where orderStatus==-1 
+
+// 查看投资组合总体情况
+dailyTotalPortfolios=Backtest::getDailyTotalPortfolios(engine)
+
+// 查看回报情况
+returnSummary=Backtest::getReturnSummary(long(engine))</code></pre>
+                </div>
+            </article>
+        </article>
+    </article>
+    <article class="- topic/topic topic nested1" aria-labelledby="ariaid-title14" id="topic_u3n_yqh_m2c">
+        <h2 class="- topic/title title topictitle2" id="ariaid-title14">3. 基于 DolphinDB 的股指期货交易策略实现</h2>
+        <div class="- topic/body body">
+            <p class="- topic/p p">在本章节中，我们将详细介绍如何利用 DolphinDB
+                内置脚本编写时间驱动函数，实现股指期货交易策略，内容包括策略逻辑的实现过程、初始化参数的配置、策略逻辑上下文中如何生成个股信号及指数信号等。</p>
+        </div>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title15" id="topic_yfc_zqh_m2c">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title15">3.1 策略逻辑介绍</h3>
+            <div class="- topic/body body">
+                <p class="- topic/p p">以下是一个基于均线交叉和 RSI
+                        指标的简单的股指期货策略，主要用于生成个股的买卖信号，并通过合成这些信号来决定是否对股指期货进行开仓或平仓操作。本策略的核心逻辑包括<strong class="+ topic/ph hi-d/b ph b">个股信号生成</strong>和<strong class="+ topic/ph hi-d/b ph b">指数信号合成</strong>两部分，最终通过回测引擎进行模拟交易。</p>
+                <figure class="- topic/fig fig fignone" id="topic_yfc_zqh_m2c__fig_n4l_vbf_h2c" data-ofbid="topic_yfc_zqh_m2c__fig_n4l_vbf_h2c"><figcaption data-caption-side="top" class="- topic/title title figcap"><span class="figtitleprefix fig--title-label">图<span class="fig--title-label-number"> 3</span><span class="fig--title-label-punctuation">. </span></span><span class="fig--title">图3.1 股指期货交易策略流程图</span></figcaption>
+                    
+                    <img class="- topic/image image" id="topic_yfc_zqh_m2c__image_stw_ly1_k2c" src="images/stock_backtest/3-1.png" width="500"/>
+                </figure>
+                <ul class="- topic/ul ul" id="topic_yfc_zqh_m2c__ul_bjf_zsh_m2c" data-ofbid="topic_yfc_zqh_m2c__ul_bjf_zsh_m2c">
+                    <li class="- topic/li li"><strong class="+ topic/ph hi-d/b ph b">股信号生成:</strong> 首先基于双均线、RSI、波动率等指标生成个股开仓信号(多头信号标记为1、空头信号标记为-1)、平仓信号(标记为0)</li>
+                    <li class="- topic/li li"><strong class="+ topic/ph hi-d/b ph b">指数信号合成: </strong>基于个股信号, 等权加权得到指数信号, 并得到对应指数标的的开仓信号(标记为1)、平仓信号(标记为0)</li>
+                </ul>
+                <p class="- topic/p p">在本案例中，我们以沪深300股指期货为例，将股指期货以及成分股作为分钟频期货行情数据传入回测引擎进行回测，策略的委托订单以委托价格成交。此外，本案例的回测流程与之前介绍的投资组合回测案例相似，对于重复的步骤将不再详细说明。</p>
+            </div>
+        </article>
+        <article class="- topic/topic topic nested2" aria-labelledby="ariaid-title16" id="topic_cmc_zqh_m2c">
+            <h3 class="- topic/title title topictitle3" id="ariaid-title16">3.2 策略实现流程</h3>
+            <article class="- topic/topic topic nested3" aria-labelledby="ariaid-title17" id="topic_xw4_1th_m2c">
+                <h4 class="- topic/title title topictitle4" id="ariaid-title17">3.2.1 个股信号生成</h4>
+                <div class="- topic/body body">
+                    <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">1. 初始化函数</strong></p>
+                    <p class="- topic/p p">首先，可以在初始化函数 <code class="+ topic/ph pr-d/codeph ph codeph">initialize</code> 中通过参数逻辑上下文 <code class="+ topic/ph pr-d/codeph ph codeph">context</code>
+                        设置策略参数。策略初始化函数 <code class="+ topic/ph pr-d/codeph ph codeph">initialize</code> 只在创建引擎之后触发一次。在本案例中，须在初始化函数中通过
+                            <code class="+ topic/ph pr-d/codeph ph codeph">subscribeIndicator</code>
+                        实时订阅双均线、RSI、波动率等指标，并在初始化函数中定义买入、卖出信号阈值、个股信号、指数信号、双均线等全局参数。</p>
+                    <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_xw4_1th_m2c__codeblock_nzg_cth_m2c" data-ofbid="topic_xw4_1th_m2c__codeblock_nzg_cth_m2c"><code>def initialize(mutable contextDict){
+    d = dict(STRING, ANY)
+    d["shortMA"] = &lt;MA(close, 5)&gt;
+    d["longMA"] = &lt;MA(close, 20)&gt;
+    d["RSI"] = &lt;RSI(close, 24)&gt;
+    d["volatility"] = &lt;getVolatility(close, 10)&gt;
+    Backtest::subscribeIndicator(contextDict["engine"], "kline", d)
+    
+    // 买入信号阈值
+    contextDict["buySignal"] = 0.995
+    // 卖出信号阈值
+    contextDict["sellSignal"] = 0.995
+    // 信号字典
+    contextDict["stockSignal"] = dict(STRING, ANY)
+    contextDict["indexSignal"] = dict(STRING, ANY)
+    // 短期均线长期均线的信号字典
+    // 当短期均线大于长期均线更新为-1,当长期均线大于短期均线更新为1,其他标记为0
+    contextDict["shortLongMA"] = dict(STRING, ANY)
+}
+</code></pre>
+                    <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">2. 开仓信号判断</strong></p>
+                    <p class="- topic/p p">订阅得到上述指标后，在策略逻辑上下文 <code class="+ topic/ph pr-d/codeph ph codeph">onBar</code> 函数基于 <em class="+ topic/ph hi-d/i ph i">shortMA、longMA 、RSI
+                            、volatility</em> 等指标，以及全局字典<em class="+ topic/ph hi-d/i ph i"> shortLongMA </em>分别生成对应的开仓信号:</p>
+                    <ul class="- topic/ul ul" id="topic_xw4_1th_m2c__ul_tgn_cth_m2c" data-ofbid="topic_xw4_1th_m2c__ul_tgn_cth_m2c">
+                        <li class="- topic/li li">开盘时，当短均线穿过长均线、<em class="+ topic/ph hi-d/i ph i">RSI </em>指标小于 70 且波动率因子 <em class="+ topic/ph hi-d/i ph i">volatility </em>小于 0.02
+                            生成多头信号，标记为 1。</li>
+                        <li class="- topic/li li">开盘时，当长均线穿过短均线、或 <em class="+ topic/ph hi-d/i ph i">RSI </em>指标大于 80 、或波动率因子 <em class="+ topic/ph hi-d/i ph i">volatility </em>大于0.08
+                            时，则生成空头信号，标记为 -1。</li>
+                    </ul>
+                    <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_xw4_1th_m2c__codeblock_ff2_dth_m2c" data-ofbid="topic_xw4_1th_m2c__codeblock_ff2_dth_m2c"><code>def onBar(mutable contextDict, msg, indicator){
+    lowDict = contextDict["lowPrice"]
+    highDict = contextDict["highPrice"]
+    stockSignalDict = contextDict["stockSignal"] // 个股信号字典
+    indexSignalDict = contextDict["indexSignal"] // 指数信号字典
+    keysAll = msg.keys()
+    
+    // 先针对股票生成信号,假设只传入沪深300成分股+股指IF
+    keys1 = keysAll[!(keysAll like "IF%")]
+    for (i in keys1){
+        &amp;istock = msg[i].symbol
+        &amp;close = msg[i].close
+        &amp;shortMA = indicator[i].shortMA
+        &amp;longMA = indicator[i].longMA
+        &amp;RSI = indicator[i].RSI
+        &amp;volatility = indicator[i].volatility
+
+        // 开仓信号
+        if (minute(contextDict["tradeTime"])==09:31m){
+            stockSignalDict[istock] = iif(
+                contextDict[istock]==1 &amp;&amp; shortMA&gt;longMA &amp;&amp; 
+                RSI&lt;70 &amp;&amp; volatility&lt;0.02, 
+                1, 
+                iif(
+                    (contextDict[istock]==-1 &amp;&amp; longMA&gt;shortMA) || 
+                    RSI&gt;80 || volatility&gt;0.05,
+                    -1, 
+                    0
+                )
+            )
+        }
+        
+        // 记录收盘时刻下的短期均线和长期均线关系
+        if (minute(contextDict["tradeTime"])==15:00m){
+            shortLongMADict[istock] = iif(
+                shortMA&gt;longMA, 
+                -1,
+                iif(shortMA&lt;longMA, 1, 0)
+            )
+        }
+
+    //其他逻辑代码在下文展示，此处不再展示
+}      </code></pre>
+                    <p class="- topic/p p"><strong class="+ topic/ph hi-d/b ph b">3. 平仓信号判断</strong></p>
+                    <p class="- topic/p p">当开盘生成个股开仓信号后，在策略逻辑上下文 <code class="+ topic/ph pr-d/codeph ph codeph">onBar</code> 函数基于个股分钟频收盘价 <em class="+ topic/ph hi-d/i ph i">close</em>、短均线指标
+                            <em class="+ topic/ph hi-d/i ph i">shortMA </em>分别生成对应的平仓信号：</p>
+                    <ul class="- topic/ul ul" id="topic_xw4_1th_m2c__ul_uzm_dth_m2c" data-ofbid="topic_xw4_1th_m2c__ul_uzm_dth_m2c">
+                        <li class="- topic/li li">多头：当收盘价跌破短均线，生成平仓信号，标记为0。</li>
+                        <li class="- topic/li li">空头：当收盘价超过短均线，生成平仓信号，标记为0。</li>
+                    </ul>
+                    <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_xw4_1th_m2c__codeblock_qzy_dth_m2c" data-ofbid="topic_xw4_1th_m2c__codeblock_qzy_dth_m2c"><code>// 平仓信号
+if (stockSignalDict[istock]==1){
+    stockSignalDict[istock] = iif(close&lt;shortMA, 0, stockSignalDict[istock])
+}
+else if (stockSignalDict[istock]==-1){
+    stockSignalDict[istock] = iif(close&gt;shortMA, 0, stockSignalDict[istock])
+}</code></pre>
+                </div>
+            </article>
+            <article class="- topic/topic topic nested3" aria-labelledby="ariaid-title18" id="topic_npr_1th_m2c">
+                <h4 class="- topic/title title topictitle4" id="ariaid-title18">3.2.2 指数信号合成</h4>
+                <div class="- topic/body body">
+                    <p class="- topic/p p">在生成得到成分股的信号以后，本案例以沪深300股指期货为例，在 <code class="+ topic/ph pr-d/codeph ph codeph">onBar</code>
+                        函数中首先通过等权合成得到沪深300股指的信号 <em class="+ topic/ph hi-d/i ph i">indexSignal</em> ，基于该信号分别生成对应的开仓、平仓信号，并通过 <a class="- topic/xref xref" href="../plugins/backtest/interface_description.html">Backtest::submitOrder</a> 接口提交买入、卖出信号。</p>
+                    <ul class="- topic/ul ul" id="topic_npr_1th_m2c__ul_l2q_2th_m2c" data-ofbid="topic_npr_1th_m2c__ul_l2q_2th_m2c">
+                        <li class="- topic/li li">开仓信号：<ul class="- topic/ul ul" id="topic_npr_1th_m2c__ul_m2q_2th_m2c" data-ofbid="topic_npr_1th_m2c__ul_m2q_2th_m2c">
+                                <li class="- topic/li li"><em class="+ topic/ph hi-d/i ph i">indexSignal</em> &gt;0.75，则开多</li>
+                                <li class="- topic/li li"><em class="+ topic/ph hi-d/i ph i">indexSignal</em> &lt;-0.75，则开空</li>
+                            </ul></li>
+                        <li class="- topic/li li">平仓信号：<ul class="- topic/ul ul" id="topic_npr_1th_m2c__ul_n2q_2th_m2c" data-ofbid="topic_npr_1th_m2c__ul_n2q_2th_m2c">
+                                <li class="- topic/li li">若开多且 <em class="+ topic/ph hi-d/i ph i">indexSignal</em> &lt;0.25，则平仓</li>
+                                <li class="- topic/li li">若开空且 <em class="+ topic/ph hi-d/i ph i">indexSignal</em> &gt;-0.25，则平仓</li>
+                            </ul></li>
+                    </ul>
+                    <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="topic_npr_1th_m2c__codeblock_hwx_gth_m2c" data-ofbid="topic_npr_1th_m2c__codeblock_hwx_gth_m2c"><code>    // 股指合成逻辑
+    keys2 = keysAll[keysAll like "IF%"]
+    for (i in keys2){
+        &amp;index = msg[i].symbol
+        &amp;symbolSource = msg[i].symbolSource
+        // 等权合成指数信号
+        &amp;indexSignal = stockSignalDict.values().sum()/300
+        &amp;price = msg[i].close
+        if (indexSignal&gt;0.75){
+            // 标记开多信号
+            indexSignalDict[index] = 1
+            Backtest::submitOrder(contextDict["engine"], 
+                      (index, symbolSource,contextDict["tradeTime"], 
+                      5, price+0.02, 0., 2, 1, 0), "buyOpen")
+        }   
+        if (indexSignal&lt;-0.75){
+            // 标记开空信号
+            indexSignalDict[index] = -1
+            Backtest::submitOrder(contextDict["engine"], 
+                    (index, symbolSource,contextDict["tradeTime"], 
+                      5, price+0.02, 0., 2, 2, 0), "sellOpen")
+    
+        }
+        if (indexSignalDict[index]==1 and indexSignal&lt;0.25){
+            // 平仓信号
+            indexSignalDict[index] = 0
+            Backtest::submitOrder(contextDict["engine"], 
+                    (index, symbolSource,contextDict["tradeTime"], 
+                    5, price-0.02, 0., 2, 3, 0), "sellClose")
+        }
+        if (indexSignalDict[index]==-1 and indexSignal&lt;-0.25){
+            // 平仓信号
+            indexSignalDict[index] = 0
+            Backtest::submitOrder(contextDict["engine"], 
+                    (index, symbolSource,contextDict["tradeTime"], 
+                    5, price-0.02, 0., 2, 4, 0), "buyClose")
+        }    
+    }</code></pre>
+                </div>
+            </article>
+        </article>
+    </article>
+    <article class="- topic/topic topic nested1" aria-labelledby="ariaid-title19" id="topic_wpn_yqh_m2c">
+        <h2 class="- topic/title title topictitle2" id="ariaid-title19">4. 总结</h2>
+        <div class="- topic/body body">
+            <p class="- topic/p p">我们成功构建了基于 DolphinDB 的股票与股指期货中低频组合交易策略，涵盖从信号生成、回测执行到策略优化的完整流程。DolphinDB
+                以其卓越的分布式架构和高性能时序数据处理能力，在海量数据的实时分析、信号生成、动态调整和策略验证中展现了极高的效率和稳定性。通过模块化设计，我们实现了多种策略模式的灵活切换，验证了策略的稳健性与可行性。</p>
+        </div>
+    </article>
+    <article class="- topic/topic topic nested1" aria-labelledby="ariaid-title20" id="topic_dvn_yqh_m2c">
+        <h2 class="- topic/title title topictitle2" id="ariaid-title20">5. 附录</h2>
+        <div class="- topic/body body">
+            <ul class="- topic/ul ul" id="topic_dvn_yqh_m2c__ul_onf_3th_m2c" data-ofbid="topic_dvn_yqh_m2c__ul_onf_3th_m2c">
+                <li class="- topic/li li"><strong class="+ topic/ph hi-d/b ph b">投资组合回测</strong><ul class="- topic/ul ul" id="topic_dvn_yqh_m2c__ul_nxx_jth_m2c" data-ofbid="topic_dvn_yqh_m2c__ul_nxx_jth_m2c">
+                        <li class="- topic/li li"><a class="- topic/xref xref" href="script/stock_backtest/loadData1.dos">加载数据脚本</a></li>
+                        <li class="- topic/li li"><a class="- topic/xref xref" href="script/stock_backtest/backTest1.dos">回测脚本</a></li>
+                    </ul></li>
+                <li class="- topic/li li"><strong class="+ topic/ph hi-d/b ph b">股指期货回测</strong><ul class="- topic/ul ul" id="topic_dvn_yqh_m2c__ul_vch_mth_m2c" data-ofbid="topic_dvn_yqh_m2c__ul_vch_mth_m2c">
+                        <li class="- topic/li li"><a class="- topic/xref xref" href="script/stock_backtest/loadData2.dos">数据模拟脚本</a></li>
+                        <li class="- topic/li li"><a class="- topic/xref xref" href="script/stock_backtest/backtest2.dos">回测脚本</a></li>
+                    </ul></li>
+            </ul>
+        </div>
+    </article>
+</article></main></div>
+                        
+                        
+                        
+                        
+                        
+                        
+                    </div>
+                    
+                        <nav role="navigation" id="wh_topic_toc" aria-label="On this page" class="col-lg-2 d-none d-lg-block navbar d-print-none"> 
+                            <div id="wh_topic_toc_content">
+		                        
+	                            <div class=" wh_topic_toc "><div class="wh_topic_label">在本页上</div><ul><li class="topic-item"><a href="#topic_uzj_yqh_m2c" data-tocid="topic_uzj_yqh_m2c">1. 背景介绍</a><ul><li class="topic-item"><a href="#topic_yms_yqh_m2c" data-tocid="topic_yms_yqh_m2c">1.1 基于指数信号的股票投资组合交易策略</a></li><li class="topic-item"><a href="#topic_nts_yqh_m2c" data-tocid="topic_nts_yqh_m2c">1.2 基于成分股信号的股指期货交易策略</a></li></ul></li><li class="topic-item"><a href="#topic_hym_yqh_m2c" data-tocid="topic_hym_yqh_m2c">2. 基于 DolphinDB 的股票中低频组合交易策略实现</a><ul><li class="topic-item"><a href="#topic_ogx_yqh_m2c" data-tocid="topic_ogx_yqh_m2c">2.1 策略逻辑介绍</a></li><li class="topic-item"><a href="#topic_zmx_yqh_m2c" data-tocid="topic_zmx_yqh_m2c">2.2 策略实现流程</a><ul><li class="topic-item"><a href="#topic_xwm_krh_m2c" data-tocid="topic_xwm_krh_m2c">2.2.1 加载行情数据并计算技术指标</a></li><li class="topic-item"><a href="#topic_kgp_krh_m2c" data-tocid="topic_kgp_krh_m2c">2.2.2 配置回测参数</a></li><li class="topic-item"><a href="#topic_crp_krh_m2c" data-tocid="topic_crp_krh_m2c">2.2.3 设置自定义策略回调函数</a></li><li class="topic-item"><a href="#topic_syp_krh_m2c" data-tocid="topic_syp_krh_m2c">2.2.4 创建回测引擎</a></li><li class="topic-item"><a href="#topic_ofq_krh_m2c" data-tocid="topic_ofq_krh_m2c">2.2.5 运行回测</a></li><li class="topic-item"><a href="#topic_qkq_krh_m2c" data-tocid="topic_qkq_krh_m2c">2.2.6 获取回测结果</a></li></ul></li></ul></li><li class="topic-item"><a href="#topic_u3n_yqh_m2c" data-tocid="topic_u3n_yqh_m2c">3. 基于 DolphinDB 的股指期货交易策略实现</a><ul><li class="topic-item"><a href="#topic_yfc_zqh_m2c" data-tocid="topic_yfc_zqh_m2c">3.1 策略逻辑介绍</a></li><li class="topic-item"><a href="#topic_cmc_zqh_m2c" data-tocid="topic_cmc_zqh_m2c">3.2 策略实现流程</a><ul><li class="topic-item"><a href="#topic_xw4_1th_m2c" data-tocid="topic_xw4_1th_m2c">3.2.1 个股信号生成</a></li><li class="topic-item"><a href="#topic_npr_1th_m2c" data-tocid="topic_npr_1th_m2c">3.2.2 指数信号合成</a></li></ul></li></ul></li><li class="topic-item"><a href="#topic_wpn_yqh_m2c" data-tocid="topic_wpn_yqh_m2c">4. 总结</a></li><li class="topic-item"><a href="#topic_dvn_yqh_m2c" data-tocid="topic_dvn_yqh_m2c">5. 附录</a></li></ul></div>
+	                        	
+                        	</div>
+                        </nav>
+                    
+                </div>
+            </div>
+            
+            
+            
+        </div> 
+        <footer class="navbar navbar-default wh_footer">
+  <div class=" footer-container mx-auto ">
+<title>Copyright</title><p><b> ©2025 浙江智臾科技有限公司 浙ICP备18048711号-3</b></p>
+  </div>
+</footer>
+        
+        <div id="go2top" class="d-print-none">
+            <span class="oxy-icon oxy-icon-up"></span>
+        </div>
+        
+        <div id="modal_img_large" class="modal">
+            <span class="close oxy-icon oxy-icon-remove"></span>
+            <div id="modal_img_container"></div>
+            <div id="caption"></div>
+        </div>
+        
+        
+        
+    </body>
+</html>

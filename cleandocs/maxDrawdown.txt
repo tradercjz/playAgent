@@ -1,0 +1,61 @@
+
+
+```DolphinDB
+## 语法
+
+`maxDrawdown(X, [ratio=true])`
+
+聚合函数，别名 `mdd`
+
+## 详情
+
+计算传入向量数据的最大回撤（Maximum Drawdown，简称 MDD）或最大回撤率（Maximum Drawdown Rate）。返回一个与 X 数据类型相同的标量。
+
+## 参数
+
+### 参数说明
+
+| 参数  | 类型      | 说明                                                                 |
+|-------|-----------|----------------------------------------------------------------------|
+| X     | 数值向量  | 用于计算最大回撤的输入数据（通常为累积收益或收益率），不可为空       |
+| ratio | 布尔标量  | 是否返回最大回撤率（默认 true）。false 表示返回基于金额的绝对回撤值 |
+
+### 计算规则
+
+当 ratio=true 时：  
+最大回撤率 = (峰值 - 谷值) / 峰值  
+当 ratio=false 时：  
+最大回撤值 = 峰值 - 谷值
+
+## 示例
+
+### 基础计算
+
+```DolphinDB
+x = [36, 96, 42, 100, 59, 86, 25, 72]
+
+// 计算最大回撤率
+select maxDrawdown(x) as MDD_rate  
+// 输出：0.75
+
+// 计算绝对回撤值
+select maxDrawdown(x, false) as MDD_value  
+// 输出：75
+```
+
+### 实际应用场景
+
+```DolphinDB
+// 创建包含收益数据的分布式表
+t = table(take(2024.10.01..2024.10.08, 8) as date, x as cumulative_return)
+
+// 计算全表最大回撤率
+select maxDrawdown(cumulative_return) from t  
+// 输出：0.75
+
+// 按时间窗口滚动计算
+select date, maxDrawdown(cumulative_return) over (rows 3 preceding) as rolling_MDD 
+from t
+```
+
+**相关函数**：`cummdd` 可用于计算累积回撤序列

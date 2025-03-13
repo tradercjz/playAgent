@@ -1,0 +1,324 @@
+<!DOCTYPE html><html xmlns="http://www.w3.org/1999/xhtml" xml:lang="zh" lang="zh" data-whc_version="26.0">
+    <head><link rel="shortcut icon" href="../favicon.ico"/><link rel="icon" href="../favicon.ico"/><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><meta name="description" content="欢迎阅读 DolphinDB 技术文档！ DolphinDB 是一款基于高性能时序数据库，支持复杂分析与流计算的实时计算平台。DolphinDB 针对数据存储、统计分析、实时计算和机器学习等多种需求，提供高效读写、快速查询、复杂分析、分布式并行计算、低延迟流处理等功能，支持高可用与水平扩展。 如下为 DolphinDB 的系统架构图： 图 1 . DolphinDB 系统架构图 结合架构图，以下对 ..."/><meta name="DC.rights.owner" content="(C) 版权 2025"/><meta name="copyright" content="(C) 版权 2025"/><meta name="generator" content="DITA-OT"/><meta name="DC.type" content="topic"/><meta name="DC.coverage" content=""/><meta name="prodname" content="DolphinDB"/><meta name="brand" content="DolphinDB"/><meta name="DC.creator" content="DolphinDB"/><meta name="DC.publisher" content="DDB N/A DDB 200"/><meta name="DC.format" content="HTML5"/><meta name="DC.identifier" content="ddb_intro"/><meta name="wh-search-title" content="关于DolphinDB"/><title>关于 DolphinDB</title><!--  Generated with Oxygen version 26.0, build number 2024012323.  --><meta name="wh-path2root" content="../"/><meta name="wh-toc-id" content="ddb_intro-d9713e87"/><meta name="wh-source-relpath" content="about/ddb_intro.dita"/><meta name="wh-out-relpath" content="about/ddb_intro.html"/>
+
+    <link rel="stylesheet" type="text/css" href="../oxygen-webhelp/app/commons.css?buildId=2024012323"/>
+    <link rel="stylesheet" type="text/css" href="../oxygen-webhelp/app/topic.css?buildId=2024012323"/>
+
+    <script src="../oxygen-webhelp/app/options/properties.js?buildId=20250305183303"></script>
+    <script src="../oxygen-webhelp/app/localization/strings.js?buildId=2024012323"></script>
+    <script src="../oxygen-webhelp/app/search/index/keywords.js?buildId=20250305183303"></script>
+    <script defer="defer" src="../oxygen-webhelp/app/commons.js?buildId=2024012323"></script>
+    <script defer="defer" src="../oxygen-webhelp/app/topic.js?buildId=2024012323"></script>
+<link rel="stylesheet" type="text/css" href="../oxygen-webhelp/template/styles.css?buildId=2024012323"/><script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script><script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script></head>
+
+    <body id="ddb_intro" class="wh_topic_page frmBody">
+        <a href="#wh_topic_body" class="sr-only sr-only-focusable">
+            跳转到主要内容
+        </a>
+        
+        
+        
+        
+        <header class="navbar navbar-default wh_header">
+    <div class="container-fluid">
+        <div xmlns:whc="http://www.oxygenxml.com/webhelp/components" class="wh_header_flex_container navbar-nav navbar-expand-md navbar-dark">
+            <div class="wh_logo_and_publication_title_container">
+                <div class="wh_logo_and_publication_title">
+                    
+                    <a href="https://docs.dolphindb.cn/zh/index.html" class=" wh_logo d-none d-sm-block "><img src="../logo.png" alt="  DolphinDB 文档中心  "/></a>
+                    <div class=" wh_publication_title "><a href="../index.html"><span class="booktitle">  <span class="ph mainbooktitle">DolphinDB 文档中心</span>  </span></a></div>
+                    
+                </div>
+                
+                
+            </div>
+
+            <div class="wh_top_menu_and_indexterms_link collapse navbar-collapse" id="wh_top_menu_and_indexterms_link">
+                
+                
+                
+                
+            </div>
+        <div class=" wh_search_input navbar-form wh_topic_page_search search " role="form">
+            
+            
+            
+            <form id="searchForm" method="get" role="search" action="../search.html"><div><input type="search" placeholder="搜索 " class="wh_search_textfield" id="textToSearch" name="searchQuery" aria-label="搜索查询" required="required"/><button type="submit" class="wh_search_button" aria-label="搜索"><span class="search_input_text">搜索</span></button></div></form>
+            
+            <script src="/vendors/react/umd/react.production.min.js" defer="defer"></script>
+<script src="/vendors/react-dom/umd/react-dom.production.min.js" defer="defer"></script>
+<script src="/vendors/dayjs/dayjs.min.js" defer="defer"></script>
+<script src="/vendors/antd/dist/antd.min.js" defer="defer"></script>
+<script src="/vendors/@ant-design/icons/dist/index.umd.min.js" defer="defer"></script>
+<script src="/zh/index.js" type="module"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" defer="defer"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML" defer="defer"><!--
+
+
+--></script>
+<script defer="defer"><!--
+
+// 从主页重定向
+const currentUrl = window.location.href;
+
+// 判断当前URL是否包含index.html并且路径最后部分是index.html
+if (currentUrl.endsWith('index.html')) {
+    // 处理根目录下的index.html跳转
+    const baseUrl = currentUrl.split('/index.html')[0]; // 获取index.html之前的部分
+    const redirectUrl = `${baseUrl}/about/ddb_intro.html`; // 构建跳转路径
+    window.location.href = redirectUrl; // 执行跳转
+}
+
+--></script>
+            
+        </div></div>
+    </div>
+</header>
+        
+        
+         
+        
+        
+        
+        <div class="container-fluid" id="wh_topic_container">
+            <div class="row">
+
+                <nav class="wh_tools d-print-none navbar-expand-md" aria-label="Tools">
+                    
+                    <div data-tooltip-position="bottom" class=" wh_breadcrumb "><ol class="d-print-none"><li><span class="home"><a href="../index.html"><span>主页</span></a></span></li><li class="active"><div class="topicref" data-id="ddb_intro"><div class="title"><a href="../about/ddb_intro.html">关于DolphinDB</a></div></div></li></ol></div>
+                    
+                    
+                    
+                    <div class="wh_right_tools">
+                        <button class="wh_hide_highlight" aria-label="切换搜索突出显示" title="切换搜索突出显示"></button>
+                        <button class="webhelp_expand_collapse_sections" data-next-state="collapsed" aria-label="折叠截面" title="折叠截面"></button>
+                        
+                        
+                        
+                        
+                        <div class=" wh_print_link print d-none d-md-inline-block "><button onClick="window.print()" title="打印此页" aria-label="打印此页"></button></div>
+                        
+                        <button type="button" id="wh_toc_button" class="custom-toggler navbar-toggler collapsed wh_toggle_button navbar-light" aria-expanded="false" aria-label="Toggle publishing table of content" aria-controls="wh_publication_toc">
+                            <span class="navbar-toggler-icon"></span>
+                        </button>
+                    </div>
+                    
+                </nav>
+            </div>
+            
+            
+            
+            
+            <div class="wh_content_area">
+                <div class="row">
+                    
+                        <nav id="wh_publication_toc" class="col-lg-3 col-md-3 col-sm-12 d-md-block d-none d-print-none" aria-label="Table of Contents Container">
+                            <div id="wh_publication_toc_content">
+		                        
+                            	<div class=" wh_publication_toc " data-tooltip-position="right"><span class="expand-button-action-labels"><span id="button-expand-action" role="button" aria-label="Expand"></span><span id="button-collapse-action" role="button" aria-label="Collapse"></span><span id="button-pending-action" role="button" aria-label="Pending"></span></span><ul role="tree" aria-label="Table of Contents"><li role="treeitem" class="active"><div data-tocid="ddb_intro-d9713e87" class="topicref" data-id="ddb_intro" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../about/ddb_intro.html" id="ddb_intro-d9713e87-link">关于DolphinDB</a></div></div></li><li role="treeitem"><div data-tocid="chap1_getstarted-d9713e136" class="topicref" data-id="chap1_getstarted" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../getstarted/chap1_getstarted.html" id="chap1_getstarted-d9713e136-link">快速上手</a><div class="wh-tooltip"><p class="shortdesc">如何快速部署 DolphinDB、建库建表、写入和查询数据</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="sectionddb_deployment-d9713e189" class="topicref" data-id="sectionddb_deployment" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action sectionddb_deployment-d9713e189-link" class="wh-expand-btn"></span><div class="title"><a href="../deploy/deploy_intro.html" id="sectionddb_deployment-d9713e189-link"><span class="keyword label">部署</span></a><div class="wh-tooltip"><p class="shortdesc">如何在不同的场景中部署 DolphinDB</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="new_chap_database_manage_new_chap_dbmanage_landing_page-d9713e2259" class="topicref" data-id="new_chap_database_manage_new_chap_dbmanage_landing_page" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action new_chap_database_manage_new_chap_dbmanage_landing_page-d9713e2259-link" class="wh-expand-btn"></span><div class="title"><a href="../db_distr_comp/cfg/db_intro.html" id="new_chap_database_manage_new_chap_dbmanage_landing_page-d9713e2259-link"><span class="keyword label">数据库</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 数据库的基本概念</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="chap7_tutorials_streaming-d9713e3760" class="topicref" data-id="chap7_tutorials_streaming" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action chap7_tutorials_streaming-d9713e3760-link" class="wh-expand-btn"></span><div class="title"><a href="../stream/str_intro.html" id="chap7_tutorials_streaming-d9713e3760-link"><span class="keyword label">流数据</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 流数据引擎及流数据计算的基本概念</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e7513" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e7513-link" class="wh-expand-btn"></span><div class="title"><a href="../db_distr_comp/db_oper/import_data.html" id="tocId-d9713e7513-link">数据迁移</a><div class="wh-tooltip"><p class="shortdesc">如何从不同数据源向 DolphinDB 迁移数据</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="chap7_tutorials_system_management-d9713e7940" class="topicref" data-id="chap7_tutorials_system_management" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action chap7_tutorials_system_management-d9713e7940-link" class="wh-expand-btn"></span><div class="title"><a href="../sys_man/om_intro.html" id="chap7_tutorials_system_management-d9713e7940-link"><span class="keyword label">系统运维</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 的系统运维功能及方法</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="troubleshooting-d9713e8780" class="topicref" data-id="troubleshooting" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action troubleshooting-d9713e8780-link" class="wh-expand-btn"></span><div class="title"><a href="../error_codes/troubleshooting.html" id="troubleshooting-d9713e8780-link">故障排查</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="about_language_resources-d9713e20911" class="topicref" data-id="about_language_resources" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action about_language_resources-d9713e20911-link" class="wh-expand-btn"></span><div class="title"><a href="../progr/progr_intro.html" id="about_language_resources-d9713e20911-link"><span class="keyword label">编程语言</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 编程基本概念与方法、SQL 在 DolphinDB 的应用</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="functions_references-d9713e30925" class="topicref" data-id="functions_references" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action functions_references-d9713e30925-link" class="wh-expand-btn"></span><div class="title"><a href="../funcs/funcs_intro.html" id="functions_references-d9713e30925-link"><span class="keyword label">函数参考</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 函数分类、语法、详解及示例</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="api_protocol-d9713e94064" class="topicref" data-id="api_protocol" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action api_protocol-d9713e94064-link" class="wh-expand-btn"></span><div class="title"><a href="../api/connapi_intro.html" id="api_protocol-d9713e94064-link"><span class="keyword label">连接器 &amp; API</span></a><div class="wh-tooltip"><p class="shortdesc">面向不同编程语言的 DolphinDB API 及连接器，相关协议和用法</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="chap6_plugin-d9713e94210" class="topicref" data-id="chap6_plugin" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action chap6_plugin-d9713e94210-link" class="wh-expand-btn"></span><div class="title"><a href="../plugins/plg_intro.html" id="chap6_plugin-d9713e94210-link"><span class="keyword label">插件</span></a><div class="wh-tooltip"><p class="shortdesc">多个应用场景的插件使用说明和插件开发指导</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="third_party-d9713e97904" class="topicref" data-id="third_party" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action third_party-d9713e97904-link" class="wh-expand-btn"></span><div class="title"><a href="../third_party.html" id="third_party-d9713e97904-link">第三方工具</a></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="about_tutorials-d9713e98227" class="topicref" data-id="about_tutorials" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action about_tutorials-d9713e98227-link" class="wh-expand-btn"></span><div class="title"><a href="../tutorials/about_tutorials.html" id="about_tutorials-d9713e98227-link"><span class="keyword label">教程</span></a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 产品使用教程</p></div></div></div></li><li role="treeitem" aria-expanded="false"><div data-tocid="tocId-d9713e105982" class="topicref" data-state="not-ready"><span role="button" tabindex="0" aria-labelledby="button-expand-action tocId-d9713e105982-link" class="wh-expand-btn"></span><div class="title"><a href="../rn/server/3_00_2.html" id="tocId-d9713e105982-link">版本说明</a><div class="wh-tooltip"><p class="shortdesc">DolphinDB 版本发布历史</p></div></div></div></li></ul></div>
+		                        
+                            </div>
+                        </nav>
+                    
+                    
+                    <div class="col-lg-7 col-md-9 col-sm-12" id="wh_topic_body">
+                        <button id="wh_close_publication_toc_button" class="close-toc-button d-none" aria-label="Toggle publishing table of content" aria-controls="wh_publication_toc" aria-expanded="true">
+                            <span class="close-toc-icon-container">
+                                <span class="close-toc-icon"></span>     
+                            </span>
+                        </button>
+                        <button id="wh_close_topic_toc_button" class="close-toc-button d-none" aria-label="Toggle topic table of content" aria-controls="wh_topic_toc" aria-expanded="true">
+                            <span class="close-toc-icon-container">
+                                <span class="close-toc-icon"></span>     
+                            </span>
+                        </button>
+                        
+                        <div class=" wh_topic_content body "><main role="main"><article class="- topic/topic topic" role="article" aria-labelledby="ddb_intro__title_urq_s4v_nyb">
+    <h1 class="- topic/title title topictitle1" id="ddb_intro__title_urq_s4v_nyb"><span class="- topic/keyword keyword label">关于 DolphinDB</span></h1>
+    <div class="- topic/body body">
+        <p class="- topic/p p">欢迎阅读 DolphinDB 技术文档！</p>
+        <p class="- topic/p p">DolphinDB 是一款基于高性能时序数据库，支持复杂分析与流计算的实时计算平台。DolphinDB
+            针对数据存储、统计分析、实时计算和机器学习等多种需求，提供高效读写、快速查询、复杂分析、分布式并行计算、低延迟流处理等功能，支持高可用与水平扩展。</p>
+        <p class="- topic/p p">如下为 DolphinDB 的系统架构图：</p>
+                    <figure class="- topic/fig fig fignone" id="ddb_intro__fig_vrr_53j_3cc" data-ofbid="ddb_intro__fig_vrr_53j_3cc"><figcaption data-caption-side="top" class="- topic/title title figcapcenter"><span class="figtitleprefix fig--title-label">图<span class="fig--title-label-number"> 1</span><span class="fig--title-label-punctuation">. </span></span><span class="fig--title">DolphinDB 系统架构图</span></figcaption>
+                        
+                        <br/><div class="imagecenter"><img class="- topic/image image imagecenter" id="ddb_intro__image_wrr_53j_3cc" src="images/1.png"/></div><br/>
+                    </figure>
+        <p class="- topic/p p">结合架构图，以下对 DolphinDB 的核心组件进行详细介绍。</p></div>
+    <article class="- topic/topic topic nested1" aria-labelledby="ariaid-title2" id="hyq_tkj_3cc"><h2 class="- topic/title title topictitle2" id="ariaid-title2">分布式架构</h2>
+        <div class="- topic/body body">
+        <ul class="- topic/ul ul" id="hyq_tkj_3cc__ul_xcx_z3j_3cc" data-ofbid="hyq_tkj_3cc__ul_xcx_z3j_3cc">
+            <li class="- topic/li li">
+                <p class="- topic/p p">自研的<a class="- topic/xref xref" href="../db_distr_comp/db/db_architecture.html">分布式存储机制</a>，数据有序分散存储在不同的数据节点上，由控制节点统一精准地管理所有分区的元数据信息，包括分区和副本信息、分区版本号等要素，从而确保各节点上分区数据和副本的一致性，以提升集群的容错性和可扩展性。</p>
+            </li>
+            <li class="- topic/li li">
+                <p class="- topic/p p">提供在线和离线扩展方式、支持横向（添加更多节点）和纵向（增加单个节点的资源）的扩展系统、并且提供无缝高效的<a class="- topic/xref xref" href="../db_distr_comp/db_oper/import_data.html">数据迁移</a>和<a class="- topic/xref xref" href="../db_distr_comp/db_oper/import_data.html">再平衡</a>技术。</p>
+            </li>
+            <li class="- topic/li li">
+                <p class="- topic/p p">提供控制节点、数据节点和客户端的<a class="- topic/xref xref" href="../db_distr_comp/db/ha.html">高可用</a>方案，以确保系统在任何单节点故障下都能提供稳定的服务，从而有力保障业务的连续性。</p>
+            </li>
+            <li class="- topic/li li">
+                <p class="- topic/p p">具备全面灵活的<a class="- topic/xref xref" href="../tutorials/backup-restore-new.html">备份与恢复</a>机制，以保障数据安全，为业务保驾护航。</p>
+            </li>
+            <li class="- topic/li li">
+                <p class="- topic/p p">提供高容错性的<a class="- topic/xref xref" href="../sys_man/cluster_async_replc.html">异步复制</a>方案，其具有低延迟、高吞吐量的特点，方便实现数据跨节点、跨地域的异步复制，从而增强数据资产的安全性。</p>
+            </li>
+        </ul>
+        </div>
+    </article>
+    <article class="- topic/topic topic nested1" aria-labelledby="ariaid-title3" id="topic_jpr_1lj_3cc">
+        <h2 class="- topic/title title topictitle2" id="ariaid-title3">多模存储引擎</h2>
+        <div class="- topic/body body">
+            <ul class="- topic/ul ul" id="topic_jpr_1lj_3cc__ul_fpk_blj_3cc" data-ofbid="topic_jpr_1lj_3cc__ul_fpk_blj_3cc">
+                <li class="- topic/li li">支持 TSDB, OLAP<span class="- topic/ph ph"><span class="- topic/ph ph">, PKEY</span>, IMOLTP<span class="- topic/ph ph">、VECTORDB</span>
+                    </span>存储引擎。分别满足不同场景需求：<ul class="- topic/ul ul" id="topic_jpr_1lj_3cc__ul_n5d_dlj_3cc" data-ofbid="topic_jpr_1lj_3cc__ul_n5d_dlj_3cc">
+                        <li class="- topic/li li"><a class="- topic/xref xref" href="../db_distr_comp/db/tsdb.html">TSDB 引擎</a>采用 PAX
+                            行列混存，提供性能卓越的大数据分析与点查分析。</li>
+                        <li class="- topic/li li"><a class="- topic/xref xref" href="../db_distr_comp/db/olap.html">OLAP 引擎</a>采用列式存储，与 TSDB
+                            引擎相比，更适合用于对时间跨度较长的某些列数据进行聚合计算。</li>
+                        <li class="- topic/li li"><a class="- topic/xref xref" href="../db_distr_comp/db/pkey_engine.html">PKEY 引擎</a>是提供主键唯一性保证的，支持实时更新和高效查询的存储引擎，能够有效满足从 OLTP 数据库的主键表 CDC
+                            到 DolphinDB 中进行数据分析的需求。</li>
+                        <li class="- topic/li li"><a class="- topic/xref xref" href="../tutorials/oltp_in-memory_storage_engine_non-embedded_version_tutorials.html">IMOLTP 引擎</a>是内存数据库，以行存的形式来组织数据，不仅支持事务，同时通过创建 B+ 树索引
+                            (主键索引和二级索引) 的方式来应对高频度、高并发的更新和查询操作，该引擎将所有数据都存储在内存中。</li>
+                        <li class="- topic/li li"><a class="- topic/xref xref" href="../db_distr_comp/db/vectordb.html">VECTORDB
+                            引擎</a>支持对向量数据创建索引，并实现了快速的近似最近邻搜索，满足对大规模向量数据高效检索和响应的需求。</li>
+                    </ul></li>
+                <li class="- topic/li li">保证事务<a class="- topic/xref xref" href="../db_distr_comp/db/transaction.html">ACID</a> 特性，提供快照级别的隔离机制。</li>
+                <li class="- topic/li li">支持多种无损数据<a class="- topic/xref xref" href="../funcs/c/compress.html">压缩</a>算法，包括 LZ4,
+                    delta-of-delta, zstd, chimp，字典压缩等，压缩率可达 4:1~10:1。</li>
+                <li class="- topic/li li">支持<a class="- topic/xref xref" href="../db_distr_comp/db/tiered_storage.html">分级存储</a>，区分热数据和冷数据存储，减少存储成本。</li>
+            </ul>
+        </div>
+    </article>
+    <article class="- topic/topic topic nested1" aria-labelledby="ariaid-title4" id="topic_zv3_jmj_3cc">
+        <h2 class="- topic/title title topictitle2" id="ariaid-title4">批计算处理</h2>
+        <div class="- topic/body body">
+            <ul class="- topic/ul ul" id="topic_zv3_jmj_3cc__ul_lrf_kmj_3cc" data-ofbid="topic_zv3_jmj_3cc__ul_lrf_kmj_3cc">
+                <li class="- topic/li li">使用内嵌的<a class="- topic/xref xref" href="../db_distr_comp/db/db_partitioning.html">分布式文件系统</a>，不仅简化数据管理流程，还显著增强了分布式计算环境的负载均衡能力，同时提供了强大的容错机制，确保数据的高可用性和计算任务的连续执行。</li>
+                <li class="- topic/li li">内置 2000+ 多领域、多种类、多功能的<a class="- topic/xref xref" href="../funcs/a/abs.html">函数</a>，覆盖广泛的数据处理需求，并开放接口支持用户自定义函数，帮助用户轻松应对各类复杂应用场景的挑战。</li>
+                <li class="- topic/li li">分布式计算框架集成了 <a class="- topic/xref xref" href="../funcs/p/pipeline.html">pipeline</a>、<a class="- topic/xref xref" href="../funcs/m/mr.html">Map-Reduce</a> 和迭代计算等多种计算模型，为用户提供性能最优的一站式多样化数据解决方案。</li>
+                <li class="- topic/li li">通过 SQL 语言与函数、表达式的无缝结合，以及<a class="- topic/xref xref" href="../tutorials/hybrid_programming_paradigms.html">向量化计算</a>，开拓性地助力用户直接在数据库层面进行复杂的数据分析及运算，从而显著提升数据处理的速度和效率。</li>
+                <li class="- topic/li li">充分利用多机多核 CPU 资源，凭借精细的<a class="- topic/xref xref" href="../funcs/ho_funcs/peach.html">并行处理</a>策略与高效的任务调度算法，实现了对海量数据的快速处理。</li>
+            </ul>
+        </div>
+    </article>
+    <article class="- topic/topic topic nested1" aria-labelledby="ariaid-title5" id="topic_okj_tmj_3cc">
+        <h2 class="- topic/title title topictitle2" id="ariaid-title5">流数据处理</h2>
+        <div class="- topic/body body">
+            <ul class="- topic/ul ul" id="topic_okj_tmj_3cc__ul_w1w_5mj_3cc" data-ofbid="topic_okj_tmj_3cc__ul_w1w_5mj_3cc">
+                <li class="- topic/li li">
+                    <p class="- topic/p p">支持通过流数据表进行<a class="- topic/xref xref" href="../stream/str_intro.html">流数据</a>订阅与发布。</p>
+                </li>
+                <li class="- topic/li li">
+                    <p class="- topic/p p">内置<a class="- topic/xref xref" href="../stream/time_series_engine.html">时间序列聚合</a>、<a class="- topic/xref xref" href="../stream/cross_sectional_engine.html">横截面处理</a>、<a class="- topic/xref xref" href="../stream/reactive_state_engine.html">响应式状态处理</a>、<a class="- topic/xref xref" href="../stream/anomaly_detection_engine.html">异常检测</a>、<a class="- topic/xref xref" href="../stream/session_window_engine.html">会话窗口</a>、<a class="- topic/xref xref" href="../stream/str_join_engine.html">多表关联</a>等流式计算引擎，提供<a class="- topic/xref xref" href="../funcs/themes/mFunctions.html">滑动窗口</a>、<a class="- topic/xref xref" href="../funcs/themes/cumFunctions.html">累计窗口</a>、<a class="- topic/xref xref" href="../funcs/funcs_by_topics.html#funcs_by_topics_math_statis">统计函数</a>等算子。用户可通过串联调用计算引擎构建高效强大的计算流水线，或借助流数据引擎解析器（streamEngineParser）自动构建计算流水线，从而满足复杂多变的业务需求。</p>
+                </li>
+                <li class="- topic/li li">
+                    <p class="- topic/p p">支持<a class="- topic/xref xref" href="../stream/str_replay.html">回放历史数据</a>，支持 1 对 1，N 对 N，N 对 1
+                        三种回放形式。</p>
+                </li>
+                <li class="- topic/li li">
+                    <p class="- topic/p p">支持<a class="- topic/xref xref" href="../stream/str_batch.html">流批一体</a>，即将研发环境中基于历史数据建模分析得到的因子或表达式直接应用于生产环境的实时数据中，并保证流计算的结果和批量计算完全一致。该功能可为用户的测试、验证和回溯分析提供极大便利。</p>
+                </li>
+                <li class="- topic/li li">
+                    <p class="- topic/p p">支持从多种数据源<a class="- topic/xref xref" href="../stream/str_api_python.html">接入实时流数据</a>实时写入 DolphinDB
+                        中，并自动处理数据格式转换和同步问题。</p>
+                </li>
+                <li class="- topic/li li">
+                    <p class="- topic/p p">内置 <a class="- topic/xref xref" href="../stream/cep.html">CEP 引擎</a>（Complex Event
+                        Processing，复杂事件处理），能够接收实时数据流，定义事件并从事件流中检测特定事件，进而对满足指定规则的事件执行预设的操作。</p>
+                </li>
+                <li class="- topic/li li">
+                    <p class="- topic/p p">实现亚毫秒级的延迟，确保实时数据处理的极致性能。</p>
+                </li>
+            </ul>
+        </div>
+    </article>
+    <article class="- topic/topic topic nested1" aria-labelledby="ariaid-title6" id="topic_hwz_nnj_3cc">
+        <h2 class="- topic/title title topictitle2" id="ariaid-title6">多范式编程语言</h2>
+        <div class="- topic/body body">
+            <ul class="- topic/ul ul" id="topic_hwz_nnj_3cc__ul_ghv_znj_3cc" data-ofbid="topic_hwz_nnj_3cc__ul_ghv_znj_3cc">
+                <li class="- topic/li li">DolphinDB 内置图灵完备的编程语言。其支持命令式编程、函数式编程、向量化编程、SQL 编程等<a class="- topic/xref xref" href="../tutorials/hybrid_programming_paradigms.html">多范式编程语言</a>，凭借语言简洁灵活、表达能力强的优势，帮助用户实现开发效率的飞跃式提升。 </li>
+                <li class="- topic/li li">支持 <a class="- topic/xref xref" href="../progr/sql/sql_intro.html" title="DolphinDB 中 SQL 语句的基本语法和用法">SQL-92 标准</a>
+                        ，更在此基础上扩展了如组内计算、透视表等多种功能。同时兼容 Oracle 和 MySQL 等主流 SQL 方言。
+                </li>
+                <li class="- topic/li li"><a class="- topic/xref xref" href="../progr/py_parser/py_par_intro.html">Python Parser</a> 支持 Python
+                        的部分原生对象（dict, list ,tuple, set）、语法以及 pandas 库的部分功能。用户能够在 DolphinDB 客户端中直接使用
+                        Python 语法来访问和操作 DolphinDB 的数据。（<a class="- topic/xref xref" href="../tutorials/py_parser__quant_fin.html">点击阅读 Python Parser
+                        在金融量化分析场景的应用</a>）
+                </li>
+            </ul>
+        </div>
+    </article>
+    <article class="- topic/topic topic nested1" aria-labelledby="ariaid-title7" id="topic_lhs_1pj_3cc">
+        <h2 class="- topic/title title topictitle2" id="ariaid-title7">良好生态</h2>
+        <div class="- topic/body body">
+            <div class="- topic/p p">
+                <ul class="- topic/ul ul" id="topic_lhs_1pj_3cc__ul_md5_bpj_3cc" data-ofbid="topic_lhs_1pj_3cc__ul_md5_bpj_3cc">
+                    <li class="- topic/li li">
+                        <p class="- topic/p p">提供丰富全面的 <a class="- topic/xref xref" href="../api/connapi_intro.html">SDK</a> 生态，包括 <a class="- topic/xref xref" href="https://docs.dolphindb.cn/zh/pydoc/py.html" target="_blank" rel="external noopener">Python</a>， <a class="- topic/xref xref" href="https://docs.dolphindb.cn/zh/cppdoc/cpp_api.html" target="_blank" rel="external noopener">C++</a>，<a class="- topic/xref xref" href="https://docs.dolphindb.cn/zh/csharpdoc/csharp.html" target="_blank" rel="external noopener">C#</a>，<a class="- topic/xref xref" href="https://docs.dolphindb.cn/zh/godoc/go.html" target="_blank" rel="external noopener">Go</a>，<a class="- topic/xref xref" href="https://docs.dolphindb.cn/zh/rdoc/r.html" target="_blank" rel="external noopener">R</a> 和 <a class="- topic/xref xref" href="https://docs.dolphindb.cn/zh/jsdoc/js.html" target="_blank" rel="external noopener">JavaScript</a> 等多种主流编程语言。</p>
+                    </li>
+                    <li class="- topic/li li">
+                        <p class="- topic/p p">多种客户端，包括 <a class="- topic/xref xref" href="../db_distr_comp/db_man/web/intro.html">Web 集群管理器</a>、<a class="- topic/xref xref" href="../db_distr_comp/vscode.html">DolphinDB VS Code</a>、<a class="- topic/xref xref" href="../db_distr_comp/gui.html">JAVA GUI</a>、<a class="- topic/xref xref" href="../db_distr_comp/jupyter.html">Jupyter Notebook</a>、<a class="- topic/xref xref" href="../db_distr_comp/terminal.html">DolphinDB 终端</a>。</p>
+                    </li>
+                    <li class="- topic/li li">
+                        <p class="- topic/p p">多领域、多种类、多方式的<a class="- topic/xref xref" href="../plugins/plg_intro.html">插件</a>，涵盖数据存取、行情接入、金融相关、消息队列、数值计算、机器学习、网络、云存储、文件等。</p>
+                    </li>
+                    <li class="- topic/li li">
+                        <p class="- topic/p p">提供<a class="- topic/xref xref" href="../tutorials/tu_modules.html">模块</a>化设计，为用户提供便捷的<a class="- topic/xref xref" href="../modules/ta/ta.html">技术分析指标库</a>、<a class="- topic/xref xref" href="../modules/mytt/mytt.html">指标库</a>、<a class="- topic/xref xref" href="../modules/gtja191Alpha/191alpha.html">因子库</a>、<a class="- topic/xref xref" href="../modules/wq101alpha/wq101alpha.html">因子指标库</a>、<a class="- topic/xref xref" href="../modules/ops/ops.html">运维函数库</a>、<a class="- topic/xref xref" href="../modules/easyTLDataImport/easytl_data_import.html">历史数据导入</a>、<a class="- topic/xref xref" href="../modules/easyNSQ/easynsq.html">行情数据接入模块</a>、<a class="- topic/xref xref" href="../tutorials/barra_multi_factor_risk_model.html">多因子风险模型</a>、<a class="- topic/xref xref" href="../modules/MarketHoliday/mkt_calendar.html">交易日历</a>等，旨在简化功能代码的调用流程和优化系统维护效率。</p>
+                    </li>
+                    <li class="- topic/li li"><p class="- topic/p p">集成专属的 <a class="- topic/xref xref" href="../plugins/dataxwriter/README_CN.html">DataX</a>、<a class="- topic/xref xref" href="../tools/grafana_overview.html">Grafana</a>
+                            等第三方工具，可衔接数据传输与可视化等多种解决方案。</p>
+                    </li>
+
+                </ul>
+            </div>
+        </div>
+    </article>
+                
+
+
+</article></main></div>
+                        
+                        
+                        
+                        
+                        
+                        
+                    </div>
+                    
+                        <nav role="navigation" id="wh_topic_toc" aria-label="On this page" class="col-lg-2 d-none d-lg-block navbar d-print-none"> 
+                            <div id="wh_topic_toc_content">
+		                        
+	                            <div class=" wh_topic_toc "><div class="wh_topic_label">在本页上</div><ul><li class="topic-item"><a href="#hyq_tkj_3cc" data-tocid="hyq_tkj_3cc">分布式架构</a></li><li class="topic-item"><a href="#topic_jpr_1lj_3cc" data-tocid="topic_jpr_1lj_3cc">多模存储引擎</a></li><li class="topic-item"><a href="#topic_zv3_jmj_3cc" data-tocid="topic_zv3_jmj_3cc">批计算处理</a></li><li class="topic-item"><a href="#topic_okj_tmj_3cc" data-tocid="topic_okj_tmj_3cc">流数据处理</a></li><li class="topic-item"><a href="#topic_hwz_nnj_3cc" data-tocid="topic_hwz_nnj_3cc">多范式编程语言</a></li><li class="topic-item"><a href="#topic_lhs_1pj_3cc" data-tocid="topic_lhs_1pj_3cc">良好生态</a></li></ul></div>
+	                        	
+                        	</div>
+                        </nav>
+                    
+                </div>
+            </div>
+            
+            
+            
+        </div> 
+        <footer class="navbar navbar-default wh_footer">
+  <div class=" footer-container mx-auto ">
+<title>Copyright</title><p><b> ©2025 浙江智臾科技有限公司 浙ICP备18048711号-3</b></p>
+  </div>
+</footer>
+        
+        <div id="go2top" class="d-print-none">
+            <span class="oxy-icon oxy-icon-up"></span>
+        </div>
+        
+        <div id="modal_img_large" class="modal">
+            <span class="close oxy-icon oxy-icon-remove"></span>
+            <div id="modal_img_container"></div>
+            <div id="caption"></div>
+        </div>
+        
+        
+        
+    </body>
+</html>
