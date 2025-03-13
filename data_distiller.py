@@ -157,6 +157,7 @@ Function Name:
         else:
             inputs, answers = self._extract_info_from_generated_file(exist_data)
             self.index = len(inputs)
+            self.index += 6
             self.conversation_history = [{"role": "system", "content": self.templates.mock_distill_unique(inputs, answers)}]
         
         self._prepare_conversation_for_func(func)
@@ -350,27 +351,29 @@ class DistillationOrchestrator:
         logger = ThreadSafeLogger.get_logger(func)
         logger.info(f"开始处理函数: {func}")
         
+        distiller = FunctionDistiller(
+            host=config['host'], 
+            port=config['port'], 
+            user=config['user'], 
+            passwd=config['passwd'],
+            md_dir=md_dir,
+            max_retries=config.get('max_retries', 2),
+            func_name=func
+        )
+            
         cnt=0
         while cnt <= 20:
             cnt += 1
             logger.info(f"第{cnt}次重新开始")
-            distiller = FunctionDistiller(
-                host=config['host'], 
-                port=config['port'], 
-                user=config['user'], 
-                passwd=config['passwd'],
-                md_dir=md_dir,
-                max_retries=config.get('max_retries', 2),
-                func_name=func
-            )
             
             try:
                 result = distiller.distill_function(func)
                 logger.info(f"函数 {func} 处理{'成功' if result else '失败'}")
-                return func, result
+                #return func, result
             except Exception as e:
                 logger.error(f"函数 {func} 处理时出现异常: {str(e)}", exc_info=True)
-                return func, False
+                #return func, False
+            
 
     @classmethod
     def process_functions(cls, funcs: List[str], config: Dict[str, Any], 
@@ -439,7 +442,7 @@ def main():
     }
 
     # SQL相关函数
-    functions = [ "nss", "ns", "condValueAtRisk", "nsspredict", "valueAtRisk"  ]
+    functions = [ "nss" ]
     
     clean_doc_dir = "./cleandocs"
     main_logger.info(f"开始处理 SQL 函数: {functions}")

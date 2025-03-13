@@ -1,0 +1,1135 @@
+2025-03-13 13:44:11,507 - [ThreadPoolExecutor-0_3] - INFO - 开始处理函数: nssPredict
+2025-03-13 13:44:11,509 - [ThreadPoolExecutor-0_3] - INFO - 第1次重新开始
+2025-03-13 13:44:11,612 - [ThreadPoolExecutor-0_3] - ERROR - 函数 nssPredict 处理时出现异常: not found
+Traceback (most recent call last):
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 368, in _process_in_thread
+    result = distiller.distill_function(func)
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 300, in distill_function
+    mock_response_data = self._mock_distill_process(func)
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 162, in _mock_distill_process
+    self._prepare_conversation_for_func(func)
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 94, in _prepare_conversation_for_func
+    raise Exception("not found")
+Exception: not found
+2025-03-13 13:44:11,642 - [ThreadPoolExecutor-0_3] - INFO - 第2次重新开始
+2025-03-13 13:44:11,669 - [ThreadPoolExecutor-0_3] - ERROR - 函数 nssPredict 处理时出现异常: not found
+Traceback (most recent call last):
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 368, in _process_in_thread
+    result = distiller.distill_function(func)
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 300, in distill_function
+    mock_response_data = self._mock_distill_process(func)
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 162, in _mock_distill_process
+    self._prepare_conversation_for_func(func)
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 94, in _prepare_conversation_for_func
+    raise Exception("not found")
+Exception: not found
+2025-03-13 13:44:11,669 - [ThreadPoolExecutor-0_3] - INFO - 第3次重新开始
+2025-03-13 13:44:11,682 - [ThreadPoolExecutor-0_3] - ERROR - 函数 nssPredict 处理时出现异常: not found
+Traceback (most recent call last):
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 368, in _process_in_thread
+    result = distiller.distill_function(func)
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 300, in distill_function
+    mock_response_data = self._mock_distill_process(func)
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 162, in _mock_distill_process
+    self._prepare_conversation_for_func(func)
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 94, in _prepare_conversation_for_func
+    raise Exception("not found")
+Exception: not found
+2025-03-13 13:44:11,682 - [ThreadPoolExecutor-0_3] - INFO - 第4次重新开始
+2025-03-13 13:44:11,691 - [ThreadPoolExecutor-0_3] - ERROR - 函数 nssPredict 处理时出现异常: not found
+Traceback (most recent call last):
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 368, in _process_in_thread
+    result = distiller.distill_function(func)
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 300, in distill_function
+    mock_response_data = self._mock_distill_process(func)
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 162, in _mock_distill_process
+    self._prepare_conversation_for_func(func)
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 94, in _prepare_conversation_for_func
+    raise Exception("not found")
+Exception: not found
+2025-03-13 13:44:11,691 - [ThreadPoolExecutor-0_3] - INFO - 第5次重新开始
+2025-03-13 13:44:11,700 - [ThreadPoolExecutor-0_3] - ERROR - 函数 nssPredict 处理时出现异常: not found
+Traceback (most recent call last):
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 368, in _process_in_thread
+    result = distiller.distill_function(func)
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 300, in distill_function
+    mock_response_data = self._mock_distill_process(func)
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 162, in _mock_distill_process
+    self._prepare_conversation_for_func(func)
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 94, in _prepare_conversation_for_func
+    raise Exception("not found")
+Exception: not found
+2025-03-13 13:44:11,700 - [ThreadPoolExecutor-0_3] - INFO - 第6次重新开始
+2025-03-13 13:44:11,709 - [ThreadPoolExecutor-0_3] - ERROR - 函数 nssPredict 处理时出现异常: not found
+Traceback (most recent call last):
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 368, in _process_in_thread
+    result = distiller.distill_function(func)
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 300, in distill_function
+    mock_response_data = self._mock_distill_process(func)
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 162, in _mock_distill_process
+    self._prepare_conversation_for_func(func)
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 94, in _prepare_conversation_for_func
+    raise Exception("not found")
+Exception: not found
+2025-03-13 13:44:11,709 - [ThreadPoolExecutor-0_3] - INFO - 第7次重新开始
+2025-03-13 13:44:11,718 - [ThreadPoolExecutor-0_3] - ERROR - 函数 nssPredict 处理时出现异常: not found
+Traceback (most recent call last):
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 368, in _process_in_thread
+    result = distiller.distill_function(func)
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 300, in distill_function
+    mock_response_data = self._mock_distill_process(func)
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 162, in _mock_distill_process
+    self._prepare_conversation_for_func(func)
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 94, in _prepare_conversation_for_func
+    raise Exception("not found")
+Exception: not found
+2025-03-13 13:44:11,718 - [ThreadPoolExecutor-0_3] - INFO - 第8次重新开始
+2025-03-13 13:44:11,727 - [ThreadPoolExecutor-0_3] - ERROR - 函数 nssPredict 处理时出现异常: not found
+Traceback (most recent call last):
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 368, in _process_in_thread
+    result = distiller.distill_function(func)
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 300, in distill_function
+    mock_response_data = self._mock_distill_process(func)
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 162, in _mock_distill_process
+    self._prepare_conversation_for_func(func)
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 94, in _prepare_conversation_for_func
+    raise Exception("not found")
+Exception: not found
+2025-03-13 13:44:11,728 - [ThreadPoolExecutor-0_3] - INFO - 第9次重新开始
+2025-03-13 13:44:11,737 - [ThreadPoolExecutor-0_3] - ERROR - 函数 nssPredict 处理时出现异常: not found
+Traceback (most recent call last):
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 368, in _process_in_thread
+    result = distiller.distill_function(func)
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 300, in distill_function
+    mock_response_data = self._mock_distill_process(func)
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 162, in _mock_distill_process
+    self._prepare_conversation_for_func(func)
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 94, in _prepare_conversation_for_func
+    raise Exception("not found")
+Exception: not found
+2025-03-13 13:44:11,737 - [ThreadPoolExecutor-0_3] - INFO - 第10次重新开始
+2025-03-13 13:44:11,746 - [ThreadPoolExecutor-0_3] - ERROR - 函数 nssPredict 处理时出现异常: not found
+Traceback (most recent call last):
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 368, in _process_in_thread
+    result = distiller.distill_function(func)
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 300, in distill_function
+    mock_response_data = self._mock_distill_process(func)
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 162, in _mock_distill_process
+    self._prepare_conversation_for_func(func)
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 94, in _prepare_conversation_for_func
+    raise Exception("not found")
+Exception: not found
+2025-03-13 13:44:11,746 - [ThreadPoolExecutor-0_3] - INFO - 第11次重新开始
+2025-03-13 13:44:11,755 - [ThreadPoolExecutor-0_3] - ERROR - 函数 nssPredict 处理时出现异常: not found
+Traceback (most recent call last):
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 368, in _process_in_thread
+    result = distiller.distill_function(func)
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 300, in distill_function
+    mock_response_data = self._mock_distill_process(func)
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 162, in _mock_distill_process
+    self._prepare_conversation_for_func(func)
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 94, in _prepare_conversation_for_func
+    raise Exception("not found")
+Exception: not found
+2025-03-13 13:44:11,756 - [ThreadPoolExecutor-0_3] - INFO - 第12次重新开始
+2025-03-13 13:44:11,765 - [ThreadPoolExecutor-0_3] - ERROR - 函数 nssPredict 处理时出现异常: not found
+Traceback (most recent call last):
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 368, in _process_in_thread
+    result = distiller.distill_function(func)
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 300, in distill_function
+    mock_response_data = self._mock_distill_process(func)
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 162, in _mock_distill_process
+    self._prepare_conversation_for_func(func)
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 94, in _prepare_conversation_for_func
+    raise Exception("not found")
+Exception: not found
+2025-03-13 13:44:11,765 - [ThreadPoolExecutor-0_3] - INFO - 第13次重新开始
+2025-03-13 13:44:11,774 - [ThreadPoolExecutor-0_3] - ERROR - 函数 nssPredict 处理时出现异常: not found
+Traceback (most recent call last):
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 368, in _process_in_thread
+    result = distiller.distill_function(func)
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 300, in distill_function
+    mock_response_data = self._mock_distill_process(func)
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 162, in _mock_distill_process
+    self._prepare_conversation_for_func(func)
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 94, in _prepare_conversation_for_func
+    raise Exception("not found")
+Exception: not found
+2025-03-13 13:44:11,774 - [ThreadPoolExecutor-0_3] - INFO - 第14次重新开始
+2025-03-13 13:44:11,783 - [ThreadPoolExecutor-0_3] - ERROR - 函数 nssPredict 处理时出现异常: not found
+Traceback (most recent call last):
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 368, in _process_in_thread
+    result = distiller.distill_function(func)
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 300, in distill_function
+    mock_response_data = self._mock_distill_process(func)
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 162, in _mock_distill_process
+    self._prepare_conversation_for_func(func)
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 94, in _prepare_conversation_for_func
+    raise Exception("not found")
+Exception: not found
+2025-03-13 13:44:11,783 - [ThreadPoolExecutor-0_3] - INFO - 第15次重新开始
+2025-03-13 13:44:11,792 - [ThreadPoolExecutor-0_3] - ERROR - 函数 nssPredict 处理时出现异常: not found
+Traceback (most recent call last):
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 368, in _process_in_thread
+    result = distiller.distill_function(func)
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 300, in distill_function
+    mock_response_data = self._mock_distill_process(func)
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 162, in _mock_distill_process
+    self._prepare_conversation_for_func(func)
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 94, in _prepare_conversation_for_func
+    raise Exception("not found")
+Exception: not found
+2025-03-13 13:44:11,792 - [ThreadPoolExecutor-0_3] - INFO - 第16次重新开始
+2025-03-13 13:44:11,801 - [ThreadPoolExecutor-0_3] - ERROR - 函数 nssPredict 处理时出现异常: not found
+Traceback (most recent call last):
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 368, in _process_in_thread
+    result = distiller.distill_function(func)
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 300, in distill_function
+    mock_response_data = self._mock_distill_process(func)
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 162, in _mock_distill_process
+    self._prepare_conversation_for_func(func)
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 94, in _prepare_conversation_for_func
+    raise Exception("not found")
+Exception: not found
+2025-03-13 13:44:11,801 - [ThreadPoolExecutor-0_3] - INFO - 第17次重新开始
+2025-03-13 13:44:11,810 - [ThreadPoolExecutor-0_3] - ERROR - 函数 nssPredict 处理时出现异常: not found
+Traceback (most recent call last):
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 368, in _process_in_thread
+    result = distiller.distill_function(func)
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 300, in distill_function
+    mock_response_data = self._mock_distill_process(func)
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 162, in _mock_distill_process
+    self._prepare_conversation_for_func(func)
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 94, in _prepare_conversation_for_func
+    raise Exception("not found")
+Exception: not found
+2025-03-13 13:44:11,810 - [ThreadPoolExecutor-0_3] - INFO - 第18次重新开始
+2025-03-13 13:44:11,819 - [ThreadPoolExecutor-0_3] - ERROR - 函数 nssPredict 处理时出现异常: not found
+Traceback (most recent call last):
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 368, in _process_in_thread
+    result = distiller.distill_function(func)
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 300, in distill_function
+    mock_response_data = self._mock_distill_process(func)
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 162, in _mock_distill_process
+    self._prepare_conversation_for_func(func)
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 94, in _prepare_conversation_for_func
+    raise Exception("not found")
+Exception: not found
+2025-03-13 13:44:11,819 - [ThreadPoolExecutor-0_3] - INFO - 第19次重新开始
+2025-03-13 13:44:11,828 - [ThreadPoolExecutor-0_3] - ERROR - 函数 nssPredict 处理时出现异常: not found
+Traceback (most recent call last):
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 368, in _process_in_thread
+    result = distiller.distill_function(func)
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 300, in distill_function
+    mock_response_data = self._mock_distill_process(func)
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 162, in _mock_distill_process
+    self._prepare_conversation_for_func(func)
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 94, in _prepare_conversation_for_func
+    raise Exception("not found")
+Exception: not found
+2025-03-13 13:44:11,828 - [ThreadPoolExecutor-0_3] - INFO - 第20次重新开始
+2025-03-13 13:44:11,837 - [ThreadPoolExecutor-0_3] - ERROR - 函数 nssPredict 处理时出现异常: not found
+Traceback (most recent call last):
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 368, in _process_in_thread
+    result = distiller.distill_function(func)
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 300, in distill_function
+    mock_response_data = self._mock_distill_process(func)
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 162, in _mock_distill_process
+    self._prepare_conversation_for_func(func)
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 94, in _prepare_conversation_for_func
+    raise Exception("not found")
+Exception: not found
+2025-03-13 13:44:11,837 - [ThreadPoolExecutor-0_3] - INFO - 第21次重新开始
+2025-03-13 13:44:11,846 - [ThreadPoolExecutor-0_3] - ERROR - 函数 nssPredict 处理时出现异常: not found
+Traceback (most recent call last):
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 368, in _process_in_thread
+    result = distiller.distill_function(func)
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 300, in distill_function
+    mock_response_data = self._mock_distill_process(func)
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 162, in _mock_distill_process
+    self._prepare_conversation_for_func(func)
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 94, in _prepare_conversation_for_func
+    raise Exception("not found")
+Exception: not found
+2025-03-13 13:52:00,763 - [ThreadPoolExecutor-0_3] - INFO - 开始处理函数: nssPredict
+2025-03-13 13:52:00,848 - [ThreadPoolExecutor-0_3] - INFO - 第1次重新开始
+2025-03-13 13:52:00,875 - [ThreadPoolExecutor-0_3] - ERROR - 函数 nssPredict 处理时出现异常: not found
+Traceback (most recent call last):
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 370, in _process_in_thread
+    result = distiller.distill_function(func)
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 301, in distill_function
+    mock_response_data = self._mock_distill_process(func)
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 163, in _mock_distill_process
+    self._prepare_conversation_for_func(func)
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 94, in _prepare_conversation_for_func
+    raise Exception("not found")
+Exception: not found
+2025-03-13 13:52:00,877 - [ThreadPoolExecutor-0_3] - INFO - 第2次重新开始
+2025-03-13 13:52:00,942 - [ThreadPoolExecutor-0_3] - ERROR - 函数 nssPredict 处理时出现异常: not found
+Traceback (most recent call last):
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 370, in _process_in_thread
+    result = distiller.distill_function(func)
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 301, in distill_function
+    mock_response_data = self._mock_distill_process(func)
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 163, in _mock_distill_process
+    self._prepare_conversation_for_func(func)
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 94, in _prepare_conversation_for_func
+    raise Exception("not found")
+Exception: not found
+2025-03-13 13:52:00,943 - [ThreadPoolExecutor-0_3] - INFO - 第3次重新开始
+2025-03-13 13:52:00,945 - [ThreadPoolExecutor-0_3] - ERROR - 函数 nssPredict 处理时出现异常: not found
+Traceback (most recent call last):
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 370, in _process_in_thread
+    result = distiller.distill_function(func)
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 301, in distill_function
+    mock_response_data = self._mock_distill_process(func)
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 163, in _mock_distill_process
+    self._prepare_conversation_for_func(func)
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 94, in _prepare_conversation_for_func
+    raise Exception("not found")
+Exception: not found
+2025-03-13 13:52:00,946 - [ThreadPoolExecutor-0_3] - INFO - 第4次重新开始
+2025-03-13 13:52:00,948 - [ThreadPoolExecutor-0_3] - ERROR - 函数 nssPredict 处理时出现异常: not found
+Traceback (most recent call last):
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 370, in _process_in_thread
+    result = distiller.distill_function(func)
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 301, in distill_function
+    mock_response_data = self._mock_distill_process(func)
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 163, in _mock_distill_process
+    self._prepare_conversation_for_func(func)
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 94, in _prepare_conversation_for_func
+    raise Exception("not found")
+Exception: not found
+2025-03-13 13:52:00,948 - [ThreadPoolExecutor-0_3] - INFO - 第5次重新开始
+2025-03-13 13:52:00,950 - [ThreadPoolExecutor-0_3] - ERROR - 函数 nssPredict 处理时出现异常: not found
+Traceback (most recent call last):
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 370, in _process_in_thread
+    result = distiller.distill_function(func)
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 301, in distill_function
+    mock_response_data = self._mock_distill_process(func)
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 163, in _mock_distill_process
+    self._prepare_conversation_for_func(func)
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 94, in _prepare_conversation_for_func
+    raise Exception("not found")
+Exception: not found
+2025-03-13 13:52:00,951 - [ThreadPoolExecutor-0_3] - INFO - 第6次重新开始
+2025-03-13 13:52:00,953 - [ThreadPoolExecutor-0_3] - ERROR - 函数 nssPredict 处理时出现异常: not found
+Traceback (most recent call last):
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 370, in _process_in_thread
+    result = distiller.distill_function(func)
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 301, in distill_function
+    mock_response_data = self._mock_distill_process(func)
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 163, in _mock_distill_process
+    self._prepare_conversation_for_func(func)
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 94, in _prepare_conversation_for_func
+    raise Exception("not found")
+Exception: not found
+2025-03-13 13:52:00,953 - [ThreadPoolExecutor-0_3] - INFO - 第7次重新开始
+2025-03-13 13:52:00,955 - [ThreadPoolExecutor-0_3] - ERROR - 函数 nssPredict 处理时出现异常: not found
+Traceback (most recent call last):
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 370, in _process_in_thread
+    result = distiller.distill_function(func)
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 301, in distill_function
+    mock_response_data = self._mock_distill_process(func)
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 163, in _mock_distill_process
+    self._prepare_conversation_for_func(func)
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 94, in _prepare_conversation_for_func
+    raise Exception("not found")
+Exception: not found
+2025-03-13 13:52:00,955 - [ThreadPoolExecutor-0_3] - INFO - 第8次重新开始
+2025-03-13 13:52:00,957 - [ThreadPoolExecutor-0_3] - ERROR - 函数 nssPredict 处理时出现异常: not found
+Traceback (most recent call last):
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 370, in _process_in_thread
+    result = distiller.distill_function(func)
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 301, in distill_function
+    mock_response_data = self._mock_distill_process(func)
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 163, in _mock_distill_process
+    self._prepare_conversation_for_func(func)
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 94, in _prepare_conversation_for_func
+    raise Exception("not found")
+Exception: not found
+2025-03-13 13:52:00,957 - [ThreadPoolExecutor-0_3] - INFO - 第9次重新开始
+2025-03-13 13:52:00,958 - [ThreadPoolExecutor-0_3] - ERROR - 函数 nssPredict 处理时出现异常: not found
+Traceback (most recent call last):
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 370, in _process_in_thread
+    result = distiller.distill_function(func)
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 301, in distill_function
+    mock_response_data = self._mock_distill_process(func)
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 163, in _mock_distill_process
+    self._prepare_conversation_for_func(func)
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 94, in _prepare_conversation_for_func
+    raise Exception("not found")
+Exception: not found
+2025-03-13 13:52:00,959 - [ThreadPoolExecutor-0_3] - INFO - 第10次重新开始
+2025-03-13 13:52:00,960 - [ThreadPoolExecutor-0_3] - ERROR - 函数 nssPredict 处理时出现异常: not found
+Traceback (most recent call last):
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 370, in _process_in_thread
+    result = distiller.distill_function(func)
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 301, in distill_function
+    mock_response_data = self._mock_distill_process(func)
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 163, in _mock_distill_process
+    self._prepare_conversation_for_func(func)
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 94, in _prepare_conversation_for_func
+    raise Exception("not found")
+Exception: not found
+2025-03-13 13:52:00,960 - [ThreadPoolExecutor-0_3] - INFO - 第11次重新开始
+2025-03-13 13:52:00,962 - [ThreadPoolExecutor-0_3] - ERROR - 函数 nssPredict 处理时出现异常: not found
+Traceback (most recent call last):
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 370, in _process_in_thread
+    result = distiller.distill_function(func)
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 301, in distill_function
+    mock_response_data = self._mock_distill_process(func)
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 163, in _mock_distill_process
+    self._prepare_conversation_for_func(func)
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 94, in _prepare_conversation_for_func
+    raise Exception("not found")
+Exception: not found
+2025-03-13 13:52:00,962 - [ThreadPoolExecutor-0_3] - INFO - 第12次重新开始
+2025-03-13 13:52:00,963 - [ThreadPoolExecutor-0_3] - ERROR - 函数 nssPredict 处理时出现异常: not found
+Traceback (most recent call last):
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 370, in _process_in_thread
+    result = distiller.distill_function(func)
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 301, in distill_function
+    mock_response_data = self._mock_distill_process(func)
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 163, in _mock_distill_process
+    self._prepare_conversation_for_func(func)
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 94, in _prepare_conversation_for_func
+    raise Exception("not found")
+Exception: not found
+2025-03-13 13:52:00,964 - [ThreadPoolExecutor-0_3] - INFO - 第13次重新开始
+2025-03-13 13:52:00,965 - [ThreadPoolExecutor-0_3] - ERROR - 函数 nssPredict 处理时出现异常: not found
+Traceback (most recent call last):
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 370, in _process_in_thread
+    result = distiller.distill_function(func)
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 301, in distill_function
+    mock_response_data = self._mock_distill_process(func)
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 163, in _mock_distill_process
+    self._prepare_conversation_for_func(func)
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 94, in _prepare_conversation_for_func
+    raise Exception("not found")
+Exception: not found
+2025-03-13 13:52:00,965 - [ThreadPoolExecutor-0_3] - INFO - 第14次重新开始
+2025-03-13 13:52:00,966 - [ThreadPoolExecutor-0_3] - ERROR - 函数 nssPredict 处理时出现异常: not found
+Traceback (most recent call last):
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 370, in _process_in_thread
+    result = distiller.distill_function(func)
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 301, in distill_function
+    mock_response_data = self._mock_distill_process(func)
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 163, in _mock_distill_process
+    self._prepare_conversation_for_func(func)
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 94, in _prepare_conversation_for_func
+    raise Exception("not found")
+Exception: not found
+2025-03-13 13:52:00,966 - [ThreadPoolExecutor-0_3] - INFO - 第15次重新开始
+2025-03-13 13:52:00,967 - [ThreadPoolExecutor-0_3] - ERROR - 函数 nssPredict 处理时出现异常: not found
+Traceback (most recent call last):
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 370, in _process_in_thread
+    result = distiller.distill_function(func)
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 301, in distill_function
+    mock_response_data = self._mock_distill_process(func)
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 163, in _mock_distill_process
+    self._prepare_conversation_for_func(func)
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 94, in _prepare_conversation_for_func
+    raise Exception("not found")
+Exception: not found
+2025-03-13 13:52:00,968 - [ThreadPoolExecutor-0_3] - INFO - 第16次重新开始
+2025-03-13 13:52:00,969 - [ThreadPoolExecutor-0_3] - ERROR - 函数 nssPredict 处理时出现异常: not found
+Traceback (most recent call last):
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 370, in _process_in_thread
+    result = distiller.distill_function(func)
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 301, in distill_function
+    mock_response_data = self._mock_distill_process(func)
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 163, in _mock_distill_process
+    self._prepare_conversation_for_func(func)
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 94, in _prepare_conversation_for_func
+    raise Exception("not found")
+Exception: not found
+2025-03-13 13:52:00,969 - [ThreadPoolExecutor-0_3] - INFO - 第17次重新开始
+2025-03-13 13:52:00,970 - [ThreadPoolExecutor-0_3] - ERROR - 函数 nssPredict 处理时出现异常: not found
+Traceback (most recent call last):
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 370, in _process_in_thread
+    result = distiller.distill_function(func)
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 301, in distill_function
+    mock_response_data = self._mock_distill_process(func)
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 163, in _mock_distill_process
+    self._prepare_conversation_for_func(func)
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 94, in _prepare_conversation_for_func
+    raise Exception("not found")
+Exception: not found
+2025-03-13 13:52:00,970 - [ThreadPoolExecutor-0_3] - INFO - 第18次重新开始
+2025-03-13 13:52:00,971 - [ThreadPoolExecutor-0_3] - ERROR - 函数 nssPredict 处理时出现异常: not found
+Traceback (most recent call last):
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 370, in _process_in_thread
+    result = distiller.distill_function(func)
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 301, in distill_function
+    mock_response_data = self._mock_distill_process(func)
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 163, in _mock_distill_process
+    self._prepare_conversation_for_func(func)
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 94, in _prepare_conversation_for_func
+    raise Exception("not found")
+Exception: not found
+2025-03-13 13:52:00,971 - [ThreadPoolExecutor-0_3] - INFO - 第19次重新开始
+2025-03-13 13:52:00,972 - [ThreadPoolExecutor-0_3] - ERROR - 函数 nssPredict 处理时出现异常: not found
+Traceback (most recent call last):
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 370, in _process_in_thread
+    result = distiller.distill_function(func)
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 301, in distill_function
+    mock_response_data = self._mock_distill_process(func)
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 163, in _mock_distill_process
+    self._prepare_conversation_for_func(func)
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 94, in _prepare_conversation_for_func
+    raise Exception("not found")
+Exception: not found
+2025-03-13 13:52:00,972 - [ThreadPoolExecutor-0_3] - INFO - 第20次重新开始
+2025-03-13 13:52:00,973 - [ThreadPoolExecutor-0_3] - ERROR - 函数 nssPredict 处理时出现异常: not found
+Traceback (most recent call last):
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 370, in _process_in_thread
+    result = distiller.distill_function(func)
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 301, in distill_function
+    mock_response_data = self._mock_distill_process(func)
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 163, in _mock_distill_process
+    self._prepare_conversation_for_func(func)
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 94, in _prepare_conversation_for_func
+    raise Exception("not found")
+Exception: not found
+2025-03-13 13:52:00,973 - [ThreadPoolExecutor-0_3] - INFO - 第21次重新开始
+2025-03-13 13:52:00,974 - [ThreadPoolExecutor-0_3] - ERROR - 函数 nssPredict 处理时出现异常: not found
+Traceback (most recent call last):
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 370, in _process_in_thread
+    result = distiller.distill_function(func)
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 301, in distill_function
+    mock_response_data = self._mock_distill_process(func)
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 163, in _mock_distill_process
+    self._prepare_conversation_for_func(func)
+  File "/home/jzchen/DataDistiller/data_distiller.py", line 94, in _prepare_conversation_for_func
+    raise Exception("not found")
+Exception: not found
+2025-03-13 13:53:11,258 - [ThreadPoolExecutor-0_3] - INFO - 开始处理函数: nssPredict
+2025-03-13 13:53:11,329 - [ThreadPoolExecutor-0_3] - INFO - 第1次重新开始
+2025-03-13 13:53:11,350 - [ThreadPoolExecutor-0_3] - INFO - 开始读取 ./cleandocs/nssPredict.txt
+2025-03-13 13:53:11,371 - [ThreadPoolExecutor-0_3] - INFO - 开始第1次尝试
+2025-03-13 13:53:11,801 - [ThreadPoolExecutor-0_3] - INFO - Thinking...
+2025-03-13 13:53:11,809 - [ThreadPoolExecutor-0_3] - INFO - Reasoning:
+2025-03-13 13:53:31,983 - [ThreadPoolExecutor-0_3] - INFO - Assistant> 
+
+{
+    "function":"nssPredict",
+    "question": "假设某金融机构使用Nelson-Siegel模型进行债券定价，给定模型参数[0.03, -0.01, 0.02, 1.5]，需要预测3个月期、2年期和7年期的债券收益率，应该如何操作？",
+    "input": "model = dict(STRING, ANY)\nmodel[`modelName] = `ns\nmodel[`params] = [0.03, -0.01, 0.02, 1.5]\nmaturity = [0.25, 2, 7]",
+    "answer": "nssPredict(model, maturity)\n// 计算结果将返回三个期限对应的预测收益率向量"
+}
+2025-03-13 13:53:31,984 - [ThreadPoolExecutor-0_3] - INFO - 准备测试生成脚本正确性
+2025-03-13 13:53:31,986 - [ThreadPoolExecutor-0_3] - INFO - 脚本正常，准备生成文件
+2025-03-13 13:53:31,986 - [ThreadPoolExecutor-0_3] - INFO - 模型预实验成功，开始生成标注数据
+2025-03-13 13:53:31,987 - [ThreadPoolExecutor-0_3] - INFO - 开始读取 ./cleandocs/nssPredict.txt
+2025-03-13 13:53:31,993 - [ThreadPoolExecutor-0_3] - INFO - 开始第1次尝试
+2025-03-13 13:53:33,681 - [ThreadPoolExecutor-0_3] - INFO - Thinking...
+2025-03-13 13:53:33,683 - [ThreadPoolExecutor-0_3] - INFO - Reasoning:
+2025-03-13 13:53:53,023 - [ThreadPoolExecutor-0_3] - INFO - Assistant> 
+
+{
+    "function":"nssPredict",
+    "question": "使用Nelson-Siegel模型预测不同期限债券收益率",
+    "input": "model参数[0.03, -0.01, 0.02, 1.5]，期限[0.25,2,7]年",
+    "answer": "model = dict(STRING, ANY)\nmodel[`modelName] = 'ns'\nmodel[`params] = [0.03, -0.01, 0.02, 1.5]\nmaturity = [0.25, 2, 7]\nnssPredict(model, maturity)"
+}
+2025-03-13 13:53:53,024 - [ThreadPoolExecutor-0_3] - INFO - 准备测试生成脚本正确性
+2025-03-13 13:53:53,026 - [ThreadPoolExecutor-0_3] - ERROR - 数据脚本错误：<Exception> in run: Server response: 'Syntax Error: [line #1] Cannot recognize the token model参数' script: 'model参数[0.03, -0.01, 0.02, 1.5]，期限[0.25,2,7]年'
+2025-03-13 13:53:53,027 - [ThreadPoolExecutor-0_3] - INFO - 开始第2次尝试
+2025-03-13 13:53:54,081 - [ThreadPoolExecutor-0_3] - INFO - Thinking...
+2025-03-13 13:53:54,082 - [ThreadPoolExecutor-0_3] - INFO - Reasoning:
+2025-03-13 13:54:19,924 - [ThreadPoolExecutor-0_3] - INFO - Assistant> 
+
+{
+    "function":"nssPredict",
+    "question": "使用Nelson-Siegel模型参数[0.03, -0.01, 0.02, 1.5]预测3个月期、2年期和7年期债券收益率",
+    "input": "NS模型参数及期限向量[0.25, 2, 7]",
+    "answer": "model = dict(`modelName`params, `ns` [0.03, -0.01, 0.02, 1.5])\nmaturity = [0.25, 2, 7]\nprint nssPredict(model, maturity)"
+}
+2025-03-13 13:54:19,924 - [ThreadPoolExecutor-0_3] - INFO - 准备测试生成脚本正确性
+2025-03-13 13:54:19,926 - [ThreadPoolExecutor-0_3] - ERROR - 数据脚本错误：<Exception> in run: Server response: 'Syntax Error: [line #1] Cannot recognize the token NS模型参数及期限向量' script: 'NS模型参数及期限向量[0.25, 2, 7]'
+2025-03-13 13:54:19,927 - [ThreadPoolExecutor-0_3] - ERROR - 解答脚本错误：<Exception> in run: Server response: 'model = dict(["modelName","params"], ["ns",""][[0.03,-0.01,0.02,1.5]]) => A scalar or set object doesn't support random access.' script: 'model = dict(`modelName`params, `ns` [0.03, -0.01, 0.02, 1.5])
+maturity = [0.25, 2, 7]
+print nssPredict(model, maturity)'
+2025-03-13 13:54:19,928 - [ThreadPoolExecutor-0_3] - INFO - 函数 nssPredict 处理失败
+2025-03-13 13:54:19,928 - [ThreadPoolExecutor-0_3] - INFO - 第2次重新开始
+2025-03-13 13:54:19,930 - [ThreadPoolExecutor-0_3] - INFO - 开始读取 ./cleandocs/nssPredict.txt
+2025-03-13 13:54:19,933 - [ThreadPoolExecutor-0_3] - INFO - 开始第1次尝试
+2025-03-13 13:54:20,487 - [ThreadPoolExecutor-0_3] - INFO - Thinking...
+2025-03-13 13:54:20,488 - [ThreadPoolExecutor-0_3] - INFO - Reasoning:
+2025-03-13 13:54:42,301 - [ThreadPoolExecutor-0_3] - INFO - Assistant> 
+
+{
+    "function":"nssPredict",
+    "question": "假设我们基于Nelson-Siegel模型构建了利率期限结构模型，包含四个参数和三个不同剩余期限，如何获取这些期限对应的理论收益率？",
+    "input": "model = dict(STRING, ANY)\nmodel[`modelName] = `ns\nmodel[`params] = [0.0325, -0.0078, 0.0153, 1.876]\nmaturities = [0.5, 2.0, 7.0, 15.0]",
+    "answer": "// 使用NS模型计算不同剩余期限的理论收益率\nnssPredict(model, maturities)"
+}
+2025-03-13 13:54:42,302 - [ThreadPoolExecutor-0_3] - INFO - 准备测试生成脚本正确性
+2025-03-13 13:54:42,303 - [ThreadPoolExecutor-0_3] - INFO - 脚本正常，准备生成文件
+2025-03-13 13:54:42,304 - [ThreadPoolExecutor-0_3] - INFO - 模型预实验成功，开始生成标注数据
+2025-03-13 13:54:42,304 - [ThreadPoolExecutor-0_3] - INFO - 开始读取 ./cleandocs/nssPredict.txt
+2025-03-13 13:54:42,307 - [ThreadPoolExecutor-0_3] - INFO - 开始第1次尝试
+2025-03-13 13:54:42,595 - [ThreadPoolExecutor-0_3] - INFO - Thinking...
+2025-03-13 13:54:42,596 - [ThreadPoolExecutor-0_3] - INFO - Reasoning:
+2025-03-13 13:55:05,924 - [ThreadPoolExecutor-0_3] - INFO - Assistant> 
+
+{
+    "function":"nssPredict",
+    "question": "基于Nelson-Siegel模型参数计算不同剩余期限的理论收益率",
+    "input": "模拟NS模型参数[0.03, -0.01, 0.005, 2.0]和剩余期限[0.5, 2, 5]",
+    "answer": "model = dict(STRING, ANY)\nmodel[`modelName] = \"ns\"\nmodel[`params] = [0.03, -0.01, 0.005, 2.0]\nmaturity = [0.5, 2, 5]\nselect maturity, nssPredict(model, maturity) as theoretical_yield"
+}
+2025-03-13 13:55:05,924 - [ThreadPoolExecutor-0_3] - INFO - 准备测试生成脚本正确性
+2025-03-13 13:55:05,926 - [ThreadPoolExecutor-0_3] - ERROR - 数据脚本错误：<Exception> in run: Server response: 'Syntax Error: [line #1] Cannot recognize the token 模拟NS模型参数' script: '模拟NS模型参数[0.03, -0.01, 0.005, 2.0]和剩余期限[0.5, 2, 5]'
+2025-03-13 13:55:05,927 - [ThreadPoolExecutor-0_3] - INFO - 开始第2次尝试
+2025-03-13 13:55:06,235 - [ThreadPoolExecutor-0_3] - INFO - Thinking...
+2025-03-13 13:55:06,236 - [ThreadPoolExecutor-0_3] - INFO - Reasoning:
+2025-03-13 13:55:35,861 - [ThreadPoolExecutor-0_3] - INFO - Assistant> 
+
+{
+    "function":"nssPredict",
+    "question": "基于NS模型参数[0.03, -0.01, 0.005, 2.0]和剩余期限[0.5, 2, 5]计算理论收益率",
+    "input": "model = dict(STRING, ANY)\nmodel[`modelName] = 'ns'\nmodel[`params] = [0.03, -0.01, 0.005, 2.0]\nmaturity = [0.5, 2, 5]",
+    "answer": "model = dict(STRING, ANY)\nmodel[`modelName] = 'ns'\nmodel[`params] = [0.03, -0.01, 0.005, 2.0]\nnssPredict(model, [0.5, 2, 5])\n\n// 结果示例\n// [0.0265, 0.0213, 0.0247] (实际输出可能因参数精度不同略有差异)"
+}
+2025-03-13 13:55:35,861 - [ThreadPoolExecutor-0_3] - INFO - 准备测试生成脚本正确性
+2025-03-13 13:55:35,863 - [ThreadPoolExecutor-0_3] - INFO - 脚本正常，准备生成文件
+2025-03-13 13:55:35,864 - [ThreadPoolExecutor-0_3] - INFO - 已生成输出文件: ./data/jinzhi_nssPredict_3.txt
+2025-03-13 13:55:35,864 - [ThreadPoolExecutor-0_3] - INFO - 函数 nssPredict 处理成功
+2025-03-13 13:55:35,864 - [ThreadPoolExecutor-0_3] - INFO - 第3次重新开始
+2025-03-13 13:55:35,867 - [ThreadPoolExecutor-0_3] - INFO - 开始读取 ./cleandocs/nssPredict.txt
+2025-03-13 13:55:35,870 - [ThreadPoolExecutor-0_3] - INFO - 开始第1次尝试
+2025-03-13 13:55:36,375 - [ThreadPoolExecutor-0_3] - INFO - Thinking...
+2025-03-13 13:55:36,376 - [ThreadPoolExecutor-0_3] - INFO - Reasoning:
+2025-03-13 13:56:04,747 - [ThreadPoolExecutor-0_3] - INFO - Assistant> 
+
+{
+    "function": "nssPredict",
+    "question": "当使用包含负值参数的NSS模型时，如何同时预测包含3个月短期债券和15年长期债券的收益率？",
+    "input": "model = dict(STRING, ANY)\nmodel[`modelName] = 'nss'\nmodel[`params] = [0.02, -0.015, 0.03, -0.01, 1.5, 0.2]\nmaturity = [0.25, 1, 5, 15]",
+    "answer": "model = dict(STRING, ANY)\nmodel[`modelName] = 'nss'\nmodel[`params] = [0.02, -0.015, 0.03, -0.01, 1.5, 0.2]\nnssPredict(model, [0.25, 1, 5, 15])\n\n// 预期结果示例（实际值可能因参数精度不同）：\n// [0.0185, 0.0152, 0.0221, 0.0198]"
+}
+2025-03-13 13:56:04,747 - [ThreadPoolExecutor-0_3] - INFO - 准备测试生成脚本正确性
+2025-03-13 13:56:04,749 - [ThreadPoolExecutor-0_3] - INFO - 脚本正常，准备生成文件
+2025-03-13 13:56:04,749 - [ThreadPoolExecutor-0_3] - INFO - 模型预实验成功，开始生成标注数据
+2025-03-13 13:56:04,750 - [ThreadPoolExecutor-0_3] - INFO - 开始读取 ./cleandocs/nssPredict.txt
+2025-03-13 13:56:04,752 - [ThreadPoolExecutor-0_3] - INFO - 开始第1次尝试
+2025-03-13 13:56:05,186 - [ThreadPoolExecutor-0_3] - INFO - Thinking...
+2025-03-13 13:56:05,187 - [ThreadPoolExecutor-0_3] - INFO - Reasoning:
+2025-03-13 13:56:26,342 - [ThreadPoolExecutor-0_3] - INFO - Assistant> 
+
+{
+    "function":"nssPredict",
+    "question": "当使用包含负值参数的NSS模型时，如何同时预测包含3个月短期债券和15年长期债券的收益率？",
+    "input": "model = dict(STRING, ANY)\nmodel[`modelName] = `nss\nmodel[`params] = [0.02, -0.015, 0.03, -0.008, 1.5, 0.2]\nmaturity = [0.25, 15]",
+    "answer": "// 创建包含负值参数的NSS模型\nmodel = dict(STRING, ANY)\nmodel[`modelName] = `nss\nmodel[`params] = [0.02, -0.015, 0.03, -0.008, 1.5, 0.2]\n\n// 计算3个月(0.25年)和15年债券的收益率\nmaturity = [0.25, 15]\nresult = nssPredict(model, maturity)\n\n// 输出结果示例：[0.0185, 0.0327] 具体数值取决于参数"
+}
+2025-03-13 13:56:26,342 - [ThreadPoolExecutor-0_3] - INFO - 准备测试生成脚本正确性
+2025-03-13 13:56:26,344 - [ThreadPoolExecutor-0_3] - INFO - 脚本正常，准备生成文件
+2025-03-13 13:56:26,344 - [ThreadPoolExecutor-0_3] - INFO - 已生成输出文件: ./data/jinzhi_nssPredict_4.txt
+2025-03-13 13:56:26,345 - [ThreadPoolExecutor-0_3] - INFO - 函数 nssPredict 处理成功
+2025-03-13 13:56:26,345 - [ThreadPoolExecutor-0_3] - INFO - 第4次重新开始
+2025-03-13 13:56:26,348 - [ThreadPoolExecutor-0_3] - INFO - 开始读取 ./cleandocs/nssPredict.txt
+2025-03-13 13:56:26,351 - [ThreadPoolExecutor-0_3] - INFO - 开始第1次尝试
+2025-03-13 13:56:26,771 - [ThreadPoolExecutor-0_3] - INFO - Thinking...
+2025-03-13 13:56:26,772 - [ThreadPoolExecutor-0_3] - INFO - Reasoning:
+2025-03-13 13:56:59,194 - [ThreadPoolExecutor-0_3] - INFO - Assistant> 
+
+{
+    "function":"nssPredict",
+    "question": "当使用NSS模型参数包含不同衰减率的lambda值时，如何预测包含极短期（1个月）、中期（7年）和超长期（30年）债券的理论收益率？",
+    "input": "model = dict(STRING, ANY)\nmodel[`modelName] = `nss\nmodel[`params] = [0.028, -0.035, 0.018, -0.009, 0.3, 4.5]\nmaturities = [0.0833333, 7, 30] // 对应1个月(1/12)、7年、30年",
+    "answer": "// 使用NSS模型预测极端期限债券收益率\nnssPredict(model, maturities)\n\n/* 预期输出特点：\n1. 极短期收益率受β0和β1主导\n2. 中期收益率受λ0=0.3影响较大\n3. 超长期收益率反映β0和β3的长期成分\n实际输出示例：[0.0153, 0.0238, 0.0291] */"
+}
+2025-03-13 13:56:59,195 - [ThreadPoolExecutor-0_3] - INFO - 准备测试生成脚本正确性
+2025-03-13 13:56:59,197 - [ThreadPoolExecutor-0_3] - INFO - 脚本正常，准备生成文件
+2025-03-13 13:56:59,197 - [ThreadPoolExecutor-0_3] - INFO - 模型预实验成功，开始生成标注数据
+2025-03-13 13:56:59,198 - [ThreadPoolExecutor-0_3] - INFO - 开始读取 ./cleandocs/nssPredict.txt
+2025-03-13 13:56:59,201 - [ThreadPoolExecutor-0_3] - INFO - 开始第1次尝试
+2025-03-13 13:56:59,512 - [ThreadPoolExecutor-0_3] - INFO - Thinking...
+2025-03-13 13:56:59,513 - [ThreadPoolExecutor-0_3] - INFO - Reasoning:
+2025-03-13 13:57:24,687 - [ThreadPoolExecutor-0_3] - INFO - Assistant> 
+
+{
+    "function":"nssPredict",
+    "question": "当使用NSS模型参数包含不同衰减率的lambda值时，如何预测包含极短期（1个月）、中期（7年）和超长期（30年）债券的理论收益率？",
+    "input": "model = dict(STRING, ANY)\nmodel[`modelName] = `nss\nmodel[`params] = [0.028, -0.035, -0.018, 0.042, 1.2, 0.15]\nmaturity = [0.0833, 7, 30] // 1个月=0.0833年，7年，30年",
+    "answer": "model = dict(STRING, ANY)\nmodel[`modelName] = `nss\nmodel[`params] = [0.028, -0.035, -0.018, 0.042, 1.2, 0.15]\nmaturities = [0.0833, 7, 30]\nprint nssPredict(model, maturities)\n\n// 输出示例（实际值会根据参数变化）\n// [0.012345, 0.035678, 0.042159]"
+}
+2025-03-13 13:57:24,691 - [ThreadPoolExecutor-0_3] - INFO - 准备测试生成脚本正确性
+2025-03-13 13:57:24,693 - [ThreadPoolExecutor-0_3] - INFO - 脚本正常，准备生成文件
+2025-03-13 13:57:24,694 - [ThreadPoolExecutor-0_3] - INFO - 已生成输出文件: ./data/jinzhi_nssPredict_5.txt
+2025-03-13 13:57:24,694 - [ThreadPoolExecutor-0_3] - INFO - 函数 nssPredict 处理成功
+2025-03-13 13:57:24,694 - [ThreadPoolExecutor-0_3] - INFO - 第5次重新开始
+2025-03-13 13:57:24,698 - [ThreadPoolExecutor-0_3] - INFO - 开始读取 ./cleandocs/nssPredict.txt
+2025-03-13 13:57:24,702 - [ThreadPoolExecutor-0_3] - INFO - 开始第1次尝试
+2025-03-13 13:57:25,188 - [ThreadPoolExecutor-0_3] - INFO - Thinking...
+2025-03-13 13:57:25,189 - [ThreadPoolExecutor-0_3] - INFO - Reasoning:
+2025-03-13 13:57:54,254 - [ThreadPoolExecutor-0_3] - INFO - Assistant> 
+
+{
+    "function":"nssPredict",
+    "question": "当需要对比NS模型和NSS模型对相同期限债券的预测结果时，如何分别计算1年、5年、10年期限的理论收益率？",
+    "input": "model_ns = dict(STRING, ANY)\nmodel_ns[`modelName] = `ns\nmodel_ns[`params] = [0.035, -0.02, 0.018, 1.8]\n\nmodel_nss = dict(STRING, ANY)\nmodel_nss[`modelName] = `nss\nmodel_nss[`params] = [0.04, -0.015, 0.025, -0.008, 1.5, 0.3]\n\nmaturity = [1, 5, 10]",
+    "answer": "// NS模型预测\nns_result = nssPredict(model_ns, maturity)\n// NSS模型预测\nnss_result = nssPredict(model_nss, maturity)\n\n// 输出结果示例\n/*\nNS模型结果：[0.0331, 0.0289, 0.0325]\nNSS模型结果：[0.0387, 0.0295, 0.0342]\n*/\n\n[ns_result, nss_result]"
+}
+2025-03-13 13:57:54,254 - [ThreadPoolExecutor-0_3] - INFO - 准备测试生成脚本正确性
+2025-03-13 13:57:54,256 - [ThreadPoolExecutor-0_3] - INFO - 脚本正常，准备生成文件
+2025-03-13 13:57:54,256 - [ThreadPoolExecutor-0_3] - INFO - 模型预实验成功，开始生成标注数据
+2025-03-13 13:57:54,257 - [ThreadPoolExecutor-0_3] - INFO - 开始读取 ./cleandocs/nssPredict.txt
+2025-03-13 13:57:54,259 - [ThreadPoolExecutor-0_3] - INFO - 开始第1次尝试
+2025-03-13 13:57:55,745 - [ThreadPoolExecutor-0_3] - INFO - Thinking...
+2025-03-13 13:57:55,746 - [ThreadPoolExecutor-0_3] - INFO - Reasoning:
+2025-03-13 13:58:21,497 - [ThreadPoolExecutor-0_3] - INFO - Assistant> 
+
+{
+    "function":"nssPredict",
+    "question": "当需要对比NS模型和NSS模型对相同期限债券的预测结果时，如何分别计算1年、5年、10年期限的理论收益率？",
+    "input": "模拟NS/NSS模型参数及期限数据：\nns_model = dict(STRING, ANY)(`modelName`params, [`ns] [0.03, -0.02, 0.01, 1.5])\nnss_model = dict(STRING, ANY)(`modelName`params, [`nss] [0.028, -0.015, 0.008, 0.002, 1.8, 0.2])\nmaturity = [1, 5, 10]",
+    "answer": "// NS模型预测\nns_result = nssPredict(ns_model, [1, 5, 10])\n// NSS模型预测\nnss_result = nssPredict(nss_model, [1, 5, 10])\n// 对比结果\nresult_table = table(maturity as Maturity, ns_result as NS_Yield, nss_result as NSS_Yield)"
+}
+2025-03-13 13:58:21,497 - [ThreadPoolExecutor-0_3] - INFO - 准备测试生成脚本正确性
+2025-03-13 13:58:21,499 - [ThreadPoolExecutor-0_3] - ERROR - 数据脚本错误：<Exception> in run: Server response: 'Syntax Error: [line #1] Cannot recognize the token 模拟NS' script: '模拟NS/NSS模型参数及期限数据：
+ns_model = dict(STRING, ANY)(`modelName`params, [`ns] [0.03, -0.02, 0.01, 1.5])
+nss_model = dict(STRING, ANY)(`modelName`params, [`nss] [0.028, -0.015, 0.008, 0.002, 1.8, 0.2])
+maturity = [1, 5, 10]'
+2025-03-13 13:58:21,500 - [ThreadPoolExecutor-0_3] - ERROR - 解答脚本错误：<Exception> in run: Server response: 'Syntax Error: [line #2] Cannot recognize the token ns_model' script: '// NS模型预测
+ns_result = nssPredict(ns_model, [1, 5, 10])
+// NSS模型预测
+nss_result = nssPredict(nss_model, [1, 5, 10])
+// 对比结果
+result_table = table(maturity as Maturity, ns_result as NS_Yield, nss_result as NSS_Yield)'
+2025-03-13 13:58:21,501 - [ThreadPoolExecutor-0_3] - INFO - 开始第2次尝试
+2025-03-13 13:58:21,834 - [ThreadPoolExecutor-0_3] - INFO - Thinking...
+2025-03-13 13:58:21,835 - [ThreadPoolExecutor-0_3] - INFO - Reasoning:
+2025-03-13 13:58:47,026 - [ThreadPoolExecutor-0_3] - INFO - Assistant> 
+
+{
+    "function":"nssPredict",
+    "question": "当需要对比NS模型和NSS模型对相同期限债券的预测结果时，如何分别计算1年、5年、10年期限的理论收益率？",
+    "input": "// 创建NS模型字典\nns_model = dict(STRING, ANY)\nns_model[`modelName] = `ns\nns_model[`params] = [0.03, -0.02, 0.01, 1.5]\n\n// 创建NSS模型字典\nnss_model = dict(STRING, ANY)\nnss_model[`modelName] = `nss\nnss_model[`params] = [0.028, -0.015, 0.008, 0.002, 1.8, 0.2]\n\nmaturity = [1, 5, 10]",
+    "answer": "// NS模型预测收益率\nns_yield = nssPredict(ns_model, maturity)\n\n// NSS模型预测收益率\nnss_yield = nssPredict(nss_model, maturity)\n\n// 创建对比结果表\nresult = table(maturity as Maturity, ns_yield as NS_Yield, nss_yield as NSS_Yield)\nselect * from result"
+}
+2025-03-13 13:58:47,027 - [ThreadPoolExecutor-0_3] - INFO - 准备测试生成脚本正确性
+2025-03-13 13:58:47,030 - [ThreadPoolExecutor-0_3] - INFO - 脚本正常，准备生成文件
+2025-03-13 13:58:47,031 - [ThreadPoolExecutor-0_3] - INFO - 已生成输出文件: ./data/jinzhi_nssPredict_6.txt
+2025-03-13 13:58:47,031 - [ThreadPoolExecutor-0_3] - INFO - 函数 nssPredict 处理成功
+2025-03-13 13:58:47,031 - [ThreadPoolExecutor-0_3] - INFO - 第6次重新开始
+2025-03-13 13:58:47,036 - [ThreadPoolExecutor-0_3] - INFO - 开始读取 ./cleandocs/nssPredict.txt
+2025-03-13 13:58:47,039 - [ThreadPoolExecutor-0_3] - INFO - 开始第1次尝试
+2025-03-13 13:58:47,567 - [ThreadPoolExecutor-0_3] - INFO - Thinking...
+2025-03-13 13:58:47,568 - [ThreadPoolExecutor-0_3] - INFO - Reasoning:
+2025-03-13 13:59:17,192 - [ThreadPoolExecutor-0_3] - INFO - Assistant> 
+
+{
+    "function": "nssPredict",
+    "question": "当需要同时使用两组不同的NSS模型参数预测同一组债券期限（包括0.5年、7年、20年）的收益率时，应该如何操作？",
+    "input": "// 创建第一组NSS模型参数\nmodel1 = dict(STRING, ANY)\nmodel1[`modelName] = `nss\nmodel1[`params] = [0.035, -0.022, 0.018, -0.007, 2.5, 0.18]\n\n// 创建第二组NSS模型参数\nmodel2 = dict(STRING, ANY)\nmodel2[`modelName] = `nss\nmodel2[`params] = [0.028, -0.015, 0.012, -0.004, 1.6, 0.22]\n\n// 统一债券期限（单位：年）\nmaturities = [0.5, 7, 20]",
+    "answer": "// 计算第一组参数的预测收益率\nresult1 = nssPredict(model1, maturities)\n\n// 计算第二组参数的预测收益率\nresult2 = nssPredict(model2, maturities)\n\n// 创建对比结果表\ncompareResult = table(maturities as Maturity, result1 as Model1_Yield, result2 as Model2_Yield)\nselect * from compareResult\n\n/* 示例输出\nMaturity | Model1_Yield | Model2_Yield\n-------------------------------\n0.5     | 0.0314       | 0.0298\n7       | 0.0367       | 0.0332\n20      | 0.0391       | 0.0356\n（实际数值会根据参数精度不同变化）\n*/"
+}
+2025-03-13 13:59:17,193 - [ThreadPoolExecutor-0_3] - INFO - 准备测试生成脚本正确性
+2025-03-13 13:59:17,197 - [ThreadPoolExecutor-0_3] - INFO - 脚本正常，准备生成文件
+2025-03-13 13:59:17,198 - [ThreadPoolExecutor-0_3] - INFO - 模型预实验成功，开始生成标注数据
+2025-03-13 13:59:17,198 - [ThreadPoolExecutor-0_3] - INFO - 开始读取 ./cleandocs/nssPredict.txt
+2025-03-13 13:59:17,202 - [ThreadPoolExecutor-0_3] - INFO - 开始第1次尝试
+2025-03-13 13:59:17,526 - [ThreadPoolExecutor-0_3] - INFO - Thinking...
+2025-03-13 13:59:17,527 - [ThreadPoolExecutor-0_3] - INFO - Reasoning:
+2025-03-13 14:00:01,355 - [ThreadPoolExecutor-0_3] - INFO - Assistant> 
+
+{
+    "function":"nssPredict",
+    "question": "当需要同时使用两组不同的NSS模型参数预测同一组债券期限（包括0.5年、7年、20年）的收益率时，应该如何操作？",
+    "input": "// 模拟两组NSS参数和债券期限\nmodel1 = dict(STRING, ANY)\nmodel1[`modelName] = `nss\nmodel1[`params] = [0.038, -0.048, -0.022, 0.047, 1.873, 0.161]\n\nmodel2 = dict(STRING, ANY)\nmodel2[`modelName] = `nss\nmodel2[`params] = [0.035, -0.045, -0.020, 0.042, 2.1, 0.18]\n\nmaturity = [0.5, 7, 20]",
+    "answer": "// 分别对两组参数应用nssPredict函数\nresult1 = nssPredict(model1, maturity)\nresult2 = nssPredict(model2, maturity)\n\n// 查看两组参数的预测结果\n[result1, result2]"
+}
+2025-03-13 14:00:01,355 - [ThreadPoolExecutor-0_3] - INFO - 准备测试生成脚本正确性
+2025-03-13 14:00:01,357 - [ThreadPoolExecutor-0_3] - INFO - 脚本正常，准备生成文件
+2025-03-13 14:00:01,358 - [ThreadPoolExecutor-0_3] - INFO - 已生成输出文件: ./data/jinzhi_nssPredict_7.txt
+2025-03-13 14:00:01,358 - [ThreadPoolExecutor-0_3] - INFO - 函数 nssPredict 处理成功
+2025-03-13 14:00:01,359 - [ThreadPoolExecutor-0_3] - INFO - 第7次重新开始
+2025-03-13 14:00:01,364 - [ThreadPoolExecutor-0_3] - INFO - 开始读取 ./cleandocs/nssPredict.txt
+2025-03-13 14:00:01,367 - [ThreadPoolExecutor-0_3] - INFO - 开始第1次尝试
+2025-03-13 14:00:01,929 - [ThreadPoolExecutor-0_3] - INFO - Thinking...
+2025-03-13 14:00:01,931 - [ThreadPoolExecutor-0_3] - INFO - Reasoning:
+2025-03-13 14:00:25,558 - [ThreadPoolExecutor-0_3] - INFO - Assistant> 
+
+{
+    "function":"nssPredict",
+    "question": "当NSS模型参数中存在零值和负值时，如何预测包括1个月、3年、10年、25年等多个不同期限的债券收益率？",
+    "input": "// 创建包含零值和负值的NSS模型参数\nmodel = dict(STRING, ANY)\nmodel[`modelName] = `nss\nmodel[`params] = [0.025, -0.01, 0.0, -0.005, 1.8, 0.1]\nmaturity = [0.0833, 3, 10,25] // 对应1个月、3年、10年、25年",
+    "answer": "// 使用NSS模型预测多期限收益率\nmodel = dict(STRING, ANY)\nmodel[`modelName] = `nss\nmodel[`params] = [0.025, -0.01, 0.0, -0.005, 1.8, 0.1]\nmaturities = [0.0833, 3, 10, 25]\nresult = nssPredict(model, maturities)\n\n/* 预期输出结构示例（实际值会根据参数变化）：\n[0.0235, 0.0179, 0.0196, 0.0203] \n其中：\n0.0833年(1个月)收益率约2.35%\n3年期收益率约1.79%\n10年期收益率约1.96%\n25年期收益率约2.03%\n*/"
+}
+2025-03-13 14:00:25,558 - [ThreadPoolExecutor-0_3] - INFO - 准备测试生成脚本正确性
+2025-03-13 14:00:25,560 - [ThreadPoolExecutor-0_3] - INFO - 脚本正常，准备生成文件
+2025-03-13 14:00:25,561 - [ThreadPoolExecutor-0_3] - INFO - 模型预实验成功，开始生成标注数据
+2025-03-13 14:00:25,561 - [ThreadPoolExecutor-0_3] - INFO - 开始读取 ./cleandocs/nssPredict.txt
+2025-03-13 14:00:25,564 - [ThreadPoolExecutor-0_3] - INFO - 开始第1次尝试
+2025-03-13 14:00:26,944 - [ThreadPoolExecutor-0_3] - INFO - Thinking...
+2025-03-13 14:00:26,946 - [ThreadPoolExecutor-0_3] - INFO - Reasoning:
+2025-03-13 14:01:02,466 - [ThreadPoolExecutor-0_3] - INFO - Assistant> 
+
+{
+    "function":"nssPredict",
+    "question": "当NSS模型参数中存在零值和负值时，如何预测包括1个月、3年、10年、25年等多个不同期限的债券收益率？",
+    "input": "model = dict(STRING, ANY)\nmodel[`modelName] = 'nss'\nmodel[`params] = [0, -0.05, 0, 0.03, 0, 1.5]  # 包含零和负值的参数\nmaturity = [0.083333, 3, 10, 25]  # 1个月、3年、10年、25年对应到期年限",
+    "answer": "model = dict(STRING, ANY)\nmodel[`modelName] = 'nss'\nmodel[`params] = [0, -0.05, 0, 0.03, 0, 1.5]\nmaturity = [0.083333, 3, 10, 25]\nnssPredict(model, maturity)\n// 输出结果（示例）：\n// [0.0125, 0.0289, 0.0356, 0.0421] 实际结果会根据模型参数计算得出"
+}
+2025-03-13 14:01:02,467 - [ThreadPoolExecutor-0_3] - INFO - 准备测试生成脚本正确性
+2025-03-13 14:01:02,468 - [ThreadPoolExecutor-0_3] - ERROR - 数据脚本错误：<Exception> in run: Server response: 'Syntax Error: [line #3] Can't recognize token #' script: 'model = dict(STRING, ANY)
+model[`modelName] = 'nss'
+model[`params] = [0, -0.05, 0, 0.03, 0, 1.5]  # 包含零和负值的参数
+maturity = [0.083333, 3, 10, 25]  # 1个月、3年、10年、25年对应到期年限'
+2025-03-13 14:01:02,469 - [ThreadPoolExecutor-0_3] - INFO - 开始第2次尝试
+2025-03-13 14:01:02,839 - [ThreadPoolExecutor-0_3] - INFO - Thinking...
+2025-03-13 14:01:02,840 - [ThreadPoolExecutor-0_3] - INFO - Reasoning:
+2025-03-13 14:01:25,969 - [ThreadPoolExecutor-0_3] - INFO - Assistant> 
+
+{
+    "function":"nssPredict",
+    "question": "当NSS模型参数中存在零值和负值时，如何预测多个不同期限的债券收益率？",
+    "input": "包含零和负值的NSS参数模型及多期限输入",
+    "answer": "model = dict(STRING, ANY)
+model[`modelName] = `nss  // 使用符号类型`nss而不是字符串'nss'
+model[`params] = [0, -0.05, 0, 0.03, 0, 1.5]  // 包含零和负值的参数
+maturity = [0.083333, 3, 10, 25]  // 1个月、3年、10年、25年对应到期年限
+nssPredict(model, maturity)"
+}
+2025-03-13 14:01:25,969 - [ThreadPoolExecutor-0_3] - ERROR - JSON解析错误: Invalid control character at: line 7 column 41 (char 165)
+2025-03-13 14:01:25,969 - [ThreadPoolExecutor-0_3] - ERROR - LLM响应解析失败: JSON解析错误: Invalid control character at: line 7 column 41 (char 165)
+2025-03-13 14:01:25,970 - [ThreadPoolExecutor-0_3] - INFO - 函数 nssPredict 处理失败
+2025-03-13 14:01:25,970 - [ThreadPoolExecutor-0_3] - INFO - 第8次重新开始
+2025-03-13 14:01:25,976 - [ThreadPoolExecutor-0_3] - INFO - 开始读取 ./cleandocs/nssPredict.txt
+2025-03-13 14:01:25,979 - [ThreadPoolExecutor-0_3] - INFO - 开始第1次尝试
+2025-03-13 14:01:26,831 - [ThreadPoolExecutor-0_3] - INFO - Thinking...
+2025-03-13 14:01:26,832 - [ThreadPoolExecutor-0_3] - INFO - Reasoning:
+2025-03-13 14:02:01,404 - [ThreadPoolExecutor-0_3] - INFO - Assistant> 
+
+{
+    "function":"nssPredict",
+    "question": "当需要对比两组不同经济周期下的NSS模型参数（一组代表经济扩张期，另一组代表经济收缩期）对同一组债券期限的预测影响时，如何获取0.25年、10年、25年三个关键期限的对比收益率数据？",
+    "input": "model1 = dict(STRING, ANY)\nmodel1[`modelName] = `nss\nmodel1[`params] = [0.035, -0.018, 0.022, -0.009, 1.5, 0.4]\n\nmodel2 = dict(STRING, ANY)\nmodel2[`modelName] = `nss\nmodel2[`params] = [0.025, 0.012, -0.015, 0.007, 2.3, 0.25]\n\nmaturity = [0.25, 10, 25]",
+    "answer": "// 计算两组参数的预测结果\nresult1 = nssPredict(model1, maturity)\nresult2 = nssPredict(model2, maturity)\n\n// 创建对比结果表\nresult_table = table(maturity as Maturity, result1 as Expansion_Period, result2 as Recession_Period)\nselect * from result_table"
+}
+2025-03-13 14:02:01,405 - [ThreadPoolExecutor-0_3] - INFO - 准备测试生成脚本正确性
+2025-03-13 14:02:01,408 - [ThreadPoolExecutor-0_3] - INFO - 脚本正常，准备生成文件
+2025-03-13 14:02:01,409 - [ThreadPoolExecutor-0_3] - INFO - 模型预实验成功，开始生成标注数据
+2025-03-13 14:02:01,409 - [ThreadPoolExecutor-0_3] - INFO - 开始读取 ./cleandocs/nssPredict.txt
+2025-03-13 14:02:01,412 - [ThreadPoolExecutor-0_3] - INFO - 开始第1次尝试
+2025-03-13 14:02:01,739 - [ThreadPoolExecutor-0_3] - INFO - Thinking...
+2025-03-13 14:02:01,740 - [ThreadPoolExecutor-0_3] - INFO - Reasoning:
+2025-03-13 14:02:35,824 - [ThreadPoolExecutor-0_3] - INFO - Assistant> 
+
+{
+    "function":"nssPredict",
+    "question": "获取不同经济周期NSS模型参数在0.25/10/25年关键期限的对比收益率",
+    "input": "// 经济扩张期模型参数\nexpansion_model = dict(STRING, ANY)\nexpansion_model[`modelName] = `nss\nexpansion_model[`params] = [0.0382, -0.0486, -0.0223, 0.0475, 1.8730, 0.1612]\n\n// 经济收缩期模型参数\ncontraction_model = dict(STRING, ANY)\ncontraction_model[`modelName] = `nss\ncontraction_model[`params] = [0.0285, -0.0389, -0.0152, 0.0357, 2.1543, 0.1428]\n\nmaturity = [0.25, 10, 25]",
+    "answer": "// 计算各周期收益率预测\nexpansion_yields = nssPredict(expansion_model, maturity)\ncontraction_yields = nssPredict(contraction_model, maturity)\n\n// 创建对比表格\nresult = table(maturity as Maturity, expansion_yields as Expansion, contraction_yields as Contraction)\nselect Maturity, format(Expansion*100,'0.4f')+'%' as Expansion_Yield, format(Contraction*100,'0.4f')+'%' as Contraction_Yield from result"
+}
+2025-03-13 14:02:35,824 - [ThreadPoolExecutor-0_3] - INFO - 准备测试生成脚本正确性
+2025-03-13 14:02:35,868 - [ThreadPoolExecutor-0_3] - ERROR - 解答脚本错误：<Exception> in run: Server response: 'select Maturity,format(Expansion * 100, "0.4f") + '%' as Expansion_Yield,format(Contraction * 100, "0.4f") + '%' as Contraction_Yield from result => String cannot be added to a vector that is not of string type.' script: '// 计算各周期收益率预测
+expansion_yields = nssPredict(expansion_model, maturity)
+contraction_yields = nssPredict(contraction_model, maturity)
+
+// 创建对比表格
+result = table(maturity as Maturity, expansion_yields as Expansion, contraction_yields as Contraction)
+select Maturity, format(Expansion*100,'0.4f')+'%' as Expansion_Yield, format(Contraction*100,'0.4f')+'%' as Contraction_Yield from result'
+2025-03-13 14:02:35,869 - [ThreadPoolExecutor-0_3] - INFO - 开始第2次尝试
+2025-03-13 14:02:36,227 - [ThreadPoolExecutor-0_3] - INFO - Thinking...
+2025-03-13 14:02:36,228 - [ThreadPoolExecutor-0_3] - INFO - Reasoning:
+2025-03-13 14:03:49,362 - [ThreadPoolExecutor-0_3] - INFO - Assistant> 
+
+{
+    "function":"nssPredict",
+    "question": "当需要对比两组不同经济周期下的NSS模型参数（一组代表经济扩张期，另一组代表经济收缩期）对同一组债券期限的预测影响时，如何获取0.25年、10年、25年三个关键期限的对比收益率数据？",
+    "input": "// 构造经济周期模型参数\nexpansion_model = dict(STRING, ANY)\nexpansion_model[`modelName] = 'nss'\nexpansion_model[`params] = [0.05, -0.03, 0.02, 0.01, 1.8, 0.2]\n\ncontraction_model = dict(STRING, ANY)\ncontraction_model[`modelName] = 'nss'\ncontraction_model[`params] = [0.02, 0.01, -0.03, 0.05, 2.5, 0.15]\n\nmaturity = [0.25, 10, 25]",
+    "answer": "// 计算各周期收益率预测\nexpansion_yields = nssPredict(expansion_model, maturity)\ncontraction_yields = nssPredict(contraction_model, maturity)\n\n// 创建对比表格并格式化输出\nresult = table(maturity as Maturity, expansion_yields as Expansion, contraction_yields as Contraction)\nselect Maturity, format(Expansion*100, '0.4f%%') as Expansion_Yield, format(Contraction*100, '0.4f%%') as Contraction_Yield from result"
+}
+2025-03-13 14:03:49,363 - [ThreadPoolExecutor-0_3] - INFO - 准备测试生成脚本正确性
+2025-03-13 14:03:49,389 - [ThreadPoolExecutor-0_3] - ERROR - 解答脚本错误：<Exception> in run: Server response: 'select Maturity,format(Expansion * 100, "0.4f%%") as Expansion_Yield,format(Contraction * 100, "0.4f%%") as Contraction_Yield from result => Characters other than 0/#/./,/E/% can't appear in the middle of a number format.' script: '// 计算各周期收益率预测
+expansion_yields = nssPredict(expansion_model, maturity)
+contraction_yields = nssPredict(contraction_model, maturity)
+
+// 创建对比表格并格式化输出
+result = table(maturity as Maturity, expansion_yields as Expansion, contraction_yields as Contraction)
+select Maturity, format(Expansion*100, '0.4f%%') as Expansion_Yield, format(Contraction*100, '0.4f%%') as Contraction_Yield from result'
+2025-03-13 14:03:49,389 - [ThreadPoolExecutor-0_3] - INFO - 函数 nssPredict 处理失败
+2025-03-13 14:03:49,390 - [ThreadPoolExecutor-0_3] - INFO - 第9次重新开始
+2025-03-13 14:03:49,396 - [ThreadPoolExecutor-0_3] - INFO - 开始读取 ./cleandocs/nssPredict.txt
+2025-03-13 14:03:49,399 - [ThreadPoolExecutor-0_3] - INFO - 开始第1次尝试
+2025-03-13 14:03:49,907 - [ThreadPoolExecutor-0_3] - INFO - Thinking...
+2025-03-13 14:03:49,908 - [ThreadPoolExecutor-0_3] - INFO - Reasoning:
+2025-03-13 14:04:16,401 - [ThreadPoolExecutor-0_3] - INFO - Assistant> 
+
+{
+    "function":"nssPredict",
+    "question": "当NSS模型的两个lambda参数具有显著不同的衰减率时，如何预测包含一个月期、三年、十五年及三十年期限的债券理论收益率？",
+    "input": "model = dict(STRING, ANY)\nmodel[`modelName] = `nss\nmodel[`params] = [0.025, -0.018, 0.032, -0.009, 0.5, 3.0]\nmaturity = [0.0833, 3, 15, 30]",
+    "answer": "// 使用不同衰减率的NSS模型预测混合期限收益率\nmodel = dict(STRING, ANY)\nmodel[`modelName] = `nss\nmodel[`params] = [0.025, -0.018, 0.032, -0.009, 0.5, 3.0]\nmaturities = [0.0833, 3, 15, 30]\nprint nssPredict(model, maturities)\n\n/* 预期输出格式（实际数值取决于参数）：\n[0.015, 0.027, 0.034, 0.036] \n其中：\n- 一个月期受短期因子主导\n- 三年期受中期因子影响\n- 十五年期体现长期趋势\n- 三十年期反映超长期稳定状态 */"
+}
+2025-03-13 14:04:16,401 - [ThreadPoolExecutor-0_3] - INFO - 准备测试生成脚本正确性
+2025-03-13 14:04:16,403 - [ThreadPoolExecutor-0_3] - INFO - 脚本正常，准备生成文件
+2025-03-13 14:04:16,403 - [ThreadPoolExecutor-0_3] - INFO - 模型预实验成功，开始生成标注数据
+2025-03-13 14:04:16,404 - [ThreadPoolExecutor-0_3] - INFO - 开始读取 ./cleandocs/nssPredict.txt
+2025-03-13 14:04:16,406 - [ThreadPoolExecutor-0_3] - INFO - 开始第1次尝试
+2025-03-13 14:04:16,828 - [ThreadPoolExecutor-0_3] - INFO - Thinking...
+2025-03-13 14:04:16,829 - [ThreadPoolExecutor-0_3] - INFO - Reasoning:
+2025-03-13 14:04:39,363 - [ThreadPoolExecutor-0_3] - INFO - Assistant> 
+
+{
+    "function":"nssPredict",
+    "question": "当NSS模型的两个lambda参数具有显著不同的衰减率时，如何预测包含一个月期、三年、十五年及三十年期限的债券理论收益率？",
+    "input": "model = dict(STRING, ANY)\nmodel[`modelName] = `nss\nmodel[`params] = [0.05, -0.03, 0.02, -0.01, 0.5, 0.1]  // β0=0.05,β1=-0.03,β2=0.02,β3=-0.01,λ0=0.5(快速衰减),λ1=0.1(慢速衰减)\nmaturity = [0.0833, 3, 15, 30]  // 对应1个月/3年/15年/30年",
+    "answer": "// 使用显著不同衰减率的lambda参数预测多期限收益率\nmodel = dict(STRING, ANY)\nmodel[`modelName] = `nss\nmodel[`params] = [0.05, -0.03, 0.02, -0.01, 0.5, 0.1]\nterms = [0.0833, 3, 15, 30]\nselect terms as maturity, nssPredict(model, terms) as predicted_yield"
+}
+2025-03-13 14:04:39,364 - [ThreadPoolExecutor-0_3] - INFO - 准备测试生成脚本正确性
+2025-03-13 14:04:39,366 - [ThreadPoolExecutor-0_3] - INFO - 脚本正常，准备生成文件
+2025-03-13 14:04:39,367 - [ThreadPoolExecutor-0_3] - INFO - 已生成输出文件: ./data/jinzhi_nssPredict_8.txt
+2025-03-13 14:04:39,367 - [ThreadPoolExecutor-0_3] - INFO - 函数 nssPredict 处理成功
+2025-03-13 14:04:39,368 - [ThreadPoolExecutor-0_3] - INFO - 第10次重新开始
+2025-03-13 14:04:39,374 - [ThreadPoolExecutor-0_3] - INFO - 开始读取 ./cleandocs/nssPredict.txt
+2025-03-13 14:04:39,377 - [ThreadPoolExecutor-0_3] - INFO - 开始第1次尝试
+2025-03-13 14:04:39,858 - [ThreadPoolExecutor-0_3] - INFO - Thinking...
+2025-03-13 14:04:39,859 - [ThreadPoolExecutor-0_3] - INFO - Reasoning:
+2025-03-13 14:05:17,396 - [ThreadPoolExecutor-0_3] - INFO - Assistant> 
+
+{
+    "function":"nssPredict",
+    "question": "当用户有两个不同日期的NSS模型参数集时，如何计算同一组债券期限（1年、5年、10年）在这两个参数下的预测收益率，并将结果按日期和期限展示？",
+    "input": "dates = [2023.01.01, 2023.01.02]\nparams = [[0.035, -0.02, 0.01, -0.005, 1.8, 0.2], [0.034, -0.018, 0.012, -0.004, 1.7, 0.25]]\nmaturity = [1, 5, 10]\nmodel1 = dict(STRING, ANY)\nmodel1[`modelName] = `nss\nmodel1[`params] = params[0]\nmodel2 = dict(STRING, ANY)\nmodel2[`modelName] = `nss\nmodel2[`params] = params[1]",
+    "answer": "// 生成结果表并合并展示\nresults = table(\n    take(dates, 2*3) as date,\n    take(maturity, 6) as maturity,\n    (nssPredict(model1, maturity) join nssPredict(model2, maturity)) as yield\n)\nselect * from results order by date, maturity\n\n/* 输出示例\n       date  maturity     yield\n2023.01.01        1  0.021357\n2023.01.01        5  0.033214\n2023.01.01       10  0.038592\n2023.01.02        1  0.020945\n2023.01.02        5  0.034067\n2023.01.02       10  0.040123\n*/\n"
+}
+2025-03-13 14:05:17,397 - [ThreadPoolExecutor-0_3] - INFO - 准备测试生成脚本正确性
+2025-03-13 14:05:17,402 - [ThreadPoolExecutor-0_3] - INFO - 脚本正常，准备生成文件
+2025-03-13 14:05:17,403 - [ThreadPoolExecutor-0_3] - INFO - 模型预实验成功，开始生成标注数据
+2025-03-13 14:05:17,403 - [ThreadPoolExecutor-0_3] - INFO - 开始读取 ./cleandocs/nssPredict.txt
+2025-03-13 14:05:17,406 - [ThreadPoolExecutor-0_3] - INFO - 开始第1次尝试
+2025-03-13 14:05:17,754 - [ThreadPoolExecutor-0_3] - INFO - Thinking...
+2025-03-13 14:05:17,755 - [ThreadPoolExecutor-0_3] - INFO - Reasoning:
+2025-03-13 14:05:54,946 - [ThreadPoolExecutor-0_3] - INFO - Assistant> 
+
+{
+    "function":"nssPredict",
+    "question": "当用户有两个不同日期的NSS模型参数集时，如何计算同一组债券期限（1年、5年、10年）在这两个参数下的预测收益率，并将结果按日期和期限展示？",
+    "input": "模拟参数集：\n2023.01.01参数[0.038184,-0.048575,-0.022287,0.047523,1.873046,0.161160]\n2023.01.05参数[0.035,-0.045,-0.020,0.045,1.800,0.150]",
+    "answer": "// 创建模型参数表\nmodels = table(\n    [2023.01.01, 2023.01.05] as date,\n    [[0.038184,-0.048575,-0.022287,0.047523,1.873046,0.161160], [0.035,-0.045,-0.020,0.045,1.800,0.150]] as params\n)\n\n// 生成所有期限组合\nmaturities = [1,5,10]\nresult = select date, maturity as `term, \n        nssPredict(dict(`modelName`params, `nss`, params), maturity) as yield \nfrom models cross join table(maturities as maturity)\n\n// 按日期和期限排序输出\nselect * from result order by date, term"
+}
+2025-03-13 14:05:54,947 - [ThreadPoolExecutor-0_3] - INFO - 准备测试生成脚本正确性
+2025-03-13 14:05:54,948 - [ThreadPoolExecutor-0_3] - ERROR - 数据脚本错误：<Exception> in run: Server response: 'Syntax Error: [line #1] Cannot recognize the token 模拟参数集：' script: '模拟参数集：
+2023.01.01参数[0.038184,-0.048575,-0.022287,0.047523,1.873046,0.161160]
+2023.01.05参数[0.035,-0.045,-0.020,0.045,1.800,0.150]'
+2025-03-13 14:05:55,064 - [ThreadPoolExecutor-0_3] - ERROR - 解答脚本错误：<Exception> in run: Server response: 'result = select date,maturity as term,nssPredict(dict(["modelName","params"], ["nss",""], params), maturity) as yield from cj(models,table(maturities as maturity)) => The any vector can't be converted to bool scalar.' script: '// 创建模型参数表
+models = table(
+    [2023.01.01, 2023.01.05] as date,
+    [[0.038184,-0.048575,-0.022287,0.047523,1.873046,0.161160], [0.035,-0.045,-0.020,0.045,1.800,0.150]] as params
+)
+
+// 生成所有期限组合
+maturities = [1,5,10]
+result = select date, maturity as `term, 
+        nssPredict(dict(`modelName`params, `nss`, params), maturity) as yield 
+from models cross join table(maturities as maturity)
+
+// 按日期和期限排序输出
+select * from result order by date, term'
+2025-03-13 14:05:55,064 - [ThreadPoolExecutor-0_3] - INFO - 开始第2次尝试
+2025-03-13 14:05:55,415 - [ThreadPoolExecutor-0_3] - INFO - Thinking...
+2025-03-13 14:05:55,416 - [ThreadPoolExecutor-0_3] - INFO - Reasoning:
+2025-03-13 14:06:28,958 - [ThreadPoolExecutor-0_3] - INFO - Assistant> 
+
+{
+    "function":"nssPredict",
+    "question": "当用户有两个不同日期的NSS模型参数集时，如何计算同一组债券期限（1年、5年、10年）在这两个参数下的预测收益率，并将结果按日期和期限展示？",
+    "input": "models = table(
+    [2023.01.01, 2023.01.05] as date,
+    [[0.038184,-0.048575,-0.022287,0.047523,1.873046,0.161160], [0.035,-0.045,-0.020,0.045,1.800,0.150]] as params
+)\nmaturities = [1,5,10]",
+    "answer": "// 创建模型参数表
+models = table(
+    [2023.01.01, 2023.01.05] as date,
+    [[0.038184,-0.048575,-0.022287,0.047523,1.873046,0.161160], [0.035,-0.045,-0.020,0.045,1.800,0.150]] as params
+)
+
+// 生成期限维表并计算预测收益率
+maturities = [1,5,10]
+result = select 
+    date,
+    maturity as term,
+    nssPredict(dict(['modelName','params'], ['nss', params]), maturity) as yield 
+from models cross join table(maturities as maturity) 
+
+// 按日期和期限排序输出
+select * from result order by date, term"
+}
+2025-03-13 14:06:28,959 - [ThreadPoolExecutor-0_3] - ERROR - JSON解析错误: Invalid control character at: line 6 column 30 (char 152)
+2025-03-13 14:06:28,959 - [ThreadPoolExecutor-0_3] - ERROR - LLM响应解析失败: JSON解析错误: Invalid control character at: line 6 column 30 (char 152)
+2025-03-13 14:06:28,959 - [ThreadPoolExecutor-0_3] - INFO - 函数 nssPredict 处理失败
+2025-03-13 14:06:28,959 - [ThreadPoolExecutor-0_3] - INFO - 第11次重新开始
+2025-03-13 14:06:28,966 - [ThreadPoolExecutor-0_3] - INFO - 开始读取 ./cleandocs/nssPredict.txt
+2025-03-13 14:06:28,969 - [ThreadPoolExecutor-0_3] - INFO - 开始第1次尝试
+2025-03-13 14:06:29,400 - [ThreadPoolExecutor-0_3] - INFO - Thinking...
+2025-03-13 14:06:29,401 - [ThreadPoolExecutor-0_3] - INFO - Reasoning:
+2025-03-13 14:07:03,932 - [ThreadPoolExecutor-0_3] - INFO - Assistant> 
+
+{
+    "function":"nssPredict",
+    "question": "当NSS模型的衰减参数λ0非常小（接近瞬时衰减）而λ1非常大时，如何预测从1个月到50年跨度期限的债券理论收益率？",
+    "input": "// 创建NSS模型参数\nmodel = dict(STRING, ANY)\nmodel[`modelName] = `nss\nmodel[`params] = [0.045, -0.032, 0.018, -0.007, 0.1, 5.0]\n\n// 定义包含极端期限的数组\nterms = [0.0833, 5, 20, 50]",
+    "answer": "// 使用nssPredict计算各期限收益率\nselect terms as maturity, nssPredict(model, terms) as yield_curve\n\n/* 预期结果示例\nmaturity    yield_curve\n0.0833      0.0432\n5           0.0375\n20          0.0289\n50          0.0261\n*/\n\n// 注意：实际输出值会根据模型参数计算得出，此处为示例说明参数对收益率曲线形态的影响"
+}
+2025-03-13 14:07:03,932 - [ThreadPoolExecutor-0_3] - INFO - 准备测试生成脚本正确性
+2025-03-13 14:07:03,934 - [ThreadPoolExecutor-0_3] - INFO - 脚本正常，准备生成文件
+2025-03-13 14:07:03,935 - [ThreadPoolExecutor-0_3] - INFO - 模型预实验成功，开始生成标注数据
+2025-03-13 14:07:03,935 - [ThreadPoolExecutor-0_3] - INFO - 开始读取 ./cleandocs/nssPredict.txt
+2025-03-13 14:07:03,938 - [ThreadPoolExecutor-0_3] - INFO - 开始第1次尝试
+2025-03-13 14:07:04,785 - [ThreadPoolExecutor-0_3] - INFO - Thinking...
+2025-03-13 14:07:04,786 - [ThreadPoolExecutor-0_3] - INFO - Reasoning:
+2025-03-13 14:07:35,086 - [ThreadPoolExecutor-0_3] - INFO - Assistant> 
+
+{
+    "function":"nssPredict",
+    "question": "当NSS模型的衰减参数λ0非常小（接近瞬时衰减）而λ1非常大时，如何预测从1个月到50年跨度期限的债券理论收益率？",
+    "input": "model = dict(STRING, ANY)\nmodel[`modelName] = `nss\nmodel[`params] = [0.05, -0.03, -0.02, 0.04, 0.01, 100]  // λ0=0.01接近瞬时衰减，λ1=100极大值\nmaturity = 0.0833 0.25 0.5 1 5 10 20 30 50  // 包含1个月到50年的关键期限",
+    "answer": "// 使用极端参数构建NSS模型预测多期限收益率\nmodel = dict(STRING, ANY)\nmodel[`modelName] = `nss\nmodel[`params] = [0.05, -0.03, -0.02, 0.04, 0.01, 100]\nmaturity = (0.0833 0.25 0.5) join 1..50  // 生成1个月到50年的连续期限\nselect maturity, nssPredict(model, maturity) as yield_curve"
+}
+2025-03-13 14:07:35,090 - [ThreadPoolExecutor-0_3] - INFO - 准备测试生成脚本正确性
+2025-03-13 14:07:35,092 - [ThreadPoolExecutor-0_3] - INFO - 脚本正常，准备生成文件
+2025-03-13 14:07:35,092 - [ThreadPoolExecutor-0_3] - INFO - 已生成输出文件: ./data/jinzhi_nssPredict_9.txt
+2025-03-13 14:07:35,093 - [ThreadPoolExecutor-0_3] - INFO - 函数 nssPredict 处理成功
+2025-03-13 14:07:35,093 - [ThreadPoolExecutor-0_3] - INFO - 第12次重新开始
+2025-03-13 14:07:35,100 - [ThreadPoolExecutor-0_3] - INFO - 开始读取 ./cleandocs/nssPredict.txt
+2025-03-13 14:07:35,103 - [ThreadPoolExecutor-0_3] - INFO - 开始第1次尝试
+2025-03-13 14:07:35,842 - [ThreadPoolExecutor-0_3] - INFO - Thinking...
+2025-03-13 14:07:35,843 - [ThreadPoolExecutor-0_3] - INFO - Reasoning:
+2025-03-13 14:07:57,721 - [ThreadPoolExecutor-0_3] - INFO - Assistant> 
+
+{
+    "function": "nssPredict",
+    "question": "当NSS模型的lambda参数被设定为相同衰减率时，如何预测包含3个月短期、5年中期和20年长期债券的收益率？",
+    "input": "// 创建NSS模型字典并设定相同lambda参数\nmodel = dict(STRING, ANY)\nmodel[`modelName] = `nss\nmodel[`params] = [0.035, -0.022, 0.015, -0.008, 1.5, 1.5]\n\n// 定义不同期限的债券到期时间（单位：年）\nmaturity = [0.25, 5.0, 20.0]",
+    "answer": "// 使用nssPredict函数计算不同期限的预测收益率\nselect maturity as Maturity, nssPredict(model, maturity) as Predicted_Yield"
+}
+2025-03-13 14:07:57,721 - [ThreadPoolExecutor-0_3] - INFO - 准备测试生成脚本正确性
+2025-03-13 14:07:57,726 - [ThreadPoolExecutor-0_3] - INFO - 脚本正常，准备生成文件
+2025-03-13 14:07:57,726 - [ThreadPoolExecutor-0_3] - INFO - 模型预实验成功，开始生成标注数据
+2025-03-13 14:07:57,727 - [ThreadPoolExecutor-0_3] - INFO - 开始读取 ./cleandocs/nssPredict.txt
+2025-03-13 14:07:57,730 - [ThreadPoolExecutor-0_3] - INFO - 开始第1次尝试
+2025-03-13 14:07:58,231 - [ThreadPoolExecutor-0_3] - INFO - Thinking...
+2025-03-13 14:07:58,232 - [ThreadPoolExecutor-0_3] - INFO - Reasoning:
+2025-03-13 14:08:21,209 - [ThreadPoolExecutor-0_3] - INFO - Assistant> 
+
+{
+    "function":"nssPredict",
+    "question": "当NSS模型的lambda参数被设定为相同衰减率时，如何预测包含3个月短期、5年中期和20年长期债券的收益率？",
+    "input": "model = dict(STRING, ANY)
+model[`modelName] = `nss
+model[`params] = [0.05, -0.01, 0.02, 0.03, 1.5, 1.5]  // β0-β3=0.05,-0.01,0.02,0.03；λ0=λ1=1.5
+maturity = [0.25, 5, 20]  // 3个月=0.25年，5年，20年",
+    "answer": "// 创建NSS模型字典并设置相同lambda参数
+model = dict(STRING, ANY)
+model[`modelName] = `nss
+model[`params] = [0.05, -0.01, 0.02, 0.03, 1.5, 1.5]
+
+// 计算不同期限债券收益率
+maturity = [0.25, 5, 20]
+nssPredict(model, maturity)
+
+/* 预期输出示例（具体数值可能因参数不同而变化）：
+[0.0432, 0.0378, 0.0521]  // 对应0.25年、5年、20年的预测收益率
+*/"
+}
+2025-03-13 14:08:21,210 - [ThreadPoolExecutor-0_3] - ERROR - JSON解析错误: Invalid control character at: line 6 column 40 (char 147)
+2025-03-13 14:08:21,210 - [ThreadPoolExecutor-0_3] - ERROR - LLM响应解析失败: JSON解析错误: Invalid control character at: line 6 column 40 (char 147)
+2025-03-13 14:08:21,210 - [ThreadPoolExecutor-0_3] - INFO - 开始第2次尝试
+2025-03-13 14:08:21,564 - [ThreadPoolExecutor-0_3] - INFO - Thinking...
+2025-03-13 14:08:21,566 - [ThreadPoolExecutor-0_3] - INFO - Reasoning:
+2025-03-13 14:08:39,935 - [ThreadPoolExecutor-0_3] - INFO - Assistant> 
+
+{
+    "function":"nssPredict",
+    "question": "当NSS模型的lambda参数被设定为相同衰减率时，如何预测包含3个月短期、5年中期和20年长期债券的收益率？",
+    "input": "model = dict(STRING, ANY)\nmodel[`modelName] = `nss\nmodel[`params] = [0.05, -0.02, 0.01, 0.03, 0.5, 0.5]  // λ0和λ1都设为0.5\nmaturity = [0.25, 5.0, 20.0]  // 3个月=0.25年，5年，20年",
+    "answer": "nssPredict(model, maturity)\n// 输出结果示例：[0.0425, 0.0512, 0.0487] (实际输出值会根据参数变化)"
+}
+2025-03-13 14:08:39,935 - [ThreadPoolExecutor-0_3] - INFO - 准备测试生成脚本正确性
+2025-03-13 14:08:39,937 - [ThreadPoolExecutor-0_3] - INFO - 脚本正常，准备生成文件
+2025-03-13 14:08:39,938 - [ThreadPoolExecutor-0_3] - INFO - 已生成输出文件: ./data/jinzhi_nssPredict_10.txt
+2025-03-13 14:08:39,938 - [ThreadPoolExecutor-0_3] - INFO - 函数 nssPredict 处理成功
+2025-03-13 14:08:39,938 - [ThreadPoolExecutor-0_3] - INFO - 第13次重新开始
+2025-03-13 14:08:39,946 - [ThreadPoolExecutor-0_3] - INFO - 开始读取 ./cleandocs/nssPredict.txt
+2025-03-13 14:08:39,948 - [ThreadPoolExecutor-0_3] - INFO - 开始第1次尝试
+2025-03-13 14:08:41,070 - [ThreadPoolExecutor-0_3] - INFO - Thinking...
+2025-03-13 14:08:41,071 - [ThreadPoolExecutor-0_3] - INFO - Reasoning:
+2025-03-13 14:09:08,663 - [ThreadPoolExecutor-0_3] - INFO - Assistant> 
+
+{
+    "function": "nssPredict",
+    "question": "当NSS模型的两个lambda参数具有不同的时间衰减特性（一个快速衰减，一个缓慢衰减）时，如何预测包含极短期（1周）、中期（10年）和超长期（50年）期限的债券理论收益率？",
+    "input": "model = dict(STRING, ANY)\nmodel[`modelName] = `nss\nmodel[`params] = [0.035, -0.028, 0.017, -0.009, 5.0, 0.1]\nmaturity = [0.01923, 10, 50]  // 1周(0.01923年)、10年、50年",
+    "answer": "// 使用不同衰减特性的NSS模型预测收益率\nselect maturity as Term, nssPredict(model, maturity) as Yield\n// 预期输出结构（数值示例）：\n// Term     Yield\n// 0.01923  0.0321\n// 10       0.0415\n// 50       0.0368\n//（实际数值根据参数计算会有变化）"
+}
+2025-03-13 14:09:08,663 - [ThreadPoolExecutor-0_3] - INFO - 准备测试生成脚本正确性
+2025-03-13 14:09:08,665 - [ThreadPoolExecutor-0_3] - INFO - 脚本正常，准备生成文件
+2025-03-13 14:09:08,665 - [ThreadPoolExecutor-0_3] - INFO - 模型预实验成功，开始生成标注数据
+2025-03-13 14:09:08,666 - [ThreadPoolExecutor-0_3] - INFO - 开始读取 ./cleandocs/nssPredict.txt
+2025-03-13 14:09:08,669 - [ThreadPoolExecutor-0_3] - INFO - 开始第1次尝试
+2025-03-13 14:09:09,558 - [ThreadPoolExecutor-0_3] - INFO - Thinking...
+2025-03-13 14:09:09,560 - [ThreadPoolExecutor-0_3] - INFO - Reasoning:
+2025-03-13 14:09:39,364 - [ThreadPoolExecutor-0_3] - INFO - Assistant> 
+
+{
+    "function":"nssPredict",
+    "question": "当NSS模型的两个lambda参数具有不同的时间衰减特性（一个快速衰减，一个缓慢衰减）时，如何预测包含极短期（1周）、中期（10年）和超长期（50年）期限的债券理论收益率？",
+    "input": "model = dict(STRING, ANY)
+model[`modelName] = `nss
+model[`params] = [0.05, -0.03, 0.02, 0.01, 2, 0.1]  // β0=0.05, β1=-0.03, β2=0.02, β3=0.01，λ0=2(快速衰减)，λ1=0.1(缓慢衰减)
+maturity = [0.01923, 10, 50]  // 1周=0.01923年，10年，50年",
+    "answer": "// 创建NSS模型字典
+model = dict(STRING, ANY)
+model[`modelName] = `nss
+model[`params] = [0.05, -0.03, 0.02, 0.01, 2, 0.1]
+
+// 生成不同期限的收益率预测
+maturity = [0.01923, 10, 50]
+yields = nssPredict(model, maturity)
+
+// 输出结果包含三个期限对应的理论收益率
+// yields[0]对应1周短期，yields[1]对应10年中期，yields[2]对应50年超长期
+yields"
+}
+2025-03-13 14:09:39,364 - [ThreadPoolExecutor-0_3] - ERROR - JSON解析错误: Invalid control character at: line 6 column 40 (char 178)
+2025-03-13 14:09:39,365 - [ThreadPoolExecutor-0_3] - ERROR - LLM响应解析失败: JSON解析错误: Invalid control character at: line 6 column 40 (char 178)
+2025-03-13 14:09:39,365 - [ThreadPoolExecutor-0_3] - INFO - 开始第2次尝试
+2025-03-13 14:09:39,666 - [ThreadPoolExecutor-0_3] - INFO - Thinking...
+2025-03-13 14:09:39,667 - [ThreadPoolExecutor-0_3] - INFO - Reasoning:
+2025-03-13 14:10:05,935 - [ThreadPoolExecutor-0_3] - INFO - Assistant> 
+
+{
+    "function": "nssPredict",
+    "question": "当NSS模型的两个lambda参数具有不同的时间衰减特性时预测不同期限收益率",
+    "input": "model参数设置为[0.05, -0.03, 0.02, 0.01, 1.8(快速衰减λ0), 0.1(慢速衰减λ1)]，期限[0.01923(1周),10,50]",
+    "answer": "model = dict(STRING, ANY)\nmodel[`modelName] = `nss\nmodel[`params] = [0.05, -0.03, 0.02, 0.01, 1.8, 0.1]\nmaturity = [0.01923, 10, 50]\nnssPredict(model, maturity)"
+}
+2025-03-13 14:10:05,938 - [ThreadPoolExecutor-0_3] - INFO - 准备测试生成脚本正确性
+2025-03-13 14:10:05,940 - [ThreadPoolExecutor-0_3] - ERROR - 数据脚本错误：<Exception> in run: Server response: 'Syntax Error: [line #1] Cannot recognize the token 快速衰减λ0' script: 'model参数设置为[0.05, -0.03, 0.02, 0.01, 1.8(快速衰减λ0), 0.1(慢速衰减λ1)]，期限[0.01923(1周),10,50]'
+2025-03-13 14:10:05,941 - [ThreadPoolExecutor-0_3] - INFO - 函数 nssPredict 处理失败
+2025-03-13 14:10:05,942 - [ThreadPoolExecutor-0_3] - INFO - 第14次重新开始
+2025-03-13 14:10:05,950 - [ThreadPoolExecutor-0_3] - INFO - 开始读取 ./cleandocs/nssPredict.txt
+2025-03-13 14:10:05,953 - [ThreadPoolExecutor-0_3] - INFO - 开始第1次尝试
+2025-03-13 14:10:06,437 - [ThreadPoolExecutor-0_3] - INFO - Thinking...
+2025-03-13 14:10:06,439 - [ThreadPoolExecutor-0_3] - INFO - Reasoning:
+2025-03-13 14:10:39,968 - [ThreadPoolExecutor-0_3] - INFO - Assistant> 
+
+{
+    "function": "nssPredict",
+    "question": "当需要生成从1年到30年的完整收益率曲线时，如何使用NSS模型参数[0.04, -0.02, 0.015, -0.005, 1.8, 0.3]计算各整年期限的理论收益率？",
+    "input": "model = dict(STRING, ANY)\nmodel[`modelName] = `nss\nmodel[`params] = [0.04, -0.02, 0.015, -0.005, 1.8, 0.3]\nmaturity = 1..30",
+    "answer": "// 生成1到30年完整收益率曲线\nmodel = dict(STRING, ANY)\nmodel[`modelName] = `nss\nmodel[`params] = [0.04, -0.02, 0.015, -0.005, 1.8, 0.3]\nmaturity = 1..30\n\n// 计算并展示结果\nresult = table(maturity as TermYear, nssPredict(model, maturity) as Yield)\nselect * from result"
+}
+2025-03-13 14:10:39,969 - [ThreadPoolExecutor-0_3] - INFO - 准备测试生成脚本正确性
+2025-03-13 14:10:39,973 - [ThreadPoolExecutor-0_3] - INFO - 脚本正常，准备生成文件
+2025-03-13 14:10:39,973 - [ThreadPoolExecutor-0_3] - INFO - 模型预实验成功，开始生成标注数据
+2025-03-13 14:10:39,974 - [ThreadPoolExecutor-0_3] - INFO - 开始读取 ./cleandocs/nssPredict.txt
+2025-03-13 14:10:39,977 - [ThreadPoolExecutor-0_3] - INFO - 开始第1次尝试
+2025-03-13 14:10:40,383 - [ThreadPoolExecutor-0_3] - INFO - Thinking...
+2025-03-13 14:10:40,385 - [ThreadPoolExecutor-0_3] - INFO - Reasoning:

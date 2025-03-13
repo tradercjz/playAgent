@@ -1,24 +1,101 @@
-2025-03-12 15:02:27,602 - [MainThread] - INFO - 开始执行主程序
-2025-03-12 15:02:27,602 - [MainThread] - INFO - 开始处理 SQL 函数: ['bondAccrInt', 'bondConvexity', 'bondDirtyPrice', 'bondDuration', 'nss', 'ns', 'condValueAtRisk', 'nsspredict', 'trueRange', 'valueAtRisk', 'irs', 'varma', 'bondCashflow', 'bondYield', 'createPricingEngine', 'treasuryConversionFactor', 'crmwCBond', 'cds', 'vanillaOption', 'maxDrawdown', 'mdd', 'cummdd', 'createYieldCurveEngine', 'appendForPrediction']
-2025-03-12 15:02:27,602 - [MainThread] - INFO - 开始处理 24 个函数
-2025-03-12 15:04:36,787 - [MainThread] - INFO - 处理完成: 共 24 个函数，成功 15 个，失败 9 个
-2025-03-12 15:04:36,788 - [MainThread] - INFO - SQL函数处理完成: 共 24 个函数，成功 15 个，失败 9 个
-2025-03-12 15:04:36,788 - [MainThread] - INFO - 主程序执行完毕
-2025-03-12 15:16:30,692 - [MainThread] - INFO - 开始执行主程序
-2025-03-12 15:16:30,692 - [MainThread] - INFO - 开始处理 SQL 函数: ['bondAccrInt', 'bondConvexity', 'bondDirtyPrice', 'bondDuration', 'nss', 'ns', 'condValueAtRisk', 'nsspredict', 'trueRange', 'valueAtRisk', 'irs', 'varma', 'bondCashflow', 'bondYield', 'createPricingEngine', 'treasuryConversionFactor', 'crmwCBond', 'cds', 'vanillaOption', 'maxDrawdown', 'mdd', 'cummdd', 'createYieldCurveEngine', 'appendForPrediction']
-2025-03-12 15:16:30,692 - [MainThread] - INFO - 开始处理 24 个函数
-2025-03-12 15:17:52,192 - [MainThread] - INFO - 处理完成: 共 24 个函数，成功 15 个，失败 9 个
-2025-03-12 15:17:52,193 - [MainThread] - INFO - SQL函数处理完成: 共 24 个函数，成功 15 个，失败 9 个
-2025-03-12 15:17:52,193 - [MainThread] - INFO - 主程序执行完毕
-2025-03-12 15:19:28,733 - [MainThread] - INFO - 开始执行主程序
-2025-03-12 15:19:28,734 - [MainThread] - INFO - 开始处理 SQL 函数: ['bondAccrInt', 'bondConvexity', 'bondDirtyPrice', 'bondDuration', 'nss', 'ns', 'condValueAtRisk', 'nsspredict', 'trueRange', 'valueAtRisk', 'irs', 'varma', 'bondCashflow', 'bondYield', 'createPricingEngine', 'treasuryConversionFactor', 'crmwCBond', 'cds', 'vanillaOption', 'maxDrawdown', 'mdd', 'cummdd', 'createYieldCurveEngine', 'appendForPrediction']
-2025-03-12 15:19:28,734 - [MainThread] - INFO - 开始处理 24 个函数
-2025-03-12 15:21:40,906 - [MainThread] - INFO - 处理完成: 共 24 个函数，成功 16 个，失败 8 个
-2025-03-12 15:21:40,907 - [MainThread] - INFO - SQL函数处理完成: 共 24 个函数，成功 16 个，失败 8 个
-2025-03-12 15:21:40,907 - [MainThread] - INFO - 主程序执行完毕
-2025-03-12 15:24:09,263 - [MainThread] - INFO - 开始执行主程序
-2025-03-12 15:24:09,263 - [MainThread] - INFO - 开始处理 SQL 函数: ['bondAccrInt', 'bondConvexity', 'bondDirtyPrice', 'bondDuration', 'nss', 'ns', 'condValueAtRisk', 'nsspredict', 'trueRange', 'valueAtRisk', 'irs', 'varma', 'bondCashflow', 'bondYield', 'createPricingEngine', 'treasuryConversionFactor', 'crmwCBond', 'cds', 'vanillaOption', 'maxDrawdown', 'mdd', 'cummdd', 'createYieldCurveEngine', 'appendForPrediction']
-2025-03-12 15:24:09,263 - [MainThread] - INFO - 开始处理 24 个函数
-2025-03-12 15:25:34,625 - [MainThread] - INFO - 处理完成: 共 24 个函数，成功 17 个，失败 7 个
-2025-03-12 15:25:34,626 - [MainThread] - INFO - SQL函数处理完成: 共 24 个函数，成功 17 个，失败 7 个
-2025-03-12 15:25:34,626 - [MainThread] - INFO - 主程序执行完毕
+2025-03-13 10:03:21,619 - [MainThread] - INFO - 开始执行主程序
+2025-03-13 10:03:21,619 - [MainThread] - INFO - 开始处理 SQL 函数: ['nss', 'ns', 'condValueAtRisk', 'nsspredict', 'valueAtRisk']
+2025-03-13 10:03:21,619 - [MainThread] - INFO - 开始处理 5 个函数
+2025-03-13 10:07:00,291 - [MainThread] - INFO - 处理完成: 共 5 个函数，成功 2 个，失败 3 个
+2025-03-13 10:07:00,294 - [MainThread] - INFO - SQL函数处理完成: 共 5 个函数，成功 2 个，失败 3 个
+2025-03-13 10:07:00,295 - [MainThread] - INFO - 主程序执行完毕
+2025-03-13 10:08:37,087 - [MainThread] - INFO - 开始执行主程序
+2025-03-13 10:08:37,087 - [MainThread] - INFO - 开始处理 SQL 函数: ['nss', 'ns', 'condValueAtRisk', 'nsspredict', 'valueAtRisk']
+2025-03-13 10:08:37,087 - [MainThread] - INFO - 开始处理 5 个函数
+2025-03-13 10:14:10,007 - [MainThread] - INFO - 处理完成: 共 5 个函数，成功 1 个，失败 4 个
+2025-03-13 10:14:10,008 - [MainThread] - INFO - SQL函数处理完成: 共 5 个函数，成功 1 个，失败 4 个
+2025-03-13 10:14:10,008 - [MainThread] - INFO - 主程序执行完毕
+2025-03-13 10:25:29,540 - [MainThread] - INFO - 开始执行主程序
+2025-03-13 10:25:29,540 - [MainThread] - INFO - 开始处理 SQL 函数: ['nss']
+2025-03-13 10:25:29,541 - [MainThread] - INFO - 开始处理 1 个函数
+2025-03-13 10:26:59,049 - [MainThread] - INFO - 处理完成: 共 1 个函数，成功 0 个，失败 1 个
+2025-03-13 10:26:59,049 - [MainThread] - INFO - SQL函数处理完成: 共 1 个函数，成功 0 个，失败 1 个
+2025-03-13 10:26:59,049 - [MainThread] - INFO - 主程序执行完毕
+2025-03-13 10:28:12,382 - [MainThread] - INFO - 开始执行主程序
+2025-03-13 10:28:12,382 - [MainThread] - INFO - 开始处理 SQL 函数: ['nss']
+2025-03-13 10:28:12,382 - [MainThread] - INFO - 开始处理 1 个函数
+2025-03-13 10:29:34,457 - [MainThread] - INFO - 处理完成: 共 1 个函数，成功 0 个，失败 1 个
+2025-03-13 10:29:34,458 - [MainThread] - INFO - SQL函数处理完成: 共 1 个函数，成功 0 个，失败 1 个
+2025-03-13 10:29:34,458 - [MainThread] - INFO - 主程序执行完毕
+2025-03-13 10:31:59,141 - [MainThread] - INFO - 开始执行主程序
+2025-03-13 10:31:59,141 - [MainThread] - INFO - 开始处理 SQL 函数: ['nss']
+2025-03-13 10:31:59,141 - [MainThread] - INFO - 开始处理 1 个函数
+2025-03-13 10:36:39,886 - [MainThread] - INFO - 开始执行主程序
+2025-03-13 10:36:39,886 - [MainThread] - INFO - 开始处理 SQL 函数: ['nss']
+2025-03-13 10:36:39,886 - [MainThread] - INFO - 开始处理 1 个函数
+2025-03-13 10:38:10,271 - [MainThread] - INFO - 开始执行主程序
+2025-03-13 10:38:10,272 - [MainThread] - INFO - 开始处理 SQL 函数: ['ns', 'condValueAtRisk', 'nsspredict', 'valueAtRisk']
+2025-03-13 10:38:10,272 - [MainThread] - INFO - 开始处理 4 个函数
+2025-03-13 10:46:55,058 - [MainThread] - INFO - 处理完成: 共 4 个函数，成功 4 个，失败 0 个
+2025-03-13 10:46:55,059 - [MainThread] - INFO - SQL函数处理完成: 共 4 个函数，成功 4 个，失败 0 个
+2025-03-13 10:46:55,059 - [MainThread] - INFO - 主程序执行完毕
+2025-03-13 10:49:30,770 - [MainThread] - INFO - 开始执行主程序
+2025-03-13 10:49:30,770 - [MainThread] - INFO - 开始处理 SQL 函数: ['ns', 'condValueAtRisk', 'nsspredict', 'valueAtRisk']
+2025-03-13 10:49:30,770 - [MainThread] - INFO - 开始处理 4 个函数
+2025-03-13 10:50:06,431 - [MainThread] - INFO - 开始执行主程序
+2025-03-13 10:50:06,432 - [MainThread] - INFO - 开始处理 SQL 函数: ['ns', 'condValueAtRisk', 'nsspredict', 'valueAtRisk']
+2025-03-13 10:50:06,432 - [MainThread] - INFO - 开始处理 4 个函数
+2025-03-13 10:50:06,514 - [MainThread] - INFO - 处理完成: 共 4 个函数，成功 0 个，失败 4 个
+2025-03-13 10:50:06,514 - [MainThread] - INFO - SQL函数处理完成: 共 4 个函数，成功 0 个，失败 4 个
+2025-03-13 10:50:06,514 - [MainThread] - INFO - 主程序执行完毕
+2025-03-13 10:55:30,920 - [MainThread] - INFO - 开始执行主程序
+2025-03-13 10:55:30,920 - [MainThread] - INFO - 开始处理 SQL 函数: ['ns', 'condValueAtRisk', 'nsspredict', 'valueAtRisk']
+2025-03-13 10:55:30,920 - [MainThread] - INFO - 开始处理 4 个函数
+2025-03-13 11:02:50,088 - [MainThread] - INFO - 处理完成: 共 4 个函数，成功 4 个，失败 0 个
+2025-03-13 11:02:50,088 - [MainThread] - INFO - SQL函数处理完成: 共 4 个函数，成功 4 个，失败 0 个
+2025-03-13 11:02:50,089 - [MainThread] - INFO - 主程序执行完毕
+2025-03-13 11:05:59,592 - [MainThread] - INFO - 开始执行主程序
+2025-03-13 11:05:59,592 - [MainThread] - INFO - 开始处理 SQL 函数: ['ns', 'condValueAtRisk', 'nsspredict', 'valueAtRisk']
+2025-03-13 11:05:59,592 - [MainThread] - INFO - 开始处理 4 个函数
+2025-03-13 11:20:47,990 - [MainThread] - INFO - 开始执行主程序
+2025-03-13 11:20:47,991 - [MainThread] - INFO - 开始处理 SQL 函数: ['nss', 'ns', 'condValueAtRisk', 'nsspredict', 'valueAtRisk']
+2025-03-13 11:20:47,991 - [MainThread] - INFO - 开始处理 5 个函数
+2025-03-13 11:23:24,560 - [MainThread] - INFO - 处理完成: 共 5 个函数，成功 2 个，失败 3 个
+2025-03-13 11:23:24,561 - [MainThread] - INFO - SQL函数处理完成: 共 5 个函数，成功 2 个，失败 3 个
+2025-03-13 11:23:24,561 - [MainThread] - INFO - 主程序执行完毕
+2025-03-13 11:24:12,523 - [MainThread] - INFO - 开始执行主程序
+2025-03-13 11:24:12,523 - [MainThread] - INFO - 开始处理 SQL 函数: ['nss', 'ns', 'condValueAtRisk', 'nsspredict', 'valueAtRisk']
+2025-03-13 11:24:12,523 - [MainThread] - INFO - 开始处理 5 个函数
+2025-03-13 11:27:40,782 - [MainThread] - INFO - 处理完成: 共 5 个函数，成功 0 个，失败 5 个
+2025-03-13 11:27:40,783 - [MainThread] - INFO - SQL函数处理完成: 共 5 个函数，成功 0 个，失败 5 个
+2025-03-13 11:27:40,784 - [MainThread] - INFO - 主程序执行完毕
+2025-03-13 11:50:36,226 - [MainThread] - INFO - 开始执行主程序
+2025-03-13 11:50:36,227 - [MainThread] - INFO - 开始处理 SQL 函数: ['nss', 'ns', 'condValueAtRisk', 'nsspredict', 'valueAtRisk']
+2025-03-13 11:50:36,227 - [MainThread] - INFO - 开始处理 5 个函数
+2025-03-13 12:15:16,270 - [MainThread] - ERROR - 函数 nss 处理出现异常: cannot unpack non-iterable NoneType object
+2025-03-13 12:16:48,962 - [MainThread] - ERROR - 函数 ns 处理出现异常: cannot unpack non-iterable NoneType object
+2025-03-13 12:28:30,155 - [MainThread] - ERROR - 函数 condValueAtRisk 处理出现异常: cannot unpack non-iterable NoneType object
+2025-03-13 12:28:30,156 - [MainThread] - ERROR - 函数 nsspredict 处理出现异常: cannot unpack non-iterable NoneType object
+2025-03-13 12:31:29,334 - [MainThread] - ERROR - 函数 valueAtRisk 处理出现异常: cannot unpack non-iterable NoneType object
+2025-03-13 12:31:29,335 - [MainThread] - INFO - 处理完成: 共 5 个函数，成功 0 个，失败 5 个
+2025-03-13 12:31:29,336 - [MainThread] - INFO - SQL函数处理完成: 共 5 个函数，成功 0 个，失败 5 个
+2025-03-13 12:31:29,336 - [MainThread] - INFO - 主程序执行完毕
+2025-03-13 13:33:46,699 - [MainThread] - INFO - 开始执行主程序
+2025-03-13 13:33:46,699 - [MainThread] - INFO - 开始处理 SQL 函数: ['nss', 'ns', 'condValueAtRisk', 'nsspredict', 'valueAtRisk']
+2025-03-13 13:33:46,699 - [MainThread] - INFO - 开始处理 5 个函数
+2025-03-13 13:35:58,898 - [MainThread] - INFO - 开始执行主程序
+2025-03-13 13:35:58,898 - [MainThread] - INFO - 开始处理 SQL 函数: ['nss', 'ns', 'condValueAtRisk', 'nsspredict', 'valueAtRisk']
+2025-03-13 13:35:58,898 - [MainThread] - INFO - 开始处理 5 个函数
+2025-03-13 13:44:11,501 - [MainThread] - INFO - 开始执行主程序
+2025-03-13 13:44:11,501 - [MainThread] - INFO - 开始处理 SQL 函数: ['nss', 'ns', 'condValueAtRisk', 'nssPredict', 'valueAtRisk']
+2025-03-13 13:44:11,501 - [MainThread] - INFO - 开始处理 5 个函数
+2025-03-13 13:52:00,757 - [MainThread] - INFO - 开始执行主程序
+2025-03-13 13:52:00,757 - [MainThread] - INFO - 开始处理 SQL 函数: ['nss', 'ns', 'condValueAtRisk', 'nssPredict', 'valueAtRisk']
+2025-03-13 13:52:00,757 - [MainThread] - INFO - 开始处理 5 个函数
+2025-03-13 13:53:11,254 - [MainThread] - INFO - 开始执行主程序
+2025-03-13 13:53:11,255 - [MainThread] - INFO - 开始处理 SQL 函数: ['nss', 'ns', 'condValueAtRisk', 'nssPredict', 'valueAtRisk']
+2025-03-13 13:53:11,255 - [MainThread] - INFO - 开始处理 5 个函数
+2025-03-13 14:11:03,631 - [MainThread] - INFO - 开始执行主程序
+2025-03-13 14:11:03,631 - [MainThread] - INFO - 开始处理 SQL 函数: ['nss', 'nss', 'nss', 'nss', 'nss']
+2025-03-13 14:11:03,631 - [MainThread] - INFO - 开始处理 5 个函数
+2025-03-13 14:11:22,816 - [MainThread] - INFO - 开始执行主程序
+2025-03-13 14:11:22,817 - [MainThread] - INFO - 开始处理 SQL 函数: ['nss', 'nss', 'nss', 'nss', 'nss']
+2025-03-13 14:11:22,817 - [MainThread] - INFO - 开始处理 5 个函数
+2025-03-13 14:27:28,397 - [MainThread] - INFO - 开始执行主程序
+2025-03-13 14:27:28,397 - [MainThread] - INFO - 开始处理 SQL 函数: ['nss', 'nss', 'nss', 'nss', 'nss']
+2025-03-13 14:27:28,397 - [MainThread] - INFO - 开始处理 5 个函数
