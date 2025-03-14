@@ -1,6 +1,6 @@
 
 
-# nsspredict
+# nssPredict
 
 ## 语法
 

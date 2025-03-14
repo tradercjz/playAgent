@@ -1,0 +1,41 @@
+
+
+### mmaxPositiveStreak
+
+#### 语法  
+```DolphinDB
+mmaxPositiveStreak(X, window)
+```
+
+#### 参数说明
+- **X**：输入数据（向量）
+- **window**：滑动窗口长度（元素个数）
+
+> 窗口计算规则详见：[mFunctions](../themes/mFunctions.html)
+
+#### 功能详情  
+在给定长度的滑动窗口内，统计 `X` 中连续正数之和的最大值。
+
+#### 示例  
+
+**示例1**  
+```DolphinDB
+x = 1 -1 1 -2 10 3 3 9 0 6 5
+w = 5
+mmaxPositiveStreak(x, w)
+// 输出结果为：[,,,,10,13,16,25,25,15,12]
+```
+
+**示例2（含空值处理）**  
+```DolphinDB
+x = 5 NULL 3 2 1 5 10 9 NULL 9 10 -1 NULL
+w = 5
+mmaxPositiveStreak(x, w)
+// 输出结果为：[,,,,6,11,21,27,25,24,19,19,19]
+```
+
+**示例3（搭配signum函数统计连续正数个数）**  
+```DolphinDB
+mmaxPositiveStreak(signum(x), w)
+// 输出结果为：[,,,,3,4,5,5,4,3,2,2,2]
+```

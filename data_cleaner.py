@@ -50,12 +50,7 @@ def process_function(func):
 
 def main():
     functions = [
-        "matrix"
-        # "bondAccrInt", "bondConvexity", "bondDirtyPrice", "bondDuration", "nss", 
-        # "ns", "condValueAtRisk", "nsspredict", "trueRange", "valueAtRisk",
-        # "irs", "varma", "bondCashflow", "bondYield", "createPricingEngine", 
-        # "treasuryConversionFactor", "crmwCBond", "cds", "vanillaOption", 
-        # "maxDrawdown", "mdd", "cummdd", "createYieldCurveEngine", "appendForPrediction"
+        "mask", "maxPositiveStreak", "mimaxLast", "miminLast", "mmaxPositiveStreak"
     ]
     
     os.makedirs("./cleandocs", exist_ok=True)

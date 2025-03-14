@@ -14,7 +14,6 @@ from file_manager import FileManager
 from dotenv import load_dotenv
 from utils import parse_markdown_to_json
 
-# 配置和初始化
 load_dotenv()
 
 
@@ -157,7 +156,6 @@ Function Name:
         else:
             inputs, answers = self._extract_info_from_generated_file(exist_data)
             self.index = len(inputs)
-            self.index += 6
             self.conversation_history = [{"role": "system", "content": self.templates.mock_distill_unique(inputs, answers)}]
         
         self._prepare_conversation_for_func(func)
@@ -442,7 +440,7 @@ def main():
     }
 
     # SQL相关函数
-    functions = [ "nss" ]
+    functions = [ "mask", "maxPositiveStreak", "mimaxLast", "miminLast", "mmaxPositiveStreak" ]
     
     clean_doc_dir = "./cleandocs"
     main_logger.info(f"开始处理 SQL 函数: {functions}")
