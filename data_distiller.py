@@ -122,7 +122,7 @@ Correct CoT:
 Function Name: 
 {distill_resp.function}
 """
-        output_file = f"./data/jinzhi_{distill_resp.function}_{self.index}.txt"
+        output_file = f"./data/jinzhi_{distill_resp.function}_{self.index}.md"
         
         with open(output_file, "w") as file:
             file.write(template_content)
