@@ -6,6 +6,8 @@ import concurrent.futures
 from dotenv import load_dotenv
 import os
 from pathlib import Path
+from utils import parse_markdown_to_json, json_to_markdown_file
+import re
 
 
 load_dotenv()
@@ -22,9 +24,9 @@ class Document:
     size: int = 0
 
 @llm.prompt()
-def clean_doc(docStr: str) -> LLMResponse:
+def clean_doc_via_llm(docStr: str) -> LLMResponse:
     """
-    根据如下的要求，来清洗文档。要求只是做格式上的删除或者调整处理，内容意思不变。
+    根据如下的要求，来清洗文档。要求只是做格式上的删除或者调整处理，内容意思不变。不要输出你的清洗过程。我只需要修改文档。
     规则为：
     1. Answer里面有额外字段，如Input, Function Name, Prompt。这种情况，删除额外字段即可。
     2. Answer里面没有实际回答。这种情况，删除整个文件即可。
@@ -39,6 +41,83 @@ def clean_doc(docStr: str) -> LLMResponse:
     """
 
     return {"docStr": docStr}
+
+def clean_doc_via_rules(docStr: str) -> str:
+    pass
+
+EmptyAnswerDocs = []
+
+def clean_dict(data):
+    """
+    清洗数据字典，对于每个 section，保留第一个非空的值。
+    
+    :param data: 解析后的数据字典，包含各个 section 的内容。
+    :return: 清洗后的数据字典，每个 section 保留第一个非空的值。
+    """
+
+    keep = True
+    for section, values in data.items():
+        # 对每个 section 的内容进行处理，找到第一个非空值
+        flag = True
+        for idx, value in enumerate(values):
+            if value.strip():  # 如果该值不是空字符串
+                data[section] = value.strip()  # 保留第一个非空值
+                flag = False
+                break  # 找到非空值后，跳出循环，避免继续查找
+        
+        # 如果所有值都为空，设置为空列表或None
+        if flag:
+            data[section] = ''
+            # Answer为空不保留
+            if section == "Answer":
+                keep = False
+    
+    return keep, data
+
+
+
+def parse_markdown_to_json_all(markdown_content):
+    """
+    解析 Markdown 文件，提取各个 section（如 Prompt, Answer 等）内容，返回包含内容的字典
+    支持乱序、重复的 section。
+    """
+    sections = ["Prompt", "Input", "Answer", "R1 CoT", "Correct CoT", "Function Name"]
+
+    data = {section: [] for section in sections}
+
+    lines = markdown_content.splitlines()  # 按行分割字符串内容
+
+    current_section = None
+    current_content = []
+
+    for line in lines:
+        line = line.strip()  # 去除首尾空白
+
+        # 检查该行是否是某个 section 的开头
+        if any(line.startswith(f"{section}:") for section in sections):
+            # 如果有正在收集的内容，保存当前内容
+            if current_section:
+                data[current_section].append("\n".join(current_content).strip())
+            
+            # 找到新的 section，初始化
+            for section in sections:
+                if line.startswith(f"{section}:"):
+                    current_section = section
+                    break
+            
+            # 初始化当前内容收集
+            current_content = [line[len(f"{current_section}:"):].strip()]
+        elif current_section:
+            # 如果当前正在收集内容，继续收集
+            current_content.append(line)
+
+    # 最后一次的内容保存
+    if current_section:
+        data[current_section].append("\n".join(current_content).strip())
+
+    return data
+
+
 
 def get_file_contents(directory: str, extensions: List[str] = None, encoding: str = "utf-8") -> List[Document]:
     """
@@ -117,14 +196,19 @@ def process_file_content(doc: Document, clean_dir: str="./cleanDocX/") -> Any:
     Returns:
         处理结果
     """
-    result = clean_doc(doc.content)
-    if result.success:
-        write_str_to_file(f"{clean_dir}{doc.filename}", result.content)
+
+    parsedObj = parse_markdown_to_json_all(doc.content)
+    #print(parsedObj)
+
+    keep, cleanObj = clean_dict(parsedObj)
+    if keep:
+        json_to_markdown_file(cleanObj,f"{clean_dir}{doc.filename}")
+        #write_str_to_file(f"{clean_dir}{doc.filename}.1", str(cleanObj))
     
+        return {"doc": doc.filename, "status": "processed"}
     else:
-        print(f"Handle {doc.filename} error, {result.error_m}")
-    
-    return {"doc": doc.filename, "status": "processed"}
+        EmptyAnswerDocs.append(doc.filename)
+        return {"doc": doc.filename, "status": "Answer is empty, skip"}
 
 def parallel_process_files(
     file_contents: List[Document],
@@ -174,3 +258,5 @@ if __name__ == "__main__":
     print("\n处理结果:")
     for result in results:
         print(f"文件 '{result['doc']}' 处理状态: {result['status']}")
+    
+    print(f"Anwser为空的文件: {EmptyAnswerDocs}")
