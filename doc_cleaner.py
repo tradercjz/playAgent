@@ -23,28 +23,6 @@ class Document:
     encoding: str = "utf-8"
     size: int = 0
 
-@llm.prompt()
-def clean_doc_via_llm(docStr: str) -> LLMResponse:
-    """
-    根据如下的要求，来清洗文档。要求只是做格式上的删除或者调整处理，内容意思不变。不要输出你的清洗过程。我只需要修改文档。
-    规则为：
-    1. Answer里面有额外字段，如Input, Function Name, Prompt。这种情况，删除额外字段即可。
-    2. Answer里面没有实际回答。这种情况，删除整个文件即可。
-    3. Function Name后还有一些额外的文字，如Prompt。这种情况，删除额外字段即可。
-    4. 问题/回答是英文的。这种情况，删除整个文件即可。
-
-    要求：最后的文件里，只有一个Prompt:段，一个Input:段，一个Answer: 段，一个Function Name: 段。
-    且每一段都有内容，内容与原来的相同。只是把重复的去掉
-
-    文档内容为：
-    {{ docStr }}
-    """
-
-    return {"docStr": docStr}
-
-def clean_doc_via_rules(docStr: str) -> str:
-    pass
-
 EmptyAnswerDocs = []
 
 def clean_dict(data):
@@ -198,13 +176,10 @@ def process_file_content(doc: Document, clean_dir: str="./cleanDocX/") -> Any:
     """
 
     parsedObj = parse_markdown_to_json_all(doc.content)
-    #print(parsedObj)
 
     keep, cleanObj = clean_dict(parsedObj)
     if keep:
         json_to_markdown_file(cleanObj,f"{clean_dir}{doc.filename}")
-        #write_str_to_file(f"{clean_dir}{doc.filename}.1", str(cleanObj))
-    
         return {"doc": doc.filename, "status": "processed"}
     else:
         EmptyAnswerDocs.append(doc.filename)
