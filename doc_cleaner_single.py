@@ -180,7 +180,7 @@ def get_file_contents(directory: str, extensions: List[str] = None, encoding: st
                 
     return file_contents
     
-def process_file_content(doc: Document, clean_dir: str="./cleanDocX/") -> Any:
+def process_file_content(doc: Document) -> Any:
     """
     处理单个分组的数据
     
@@ -190,12 +190,11 @@ def process_file_content(doc: Document, clean_dir: str="./cleanDocX/") -> Any:
     Returns:
         处理结果
     """
-
     parsedObj = parse_markdown_to_json_all(doc.content)
 
     keep, cleanObj = clean_dict(parsedObj)
     if keep:
-        json_to_markdown_file(cleanObj,f"{clean_dir}{doc.filename}")
+        json_to_markdown_file(cleanObj,f"{clean_dir}{doc.filename}.md")
         return {"doc": doc.filename, "status": "processed"}
     else:
         EmptyAnswerDocs.append(doc.filename)
@@ -232,7 +231,13 @@ def parallel_process_files(
 
 if __name__ == "__main__":
     # 示例用法
-    target_directory = "./0/"  # 替换为您的目录路径
+    target_directory = "./0/"  # 替换为您的原始文档目录路径，里面都是.md的文件
+
+    global clean_dir
+    clean_dir = "./cleanDocX/" # 替换为清洗后的文件目录
+
+    if not os.path.exists(clean_dir):
+         os.makedirs(clean_dir)
     
     # 1. 获取所有文件内容
     all_files = get_file_contents(target_directory, extensions=['.md'])
